@@ -2,11 +2,11 @@
 Page Optimizer Plugin
 ---------------------
 
-This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/WO/repos/html-minifier/) plugin. It performs advanced page optimizations which drastically improve the page perormce score over various tools. Here are some of them:
+This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/WO/repos/html-minifier/) plugin. It performs advanced page optimizations which drastically improve the page performance score over various tools. Here are some of them:
 
 # General improvements
 
-- Sub-resources integrity check: computed for scripts and links (for now).
+- Sub-resources integrity check: computed for scripts and links (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
 - Push resources (require http 2 protocol). you can configure which resources will be pushed
 - Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other servers
 - Range requests are supported for cached resources
