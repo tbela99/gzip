@@ -2,7 +2,7 @@
 Page Optimizer Plugin
 ---------------------
 
-This plugin is complementary to HTML Minifier plugin. It performs advanced page optimizations which drastically improve the page perormce score over various tools. Here are some of them:
+This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/WO/repos/html-minifier/) plugin. It performs advanced page optimizations which drastically improve the page perormce score over various tools. Here are some of them:
 
 # General improvements
 
