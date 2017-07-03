@@ -7,3 +7,4 @@ uglifyjs --compress --mangle -- load-worker.js > load-worker.min.js
 uglifyjs --compress --mangle -- worker.js > worker.min.js
 php -r "echo hash_file('crc32', 'load-worker.js');" > worker.checksum
 php -r "echo hash_file('crc32', 'load-worker.min.js');" > worker.min.checksum
+php -r "echo 'sha256-'.base64_encode(hash_file('sha256', 'localforage-all.min.js', true));" > integrity.checksum
