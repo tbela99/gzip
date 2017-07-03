@@ -4,11 +4,11 @@ namespace Gzip;
 
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
-use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
+#use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
-use \Sabberworm\CSS\RuleSet\RuleSet as RuleSet;
-use \Sabberworm\CSS\Rule\Rule as Rule;
+#use \Sabberworm\CSS\RuleSet\RuleSet as RuleSet;
+#use \Sabberworm\CSS\Rule\Rule as Rule;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -387,7 +387,7 @@ class GZipHelper {
 
         static::$pwacache = [];
 
-        $body = preg_replace_callback('#<((script)|(link))\s([^>]+)>#si', function ($matches) use($checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base) {
+        $body = preg_replace_callback('#<([^\s\\>]+)\s([^>]+)>#si', function ($matches) use($checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base) {
 
             $tag = $matches[1];
 
@@ -1063,57 +1063,95 @@ class GZipHelper {
             return strpos($entry, $scope) === 0;
         });
 
-        if (!empty($options['pwacachepages'])) {
+    //    if (!empty($options['pwacachepages'])) {
 
-            array_unshift(static::$pwacache, $_SERVER['REQUEST_URI']);
-        }
+    //        array_unshift(static::$pwacache, $_SERVER['REQUEST_URI']);
+    //    }
 
         if (empty($options['pwaenabled']) || empty(static::$pwacache)) {
 
             return $body;
         }
 
-        if (!empty($options['pwacachepages'])) {
 
-            // push current page
-            array_unshift(static::$pwacache, $_SERVER['REQUEST_URI']);
-        }
+        $debug = !empty($options['debug']);
+        $suffix = $debug ? '' : 'min.';
 
-        $sw_hash = md5_file(__DIR__ . '/worker.js');
+        $sw_hash = file_get_contents(__DIR__ . '/worker'.$suffix.'.checksum');
+        
+        $js = preg_replace_callback('#(["]?)\{worker-([^}]+)\}\1#', function ($matches) use($scope, $sw_hash, $options) {
 
-        $js = preg_replace_callback("#'\{worker-([^}]+)\}'#", function ($matches) use($scope, $sw_hash) {
-
-            switch ($matches[1]) {
+            switch ($matches[2]) {
 
                 case 'db':
 
-                    return "'" . static::url('media/s/dexie.min.js') . "'";
+                    return '"' . static::url('media/s/localforage-all.min.js') . '"';
 
                 case 'location':
 
-                    return "'" . $scope . 'worker' . $sw_hash . '.js' . "'";
-                    break;
+                    return '"' . $scope . 'worker'. /*$sw_hash.*/ '.js' . '"';
 
                 case 'hash':
 
-                    return "'" . $sw_hash . "'";
+                    return '"' . $sw_hash . '"';
 
                 case 'scope':
 
-                    return "'" . $scope . "'";
-                    break;
+                    return '"' . $scope . '"';
+
+                case 'name':
+
+                        return "'rs-worker'";
+
+                case 'max-age':
+
+                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
+
+                            // push current page
+                            return (int) $options['pwacachelifetime'] * 1000;
+                        }
+
+                        return '0';
+
+                case 'date':
+
+                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
+
+                            // push current page
+                            return '"'.str_replace(' ', 'T',date('Y-m-d H:i:sP')).'"'; //microtime(true);
+                        }
+
+                        return 'undef';
+
+                case 'page':
+
+                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
+
+                            // push current page
+                            return json_encode($_SERVER['REQUEST_URI']);
+                        }
+
+                        return 'undef';
 
                 case 'files':
 
-                    return json_encode(array_map(function ($file) {
+                    $files = [];
 
-                                return ['name' => preg_replace('#^.*?/media/z/(1/)?[^/]+#', '', $file), 'path' => $file];
-                            }, array_values(array_unique(static::$pwacache))));
-                    break;
+                    foreach(static::$pwacache as $file) {
+
+                        $name = preg_replace('#^.*?/media/z/(1/)?[^/]+#', '', $file);
+
+                        $files[$name] = $file;
+                    }
+                    
+
+                    return json_encode($files);
             }
 
             return $matches[0];
-        }, file_get_contents(__DIR__ . '/load-worker.js'));
+            
+        }, file_get_contents(__DIR__ . '/load-worker.'.$suffix.'js'));
+
 
         if (!empty($options['minifyjs'])) {
 

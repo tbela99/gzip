@@ -1,126 +1,130 @@
 if ('serviceWorker' in navigator) {
+
+ // '{worker-hash}'
     
+    let undef;
     let sc = document.createElement('script');
     
     sc.async = true;
-    sc.src = '{worker-db}';
+    sc.src = "{worker-db}";
     sc.onload = function () {
         
-    //    sc.parentNode.removeChild(sc);
+        let store = localforage.createInstance({
+            name: "{worker-name}"
+        });
         
-        let db = new Dexie('db_assets'); 
+        let page;
+        
         let sw = navigator.serviceWorker;
         let deleted = [], 
-            files = '{worker-files}';
+            files = "{worker-files}";
         
-        db.version(1).stores({
-            files: "++id,&name,path"
+        store.config({
+            
+            driver: [
+                
+                localforage.INDEXEDDB,
+                localforage.WEBSQL,
+                localforage.LOCALSTORAGE
+            ]
         });
         
         // worker.js has changed!
-        if(localStorage.swstate != '{worker-hash}') {
-
+        /*
+        // uninstall service worker
+       
             sw.getRegistrations().then(function(registrations) {
 
                 for(let registration of registrations) {
 
-                    console.log(['unregister worker ...', registration]);
+                    console.log(["unregister worker ...", registration]);
 
                     registration.unregister();
                 } 
             });
 
-            localStorage.swstate = '{worker-hash}';
-        }
+            localStorage.swstate = "{worker-hash}";
+        */
         
-        db.open().then(function () {
-
-            db.files.where('name').anyOf(files.map(function (file) {
-
-                return file.name;
-
-            })).
-            toArray().
+        store.getItems(Object.keys(files)).
             then(function (results) {
 
-                let result, i = 0, j, file;
-                
-                for(; i < results.length; i++) {
-                    
-                    for(j = 0; j < files.length; j++) {
-                        
-                        file = files[j];
-                        
-                        // exists
-                        if(file.name == results[i].name) {
-                            
-                            result = results[i];
-                            
-                            if(result.path != file.path) {
-                                
-                                // out of date
-                                deleted.push(result.path);
-                            }
-                            
-                            // file has not changed
-                            else {
-                                
-                                files.splice(j, 1);
-                            }
-                            
-                            break;
-                        }
+                for(let key in results) {
+
+                    if(results[key] != undef && results[key] != files[key]) {
+
+                        deleted.push(results[key]);
                     }
                 }
-                
-                console.log('files');
-                console.log(files.map(function (file) {
+
+                store.setItems(files).
+                        then(function () {
+
+                            sw.register("{worker-location}").then(function(registration) {
+
+                                let state = registration.installing || registration.waiting || registration.active;
+
+                                if(state != undef) {
+
+                                    files = Object.values(files);
+
+                                    if(files.length > 0) {
+
+                                        state.postMessage({
+                                            action: "addFiles", 
+                                            files: files
+                                        });
+                                    }
                                     
-                                    return file.path;
-                                }));
+                                    if(deleted.length > 0) {
 
-                console.log('deleted');
-                console.log(deleted.map(function (file) {
-                                    
-                                    return file.path;
-                                }));
+                                        state.postMessage({
+                                            action: "removeFiles", 
+                                            files: deleted
+                                        });
+                                    }
 
-                sw.register('{worker-location}').then(function(registration) {
+                                    page = "{worker-page}";
 
-                     let state = registration.installing || registration.waiting || registration.active;
+                                    if(page != undef) {
 
-                     if(state) {
+                                        store.getItem(page).then(function(data) {
 
-                        if(files.length > 0) {
+                                        //    console.log([Date.now(), data, Date.now() - data]);
 
-                            state.postMessage({
-                                action: 'addFiles', 
-                                files: files.map(function (file) {
-                                    
-                                    return file.path;
-                                })
-                            });
-                        }
-                        
-                        if(deleted.length > 0) {
+                                            if(data == undef || Date.now() - data >= "{worker-max-age}") {
 
-                            state.postMessage({
-                                action: 'removeFiles', 
-                                files: deleted
-                            });
-                        }
-                     } 
+                                            //    console.log([Date.now(), data, Date.now() - data]);
+                                            //    console.log("page is obsolete " + page + " timeout " + "{worker-max-age}");
+                                                        
+                                                state.postMessage({
+                                                    action: "removeFiles", 
+                                                    files: [page]
+                                                });
 
-                 }).
-                catch(function(error) {
+                                                store.setItem(page, +new Date("{worker-date}")).then(function () {
 
-                 //    console.log('Registration failed with ' + error);
-                     // unregister(sw);
-                 });
+                                                    state.postMessage({
+                                                        action: "addFiles", 
+                                                        files: [page]
+                                                    });
+                                                });
+                                            }
+                                        });
+                                    }
+                                } 
 
-                
+                        }).
+                        catch(function(error) {
+
+                        //    console.log("Registration failed with " + error);
+                            // unregister(sw);
+                        });
+                    });
+
             });
-        });
+
+        sc.parentElement.removeChild(sc);
     }
     
     document.head.appendChild(sc);
