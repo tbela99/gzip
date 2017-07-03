@@ -21,6 +21,7 @@
 		<filename>worker.min.js</filename>
         <filename>worker.checksum</filename>
         <filename>worker.min.checksum</filename>
+        <filename>integrity.checksum</filename>
 	</files>
 	<media folder="media" destination="s">
         <filename>localforage-all.js</filename>

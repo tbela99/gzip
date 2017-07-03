@@ -1087,6 +1087,10 @@ class GZipHelper {
 
                     return '"' . static::url('media/s/localforage-all.min.js') . '"';
 
+                case 'integrity':
+
+                    return '"'.file_get_contents('integrity.checksum').'"';
+
                 case 'location':
 
                     return '"' . $scope . 'worker'. /*$sw_hash.*/ '.js' . '"';

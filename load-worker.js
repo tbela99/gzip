@@ -7,6 +7,8 @@ if ('serviceWorker' in navigator) {
     
     sc.async = true;
     sc.src = "{worker-db}";
+    sc.integrity = "{worker-integrity}";
+    
     sc.onload = function () {
         
         let store = localforage.createInstance({
