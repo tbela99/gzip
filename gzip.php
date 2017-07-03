@@ -35,12 +35,15 @@ class PlgSystemGzip extends JPlugin
     
     public function onAfterInitialise() {
         
-        if(JFactory::getApplication()->isSite() && preg_match('#'.preg_quote(dirname($_SERVER['SCRIPT_NAME']).'/').'worker[a-z0-9]+\.js#i', $_SERVER['REQUEST_URI'])) {
+        if(JFactory::getApplication()->isSite() && preg_match('#'.preg_quote(dirname($_SERVER['SCRIPT_NAME']).'/').'worker([a-z0-9]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
             
+            header('Cache-Control: max-age=86400');
             header('Content-Type: text/javascript;charset=utf-8');
             header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+            $debug = $this->params->get('gzip.debug') ? '' : 'min.';
             
-            readfile(__DIR__.'/worker.js');
+            readfile(__DIR__.'/worker.'.$debug.'js');
             exit;
         }
     }
@@ -145,6 +148,17 @@ class PlgSystemGzip extends JPlugin
                 return json_encode($m);
                 
             }, array_merge(Gzip\GZipHelper::$marks, $profiler->getMarks()))), ENT_QUOTES).$quote.' ', $body, 1); 
+        }
+        
+        if(!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
+            
+            $app->allowCache(true);
+            
+            $dt = gmdate('D, d M Y H:i:s', time()).' GMT';
+            
+            $app->setHeader('Date', $dt, true );
+            $app->setHeader('Last-Modified', $dt, true );
+            $app->setHeader('Cache-Control', /*'no-cache,no-store,'.*/ 'max-age='.(int) $options['pwacachelifetime'].',must-revalidate', true);
         }
 
         $app->setBody($body);

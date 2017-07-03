@@ -13,13 +13,18 @@
 		<folder>lib</folder>
 		<folder>language</folder>
 		<filename>load-worker.js</filename>
+		<filename>load-worker.min.js</filename>
 		<filename>helper.php</filename>
 		<filename>cacert.pem</filename>
 		<filename plugin="gzip">gzip.php</filename>
 		<filename>worker.js</filename>
+		<filename>worker.min.js</filename>
+        <filename>worker.checksum</filename>
+        <filename>worker.min.checksum</filename>
 	</files>
 	<media folder="media" destination="s">
-		<filename>dexie.min.js</filename>
+        <filename>localforage-all.js</filename>
+        <filename>localforage-all.min.js</filename>
 	</media>
 	<media folder="media" destination="z">
 		<filename>index.php</filename>
@@ -200,6 +205,11 @@
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
+                                <field name="pwacachelifetime" label="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_LABEL" 
+                                    description="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_DESCRIPTION"
+                                    type="number" class="btn-group"
+                                    default="300"
+                                    />
                             </fields>
                         </fieldset>
 			<fieldset name="advanced">

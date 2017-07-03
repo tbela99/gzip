@@ -53,7 +53,7 @@ if(isset($_SERVER['HTTP_RANGE'])) {
                 
         if(
             count($range) != 2 ||    
-            $range[0] === '' && $range[1] === '' ||
+            ($range[0] === '' && $range[1] === '') ||
             $range[0] > $size - 1 ||
             $range[1] > $size - 1 ||
             ($range[1] !== '' && $range[1] < $range[0])
@@ -117,7 +117,7 @@ else {
 }
 
 header('Accept-Ranges: bytes');
-header('Content-Type: '.$accepted[$ext].';charset=utf-8');
+//header('Content-Type: '.$accepted[$ext].';charset=utf-8');
 header('Cache-Control: public, max-age=31536000, immutable');
 
 $dt = new DateTime();
