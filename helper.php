@@ -1085,11 +1085,11 @@ class GZipHelper {
 
                 case 'db':
 
-                    return '"' . static::url('media/s/localforage-all.min.js') . '"';
+                    return "'" . static::url('media/s/localforage-all.min.js') . "'";
 
                 case 'integrity':
 
-                    return '"'.file_get_contents('integrity.checksum').'"';
+                    return '"'.file_get_contents(__DIR__.'/integrity.checksum').'"';
 
                 case 'location':
 
