@@ -30,10 +30,15 @@ This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/
 - Extract critical css path. You must provide the list of css to extract. see [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info
 - Exclude css files based on patterns
 
+# Progressive Web App
+
+- Offline resources storage (images, css, js, fonts, ...)
+- Offline webpages storage with a customizable timeout
+
 Roadmap
 -------
 
-0. PWA: Implement out of the box support for progressive web apps. see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email)
+0. PWA: Implement out of the box support for progressive web apps. see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email) - we need to define an app architecture
 0. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
 0. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
 0. IMAGES: Implement progressive images loading [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
