@@ -213,9 +213,7 @@
                                     />
                             </fields>
                         </fieldset>
-			<fieldset name="advanced">
-                            <field type="spacer" label="Advanced settings" />
-                            <field type="spacer" hr="true" />
+                        <fieldset name="critical_path" label="Rendering Optimization">
                             <field type="spacer" label="Critical CSS Path" />
                             <field type="spacer" hr="true" />
                             <fields name="gzip">
@@ -239,6 +237,10 @@
                                     cols="15"
                                     default=""/>
                             </fields>
+                        </fieldset>
+			<fieldset name="advanced">
+                            <field type="spacer" label="Advanced settings" />
+                            <field type="spacer" hr="true" />
 			</fieldset>
 		</fields>
 	</config>

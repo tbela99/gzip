@@ -35,11 +35,15 @@ This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/
 - Offline resources storage (images, css, js, fonts, ...)
 - Offline webpages storage with a customizable timeout
 
+
+
 Roadmap
 -------
 
+0. Web font preloading when critical path rendering is enabled
 0. PWA: Implement out of the box support for progressive web apps. see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email) - we need to define an app architecture
-0. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
+0. PWA: background fetch see [here](https://philna.sh/blog/2017/07/04/experimenting-with-the-background-fetch-api/) and [here](https://ponyfoo.com/articles/backgroundsync)
+0. CORS for PWA: https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
 0. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
 0. IMAGES: Implement progressive images loading [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
 0. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)

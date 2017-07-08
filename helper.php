@@ -4,7 +4,7 @@ namespace Gzip;
 
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
-#use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
+use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 #use \Sabberworm\CSS\RuleSet\RuleSet as RuleSet;
@@ -646,7 +646,7 @@ class GZipHelper {
 
                     $isFile = static::isFile($file);
 
-                    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
+                //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
 
                     return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file));
                 }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
@@ -942,9 +942,9 @@ class GZipHelper {
 
             if (!empty($options['criticalcss'])) {
 
-                $styles = array_filter(array_merge($styles, preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY)));
+                $styles = array_filter(array_map('trim', array_merge($styles, preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY))));
             }
-
+            
             // really needed?
             preg_match('#<((body)|(html))(\s.*?)? class=(["\'])(.*?)\5>#si', $body, $match);
 
@@ -955,14 +955,14 @@ class GZipHelper {
 
             foreach ($styles as &$style) {
 
-                $style = preg_quote(preg_replace('#\s+([>+>\[:,])\s+#s', '$1', $style), '#');
+                $style = preg_quote(preg_replace('#\s+([>+\[:,{])\s+#s', '$1', $style), '#');
                 unset($style);
             }
 
             # '#((html)|(body))#si'
-            $regexp = '#(^|[>\s,~+])((' . implode(')|(', $styles) . '))([\s:,~+\[]|$)#si';
+            $regexp = '#(^|[>\s,~+},])((' . implode(')|(', $styles) . '))([\s:,~+\[{>,]|$)#si';
 
-            #   echo $regexp;die;
+            # echo $regexp;die;
 
             foreach ($links as $link) {
 
@@ -988,12 +988,16 @@ class GZipHelper {
                     $oCssDocument = $oCssParser->parse();
 
                     $local_css = '';
+                    $local_font_face = '';
 
                     foreach ($oCssDocument->getContents() as $block) {
 
                         $local_css .= static::extractCssRules($block, $regexp);
+                        $local_font_face .= static::extractFontFace($block);
                     }
-
+                    
+                    $local_css = $local_font_face.$local_css;
+                    
                     if (!empty($local_css)) {
 
                         if (!empty($minifier)) {
@@ -1011,6 +1015,8 @@ class GZipHelper {
                     $critical_path .= file_get_contents($css_file);
                 }
             }
+            
+            # echo var_export($critical_path, true);die;
 
             if (!empty($critical_path)) {
 
@@ -1198,6 +1204,43 @@ class GZipHelper {
         return is_file(preg_replace('~(#|\?).*$~', '', $name));
     }
 
+    protected static function extractFontFace($block) {
+
+        $content = '';
+                
+        if ($block instanceof AtRuleBlockList || $block instanceof AtRuleSet) {
+            
+            $atRuleName = $block->atRuleName();
+            
+            switch($atRuleName) {
+
+                case 'media':
+                    
+                    $result = '';
+                    
+                    foreach ($block->getContents() as $b) {
+
+                        $result .= static::extractFontFace($b);
+                    }
+                    
+                    if($result !== '') {
+                        
+                        $content .= '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $result . '}';
+                    }
+                    
+                    break;
+                    
+                case 'font-face':
+
+                    $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . implode('', $block->getRules()) . '}';
+                   
+                   break;
+            }
+        }
+
+        return $content;
+    }
+
     protected static function extractCssRules($block, $regexp) {
 
         if ($block instanceof DeclarationBlock) {
@@ -1219,23 +1262,28 @@ class GZipHelper {
             }
 
             return '';
+            
         } else if ($block instanceof AtRuleBlockList) {
+            
+            $atRuleName = $block->atRuleName();
 
-            if ($block->atRuleName() == 'media') {
+            switch($atRuleName) {
 
-                $content = '';
+                case 'media':
 
-                foreach ($block->getContents() as $b) {
+                    $content = '';
 
-                    $content .= static::extractCssRules($b, $regexp);
-                }
+                    foreach ($block->getContents() as $b) {
 
-                if ($content !== '') {
+                        $content .= static::extractCssRules($b, $regexp);
+                    }
 
-                    $content = '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() . '{' . $content . '}';
-                }
+                    if ($content !== '') {
 
-                return $content;
+                        $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+                    }
+
+                    return $content;
             }
         }
 
