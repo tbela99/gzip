@@ -27,24 +27,28 @@ This plugin is complementary to [HTML Minifier](https://git.inimov.com/projects/
 - Do not process css files that match a pattern
 - Remove css files that match a pattern
 - Load css files in a non blocking way
-- Extract critical css path. You must provide the list of css to extract. see [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info
 - Exclude css files based on patterns
+
+# Critical CSS Path
+
+See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info. The critical path enable instant page rendering by providing classes used to render the page before the stylesheets are loaded.
+Any selector that affect the page rendering is a good candidate (set dimensions, define positioning, fonts, sections background color, etc..). There is no automatic extraction and you must provide these settings to extract css classes.
+
+- CSS class definitions for critical css path
+- A list of selectors to extract from the page css
+- The web fonts are extracted automatically 
 
 # Progressive Web App
 
-- Offline resources storage (images, css, js, fonts, ...)
+- Offline resources storage (images, css, js, fonts, ...). Only resources requested via GET are stored.
 - Offline webpages storage with a customizable timeout
-
-
 
 Roadmap
 -------
 
-0. Web font preloading when critical path rendering is enabled
-0. PWA: Implement out of the box support for progressive web apps. see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email) - we need to define an app architecture
-0. PWA: background fetch see [here](https://philna.sh/blog/2017/07/04/experimenting-with-the-background-fetch-api/) and [here](https://ponyfoo.com/articles/backgroundsync)
-0. CORS for PWA: https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
+0. PWA: Implement out of the box support for progressive web apps (provide a manifest, a skeleton, a start url?). see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email) - we need to define an app architecture
 0. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
 0. IMAGES: Implement progressive images loading [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
 0. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
 0. IMAGES: Implement support for <pictures> element see [here](https://www.smashingmagazine.com/2013/10/automate-your-responsive-images-with-mobify-js/)
+0. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
