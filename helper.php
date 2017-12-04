@@ -98,7 +98,7 @@ class GZipHelper {
         }
 
         $checksum = [
-            'hash' => $hash, // 
+            'hash' => $hash, //
             //    'crossorigin' => 'anonymous',
             'algo' => $algo,
             'integrity' => empty($algo) || $algo == 'none' ? '' : $algo . "-" . base64_encode(hash_file($algo, $file, true))
@@ -293,7 +293,7 @@ class GZipHelper {
         return trim($jsShrink->squeeze($content, false, false), ';');
     }
 
-    public static function css($file, $remote_service = true) {
+    public static function css($file, $remote_service = true, $path = null) {
 
         static $minifier;
 
@@ -312,27 +312,41 @@ class GZipHelper {
 
                 return false;
             }
-        } else if (is_file($file)) {
+        }
 
-            $content = static::expandCss(file_get_contents($file), dirname($file));
-        } else {
+        else if (is_file($file)) {
+
+            $content = static::expandCss(file_get_contents($file), dirname($file), $path);
+        }
+
+        else {
 
             return false;
         }
 
         //    $content = static::expandCss($content, dirname($file));
 
-        if ($remote_service) {
+    //    if ($remote_service) {
 
-            $options = array('input' => $content);
+     //       $options = array('input' => $content);
 
-            $response = static::getContent('https://cssminifier.com/raw', $options);
+    //        $response = static::getContent('https://cssminifier.com/raw', $options);
 
-            if ($response !== false && strpos($response, 'Error:') === false) {
+     //       if ($response !== false && strpos($response, 'Error:') === false) {
 
-                return $response;
-            }
-        }
+    //            return $response;
+    //        }
+    //    }
+
+    //    $oCssParser = new \Sabberworm\CSS\Parser($content);
+    //    $oCssDocument = $oCssParser->parse();
+
+    //    $content = '';
+
+    //    foreach ($oCssDocument->getContents() as $block) {
+
+    //        $content .= static::removeEmptyRulesets($block);
+    //    }
 
         if (is_null($minifier)) {
 
@@ -378,7 +392,7 @@ class GZipHelper {
             'font' => 1,
             'script' => 2
         );
-        
+
         $checksum = !empty($options['checksum']) ? $options['checksum'] : false;
 
         $profiler = \JProfiler::getInstance('_url_');
@@ -437,7 +451,7 @@ class GZipHelper {
 
                                     $checkSumData = static::getChecksum($name, $hashFile, $checksum);
 
-                                    $file = 'media/z/' . $checkSumData['hash'] . '/' . $file;
+                                    $file = 'media/z/'.(!empty($options['pwa_network_strategy']) ? $options['pwa_network_strategy'].'/' : '') . $checkSumData['hash'] . '/' . $file;
 
                                     if (!empty($push_data)) {
 
@@ -467,9 +481,9 @@ class GZipHelper {
                 }
 
                 return $matches[0];
-                
+
             }, $matches[0]);
-            
+
         }, $body);
 
         $profiler->mark('end parse urls');
@@ -503,7 +517,7 @@ class GZipHelper {
                     $header .= '; ' . $key . '=' . $var;
                 }
 
-                // or use html <link rel=preload>
+                // or use html <link rel=preload> -> remove header
                 header('Link: <' . $file . '> ' . $header, false);
             }
         }
@@ -578,7 +592,7 @@ class GZipHelper {
     }
 
     // parse @import
-    public static function expandCss($css, $path = null) {
+    public static function expandCss($css, $path = null, $csspath = 'cache/z/css/') {
 
         if (!is_null($path)) {
 
@@ -588,7 +602,7 @@ class GZipHelper {
             }
         }
 
-        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
+        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path, $csspath) {
 
             $file = trim(str_replace(array("'", '"'), "", $matches[1]));
 
@@ -610,7 +624,7 @@ class GZipHelper {
 
                         preg_match('~(.*?)([#?].*)?$~', $file, $match);
 
-                        $file = 'cache/z/css/' . static::shorten(crc32($file)) . '-' . basename($match[1]);
+                        $file = $csspath . static::shorten(crc32($file)) . '-' . basename($match[1]);
 
                         if (!is_file($file)) {
 
@@ -628,7 +642,7 @@ class GZipHelper {
             return "\n" . ' /* url ' . $matches[1] . ' */ ' . "\n" . "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
         },
                 //resolve import directive, note import directive in imported css will NOT be processed
-                preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
+                preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $csspath) {
 
                     $file = trim($matches[1]);
 
@@ -648,7 +662,7 @@ class GZipHelper {
 
                 //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
 
-                    return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file));
+                    return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $csspath);
                 }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
         );
 
@@ -705,7 +719,7 @@ class GZipHelper {
 
                             if ($content != false) {
 
-                                file_put_contents($local, static::expandCss($content, dirname($remote)));
+                                file_put_contents($local, static::expandCss($content, dirname($remote), $path));
                             }
                         }
 
@@ -748,7 +762,7 @@ class GZipHelper {
 
                 $hash = $hashFile($name) . '-min';
 
-                $cname = str_replace(['cache', 'css', 'z/', 'min'], '', $attr['href']);
+                $cname = str_replace(['cache', 'css', 'min', 'z/cn/', 'z/no/', 'z/cf/', 'z/nf/', 'z/co/', 'z/'], '', $attr['href']);
                 $cname = preg_replace('#[^a-z0-9]+#i', '-', $cname);
 
                 $css_file = $path . $cname . '-min.css';
@@ -756,7 +770,7 @@ class GZipHelper {
 
                 if (!is_file($css_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash) {
 
-                    $content = static::css($name, $remote_service);
+                    $content = static::css($name, $remote_service, $path);
 
                     if ($content != false) {
 
@@ -827,7 +841,7 @@ class GZipHelper {
 
                             $profiler->mark("merge expand " . $name . " ");
 
-                            $css .= static::expandCss(file_get_contents($name), dirname($name));
+                            $css .= static::expandCss(file_get_contents($name), dirname($name), $path);
 
                             $profiler->mark("done merge expand " . $attr['href'] . " ");
 
@@ -876,25 +890,26 @@ class GZipHelper {
 
             $body = str_replace('</body>', implode('', array_map(function ($link) use($options) {
 
-                                $css = '<link';
+                        $css = '<link';
 
-                                if (isset($link['media'])) {
+                        if (isset($link['media'])) {
 
-                                    $link['onload'] = 'this.media=&apos;' . str_replace(['"', "'", "\n"], ['&quot;', "\&apos;", ' '], $link['media']) . '&apos;;this.removeAttribute(&apos;onload&apos;)';
-                                } else {
+                            $link['onload'] = 'this.media=&apos;' . str_replace(['"', "'", "\n"], ['&quot;', "\&apos;", ' '], $link['media']) . '&apos;;this.removeAttribute(&apos;onload&apos;)';
+                        } else {
 
-                                    $link['onload'] = '[&apos;media&apos;,&apos;onload&apos;].forEach(function(p){this.removeAttribute(p)},this)';
-                                }
+                            $link['onload'] = '[&apos;media&apos;,&apos;onload&apos;].forEach(function(p){this.removeAttribute(p)},this)';
+                        }
 
-                                $link['media'] = 'none';
+                        $link['media'] = 'none';
 
-                                foreach ($link as $key => $value) {
+                        foreach ($link as $key => $value) {
 
-                                    $css .= ' ' . $key . '="' . $value . '"';
-                                }
+                            $css .= ' ' . $key . '="' . $value . '"';
+                        }
 
-                                return $css . '>';
-                            }, $links)) . '</body>', $body);
+                        return $css . '>';
+
+                    }, $links)) . '</body>', $body);
 
             $profiler->mark("done merge css");
         } else {
@@ -944,7 +959,7 @@ class GZipHelper {
 
                 $styles = array_filter(array_map('trim', array_merge($styles, preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY))));
             }
-            
+
             // really needed?
             preg_match('#<((body)|(html))(\s.*?)? class=(["\'])(.*?)\5>#si', $body, $match);
 
@@ -995,9 +1010,9 @@ class GZipHelper {
                         $local_css .= static::extractCssRules($block, $regexp);
                         $local_font_face .= static::extractFontFace($block);
                     }
-                    
+
                     $local_css = $local_font_face.$local_css;
-                    
+
                     if (!empty($local_css)) {
 
                         if (!empty($minifier)) {
@@ -1015,7 +1030,7 @@ class GZipHelper {
                     $critical_path .= file_get_contents($css_file);
                 }
             }
-            
+
             # echo var_export($critical_path, true);die;
 
             if (!empty($critical_path)) {
@@ -1033,7 +1048,7 @@ class GZipHelper {
 
         if (!empty($css)) {
 
-            $css = static::expandCss(implode('', $css));
+            $css = static::expandCss(implode('', $css), null, $path);
 
             if (!empty($options['minifycss'])) {
 
@@ -1044,6 +1059,34 @@ class GZipHelper {
 
                 $css = $minifier->minify($css);
             }
+
+            $web_fonts = '';
+
+            /*
+            // font preloading - need to be fixed, an invalid url is returned
+            if(preg_match_all('#url\(([^)]+)\)#', $css, $fonts)) {
+
+                $web_fonts = implode("\n", array_unique(array_map(function ($url) {
+
+                    $url = preg_replace('#(^["\'])([^\1])\1#', '$2', trim($url));
+
+                    $ext = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+
+                    if(isset(static::$accepted[$ext]) && strpos(static::$accepted[$ext], 'font') !== false) {
+
+                        return '<link rel="preload" href="'.$url.'" as="font">';
+                    }
+
+                    return false;
+
+                }, $fonts[1])));
+
+                if(!empty($web_fonts)) {
+
+                    $body = str_replace('<head>', '<head>'.$web_fonts, $body);
+                }
+            }
+            */
 
             $body = str_replace('</head>', '<style>' . $css . '</style></head>', $body);
         }
@@ -1058,119 +1101,6 @@ class GZipHelper {
         static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
-    }
-
-    public static function parsePWA($body, $options = []) {
-
-        $scope = \JUri::root(true) . '/';
-
-        static::$pwacache = array_filter(static::$pwacache, function ($entry) use($scope) {
-
-            return strpos($entry, $scope) === 0;
-        });
-
-    //    if (!empty($options['pwacachepages'])) {
-
-    //        array_unshift(static::$pwacache, $_SERVER['REQUEST_URI']);
-    //    }
-
-        if (empty($options['pwaenabled']) || empty(static::$pwacache)) {
-
-            return $body;
-        }
-
-
-        $debug = !empty($options['debug']);
-        $suffix = $debug ? '' : 'min.';
-
-        $sw_hash = file_get_contents(__DIR__ . '/worker'.$suffix.'.checksum');
-        
-        $js = preg_replace_callback('#(["]?)\{worker-([^}]+)\}\1#', function ($matches) use($scope, $sw_hash, $options) {
-
-            switch ($matches[2]) {
-
-                case 'db':
-
-                    return "'" . static::url('media/s/localforage-all.min.js') . "'";
-
-                case 'integrity':
-
-                    return '"'.file_get_contents(__DIR__.'/integrity.checksum').'"';
-
-                case 'location':
-
-                    return '"' . $scope . 'worker'. /*$sw_hash.*/ '.js' . '"';
-
-                case 'hash':
-
-                    return '"' . $sw_hash . '"';
-
-                case 'scope':
-
-                    return '"' . $scope . '"';
-
-                case 'name':
-
-                        return "'rs-worker'";
-
-                case 'max-age':
-
-                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
-
-                            // push current page
-                            return (int) $options['pwacachelifetime'] * 1000;
-                        }
-
-                        return '0';
-
-                case 'date':
-
-                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
-
-                            // push current page
-                            return '"'.str_replace(' ', 'T',date('Y-m-d H:i:sP')).'"'; //microtime(true);
-                        }
-
-                        return 'undef';
-
-                case 'page':
-
-                        if (!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
-
-                            // push current page
-                            return json_encode($_SERVER['REQUEST_URI']);
-                        }
-
-                        return 'undef';
-
-                case 'files':
-
-                    $files = [];
-
-                    foreach(static::$pwacache as $file) {
-
-                        $name = preg_replace('#^.*?/media/z/(1/)?[^/]+#', '', $file);
-
-                        $files[$name] = $file;
-                    }
-                    
-
-                    return json_encode($files);
-            }
-
-            return $matches[0];
-            
-        }, file_get_contents(__DIR__ . '/load-worker.'.$suffix.'js'));
-
-
-        if (!empty($options['minifyjs'])) {
-
-            $min = new \Patchwork\JSqueeze;
-
-            $js = trim($min->squeeze($js), ';');
-        }
-
-        return str_replace('</body>', '<script>' . $js . '</script></body>', $body);
     }
 
     public static function getName($name) {
@@ -1207,33 +1137,33 @@ class GZipHelper {
     protected static function extractFontFace($block) {
 
         $content = '';
-                
+
         if ($block instanceof AtRuleBlockList || $block instanceof AtRuleSet) {
-            
+
             $atRuleName = $block->atRuleName();
-            
+
             switch($atRuleName) {
 
                 case 'media':
-                    
+
                     $result = '';
-                    
+
                     foreach ($block->getContents() as $b) {
 
                         $result .= static::extractFontFace($b);
                     }
-                    
+
                     if($result !== '') {
-                        
+
                         $content .= '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $result . '}';
                     }
-                    
+
                     break;
-                    
+
                 case 'font-face':
 
                     $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . implode('', $block->getRules()) . '}';
-                   
+
                    break;
             }
         }
@@ -1262,9 +1192,9 @@ class GZipHelper {
             }
 
             return '';
-            
+
         } else if ($block instanceof AtRuleBlockList) {
-            
+
             $atRuleName = $block->atRuleName();
 
             switch($atRuleName) {
@@ -1285,6 +1215,54 @@ class GZipHelper {
 
                     return $content;
             }
+        }
+
+        return '';
+    }
+
+    public static function removeEmptyRulesets($block) {
+
+        if ($block instanceof AtRuleBlockList) {
+
+            $content = '';
+
+            foreach ($block->getContents() as $b) {
+
+                $content .= static::removeEmptyRulesets($b);
+            }
+
+            if ($content !== '') {
+
+                $content = '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+            }
+
+            return $content;
+        }
+
+        else if ($block instanceof AtRuleSet) {
+
+        //    $block->createShorthands();
+            $rules = $block->getRules();
+
+            if(empty($rules)) {
+
+                return '';
+            }
+
+            return '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() .'{' . implode('', $rules) . '}';
+        }
+
+        else if ($block instanceof DeclarationBlock) {
+
+            $block->createShorthands();
+            $rules = $block->getRules();
+
+            if(empty($rules)) {
+
+                return '';
+            }
+
+            return implode(', ', $block->getSelectors()) . '{' . implode('', $rules) . '}';
         }
 
         return '';
@@ -1341,6 +1319,7 @@ class GZipHelper {
             if (!empty($match) && stripos($match[2], 'javascript') === false) {
 
                 return $matches[0];
+
             } else if (!empty($match)) {
 
                 $matches[1] = str_replace($match[0], '', $matches[1]);
@@ -1406,6 +1385,7 @@ class GZipHelper {
             }
 
             return '';
+
         }, $body);
 
         $profiler->mark('done parse <script>');
@@ -1457,7 +1437,6 @@ class GZipHelper {
         }
 
         $profiler->mark('done minify <script>');
-
         $profiler->mark('merge <script>');
 
         if (!empty($options['mergejs'])) {
@@ -1531,19 +1510,11 @@ class GZipHelper {
 
             if (count($files) == 1 && empty($inline_js)) {
 
-                $script = '<script async src="' . array_shift($files) . '"';
+                $script = '<script async defer src="' . array_shift($files) . '"></script>';
 
-                /*
-                  if(!empty($inline_js)) {
+            }
 
-                  $script .= ' onload="var n=this,s=document.createElement(&apos;script&apos;);s.text=&apos;'.str_replace(["\n","'", '<', '>', '"'], ['\n', "\&apos;", '&lt;', '&gt;', '&quot;'], implode(';', $inline_js)).'&apos;;this.parentNode.appendChild(s);this.removeAttribute(&apos;onload&apos;)"';
-
-                  unset($inline_js);
-                  }
-                 */
-
-                $script .= '></script>';
-            } else {
+            else {
 
                 $script = '<script src="' . implode('"></script><script src="', $files) . '"></script>';
             }

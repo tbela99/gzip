@@ -12,20 +12,13 @@
 	<files>
 		<folder>lib</folder>
 		<folder>language</folder>
-		<filename>load-worker.js</filename>
-		<filename>load-worker.min.js</filename>
+        <folder>worker/dist</folder>
 		<filename>helper.php</filename>
 		<filename>cacert.pem</filename>
 		<filename plugin="gzip">gzip.php</filename>
-		<filename>worker.js</filename>
-		<filename>worker.min.js</filename>
-        <filename>worker.checksum</filename>
-        <filename>worker.min.checksum</filename>
-        <filename>integrity.checksum</filename>
 	</files>
 	<media folder="media" destination="s">
-        <filename>localforage-all.js</filename>
-        <filename>localforage-all.min.js</filename>
+        <folder>js/dist</folder>
 	</media>
 	<media folder="media" destination="z">
 		<filename>index.php</filename>
@@ -35,7 +28,7 @@
 		<fields name="params">
 			<fieldset name="basic">
                             <fields name="gzip">
-                                <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" 
+                                <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL"
                                     description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
@@ -44,7 +37,7 @@
                                 </field>
                                 <field type="spacer" hr="true" />
                                 <field type="spacer" label="HTTP Push" />
-                                <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" 
+                                <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL"
                                     description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION"
                                     type="list"
                                     default="" multiple="true">
@@ -57,21 +50,21 @@
                                 </field>
                                 <field type="spacer" hr="true" />
                                 <field type="spacer" label="HTTP Cache" />
-                                <field name="cachefiles" label="PLG_GZIP_FIELD_CACHEFILES_LABEL" 
+                                <field name="cachefiles" label="PLG_GZIP_FIELD_CACHEFILES_LABEL"
                                     description="PLG_GZIP_FIELD_CACHEFILES_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="1">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" 
+                                <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL"
                                     description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="time">
                                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                                 </field>
-                                <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" 
+                                <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL"
                                     description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION"
                                         type="list" default="">
                                         <option value="none">JNone</option>
@@ -85,41 +78,41 @@
                                 <field type="spacer" label="Configure Javascript settings" />
                                 <field type="spacer" hr="true" />
                             <fields name="gzip">
-                                <field name="fetchjs" label="PLG_GZIP_FIELD_FETCHJS_LABEL" 
+                                <field name="fetchjs" label="PLG_GZIP_FIELD_FETCHJS_LABEL"
                                     description="PLG_GZIP_FIELD_FETCHJS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="1">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" 
+                                <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL"
                                     description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" 
+                                <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL"
                                     description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="minifyjsservice" label="PLG_GZIP_FIELD_MINIFYJSSERVICE_LABEL" 
+                                <field name="minifyjsservice" label="PLG_GZIP_FIELD_MINIFYJSSERVICE_LABEL"
                                     description="PLG_GZIP_FIELD_MINIFYJSSERVICE_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
                                         <!--<option value="1">JYes</option>-->
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" 
+                                <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL"
                                     description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION"
                                     type="textarea"
                                     rows="15"
                                    cols="45"
                                 />
-                                <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" 
+                                <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL"
                                     description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION"
                                     type="textarea"
                                     rows="15"
@@ -131,35 +124,35 @@
                                 <field type="spacer" label="Configure Css settings" />
                                 <field type="spacer" hr="true" />
                             <fields name="gzip">
-                                <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" 
+                                <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL"
                                     description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="1">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" 
+                                <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL"
                                     description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="asynccss" label="PLG_GZIP_FIELD_ASYNCCSS_LABEL" 
+                                <field name="asynccss" label="PLG_GZIP_FIELD_ASYNCCSS_LABEL"
                                     description="PLG_GZIP_FIELD_ASYNCSS_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" 
+                                <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL"
                                     description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="minifycssservice" label="PLG_GZIP_FIELD_MINIFYCSS_SERVICE_LABEL" 
+                                <field name="minifycssservice" label="PLG_GZIP_FIELD_MINIFYCSS_SERVICE_LABEL"
                                     description="PLG_GZIP_FIELD_MINIFYCSSSERVICE_DESCRIPTION"
 									type="radio" class="btn-group"
                                     default="0">
@@ -172,14 +165,14 @@
                             <field type="spacer" label="Configure images settings" />
                             <field type="spacer" hr="true" />
                             <fields name="gzip">
-                                <field name="imageenabled" label="PLG_GZIP_FIELD_IMAGE_ENABLED_LABEL" 
+                                <field name="imageenabled" label="PLG_GZIP_FIELD_IMAGE_ENABLED_LABEL"
                                     description="PLG_GZIP_FIELD_IMAGE_ENABLED_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="imageremote" label="PLG_GZIP_FIELD_IMAGE_REMOTE_LABEL" 
+                                <field name="imageremote" label="PLG_GZIP_FIELD_IMAGE_REMOTE_LABEL"
                                     description="PLG_GZIP_FIELD_IMAGE_REMOTE_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
@@ -192,45 +185,57 @@
                             <field type="spacer" label="Configure progressive web application settings" />
                             <field type="spacer" hr="true" />
                             <fields name="gzip">
-                                <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" 
+                                <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL"
                                     description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="pwacachepages" label="PLG_GZIP_FIELD_PWA_CACHE_PAGES_LABEL" 
+                                <field name="pwacachepages" label="PLG_GZIP_FIELD_PWA_CACHE_PAGES_LABEL"
                                     description="PLG_GZIP_FIELD_PWA_CACHE_PAGES_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="pwacachelifetime" label="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_LABEL" 
+                                <field name="pwacachelifetime" label="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_LABEL"
                                     description="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_DESCRIPTION"
                                     type="number" class="btn-group"
                                     default="300"
                                     />
+                                <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL"
+                                    description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION"
+                                    type="list"
+                                    default=""
+                                    >
+                                    <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                                    <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                                    <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                                    <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                                    <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                                    <option value="co" disabled="disabled">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                                </field>
                             </fields>
                         </fieldset>
                         <fieldset name="critical_path" label="Rendering Optimization">
                             <field type="spacer" label="Critical CSS Path" />
                             <field type="spacer" hr="true" />
                             <fields name="gzip">
-                                <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" 
+                                <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL"
                                     description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION"
                                     type="radio" class="btn-group"
                                     default="0">
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" 
+                                <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL"
                                     description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION"
                                     type="textarea"
                                     rows="5"
                                     cols="15"
                                     default=""/>
-                                <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" 
+                                <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL"
                                     description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION"
                                     type="textarea"
                                     rows="5"
