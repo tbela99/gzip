@@ -1,0 +1,1 @@
+var LIB = Object.create(null);
