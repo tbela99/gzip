@@ -192,22 +192,10 @@
                                         <option value="1">JYes</option>
                                         <option value="0">JNo</option>
                                 </field>
-                                <field name="pwacachepages" label="PLG_GZIP_FIELD_PWA_CACHE_PAGES_LABEL"
-                                    description="PLG_GZIP_FIELD_PWA_CACHE_PAGES_DESCRIPTION"
-                                    type="radio" class="btn-group"
-                                    default="0">
-                                        <option value="1">JYes</option>
-                                        <option value="0">JNo</option>
-                                </field>
-                                <field name="pwacachelifetime" label="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_LABEL"
-                                    description="PLG_GZIP_FIELD_PWA_CACHE_LIFETIME_DESCRIPTION"
-                                    type="number" class="btn-group"
-                                    default="300"
-                                    />
                                 <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL"
                                     description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION"
                                     type="list"
-                                    default=""
+                                    default="cn"
                                     >
                                     <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
                                     <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>

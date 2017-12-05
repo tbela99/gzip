@@ -74,6 +74,8 @@ class GZipHelper {
         "svg" => "image/svg+xml"
     );
 
+    static $pwa_network_strategy = '';
+
     /*
       public static function integrigyChecksum($file, $algo = 'sha256') {
 
@@ -316,7 +318,7 @@ class GZipHelper {
 
         else if (is_file($file)) {
 
-            $content = static::expandCss(file_get_contents($file), dirname($file), $path);
+            $content = static::expandCss(file_get_contents($file), dirname($file));
         }
 
         else {
@@ -451,7 +453,7 @@ class GZipHelper {
 
                                     $checkSumData = static::getChecksum($name, $hashFile, $checksum);
 
-                                    $file = 'media/z/'.(!empty($options['pwa_network_strategy']) ? $options['pwa_network_strategy'].'/' : '') . $checkSumData['hash'] . '/' . $file;
+                                    $file = 'media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file;
 
                                     if (!empty($push_data)) {
 
@@ -555,7 +557,7 @@ class GZipHelper {
 
                     $hashFile = static::getHashMethod();
 
-                    return \JURI::root(true) . '/media/z/' . $hashFile($name) . '/' . $file;
+                    return \JURI::root(true) . '/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file;
                 }
             }
 
@@ -592,7 +594,7 @@ class GZipHelper {
     }
 
     // parse @import
-    public static function expandCss($css, $path = null, $csspath = 'cache/z/css/') {
+    public static function expandCss($css, $path = null) {
 
         if (!is_null($path)) {
 
@@ -602,7 +604,7 @@ class GZipHelper {
             }
         }
 
-        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path, $csspath) {
+        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
 
             $file = trim(str_replace(array("'", '"'), "", $matches[1]));
 
@@ -614,7 +616,9 @@ class GZipHelper {
             if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
 
                 $file = static::resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
-            } else {
+            }
+
+            else {
 
                 if (preg_match('#^(https?:)?//#', $file)) {
 
@@ -624,7 +628,7 @@ class GZipHelper {
 
                         preg_match('~(.*?)([#?].*)?$~', $file, $match);
 
-                        $file = $csspath . static::shorten(crc32($file)) . '-' . basename($match[1]);
+                        $file = 'cache/z/'.static::$pwa_network_strategy.'css/' . static::shorten(crc32($file)) . '-' . basename($match[1]);
 
                         if (!is_file($file)) {
 
@@ -639,31 +643,34 @@ class GZipHelper {
                 }
             }
 
-            return "\n" . ' /* url ' . $matches[1] . ' */ ' . "\n" . "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
+            return "\n" . ' /* url ' . $matches[1] .
+                // -> uncomment to debug
+                // ' isFile: '.(static::isFile($file) ? 'true '.preg_replace('~[#?].*$~', '', static::getName($file)).' -> '.static::url($file) : 'false').
+                ' */ ' . "\n" . "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
         },
-                //resolve import directive, note import directive in imported css will NOT be processed
-                preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $csspath) {
+            //resolve import directive, note import directive in imported css will NOT be processed
+            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $csspath) {
 
-                    $file = trim($matches[1]);
+                $file = trim($matches[1]);
 
-                    if (preg_match('#url\(([^)]+)\)#', $file, $m)) {
+                if (preg_match('#url\(([^)]+)\)#', $file, $m)) {
 
-                        $file = $m[1];
-                    }
+                    $file = $m[1];
+                }
 
-                    $file = trim(str_replace(array("'", '"'), "", $file));
+                $file = trim(str_replace(array("'", '"'), "", $file));
 
-                    if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
+                if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
 
-                        $file = static::resolvePath($path . static::getName($file));
-                    }
+                    $file = static::resolvePath($path . static::getName($file));
+                }
 
-                    $isFile = static::isFile($file);
+                $isFile = static::isFile($file);
 
-                //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
+            //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
 
-                    return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $csspath);
-                }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
+                return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $csspath);
+            }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
         );
 
         return $css;
@@ -676,7 +683,7 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-        $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/css/';
+        $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.'css/';
 
         $fetch_remote = !empty($options['fetchcss']);
         $remote_service = !empty($options['minifycssservice']);
@@ -1062,7 +1069,6 @@ class GZipHelper {
 
             $web_fonts = '';
 
-            /*
             // font preloading - need to be fixed, an invalid url is returned
             if(preg_match_all('#url\(([^)]+)\)#', $css, $fonts)) {
 
@@ -1086,7 +1092,6 @@ class GZipHelper {
                     $body = str_replace('<head>', '<head>'.$web_fonts, $body);
                 }
             }
-            */
 
             $body = str_replace('</head>', '<style>' . $css . '</style></head>', $body);
         }
@@ -1275,7 +1280,7 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-        $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/js/';
+        $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.'js/';
 
         if (!isset(static::$regReduce)) {
 

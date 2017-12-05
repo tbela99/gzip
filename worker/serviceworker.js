@@ -47,7 +47,7 @@ self.addEventListener('fetch', (event) => {
 		strategyToUse = 'cn';
 	}
 
-	console.log({strategyToUse});
+	console.log({strategyToUse, url: event.request.url});
 
 	//no cn cf nf no co
 //	if (strategyToUse != undef && ) {

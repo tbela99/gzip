@@ -108,6 +108,7 @@ class PlgSystemGzip extends JPlugin
             }
 
             $prefix .= $options['pwa_network_strategy'].'/';
+            Gzip\GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'].'/';
         }
 
         if(!empty($options['jsignore'])) {

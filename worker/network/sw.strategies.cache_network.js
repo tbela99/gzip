@@ -13,7 +13,7 @@ SW.strategies.add('cn', function(event) {
 				// validate response before
 				if (SW.strategies.isCacheableResponse(networkResponse)) {
 
-					console.log('cache put ' + event.request.url);
+				//	console.log('cache put ' + event.request.url);
 
 					const cloned = networkResponse.clone();
 					caches.open(CACHE_NAME).then(function (cache) {
@@ -22,10 +22,10 @@ SW.strategies.add('cn', function(event) {
 					});
 				}
 
-				else {
+			//	else {
 
-					console.log('cannot put ' + event.request.url);
-				}
+			//		console.log('cannot put ' + event.request.url);
+			//	}
 
 				return networkResponse;
 			});
