@@ -44,10 +44,6 @@ Offline mode capabilities using one of these PWA network strategy:
     d. Network first, falling back to cache
     e. Cache, with network update - stale while revalidate <- this is the default
 
-Issues
-------
-0. Font preloading is disabled because the font url is invalid
-
 Roadmap
 -------
 0. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
