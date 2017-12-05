@@ -26,8 +26,8 @@ SW.strategies = function () {
 	//	isCacheableResponse: (response) => response != null && response.type == 'basic' && response.ok && !response.bodyUsed
 		isCacheableResponse: (response) => {
 
-			console.log({response, type: response && response.type, ok: response && response.ok, bodyUsed: response && response.bodyUsed});
-			console.log(new Error().stack);
+		//	console.log({response, type: response && response.type, ok: response && response.ok, bodyUsed: response && response.bodyUsed});
+		//	console.log(new Error().stack);
 
 			return response != undef && response.type == 'basic' && response.ok && !response.bodyUsed;
 		}

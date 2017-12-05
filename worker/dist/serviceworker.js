@@ -39,7 +39,8 @@ self.addEventListener("fetch", event => {
         strategyToUse = "cn";
     }
     console.log({
-        strategyToUse: strategyToUse
+        strategyToUse: strategyToUse,
+        url: event.request.url
     });
     //no cn cf nf no co
     //	if (strategyToUse != undef && ) {
@@ -74,13 +75,8 @@ SW.strategies = function() {
 		 */
         //	isCacheableResponse: (response) => response != null && response.type == 'basic' && response.ok && !response.bodyUsed
         isCacheableResponse: response => {
-            console.log({
-                response: response,
-                type: response && response.type,
-                ok: response && response.ok,
-                bodyUsed: response && response.bodyUsed
-            });
-            console.log(new Error().stack);
+            //	console.log({response, type: response && response.type, ok: response && response.ok, bodyUsed: response && response.bodyUsed});
+            //	console.log(new Error().stack);
             return response != undef && response.type == "basic" && response.ok && !response.bodyUsed;
         }
     };
@@ -141,14 +137,15 @@ SW.strategies.add("cn", function(event) {
         const fetchPromise = fetch(event.request).then(function(networkResponse) {
             // validate response before
             if (SW.strategies.isCacheableResponse(networkResponse)) {
-                console.log("cache put " + event.request.url);
+                //	console.log('cache put ' + event.request.url);
                 const cloned = networkResponse.clone();
                 caches.open(CACHE_NAME).then(function(cache) {
                     cache.put(event.request, cloned);
                 });
-            } else {
-                console.log("cannot put " + event.request.url);
             }
+            //	else {
+            //		console.log('cannot put ' + event.request.url);
+            //	}
             return networkResponse;
         });
         //	.catch(function () { return response; });
