@@ -39,11 +39,11 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 # Progressive Web App
 Offline mode capabilities using one of these PWA network strategy:
 
-a. Cache only (currently disabled in the settings page)
-b. Network only
-c. Cache first, falling back to network
-d. Network first, falling back to cache
-e. Cache, with network update - stale while revalidate <- this is the default
+0. Cache only (currently disabled in the settings page)
+0. Network only
+0. Cache first, falling back to network
+0. Network first, falling back to cache
+0. Cache, with network update - stale while revalidate <- this is the default
 
 Roadmap
 -------
