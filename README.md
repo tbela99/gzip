@@ -37,6 +37,7 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 - The web fonts are extracted automatically and preloaded
 
 # Progressive Web App
+
 Offline mode capabilities using one of these PWA network strategy:
 
 0. Cache only (currently disabled in the settings page)
@@ -63,11 +64,11 @@ Change History
 --------------
 # V2.0
 0. PWA: implement network strategies:
-    a. Cache only
-    b. Network only
-    c. Cache first, falling back to network
-    d. Network first, falling back to cache
-    e. Cache, with network update
+- Cache only
+- Network only
+- Cache first, falling back to network
+- Network first, falling back to cache
+- Cache, with network update
 
 # V1.1
 0. CSS: preload web fonts
