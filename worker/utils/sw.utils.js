@@ -1,47 +1,13 @@
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* global LIB */
-!(function(LIB, undef) {
+/* global SW, undef */
+!(function() {
 	"use strict;";
 
 	const Utils = {
-		pause: function(fn, delay) {
-			let timeout, undef;
-
-			return function() {
-				const context = this,
-					args = arguments;
-
-				if (timeout) {
-					clearTimeout(timeout);
-					timeout = undef;
-				}
-
-				timeout = setTimeout(function() {
-					timeout = undef;
-					fn.apply(context, args);
-				}, delay || 250);
-			};
-		},
-		throttle: function(fn, delay) {
-			let time, undef;
-
-			if (delay == undef) {
-				delay = 250;
-			}
-
-			return function() {
-				const now = Date.now();
-
-				if (time == undef || time + delay >= now) {
-					time = now;
-					fn.apply(this, arguments);
-				}
-			};
-		},
 		implement: function(target) {
 			const proto = target.prototype,
-				args = Array.prototype.slice.call(arguments, 1);
+				args = [].slice.call(arguments, 1);
 			let i, source, key;
 
 			function makefunc(fn, previous, parent) {
@@ -59,14 +25,10 @@
 
 					if (hasPrevious) {
 						self.previous = oldPrevious;
-					} else {
-						delete self.previous;
 					}
 
 					if (hasParent) {
 						self.parent = oldParent;
-					} else {
-						delete self.parent;
 					}
 
 					return result;
@@ -90,7 +52,7 @@
 					case "object":
 						proto[key] = merge(
 							true,
-							source instanceof Array ? [] : {},
+							Array.isArray(source) ? [] : {},
 							source
 						);
 						break;
@@ -112,7 +74,7 @@
 		extendArgs: function(fn) {
 			return function(key) {
 				if (typeof key == "object") {
-					const args = Array.prototype.slice.call(arguments, 1);
+					const args = [].slice.call(arguments, 1);
 					let k;
 
 					for (k in key) {
@@ -149,7 +111,7 @@
 
 	function merge(target) {
 		const deep = target === true,
-			args = Array.prototype.slice.call(arguments, 1);
+			args = [].slice.call(arguments, 1);
 		let i, source, prop, value;
 
 		if (deep === true) {
@@ -170,7 +132,7 @@
 									deep,
 									value == undef
 										? value
-										: value instanceof Array ? [] : {},
+										: Array.isArray(value) ? [] : {},
 									value
 								)
 								: value;
@@ -209,7 +171,7 @@
 
 			object[name] = merge(
 				true,
-				object[name] instanceof Array ? [] : {},
+				Array.isArray(object[name]) ? [] : {},
 				reset(object[name])
 			);
 		}
@@ -217,5 +179,5 @@
 		return object;
 	}
 
-	LIB.Utils = Utils;
-})(LIB);
+	SW.Utils = Utils;
+})();

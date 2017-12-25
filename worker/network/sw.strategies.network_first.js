@@ -1,28 +1,27 @@
 // @ts-check
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
-SW.strategies.add('nf', (event, cache) => {
+SW.strategies.add("nf", async (event, cache) => {
+	"use strict;";
 
-	'use strict;';
+	try {
+		const response = await fetch(event.request);
 
-    return fetch(event.request).then((response) => {
-
+		//	.then(response => {
 		if (response == undef) {
-
-			throw new Error('Network error');
+			throw new Error("Network error");
 		}
 
 		if (SW.strategies.isCacheableResponse(response)) {
-
 			const cloned = response.clone();
-			caches.open(CACHE_NAME).then(function (cache) {
-
+			caches.open(CACHE_NAME).then(function(cache) {
 				cache.put(event.request, cloned);
-			})
+			});
 		}
 
-      return response;
+		return response;
+		//	})
+	} catch (e) {}
 
-    }).catch(() => cache.match(event.request)
-  );
+	return cache.match(event.request);
 });

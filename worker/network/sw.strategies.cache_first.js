@@ -1,29 +1,23 @@
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, CACHE_NAME */
-SW.strategies.add('cf', (event) => {
+SW.strategies.add("cf", async (event) => {
+	"use strict;";
 
-	'use strict;';
+	let response = await caches.match(event.request);
 
-	return caches.match(event.request).then((response) => {
+	if (response != undef) {
+		return response;
+	}
 
-		if (response != undef) {
+	response = await fetch(event.request);
 
-			return response;
-		}
+	if (SW.strategies.isCacheableResponse(response)) {
+		const cloned = response.clone();
+		caches.open(CACHE_NAME).then(function(cache) {
+			cache.put(event.request, cloned);
+		});
+	}
 
-		return fetch(event.request).then((response) => {
-
-			if (SW.strategies.isCacheableResponse(response)) {
-
-				const cloned = response.clone();
-				caches.open(CACHE_NAME).then(function (cache) {
-
-					cache.put(event.request, cloned);
-				});
-			}
-
-			return response;
-		})
-	});
+	return response;
 });

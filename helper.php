@@ -18,6 +18,7 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 
 class GZipHelper {
 
+    static $options = [];
     static $regReduce;
     static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
     static $pwacache = [];
@@ -87,7 +88,7 @@ class GZipHelper {
 
         $hash = $hashFile($file);
 
-        $path = 'cache/z/ch/' . $hash . '-' . basename($file) . '.checksum.php';
+        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . md5($hash) . '-' . $file . '.checksum.php';
 
         if (is_file($path)) {
 
@@ -1034,7 +1035,7 @@ class GZipHelper {
 
                 if (is_file($css_file) && file_get_contents($css_hash) == $hash) {
 
-                    $critical_path .= file_get_contents($css_file);
+                    $critical_path .= static::expandCss(file_get_contents($css_file), dirname($css_file));
                 }
             }
 
@@ -1055,7 +1056,7 @@ class GZipHelper {
 
         if (!empty($css)) {
 
-            $css = static::expandCss(implode('', $css), null, $path);
+            $css = implode('', $css);
 
             if (!empty($options['minifycss'])) {
 
@@ -1072,7 +1073,7 @@ class GZipHelper {
             // font preloading - need to be fixed, an invalid url is returned
             if(preg_match_all('#url\(([^)]+)\)#', $css, $fonts)) {
 
-                $web_fonts = implode("\n", array_unique(array_map(function ($url) {
+                $web_fonts = implode("\n", array_unique(array_map(function ($url) use($path) {
 
                     $url = preg_replace('#(^["\'])([^\1])\1#', '$2', trim($url));
 
@@ -1080,7 +1081,7 @@ class GZipHelper {
 
                     if(isset(static::$accepted[$ext]) && strpos(static::$accepted[$ext], 'font') !== false) {
 
-                        return '<link rel="preload" href="'.$url.'" as="font">';
+                        return '<!-- $path '.$path.' --><link rel="preload" href="'.$url.'" as="font">';
                     }
 
                     return false;
