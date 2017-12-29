@@ -15,15 +15,9 @@ defined('_JEXEC') or die;
 class PlgSystemGzip extends JPlugin
 {
     protected $options = [];
+    protected $worker_id = '';
 
     public function onAfterRoute() {
-
-        $options = $this->params->get('gzip');
-
-        if(!empty($options)) {
-
-            $this->options = (array) $options;
-        }
 
         $document = JFactory::getDocument();
 
@@ -39,25 +33,72 @@ class PlgSystemGzip extends JPlugin
 
             if(!empty($this->options['pwaenabled'])) {
 
-                    $document->addScriptDeclaration(str_replace(['{scope}', '{debug}'], [\JUri::root(true) . '/', empty($this->options['debug']) ? '.min' : ''], file_get_contents(__DIR__.'/worker/dist/browser.min.js')));
-                }
+                $document->addScriptDeclaration(str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js')));
             }
+        }
     }
 
     public function onAfterInitialise() {
 
-        if(JFactory::getApplication()->isSite() && preg_match('#'.preg_quote(dirname($_SERVER['SCRIPT_NAME']).'/').'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
+        if(JFactory::getApplication()->isSite()) {
 
-        //    $debug = '';
-            $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
-            $file = __DIR__.'/worker/dist/serviceworker'.$debug.'.js';
+            $options = $this->params->get('gzip');
 
-            header('Cache-Control: max-age=86400');
-            header('Content-Type: text/javascript;charset=utf-8');
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+            if(!empty($options)) {
 
-            echo str_replace('{scope}', JURI::root(true) ,file_get_contents($file));
-            exit;
+                $this->options = (array) $options;
+            }
+
+            if(!empty($this->options['pwaenabled'])) {
+
+                $this->worker_id = file_get_contents(__DIR__.'/worker_version');
+            }
+
+            $dirname = dirname($_SERVER['SCRIPT_NAME']);
+
+            if($dirname != '/') {
+
+                $dirname .= '/';
+            }
+
+        //    echo '#'.preg_quote($dirname, '#').'((worker)|(localforage))([a-z0-9.]+)?\.js#i  '.$_SERVER['REQUEST_URI']."<br>";
+
+         //   var_dump(preg_match('#^'.preg_quote($dirname, '#').'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI']));
+         //   var_dump(preg_match('#^'.$dirname.'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI']));
+
+       //     die;
+
+
+            // fetch worker.js or localforage.js
+            if(preg_match('#^'.$dirname.'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
+
+            //    $debug = '';
+                $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+
+                $file = __DIR__.'/worker/dist/serviceworker'.$debug.'.js';
+
+                if($matches['1'] == 'localforage') {
+
+                    $file = 'media/z/js/dist/localforage'.$debug.'.js';
+                }
+
+                header('Cache-Control: max-age=86400');
+                header('Content-Type: text/javascript;charset=utf-8');
+                header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+
+                if($matches['1'] == 'localforage') {
+
+                readfile($file);
+                }
+
+                else {
+
+                    echo str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true)], file_get_contents($file));
+                }
+
+                exit;
+            }
         }
     }
 
@@ -145,6 +186,8 @@ class PlgSystemGzip extends JPlugin
         $body = $app->getBody();
 
         $profiler = JProfiler::getInstance('_gzip_');
+
+        Gzip\GZipHelper::$options = $options;
 
         $body = Gzip\GZipHelper::parseImages($body, $options);
         $body = Gzip\GZipHelper::parseCss($body, $options);

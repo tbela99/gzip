@@ -3,60 +3,78 @@
 /* main service worker file */
 /* global */
 
-'use strict;';
+"use strict;";
+
+//importScripts("{scope}/localforage.min.js");
 
 const SW = Object.create(null);
-const CACHE_NAME = 'v1';
+const CACHE_NAME = "{CACHE_NAME}";
+const scope = "{scope}";
+const defaultStrategy = "{defaultStrategy}";
 
-let undef;
+let undef; //
 
-// importScripts('serviceworkerhelper.min.js');
-// importScripts('serviceworkerhelper.js');
-
-self.addEventListener('install', function(event) {
+// -> importScript indexDb
+self.addEventListener("install", function(event) {
 	event.waitUntil(self.skipWaiting());
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener("activate", function(event) {
+	// delete old app owned caches
+	caches.keys().then(function(keyList) {
+		const tokens = CACHE_NAME.split(/_/, 2);
+		const search = tokens.length == 2 && tokens[0] + "_";
 
-    event.waitUntil(self.clients.claim());
+		return (
+			search !== false &&
+			Promise.all(
+				keyList.map(
+					(key) =>
+						key.indexOf(search) == 0 &&
+						key != CACHE_NAME &&
+						caches.delete(key)
+				)
+			)
+		);
+	});
+
+	event.waitUntil(self.clients.claim());
 });
 
 /**
  * @param {Request} event
  */
-self.addEventListener('fetch', (event) => {
-
-    if (event.request.method !== 'GET') {
-
-        return;
-    }
-	const scope = '{scope}';
-	const strategies = SW.strategies;
-	const url = new URL(event.request.url);
-
-	if (url.pathname.match(new RegExp(scope + '/administrator/')) != undef) {
-
+self.addEventListener("fetch", (event) => {
+	if (event.request.method !== "GET") {
 		return;
 	}
 
-	let strategyToUse = (url.pathname.match(new RegExp(scope + '/media/z/([a-z]{2})/')) || [])[1];
+	const strategies = SW.strategies;
 
-	if (!strategies.has(strategyToUse)) {
+	// guess stategy from url
+	let strategyToUse = (new URL(event.request.url).pathname.match(
+		new RegExp(scope + "/media/z/([a-z]{2})/")
+	) || [])[1];
 
-		strategyToUse = 'cn';
+	// fallback to default configured in the plugin settings
+	if (strategyToUse == undef) {
+		strategyToUse = defaultStrategy;
 	}
 
-	console.log({strategyToUse, url: event.request.url});
+	if (!strategies.has(strategyToUse)) {
+		// default browser behavior
+		strategyToUse = "no";
+	}
 
-	//no cn cf nf no co
-//	if (strategyToUse != undef && ) {
-
-		// strategyToUse = 'no';
-		// match will ignore the cache strategy?
-		event.respondWith(
-			strategies.get(strategyToUse).handle(event)
-		);
-//	}
-
+	console.info({strategyToUse, url: event.request.url});
+	event.respondWith(
+		strategies.
+			get(strategyToUse).
+			handle(event).
+			catch((error) => {
+				console.error("😭", error);
+				return fetch(event.request);
+			})
+	);
+	//	}
 });
