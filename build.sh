@@ -25,7 +25,7 @@ cd ../worker
 #sed 's/LIB/SW/g' ../js/lib/lib.utils.js > utils/sw.utils.js
 #sed 's/LIB/SW/g' ../js/lib/lib.event.js > network/sw.event.js
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/browser.js -- ./browser.js
-uglifyjs --compress unsafe=true,passes=3,ecma=6,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.js > ./dist/browser.min.js
+uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.js > ./dist/browser.min.js
 # google-closure-compiler-js --compilationLevel=ADVANCED --assumeFunctionWrapper=false --languageOut=ES6 ./dist/browser.js > ./dist/browser.g.min.js
 #
 #
@@ -36,7 +36,7 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
   ./network/sw.strategies.network_only.js ./network/sw.strategies.cache_only.js\
   ./filter/sw.filter.js\
   ./serviceworker.config.js
-uglifyjs --ecma=6 --compress unsafe=true,passes=3,ecma=6,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,drop_console=true\
+uglifyjs --ecma=6 --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,drop_console=true\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
 #  --mangle-props
 #google-closure-compiler-js --compilationLevel=ADVANCED --assumeFunctionWrapper=true --languageOut=ES6 ./dist/serviceworker.min.js > ./dist/serviceworker.g.min.js

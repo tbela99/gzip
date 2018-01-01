@@ -50,7 +50,7 @@ Offline mode capabilities using one of these PWA network strategy:
 
 ## Roadmap
 
-0. Service worker cache expiration api (using localforage)
+0. Service worker cache expiration api (using localforage or another lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 2. Messaging API (broadcasting messages to and from all/single clients)
 3. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
@@ -66,6 +66,7 @@ Offline mode capabilities using one of these PWA network strategy:
 13. PWA: Web Push Notification. see [here](https://serviceworke.rs/web-push.html)
 14. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria)
 15. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
+16. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization
 
 ## Change History
 

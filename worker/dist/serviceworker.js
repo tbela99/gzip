@@ -54,10 +54,12 @@ self.addEventListener("fetch", event => {
         strategyToUse,
         url: event.request.url
     });
-    event.respondWith(strategies.get(strategyToUse).handle(event).catch(error => {
-        console.error("😭", error);
-        return fetch(event.request);
-    }));
+    if (event.request.url.indexOf("data:") != 0) {
+        event.respondWith(strategies.get(strategyToUse).handle(event).catch(error => {
+            console.error("😭", error);
+            return fetch(event.request);
+        }));
+    }
 });
 
 // @ts-check

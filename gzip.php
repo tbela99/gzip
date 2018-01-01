@@ -61,44 +61,91 @@ class PlgSystemGzip extends JPlugin
                 $dirname .= '/';
             }
 
-        //    echo '#'.preg_quote($dirname, '#').'((worker)|(localforage))([a-z0-9.]+)?\.js#i  '.$_SERVER['REQUEST_URI']."<br>";
+            // fetch worker.js
+            if(preg_match('#^'.$dirname.'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
 
-         //   var_dump(preg_match('#^'.preg_quote($dirname, '#').'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI']));
-         //   var_dump(preg_match('#^'.$dirname.'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI']));
-
-       //     die;
-
-
-            // fetch worker.js or localforage.js
-            if(preg_match('#^'.$dirname.'((worker)|(localforage))([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
-
-            //    $debug = '';
                 $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
 
                 $file = __DIR__.'/worker/dist/serviceworker'.$debug.'.js';
-
-                if($matches['1'] == 'localforage') {
-
-                    $file = 'media/z/js/dist/localforage'.$debug.'.js';
-                }
 
                 header('Cache-Control: max-age=86400');
                 header('Content-Type: text/javascript;charset=utf-8');
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
 
-
-                if($matches['1'] == 'localforage') {
-
-                readfile($file);
-                }
-
-                else {
-
-                    echo str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true)], file_get_contents($file));
-                }
-
+                echo str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true)], file_get_contents($file));
                 exit;
             }
+
+            // fetch worker.js
+            if(!empty($this->options['pwa_app_manifest'])) {
+                
+                if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
+
+                    $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+
+                //    $file = __DIR__.'/worker/dist/serviceworker'.$debug.'.js';
+
+                //    header('Cache-Control: max-age=86400');
+                    header('Content-Type: application/json;charset=utf-8');
+                //    header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+                    $config = JFactory::getConfig();
+
+                    $short_name = $this->options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $this->options['pwa_app_short_name'];
+                    $name = $this->options['pwa_app_name'] === '' ? $config->get('sitename') : $this->options['pwa_app_name'];
+                    $description = $this->options['pwa_app_description'] === '' ? $config->get('MetaDesc') : $this->options['pwa_app_description'];
+                    $start_url = $this->options['pwa_app_start_url'] === '' ? JURI::root(true).'/' : $this->options['pwa_app_start_url'];
+
+                    $start_url .= (strpos($start_url, '?') === false ? '?' : '&'). 'utm_source=web_app_manifest';
+
+                    $manifest = [
+                        'scope' => JURI::root(true).'/',
+                        'short_name' => substr($short_name, 0, 12),
+                        'name' => $name,
+                        'description' => $description,
+                        'icons' => $this->options['pwa_app_icons'],
+                        'start_url' => $start_url,
+                        'background_color' => $this->options['pwa_app_bg_color'],
+                        'theme_color' => $this->options['pwa_app_theme_color'],
+                        'display' => $this->options['pwa_app_display']
+                    ];
+
+                    echo json_encode(array_filter($manifest, function ($value) {
+
+                        if(is_array($value)) {
+
+                            $value = array_filter($value, function ($v) { return $v !== ''; });
+                        }
+
+                        return $value !== '' && !is_null($value) && count($value) != 0;
+                    }));
+
+                //    echo str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true)], file_get_contents($file));
+                    exit;
+                }
+
+                $document = JFactory::getDocument();
+
+                if(method_exists($document, 'addHeadLink')) {
+
+                    $document->addHeadLink(JURI::root(true).'/manifest.json', 'manifest');
+                }
+
+                if(!empty($this->options['pwa_app_theme_color'])) {
+                        
+                    // setMetaData
+                    $document->setMetaData('theme-color', $this->options['pwa_app_theme_color']);
+                }
+
+            //    if(!empty($this->options['background_color'])) {
+                        
+                    // setMetaData
+            //        $document->setMetaData('theme-color', $this->options['background_color']);
+            //    }
+            }
+
+            // "start_url": "./?utm_source=web_app_manifest",
+            // manifeste url
         }
     }
 

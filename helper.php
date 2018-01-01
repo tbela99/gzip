@@ -77,18 +77,11 @@ class GZipHelper {
 
     static $pwa_network_strategy = '';
 
-    /*
-      public static function integrigyChecksum($file, $algo = 'sha256') {
-
-      return $algo."-". hash_file($algo, $file, true);;
-      }
-     */
-
     public static function getChecksum($file, callable $hashFile, $algo = 'sha256') {
 
         $hash = $hashFile($file);
 
-        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . md5($hash) . '-' . $file . '.checksum.php';
+        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . $hash . '-' . basename($file) . '.checksum.php';
 
         if (is_file($path)) {
 
@@ -108,7 +101,6 @@ class GZipHelper {
         ];
 
         file_put_contents($path, '<?php $checksum = ' . var_export($checksum, true) . ';');
-
         return $checksum;
     }
 
