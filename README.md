@@ -42,38 +42,50 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 
 Offline mode capabilities using one of these PWA network strategy:
 
+### Network cache strategies
+
 0. Cache only (currently disabled in the settings page)
 1. Network only
-2. Cache first, falling back to network
-3. Network first, falling back to cache
-4. Cache, with network update - stale while revalidate <- this is the default
+1. Cache first, falling back to network
+1. Network first, falling back to cache
+1. Cache, with network update - stale while revalidate <- this is the default
+
+### Installable web app
+
+1. The app can be installed as a standalone web app with google chrome on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
+2. Alternative links to native mobile apps can be provided and the preference can be configured
 
 ## Roadmap
 
-0. Service worker cache expiration api (using localforage)
+1. Mobile apps deep link?
+1. Customize mobile app preference using the manifest file
+1. Service worker cache expiration api (using localforage or another lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
-2. Messaging API (broadcasting messages to and from all/single clients)
-3. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
-4. PWA: Implement out of the box support for progressive web apps (provide a manifest, a skeleton, a start url?). see [here](https://techbeacon.com/how-use-service-workers-progressive-web-apps?utm_source=mobilewebweekly&utm_medium=email) - we need to define an app architecture
-5. Create a standalone app a using android and chrome. see [here](https://developers.google.com/web/updates/2014/11/Support-for-installable-web-apps-with-webapp-manifest-in-chrome-38-for-Android)
-6. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
-7. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
-8. IMAGES: Implement progressive images loading [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
-9. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
-10. IMAGES: Implement support for <pictures> element see [here](https://www.smashingmagazine.com/2013/10/automate-your-responsive-images-with-mobify-js/)
-11. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
-12. CSS: deduplicate, merge properties, rewrite rules, etc
-13. PWA: Web Push Notification. see [here](https://serviceworke.rs/web-push.html)
-14. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria)
-15. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
+1. Messaging API (broadcasting messages to and from all/single clients)
+1. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
+1. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
+1. IMAGES: Implement progressive images loading [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
+1. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
+1. IMAGES: Implement support for <pictures> element see [here](https://www.smashingmagazine.com/2013/10/automate-your-responsive-images-with-mobify-js/)
+1. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
+1. CSS: deduplicate, merge properties, rewrite rules, etc
+1. PWA: Web Push Notification. see [here](https://serviceworke.rs/web-push.html)
+1. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria) and [here](https://gist.github.com/ebidel/188a513b1cd5e77d4d1453a4b6d060b0)
+1. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
+1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization?
+1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
 
 ## Change History
+
+# V2.1
+
+0. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
 
 # V2.0
 
 0. PWA: implement network strategies:
 
-* Cache only
+* Cache only (disabled)
 * Network only
 * Cache first, falling back to network
 * Network first, falling back to cache

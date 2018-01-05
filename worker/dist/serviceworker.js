@@ -54,10 +54,12 @@ self.addEventListener("fetch", event => {
         strategyToUse,
         url: event.request.url
     });
-    event.respondWith(strategies.get(strategyToUse).handle(event).catch(error => {
-        console.error("😭", error);
-        return fetch(event.request);
-    }));
+    if (event.request.url.indexOf("data:") != 0) {
+        event.respondWith(strategies.get(strategyToUse).handle(event).catch(error => {
+            console.error("😭", error);
+            return fetch(event.request);
+        }));
+    }
 });
 
 // @ts-check
@@ -479,7 +481,18 @@ SW.Filter = function(SW) {
 /* global SW, scope */
 "use strict;";
 
-// do not cache administrator content
+// do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
+//SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {
+//	return request.url.indexOf(scope + "/administrator/") != -1;
+//});
+const excluded = "{exclude_urls}";
+
 SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {
-    return request.url.indexOf(scope + "/administrator/") != -1;
+    let i = excluded.length;
+    while (i && i--) {
+        if (request.url.indexOf(excluded[i]) == -1) {
+            return false;
+        }
+    }
+    return true;
 });

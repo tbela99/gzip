@@ -27,6 +27,7 @@ class GZipHelper {
         "jpg" => array('as' => 'image'),
         "jpeg" => array('as' => 'image'),
         "png" => array('as' => 'image'),
+        "webp" => array('as' => 'image'),
         "swf" => array('as' => 'object'),
         "ico" => array('as' => 'image'),
         "txt" => [],
@@ -47,6 +48,7 @@ class GZipHelper {
         "jpg" => "image/jpeg",
         "jpeg" => "image/jpeg",
         "png" => "image/png",
+        "webp" => "image/webp",
         "swf" => "application/x-shockwave-flash",
         "ico" => "image/x-icon",
         "txt" => "text/plain",
@@ -77,18 +79,11 @@ class GZipHelper {
 
     static $pwa_network_strategy = '';
 
-    /*
-      public static function integrigyChecksum($file, $algo = 'sha256') {
-
-      return $algo."-". hash_file($algo, $file, true);;
-      }
-     */
-
     public static function getChecksum($file, callable $hashFile, $algo = 'sha256') {
 
         $hash = $hashFile($file);
 
-        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . md5($hash) . '-' . $file . '.checksum.php';
+        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . $hash . '-' . basename($file) . '.checksum.php';
 
         if (is_file($path)) {
 
@@ -108,7 +103,6 @@ class GZipHelper {
         ];
 
         file_put_contents($path, '<?php $checksum = ' . var_export($checksum, true) . ';');
-
         return $checksum;
     }
 
