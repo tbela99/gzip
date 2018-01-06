@@ -2,10 +2,10 @@
 /* eslint wrap-iife: 0 */
 /* main service worker file */
 /* global */
+// validator https://www.pwabuilder.com/
+// pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
 
 "use strict;";
-
-//importScripts("{scope}/localforage.min.js");
 
 const SW = Object.create(null);
 const CACHE_NAME = "{CACHE_NAME}";
@@ -16,7 +16,16 @@ let undef; //
 
 // -> importScript indexDb
 self.addEventListener("install", function(event) {
-	event.waitUntil(self.skipWaiting());
+	event.waitUntil(
+		caches.
+			open(CACHE_NAME).
+			then(function(cache) {
+				return cache.addAll("{preloaded_urls}");
+			}).
+			then(function() {
+				return self.skipWaiting();
+			})
+	);
 });
 
 self.addEventListener("activate", function(event) {
@@ -66,10 +75,9 @@ self.addEventListener("fetch", (event) => {
 		strategyToUse = "no";
 	}
 
-	console.info({strategyToUse, url: event.request.url});
+	console.info({ strategyToUse, url: event.request.url });
 
-	if (event.request.url.indexOf('data:') != 0) {
-
+	if (event.request.url.indexOf("data:") != 0) {
 		event.respondWith(
 			strategies.
 				get(strategyToUse).

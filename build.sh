@@ -36,7 +36,7 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
   ./network/sw.strategies.network_only.js ./network/sw.strategies.cache_only.js\
   ./filter/sw.filter.js\
   ./serviceworker.config.js
-uglifyjs --ecma=6 --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,drop_console=true\
+uglifyjs --ecma=6 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,drop_console=true\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
 #  --mangle-props
 #google-closure-compiler-js --compilationLevel=ADVANCED --assumeFunctionWrapper=true --languageOut=ES6 ./dist/serviceworker.min.js > ./dist/serviceworker.g.min.js

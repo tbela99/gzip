@@ -57,6 +57,8 @@ Offline mode capabilities using one of these PWA network strategy:
 
 ## Roadmap
 
+1. Add PWA install urls list
+1. Investigate service worker and SRI issue
 1. Mobile apps deep link?
 1. Customize mobile app preference using the manifest file
 1. Service worker cache expiration api (using localforage or another lightweight indexDb library)
