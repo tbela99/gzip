@@ -45,12 +45,13 @@ SW.Filter = (function(SW) {
 				}
 			}
 
-			console.info({request});
+			console.info({ request });
 			return request;
 		},
 		postfetch: function(request, response) {
 			console.info("postfetch");
 
+			// shloud allow both request and response validation
 			//	const url = request.url;
 			//	const excludeSet = map.get(postfetchRule);
 
@@ -64,7 +65,7 @@ SW.Filter = (function(SW) {
 			//		}
 			//	}
 
-			console.info({request, response});
+			console.info({ request, response });
 
 			return response;
 		}

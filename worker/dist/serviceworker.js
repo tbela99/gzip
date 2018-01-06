@@ -3,9 +3,10 @@
 /* eslint wrap-iife: 0 */
 /* main service worker file */
 /* global */
+// validator https://www.pwabuilder.com/
+// pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
 "use strict;";
 
-//importScripts("{scope}/localforage.min.js");
 const SW = Object.create(null);
 
 const CACHE_NAME = "{CACHE_NAME}";
@@ -19,7 +20,11 @@ let undef;
 //
 // -> importScript indexDb
 self.addEventListener("install", function(event) {
-    event.waitUntil(self.skipWaiting());
+    event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
+        return cache.addAll("{preloaded_urls}");
+    }).then(function() {
+        return self.skipWaiting();
+    }));
 });
 
 self.addEventListener("activate", function(event) {
@@ -319,7 +324,7 @@ SW.strategies = function() {
 		 *
 		 * @param {Request} request
 		 */
-        isCacheableRequest: request => [ "same-origin", "cors" ].includes(request.mode),
+        isCacheableRequest: request => [ "same-origin", "cors", "" ].includes(request.mode),
         /**
 		 *
 		 * @param {Response} response
@@ -327,7 +332,8 @@ SW.strategies = function() {
         //	isCacheableResponse: (response) => response != null && response.type == 'basic' && response.ok && !response.bodyUsed
         isCacheableResponse: response => //	console.log({response, type: response && response.type, ok: response && response.ok, bodyUsed: response && response.bodyUsed});
         //	console.log(new Error().stack);
-        response != undef && response.type == "basic" && response.ok && !response.bodyUsed
+        response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
+        response.type == "default") && response.ok && !response.bodyUsed
     };
     strategy[Symbol.iterator] = (() => map[Symbol.iterator]());
     Object.defineProperty(strategy, "size", {
@@ -455,6 +461,7 @@ SW.Filter = function(SW) {
         },
         postfetch: function(request, response) {
             console.info("postfetch");
+            // shloud allow both request and response validation
             //	const url = request.url;
             //	const excludeSet = map.get(postfetchRule);
             //	if (excludeSet != undef) {
