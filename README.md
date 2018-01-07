@@ -4,7 +4,7 @@ This plugin is complementary to [HTML Minifier](/projects/WO/repos/html-minifier
 
 # Known issue
 
-It looks like subresources integrity is broken when servuce worker is enabled
+It looks like subresources integrity is broken when service worker is enabled
 
 # General improvements
 
@@ -50,17 +50,20 @@ Offline mode capabilities using one of these PWA network strategy:
 1. Network first, falling back to cache
 1. Cache, with network update - stale while revalidate <- this is the default
 
+### PWA preloaded resources
+
+You can provide the list of url to load when the service worker is installed like icons, logo, css files, web pages, etc ...
+
 ### Installable web app
 
 1. The app can be installed as a standalone web app with google chrome on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
-2. Alternative links to native mobile apps can be provided and the preference can be configured
+2. The app can be installed as a standalone desktop application (tested on wndows 10) with google chrome as long as you provide a 512x512 icon.
+3. Alternative links to native mobile apps can be provided and the preference can be configured
 
 ## Roadmap
 
-1. Add PWA install urls list
+1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
 1. Investigate service worker and SRI issue
-1. Mobile apps deep link?
-1. Customize mobile app preference using the manifest file
 1. Service worker cache expiration api (using localforage or another lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
@@ -74,8 +77,14 @@ Offline mode capabilities using one of these PWA network strategy:
 1. PWA: Web Push Notification. see [here](https://serviceworke.rs/web-push.html)
 1. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria) and [here](https://gist.github.com/ebidel/188a513b1cd5e77d4d1453a4b6d060b0)
 1. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
-1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization?
+
+## May be implemented
+
+These a low priority tasks.
+
+1. Mobile apps deep link?
 1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
+1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization ?
 
 ## Change History
 
