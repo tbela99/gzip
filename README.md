@@ -40,7 +40,7 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 
 # Progressive Web App
 
-Offline mode capabilities using one of these PWA network strategy:
+Offline mode capabilities using one of these PWA network strategy
 
 ### Network cache strategies
 
