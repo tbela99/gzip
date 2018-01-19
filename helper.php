@@ -263,24 +263,24 @@ class GZipHelper {
             return false;
         }
 
-        if ($remote_service) {
+    //    if ($remote_service) {
 
-            $options = array('input' => $content);
+    //        $options = array('input' => $content);
 
-            $response = static::getContent('https://javascript-minifier.com/raw', $options);
+    //        $response = static::getContent('https://javascript-minifier.com/raw', $options);
 
-            if ($response === false) {
+    //        if ($response === false) {
 
-                return false;
-            }
+    //            return false;
+    //        }
 
-            if (preg_match('#^java\.net#s', $response)) {
+    //        if (preg_match('#^java\.net#s', $response)) {
 
-                return false;
-            }
+    //            return false;
+    //        }
 
-            return $response;
-        }
+    //        return $response;
+    //    }
 
         if (is_null($jsShrink)) {
 

@@ -107,7 +107,7 @@
 			}
 		}),
 		// return a promise
-		resolve: function(name) {
+		resolve(name) {
 			name = name.toLowerCase();
 
 			const self = this;
@@ -122,7 +122,7 @@
 				})
 			);
 		},
-		addPseudo: function(name, fn) {
+		addPseudo(name, fn) {
 			this.$pseudo[name] = fn;
 			return this;
 		}

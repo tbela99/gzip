@@ -1,0 +1,32 @@
+.input-group {
+    position: relative;
+    display: table;
+    border-collapse: separate;
+    max-width: 300px;
+    .input-group-btn {
+        position: relative;
+        font-size: 0;
+        white-space: nowrap;
+        width: 1%;
+        vertical-align: middle;
+    }
+    .form-control {
+        //    position: relative;
+        z-index: 2;
+        float: left;
+        width: 100%;
+        margin-bottom: 0;
+    }
+    .form-control,
+    .input-group-addon,
+    .input-group-btn {
+        display: table-cell;
+    }
+}
+
+.wait {
+    cursor: busy;
+    >* {
+        pointer-events: none;
+    }
+}
