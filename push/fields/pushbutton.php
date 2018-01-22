@@ -29,10 +29,17 @@ class JFormFieldPushButton extends JFormField
 	protected function getInput()
 	{
 		$attributes = '';
+		$data_attr = '';
 
 		foreach ($this->element->attributes() as $attr => $value) {
 
 		//	if(!$this->element->attributes())
+
+			if (strpos($attr, 'data-') === 0) {
+
+				$data_attr .= ' '.$attr.'="'.htmlspecialchars($value).'"';
+				continue;
+			}
 
 			switch ($attr) {
 
@@ -84,7 +91,7 @@ class JFormFieldPushButton extends JFormField
 		// Trim the trailing line in the layout file
         return '<span class="input-group clearfix">
         <input type="text" class="form-control"'.$attributes.'>'.$datalist.'
-        <span class="input-group-btn"><button class="btn btn-primary" type="button">Send</button></span>
+        <span class="input-group-btn"><button class="btn btn-primary" type="button"'.$data_attr.'>Send</button></span>
       </span>';
 	}
 }

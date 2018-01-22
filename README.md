@@ -62,7 +62,8 @@ You can provide the list of url to load when the service worker is installed lik
 
 ### Web Push
 
-1. Manage Web Push subscription using OneSignal
+0. Manage Web Push subscription using OneSignal
+1. Added basic push notification settings for Joomla articles
 
 ### Service worker router api
 
@@ -70,11 +71,11 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Roadmap
 
-### Height priority list
+### High priority list
 
-0. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
+1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
+1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. Investigate service worker and SRI issue
-1. Service worker cache expiration api (using localforage or another lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
 1. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
@@ -90,6 +91,8 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ### Low priority list
 
+0. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
+1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
 1. Mobile apps deep link?
 1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
 1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization ?
@@ -98,10 +101,11 @@ Add routes to customize fetch event networking startegy by using either a static
 
 # V2.1
 
-0. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
+0. Added push notifications using onesignal
+1. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
 1. Precached urls list. You can now provide a list of urls that will be precached when the service worker is installed.
-1. Manage Web Push subscription using OneSignal
 1. Added router api. Add routes to customize fetch event networking strategy by using either a static route or a regexp
+1. Rebuild service worker and the manifest whenever the plugin is installed or the settings are updated
 
 # V2.0
 

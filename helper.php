@@ -83,7 +83,7 @@ class GZipHelper {
 
         $hash = $hashFile($file);
 
-        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/') . $hash . '-' . basename($file) . '.checksum.php';
+        $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/'.$_SERVER['SERVER_NAME'].'/') . $hash . '-' . basename($file) . '.checksum.php';
 
         if (is_file($path)) {
 
@@ -255,6 +255,7 @@ class GZipHelper {
 
                 return false;
             }
+            
         } else if (is_file($file)) {
 
             $content = file_get_contents($file);
@@ -262,25 +263,6 @@ class GZipHelper {
 
             return false;
         }
-
-    //    if ($remote_service) {
-
-    //        $options = array('input' => $content);
-
-    //        $response = static::getContent('https://javascript-minifier.com/raw', $options);
-
-    //        if ($response === false) {
-
-    //            return false;
-    //        }
-
-    //        if (preg_match('#^java\.net#s', $response)) {
-
-    //            return false;
-    //        }
-
-    //        return $response;
-    //    }
 
         if (is_null($jsShrink)) {
 
@@ -320,30 +302,6 @@ class GZipHelper {
 
             return false;
         }
-
-        //    $content = static::expandCss($content, dirname($file));
-
-    //    if ($remote_service) {
-
-     //       $options = array('input' => $content);
-
-    //        $response = static::getContent('https://cssminifier.com/raw', $options);
-
-     //       if ($response !== false && strpos($response, 'Error:') === false) {
-
-    //            return $response;
-    //        }
-    //    }
-
-    //    $oCssParser = new \Sabberworm\CSS\Parser($content);
-    //    $oCssDocument = $oCssParser->parse();
-
-    //    $content = '';
-
-    //    foreach ($oCssDocument->getContents() as $block) {
-
-    //        $content .= static::removeEmptyRulesets($block);
-    //    }
 
         if (is_null($minifier)) {
 
@@ -542,7 +500,7 @@ class GZipHelper {
 
         if (static::isFile($file)) {
 
-            if (is_file($name)) {
+            if (is_file($name) && strpos($name, 'media/z/') !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
@@ -623,7 +581,7 @@ class GZipHelper {
 
                         preg_match('~(.*?)([#?].*)?$~', $file, $match);
 
-                        $file = 'cache/z/'.static::$pwa_network_strategy.'css/' . static::shorten(crc32($file)) . '-' . basename($match[1]);
+                        $file = 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. static::shorten(crc32($file)) . '-' . basename($match[1]);
 
                         if (!is_file($file)) {
 
@@ -678,7 +636,7 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-        $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.'css/';
+        $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
         $fetch_remote = !empty($options['fetchcss']);
         $remote_service = !empty($options['minifycssservice']);
@@ -1075,7 +1033,8 @@ class GZipHelper {
 
                     if(isset(static::$accepted[$ext]) && strpos(static::$accepted[$ext], 'font') !== false) {
 
-                        return '<!-- $path '.$path.' --><link rel="preload" href="'.$url.'" as="font">';
+                        //
+                        return '<!-- $path '.$path.' - $url '.$url.' --><link rel="preload" href="'.$url.'" as="font">';
                     }
 
                     return false;
@@ -1275,7 +1234,7 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-        $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.'js/';
+        $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
 
         if (!isset(static::$regReduce)) {
 

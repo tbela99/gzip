@@ -1,12 +1,50 @@
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global LIB */
-!(function(LIB, undef) {
+!(function(LIB, window, undef) {
 	"use strict;";
 
+	const requestAnimationFrame =
+		window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+	const cancelAnimationFrame =
+		window.cancelAnimationFrame || window.webkitCancelAnimationFrame;
+
 	const Utils = {
+		pauseRAF: function(fn) {
+			let raf;
+
+			return function() {
+				const context = this,
+					args = arguments;
+
+				if (raf != undef) {
+					cancelAnimationFrame(raf);
+					raf = undef;
+				}
+
+				raf = requestAnimationFrame(function() {
+					raf = undef;
+					fn.apply(context, args);
+				});
+			};
+		},
+		throttleRAF: function(fn) {
+			let raf;
+
+			return function() {
+				const context = this,
+					args = arguments;
+
+				if (raf == undef) {
+					raf = requestAnimationFrame(function() {
+						raf = undef;
+						fn.apply(context, args);
+					});
+				}
+			};
+		},
 		pause: function(fn, delay) {
-			let timeout, undef;
+			let timeout;
 
 			return function() {
 				const context = this,
@@ -24,7 +62,7 @@
 			};
 		},
 		throttle: function(fn, delay) {
-			let time, undef;
+			let time;
 
 			if (delay == undef) {
 				delay = 250;
@@ -218,4 +256,4 @@
 	}
 
 	LIB.Utils = Utils;
-})(LIB);
+})(LIB, window);

@@ -1,4 +1,5 @@
 /* do not edit! */
+// @ts-check
 /* wrap-iife: 0 */
 !function(script, body) {
     script.src = "https://cdn.onesignal.com/sdks/OneSignalSDK.js";
@@ -12,6 +13,5 @@
             });
         });
     };
-    body.appendChild(script);
-    body.removeChild(script);
+    body.removeChild(body.appendChild(script));
 }(document.createElement("script"), document.body);

@@ -8,10 +8,10 @@
                 </field>        
         </fields>
         <fields name="push">		
-            <field name="web_push_test_url" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTURL_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTURL_DESCRIPTION" type="text"/>
+            <!-- <field name="web_push_test_url" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTURL_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTURL_DESCRIPTION" type="text"/>
             <field name="web_push_test_title" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTTITLE_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTTITLE_DESCRIPTION" type="text"/>
-            <field name="web_push_test_content" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTCONTENT_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTCONTENT_DESCRIPTION" type="textarea"/>
-            <field name="sendtest" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_SENDTEST_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_SENDTEST_DESCRIPTION" type="pushbutton"/>
+            <field name="web_push_test_content" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTCONTENT_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_TESTCONTENT_DESCRIPTION" type="textarea"/>-->
+            <field name="sendtest" data-button-group="gzip" data-task="gzip.sendNotification" label="PLG_GZIP_FIELD_CONTENT_WEBPUSH_SENDTEST_LABEL" description="PLG_GZIP_FIELD_CONTENT_WEBPUSH_SENDTEST_DESCRIPTION" type="pushbutton"/>
         </fields>
     </fieldset>
 </form>

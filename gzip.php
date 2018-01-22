@@ -63,7 +63,14 @@ class PlgSystemGzip extends JPlugin
 
         if ($form->getName() == 'com_content.article') {
             
-            JFactory::getDocument()->addStylesheet(JURI::root(true).'/plugins/system/gzip/push/css/form.css');
+            $document = JFactory::getDocument();
+            
+            $document->addStylesheet(JURI::root(true).'/plugins/system/gzip/push/css/form.css');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/dist/fetch.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.ready.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/push/js/form.js');
+
             JFactory::getLanguage()->load('plg_system_gzip', __DIR__);
 
             JFormHelper::addFieldPath(__DIR__.'/push/fields');
@@ -139,6 +146,295 @@ class PlgSystemGzip extends JPlugin
                 $document->addScriptDeclaration( $script);
             }
         }
+    }
+    
+    public function onExtensionAfterSave($context, $table, $isNew, $data) {
+
+        if ($context == 'com_plugins.plugin' && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
+
+            $options = $data['params']['gzip'];
+
+            $this->cleanCache();
+
+            $this->updateManifest($options);
+            $this->updateServiceWorker($options);
+        }
+
+        return true;
+    }
+
+    public function onAfterInitialise() {
+
+        $app = JFactory::getApplication();
+
+        if($app->isSite()) {
+
+            $options = $this->params->get('gzip');
+
+            if(!empty($options)) {
+
+                $this->options = (array) $options;
+            }
+
+            if(!empty($this->options['pwaenabled'])) {
+
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
+
+                if (!is_file($file)) {
+
+                    $this->updateServiceWorker($this->options);
+                }
+
+                $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+                $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
+            }
+
+            $dirname = dirname($_SERVER['SCRIPT_NAME']);
+
+            if($dirname != '/') {
+
+                $dirname .= '/';
+            }
+
+            // fetch worker.js
+            if(preg_match('#^'.$dirname.'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
+
+                $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/serviceworker'.$debug.'.js';
+
+                if (!is_file($file)) {
+
+                    $this->updateManifest($this->options);
+                }
+
+                header('Cache-Control: max-age=86400');
+                header('Content-Type: text/javascript;charset=utf-8');
+                header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+                readfile($file);
+                exit;
+            }
+            
+            $document = JFactory::getDocument();
+
+            // fetch worker.js
+            if(!empty($this->options['pwa_app_manifest'])) {
+            
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest.json';
+
+                if (!is_file($file)) {
+
+                    $this->updateManifest($this->options);
+                }
+
+                if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
+
+                    $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+
+                    header('Cache-Control: max-age=86400');
+                    header('Content-Type: application/manifest+json;charset=utf-8');
+                    header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+                    
+                    readfile($file);
+                    exit;
+                }
+
+                if(method_exists($document, 'addHeadLink')) {
+
+                    $document->addHeadLink(JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
+                }
+
+                if(!empty($this->options['pwa_app_theme_color'])) {
+                        
+                    // setMetaData
+                    $document->setMetaData('theme-color', $this->options['pwa_app_theme_color']);
+                }
+            }
+            /*
+            <meta property=al:android:package content=com.hostedcloudvideo.android>
+<meta property=al:android:app_name content="Hosted Cloud Video">
+<meta property=al:android:url content=intent://secure-login#Intent;package=com.hostedcloudvideo.android;scheme=hosted-cloud-video;end;>
+<link rel=external data-app=android href=//play.google.com/store/apps/details?id=com.hostedcloudvideo.android>
+<meta property=al:ios:app_store_id content=1087088968><meta property=al:ios:app_name content="Hosted Cloud Video">
+<meta property=al:ios:url content=hosted-cloud-video://secure-login><meta name=apple-itunes-app content="app-id=1087088968, app-argument=/secure-login">
+<link rel=external data-app=ios href=//itunes.apple.com/us/app/hosted-cloud-video/id1087088968?mt=8>
+
+                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
+            ];
+        }
+
+        if(!empty($options['pwa_app_native_ios'])) {
+
+            $native_apps[] = [
+
+                'platform' => 'itunes',
+                'url' => $options['pwa_app_native_ios'],
+                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
+            */
+
+            if(method_exists($document, 'addHeadLink')) {
+
+            //    $name = $this->options['pwa_app_name'] === '' ? $config->get('sitename') : $this->options['pwa_app_name'];
+                
+                if(!empty($this->options['pwa_app_native_android'])) {
+
+                    $url = $this->options['pwa_app_native_android'];
+
+                    $document->addHeadLink($url, 'external', 'rel', ['data-app' => 'android']);
+                //    $id = preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $this->options['pwa_app_native_android']);
+                }
+
+                if(!empty($this->options['pwa_app_native_ios'])) {
+
+                    $url = $this->options['pwa_app_native_ios'];
+
+                    $document->addHeadLink($url, 'external', 'rel', ['data-app' => 'ios']);
+                    //$id = preg_replace('#.*?/id(\d+).*#', '$1', $this->options['pwa_app_native_ios']);
+                }
+            }
+
+            // "start_url": "./?utm_source=web_app_manifest",
+            // manifeste url
+        }
+
+        else if ($app->isAdmin()) {
+            
+            if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['task']) && strpos($_POST['task'], 'gzip.') === 0) {
+
+                $token = JSession::getFormToken();
+
+                if (isset($_POST[$token]) && $_POST[$token] == 1) {
+                    
+                    $data = $app->input->post->get('jform', [], 'array');
+                    
+                    $router = JApplicationSite::getRouter();
+                    
+                    $uri = $router->build('index.php?option=com_content&view=article&id='.$data['id'].'&catid='.$data['catid']);
+
+                //    error_log(var_export(JUri::root().str_replace(JUri::base(true).'/', '', $uri->toString()), true));
+                //    error_log(var_export(JUri::base(true), true));
+                //    die;
+
+                    //$article->title, $article->link, $article->id, $article->catid
+                    $result = Onesignal\Onesignal::sendArticlePushNotification(
+                            $this->params->get('gzip.onesignal.web_push_app_id'), 
+                            $this->params->get('gzip.onesignal.web_push_api_key'), 
+                            !empty($data['push']['sendtest']) ? $data['push']['sendtest'] : null,
+                            $data['title'], 
+                            JUri::root().str_replace(JUri::base(true).'/', '', $uri->toString()), 
+                            $data['id'], 
+                            $data['catid']
+                        );
+
+                    echo json_encode($result);
+                    
+                //    error_log(var_export($result, true));
+                }
+
+                exit;
+            }
+        }
+    }
+
+    public function onAfterRender() {
+
+        $app = JFactory::getApplication();
+
+        if(!$app->isSite() || JFactory::getDocument()->getType() != 'html') {
+
+            return;
+        }
+
+        $options = $this->options;
+        $prefix = 'cache/z/';
+
+        if(!empty($options['pwaenabled'])) {
+
+            if(empty($options['pwa_network_strategy'])) {
+
+                $options['pwa_network_strategy'] = 'un';
+            }
+
+            $prefix .= $options['pwa_network_strategy'].'/';
+            Gzip\GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'].'/';
+        }
+
+        if(!empty($options['jsignore'])) {
+
+            $options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        if(!empty($options['jsremove'])) {
+
+            $options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        foreach (['js', 'css', 'img', 'ch'] as $key) {
+
+            $path = $_SERVER['SERVER_NAME'].'/'.$key.'/';
+
+            if (isset($options['hashfiles']) && $options['hashfiles'] == 'content') {
+
+                $path .= '1/';
+            }
+
+            if(!is_dir($prefix.$path)) {
+
+                $old_mask = umask();
+
+                umask(022);
+                mkdir($prefix.$path, 0755, true);
+                umask($old_mask);
+            }
+
+            $options[$key.'_path'] = $prefix.$path;
+        }
+
+        $body = $app->getBody();
+
+        $profiler = JProfiler::getInstance('_gzip_');
+
+        Gzip\GZipHelper::$options = $options;
+
+        $body = Gzip\GZipHelper::parseImages($body, $options);
+        $body = Gzip\GZipHelper::parseCss($body, $options);
+        $body = Gzip\GZipHelper::parseScripts($body, $options);
+        $body = Gzip\GZipHelper::parseURLs($body, $options);
+
+        $profiler->mark('done');
+
+        if(!empty($options['debug'])) {
+
+            $quote = empty($options['minifyhtml']) ? '"' : '';
+            $body = preg_replace('#<html #', '<html data-prf='.$quote. htmlspecialchars(implode("\n", array_map(function ($mark) {
+
+                $m = [
+
+                  'time' => +$mark->time,
+                  'totalTime' => $mark->totalTime,
+                  'label' => $mark->label,
+                  'memory' => +$mark->memory,
+                  'totalMemory' => $mark->totalMemory
+                ];
+
+                return json_encode($m);
+
+            }, array_merge(Gzip\GZipHelper::$marks, $profiler->getMarks()))), ENT_QUOTES).$quote.' ', $body, 1);
+        }
+
+        if(!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
+
+            $app->allowCache(true);
+
+            $dt = gmdate('D, d M Y H:i:s', time()).' GMT';
+
+            $app->setHeader('Date', $dt, true );
+            $app->setHeader('Last-Modified', $dt, true );
+            $app->setHeader('Cache-Control', /*'no-cache,no-store,'.*/ 'max-age='.(int) $options['pwacachelifetime'].',must-revalidate', true);
+        }
+
+        $app->setBody($body);
     }
 
     protected function updateManifest($options) {
@@ -292,278 +588,37 @@ class PlgSystemGzip extends JPlugin
 
         if (is_dir($path)) {
 
-            foreach(new DirectoryIterator($path) as $file) {
+            $paths = [new DirectoryIterator($path)];
 
-                if ($file->isDir() && !$file->isDot()) {
+            while(count($parts) > 0) {
 
-                    foreach(
-                        [
-                            "manifest.json", 
-                            "manifest_version",
-                            "serviceworker.js", 
-                            "serviceworker.min.js", 
-                            "worker_version" 
-                        ] as $f) {
+                $dir = array_shift($parts);
 
-                        $f = $file->getPathName().'/'.$f;
+                foreach($dir as $file) {
 
-                        if(is_file($f)) {
+                    if ($file->isDir() && !$file->isDot()) {
 
-                            unlink($f);
+                        $parts[] = $file;
+
+                        foreach(
+                            [
+                                "manifest.json", 
+                                "manifest_version",
+                                "serviceworker.js", 
+                                "serviceworker.min.js", 
+                                "worker_version" 
+                            ] as $f) {
+
+                            $f = $file->getPathName().'/'.$f;
+
+                            if(is_file($f)) {
+
+                                unlink($f);
+                            }
                         }
                     }
                 }
             }
         }        
-    }
-    
-    public function onExtensionAfterSave($context, $table, $isNew, $data) {
-
-        if ($context == 'com_plugins.plugin' && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
-
-            $options = $data['params']['gzip'];
-
-            $this->cleanCache();
-
-            $this->updateManifest($options);
-            $this->updateServiceWorker($options);
-        }
-
-        return true;
-    }
-
-    public function onAfterInitialise() {
-
-        if(JFactory::getApplication()->isSite()) {
-
-            $options = $this->params->get('gzip');
-
-            if(!empty($options)) {
-
-                $this->options = (array) $options;
-            }
-
-            if(!empty($this->options['pwaenabled'])) {
-
-                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
-
-                if (!is_file($file)) {
-
-                    $this->updateServiceWorker($this->options);
-                }
-
-                $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
-                $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
-            }
-
-            $dirname = dirname($_SERVER['SCRIPT_NAME']);
-
-            if($dirname != '/') {
-
-                $dirname .= '/';
-            }
-
-            // fetch worker.js
-            if(preg_match('#^'.$dirname.'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
-
-                $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
-
-                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/serviceworker'.$debug.'.js';
-
-                if (!is_file($file)) {
-
-                    $this->updateManifest($this->options);
-                }
-
-                header('Cache-Control: max-age=86400');
-                header('Content-Type: text/javascript;charset=utf-8');
-                header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
-
-                readfile($file);
-                exit;
-            }
-            
-            $document = JFactory::getDocument();
-
-            // fetch worker.js
-            if(!empty($this->options['pwa_app_manifest'])) {
-            
-                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest.json';
-
-                if (!is_file($file)) {
-
-                    $this->updateManifest($this->options);
-                }
-
-                if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
-
-                    $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
-
-                    header('Cache-Control: max-age=86400');
-                    header('Content-Type: application/manifest+json;charset=utf-8');
-                    header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
-                    
-                    readfile($file);
-                    exit;
-                }
-
-                if(method_exists($document, 'addHeadLink')) {
-
-                    $document->addHeadLink(JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
-                }
-
-                if(!empty($this->options['pwa_app_theme_color'])) {
-                        
-                    // setMetaData
-                    $document->setMetaData('theme-color', $this->options['pwa_app_theme_color']);
-                }
-            }
-            /*
-            <meta property=al:android:package content=com.hostedcloudvideo.android>
-<meta property=al:android:app_name content="Hosted Cloud Video">
-<meta property=al:android:url content=intent://secure-login#Intent;package=com.hostedcloudvideo.android;scheme=hosted-cloud-video;end;>
-<link rel=external data-app=android href=//play.google.com/store/apps/details?id=com.hostedcloudvideo.android>
-<meta property=al:ios:app_store_id content=1087088968><meta property=al:ios:app_name content="Hosted Cloud Video">
-<meta property=al:ios:url content=hosted-cloud-video://secure-login><meta name=apple-itunes-app content="app-id=1087088968, app-argument=/secure-login">
-<link rel=external data-app=ios href=//itunes.apple.com/us/app/hosted-cloud-video/id1087088968?mt=8>
-
-                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
-            ];
-        }
-
-        if(!empty($options['pwa_app_native_ios'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'itunes',
-                'url' => $options['pwa_app_native_ios'],
-                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
-            */
-
-            if(method_exists($document, 'addHeadLink')) {
-
-            //    $name = $this->options['pwa_app_name'] === '' ? $config->get('sitename') : $this->options['pwa_app_name'];
-                
-                if(!empty($this->options['pwa_app_native_android'])) {
-
-                    $url = $this->options['pwa_app_native_android'];
-
-                    $document->addHeadLink($url, 'external', 'rel', ['data-app' => 'android']);
-                //    $id = preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $this->options['pwa_app_native_android']);
-                }
-
-                if(!empty($this->options['pwa_app_native_ios'])) {
-
-                    $url = $this->options['pwa_app_native_ios'];
-
-                    $document->addHeadLink($url, 'external', 'rel', ['data-app' => 'ios']);
-                    //$id = preg_replace('#.*?/id(\d+).*#', '$1', $this->options['pwa_app_native_ios']);
-                }
-            }
-
-            // "start_url": "./?utm_source=web_app_manifest",
-            // manifeste url
-        }
-    }
-
-    public function onAfterRender() {
-
-        $app = JFactory::getApplication();
-
-        if(!$app->isSite() || JFactory::getDocument()->getType() != 'html') {
-
-            return;
-        }
-
-        $options = $this->options;
-        $prefix = 'cache/z/';
-
-        if(!empty($options['pwaenabled'])) {
-
-            if(empty($options['pwa_network_strategy'])) {
-
-                $options['pwa_network_strategy'] = 'un';
-            }
-
-            $prefix .= $options['pwa_network_strategy'].'/';
-            Gzip\GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'].'/';
-        }
-
-        if(!empty($options['jsignore'])) {
-
-            $options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
-        }
-
-        if(!empty($options['jsremove'])) {
-
-            $options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
-        }
-
-        foreach (['js', 'css', 'img', 'ch'] as $key) {
-
-            $path = $key.'/';
-
-            if (isset($options['hashfiles']) && $options['hashfiles'] == 'content') {
-
-                $path .= '1/';
-            }
-
-            if(!is_dir($prefix.$path)) {
-
-                $old_mask = umask();
-
-                umask(022);
-                mkdir($prefix.$path, 0755, true);
-                umask($old_mask);
-            }
-
-            $options[$key.'_path'] = $prefix.$path;
-        }
-
-        $body = $app->getBody();
-
-        $profiler = JProfiler::getInstance('_gzip_');
-
-        Gzip\GZipHelper::$options = $options;
-
-        $body = Gzip\GZipHelper::parseImages($body, $options);
-        $body = Gzip\GZipHelper::parseCss($body, $options);
-        $body = Gzip\GZipHelper::parseScripts($body, $options);
-        $body = Gzip\GZipHelper::parseURLs($body, $options);
-    //    $body = Gzip\GZipHelper::parsePWA($body, $options);
-
-        $profiler->mark('done');
-
-        if(!empty($options['debug'])) {
-
-            $quote = empty($options['minifyhtml']) ? '"' : '';
-            $body = preg_replace('#<html #', '<html data-prf='.$quote. htmlspecialchars(implode("\n", array_map(function ($mark) {
-
-                $m = [
-
-                  'time' => +$mark->time,
-                  'totalTime' => $mark->totalTime,
-                  'label' => $mark->label,
-                  'memory' => +$mark->memory,
-                  'totalMemory' => $mark->totalMemory
-                ];
-
-                return json_encode($m);
-
-            }, array_merge(Gzip\GZipHelper::$marks, $profiler->getMarks()))), ENT_QUOTES).$quote.' ', $body, 1);
-        }
-
-        if(!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
-
-            $app->allowCache(true);
-
-            $dt = gmdate('D, d M Y H:i:s', time()).' GMT';
-
-            $app->setHeader('Date', $dt, true );
-            $app->setHeader('Last-Modified', $dt, true );
-            $app->setHeader('Cache-Control', /*'no-cache,no-store,'.*/ 'max-age='.(int) $options['pwacachelifetime'].',must-revalidate', true);
-        }
-
-        $app->setBody($body);
     }
 }
