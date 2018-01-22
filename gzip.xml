@@ -5,14 +5,17 @@
     <creationDate>August 2016</creationDate>
     <copyright>Copyright (C) 2005 - 2016 Open Source Matters. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-    <authorEmail>admin@joomla.org</authorEmail>
+    <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>www.tbela.net</authorUrl>
-    <version>3.5.0.1</version>
+    <version>2.1.1</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
+        <folder>js/lib</folder>
+        <folder>js/dist</folder>
         <folder>lib</folder>
         <folder>language</folder>
         <folder>worker/dist</folder>
+        <folder>push</folder>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
         <filename>worker_version</filename>
@@ -138,7 +141,7 @@
                         <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
                         <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
                         <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
-                        <option value="co" disabled="disabled">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
                     </field>
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="App manifest settings" />
@@ -169,6 +172,23 @@
                     </field>
                     <field name="pwa_app_native_android" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_DESCRIPTION" type="text"/>
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
+                </fields>
+            </fieldset>
+            
+            <fieldset name="webpush" label="Web Push">
+                <field type="spacer" label="Configure Web Push Settings" />
+                <field type="spacer" hr="true" />
+                <field type="spacer" label="OneSignal app settings" />   
+                <fields name="gzip">    
+                    <fields name="onesignal">   
+                        <field name="enabled" label="PLG_GZIP_FIELD_ONESIGNAL_ENABLED_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>          
+                        <field name="web_push_app_id" label="PLG_GZIP_FIELD_ONESIGNAL_APP_ID_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_APP_ID_DESCRIPTION" type="text"/>
+                        <field name="web_push_api_key" label="PLG_GZIP_FIELD_ONESIGNAL_API_KEY_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_API_KEY_DESCRIPTION" type="text"/>
+                        <field name="web_push_test_user" label="PLG_GZIP_FIELD_ONESIGNAL_TEST_USER_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_TEST_USER_DESCRIPTION" type="text"/>
+                    </fields>
                 </fields>
             </fieldset>
             <fieldset name="critical_path" label="Rendering Optimization">

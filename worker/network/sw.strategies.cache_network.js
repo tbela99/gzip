@@ -9,7 +9,7 @@ SW.strategies.add("cn", async event => {
 
 	const fetchPromise = fetch(event.request).then(function(networkResponse) {
 		// validate response before
-		if (SW.strategies.isCacheableResponse(networkResponse)) {
+		if (SW.strategies.isCacheableRequest(event.request, networkResponse)) {
 			const cloned = networkResponse.clone();
 			caches.open(CACHE_NAME).then(function(cache) {
 				cache.put(event.request, cloned);

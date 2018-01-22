@@ -7,65 +7,19 @@
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
 "use strict;";
 
+"{IMPORT_SCRIPTS}";
+
 const SW = Object.create(null);
 
 const CACHE_NAME = "{CACHE_NAME}";
 
 const scope = "{scope}";
 
-const defaultStrategy = "{defaultStrategy}";
-
+// const defaultStrategy = "{defaultStrategy}";
 let undef;
 
 //
-// -> importScript indexDb
-self.addEventListener("install", function(event) {
-    event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
-        return cache.addAll("{preloaded_urls}");
-    }).then(function() {
-        return self.skipWaiting();
-    }));
-});
-
-self.addEventListener("activate", function(event) {
-    // delete old app owned caches
-    caches.keys().then(function(keyList) {
-        const tokens = CACHE_NAME.split(/_/, 2);
-        const search = tokens.length == 2 && tokens[0] + "_";
-        return search !== false && Promise.all(keyList.map(key => key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
-    });
-    event.waitUntil(self.clients.claim());
-});
-
-/**
- * @param {Request} event
- */
-self.addEventListener("fetch", event => {
-    if (event.request.method !== "GET") {
-        return;
-    }
-    const strategies = SW.strategies;
-    // guess stategy from url
-    let strategyToUse = (new URL(event.request.url).pathname.match(new RegExp(scope + "/media/z/([a-z]{2})/")) || [])[1];
-    // fallback to default configured in the plugin settings
-    if (strategyToUse == undef) {
-        strategyToUse = defaultStrategy;
-    }
-    if (!strategies.has(strategyToUse)) {
-        // default browser behavior
-        strategyToUse = "no";
-    }
-    console.info({
-        strategyToUse,
-        url: event.request.url
-    });
-    if (event.request.url.indexOf("data:") != 0) {
-        event.respondWith(strategies.get(strategyToUse).handle(event).catch(error => {
-            console.error("😭", error);
-            return fetch(event.request);
-        }));
-    }
-});
+console.log(self);
 
 // @ts-check
 /* eslint wrap-iife: 0 */
@@ -73,7 +27,7 @@ self.addEventListener("fetch", event => {
 !function() {
     "use strict;";
     const Utils = {
-        implement: function(target) {
+        implement(target) {
             const proto = target.prototype, args = [].slice.call(arguments, 1);
             let i, source, key;
             function makefunc(fn, previous, parent) {
@@ -113,9 +67,15 @@ self.addEventListener("fetch", event => {
         },
         merge,
         reset,
+        //	btoa(str) {
+        //		return btoa(unescape(encodeURIComponent(str)));
+        //	},
+        //	atob(str) {
+        //		return decodeURIComponent(escape(atob(str)));
+        //	},
         // extend a function to accept either a key/value or an object hash as arguments
         // ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
-        extendArgs: function(fn) {
+        extendArgs(fn) {
             return function(key) {
                 if (typeof key == "object") {
                     const args = [].slice.call(arguments, 1);
@@ -129,7 +89,7 @@ self.addEventListener("fetch", event => {
                 return this;
             };
         },
-        getAllPropertiesName: function(object) {
+        getAllPropertiesName(object) {
             const properties = [];
             let current = object, props, prop, i;
             do {
@@ -267,7 +227,7 @@ self.addEventListener("fetch", event => {
             }
         }),
         // return a promise
-        resolve: function(name) {
+        resolve(name) {
             name = name.toLowerCase();
             const self = this;
             const args = arguments.length > 1 ? [].slice.call(arguments, 1) : [];
@@ -277,7 +237,7 @@ self.addEventListener("fetch", event => {
                 });
             }));
         },
-        addPseudo: function(name, fn) {
+        addPseudo(name, fn) {
             this.$pseudo[name] = fn;
             return this;
         }
@@ -306,11 +266,16 @@ SW.strategies = function() {
 		 * @param {String} name
 		 * @param {function} handle
 		 */
-        add: (name, handle) => map.set(name, {
+        add: (name, handle, scheme) => map.set(name, {
+            name,
             handle: async event => {
-                await SW.resolve("prefetch", event.request);
+                //	await SW.resolve("prefetch", event.request);
                 const response = await handle(event);
-                await SW.resolve("postfetch", event.request, response);
+                //	await SW.resolve("postfetch", event.request, response);
+                console.log({
+                    mode: event.request.mode,
+                    response
+                });
                 return response;
             }
         }),
@@ -323,17 +288,21 @@ SW.strategies = function() {
         /**
 		 *
 		 * @param {Request} request
-		 */
-        isCacheableRequest: request => [ "same-origin", "cors", "" ].includes(request.mode),
-        /**
-		 *
 		 * @param {Response} response
 		 */
-        //	isCacheableResponse: (response) => response != null && response.type == 'basic' && response.ok && !response.bodyUsed
-        isCacheableResponse: response => //	console.log({response, type: response && response.type, ok: response && response.ok, bodyUsed: response && response.bodyUsed});
-        //	console.log(new Error().stack);
-        response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
-        response.type == "default") && response.ok && !response.bodyUsed
+        isCacheableRequest: (request, response) => {
+            console.log({
+                mode: request.mode,
+                sameorigin: new URL(request.url, self.origin).origin == self.origin,
+                method: request.method == "GET",
+                reponse_valid: response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
+                response.type == "default") && response.ok && !response.bodyUsed,
+                r: ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
+                response.type == "default") && response.ok && !response.bodyUsed
+            });
+            // https://www.w3.org/TR/SRI/#h-note6
+            return ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || response.type == "default") && response.ok && !response.bodyUsed;
+        }
     };
     strategy[Symbol.iterator] = (() => map[Symbol.iterator]());
     Object.defineProperty(strategy, "size", {
@@ -353,7 +322,7 @@ SW.strategies.add("nf", async (event, cache) => {
         if (response == undef) {
             throw new Error("Network error");
         }
-        if (SW.strategies.isCacheableResponse(response)) {
+        if (SW.strategies.isCacheableRequest(event.request, response)) {
             const cloned = response.clone();
             caches.open(CACHE_NAME).then(function(cache) {
                 cache.put(event.request, cloned);
@@ -374,7 +343,7 @@ SW.strategies.add("cf", async event => {
         return response;
     }
     response = await fetch(event.request);
-    if (SW.strategies.isCacheableResponse(response)) {
+    if (SW.strategies.isCacheableRequest(event.request, response)) {
         const cloned = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
             cache.put(event.request, cloned);
@@ -392,7 +361,7 @@ SW.strategies.add("cn", async event => {
     const response = await caches.match(event.request);
     const fetchPromise = fetch(event.request).then(function(networkResponse) {
         // validate response before
-        if (SW.strategies.isCacheableResponse(networkResponse)) {
+        if (SW.strategies.isCacheableRequest(event.request, networkResponse)) {
             const cloned = networkResponse.clone();
             caches.open(CACHE_NAME).then(function(cache) {
                 cache.put(event.request, cloned);
@@ -417,70 +386,135 @@ SW.strategies.add("no", event => fetch(event.request));
 SW.strategies.add("co", event => caches.match(event.request));
 
 // @ts-check
-/* eslint wrap-iife: 0 */
 /* global SW, scope, undef */
-SW.Filter = function(SW) {
-    const prefetchRule = "prefetch.rule";
-    const postfetchRule = "postfetch.rule";
-    const map = new Map();
-    const Filter = {
-        Rules: {
-            Prefetch: prefetchRule,
-            Postfetch: postfetchRule
-        },
-        validators: map,
-        addRule: (type, regExp) => {
-            if (type != prefetchRule && type != postfetchRule) {
-                throw new Error("Invalid rule type");
-            }
-            let validators = map.get(type);
-            if (validators == undef) {
-                validators = [];
-                map.set(type, validators);
-            }
-            validators.push(regExp);
+(function(SW) {
+    function normalize(method) {
+        if (method == undef || method == "HEAD") {
+            return "GET";
         }
-    };
-    SW.promisify({
-        prefetch: function(request) {
-            console.info("prefetch");
-            const url = request.url;
-            const excludeSet = map.get(prefetchRule);
-            if (excludeSet != undef) {
-                let i = 0;
-                for (;i < excludeSet.length; i++) {
-                    if (excludeSet[i](request)) {
-                        throw new Error("Url not allowed " + url);
-                    }
+        return method.toLowerCase();
+    }
+    class Router {
+        constructor() {
+            this.routes = Object.create(null);
+            this.handlers = [];
+            this.defaultHandler = Object.create(null);
+        }
+        /**
+		 *
+		 * @param {string} url
+		 * @param {FetchEvent} event
+		 */
+        getHandler(url, event) {
+            const method = event != undef && event.request.method || "GET";
+            const routes = this.routes[method] || [];
+            let route, i = routes.length;
+            while (i && i--) {
+                route = routes[i];
+                if (route.match(url)) {
+                    console.log({
+                        match: "match",
+                        url,
+                        route
+                    });
+                    return route.handler;
                 }
             }
-            console.info({
-                request
-            });
-            return request;
-        },
-        postfetch: function(request, response) {
-            console.info("postfetch");
-            // shloud allow both request and response validation
-            //	const url = request.url;
-            //	const excludeSet = map.get(postfetchRule);
-            //	if (excludeSet != undef) {
-            //		let i = 0;
-            //		for (; i < excludeSet.length; i++) {
-            //			if (excludeSet[i](request)) {
-            //				throw new Error("Url not allowed " + url);
-            //			}
-            //		}
-            //	}
-            console.info({
-                request,
-                response
-            });
-            return response;
+            return this.defaultHandler[method];
         }
-    });
-    return Filter;
-}(SW);
+        registerRoute(router, method) {
+            method = normalize(method);
+            if (!(method in this.routes)) {
+                this.routes[method] = [];
+            }
+            this.routes[method].push(router);
+            return this;
+        }
+        unregisterRoute(router, method) {
+            method = normalize(method);
+            const route = this.routes[method] || [];
+            const index = route.indexOf(router);
+            if (index != -1) {
+                route.splice(index, 1);
+            }
+            return this;
+        }
+        setDefaultHandler(handler, method) {
+            this.defaultHandler[normalize(method)] = handler;
+        }
+    }
+    class DefaultRouter {
+        constructor(path, handler) {
+            const self = this;
+            SW.Utils.reset(this);
+            //	console.log(self);
+            self.path = path;
+            self.handler = {
+                handle: async event => {
+                    let result = await self.resolve("beforeroute", event);
+                    let response, res;
+                    for (response of result) {
+                        if (response != undef && response instanceof Response) {
+                            return response;
+                        }
+                    }
+                    response = await handler.handle(event);
+                    result = await self.resolve("afterroute", event, response);
+                    for (res of result) {
+                        if (res != undef && res instanceof Response) {
+                            return res;
+                        }
+                    }
+                    return response;
+                }
+            };
+            self.promisify({
+                beforeroute(event) {
+                    if (event.request.mode == "navigate") {
+                        console.log([ "beforeroute", self, [].slice.call(arguments) ]);
+                    }
+                },
+                afterroute(event, response) {
+                    if (event.request.mode == "navigate") {
+                        console.log([ "afterroute", self, [].slice.call(arguments) ]);
+                    }
+                }
+            });
+        }
+    }
+    SW.Utils.merge(true, DefaultRouter.prototype, SW.PromiseEvent);
+    class RegExpRouter extends DefaultRouter {
+        /**
+		 *
+		 * @param {string} url
+		 * @param {Request} event
+		 */
+        match(url) {
+            //	console.log({ url, regexpp: this.path });
+            return /^https?:/.test(url) && this.path.test(url);
+        }
+    }
+    class ExpressRouter extends DefaultRouter {
+        constructor(path, handler) {
+            super(path, handler);
+            this.url = new URL(path, self.origin);
+        }
+        /**
+		 *
+		 * @param {string} url
+		 */
+        match(url) {
+            const u = new URL(url);
+            return /^https?:/.test(url) && u.origin == this.url.origin && u.pathname.indexOf(this.url.pathname) == 0;
+        }
+    }
+    const router = new Router();
+    Router.RegExpRouter = RegExpRouter;
+    Router.ExpressRouter = ExpressRouter;
+    //	Router.DataRouter = DataRouter;
+    SW.Router = Router;
+    SW.router = router;
+})(SW);
 
 // @ts-check
 /* eslint wrap-iife: 0 */
@@ -492,14 +526,81 @@ SW.Filter = function(SW) {
 //SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {
 //	return request.url.indexOf(scope + "/administrator/") != -1;
 //});
-const excluded = "{exclude_urls}";
+//const excluded = "{exclude_urls}";
+const strategies = SW.strategies;
 
-SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {
-    let i = excluded.length;
-    while (i && i--) {
-        if (request.url.indexOf(excluded[i]) == -1) {
-            return false;
-        }
+const Router = SW.Router;
+
+const router = SW.router;
+
+const handler = strategies.get("no");
+
+let entry;
+
+let defaultStrategy = "{defaultStrategy}";
+
+router.setDefaultHandler(strategies.get(defaultStrategy));
+
+// register strategies routers
+for (entry of strategies) {
+    router.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
+}
+
+// excluded urls fallback on network only
+"{exclude_urls}".forEach(path => {
+    router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
+});
+
+if (!strategies.has(defaultStrategy)) {
+    // default browser behavior
+    defaultStrategy = "no";
+}
+
+console.log({
+    SW
+});
+
+// @ts-check
+/* global CACHE_NAME */
+self.addEventListener("install", function(event) {
+    event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
+        return cache.addAll("{preloaded_urls}");
+    }).then(function() {
+        return self.skipWaiting();
+    }));
+});
+
+// @ts-check
+/* global CACHE_NAME */
+self.addEventListener("activate", function(event) {
+    // delete old app owned caches
+    event.waitUntil(self.clients.claim().then(function() {
+        return caches.keys().then(function(keyList) {
+            const tokens = CACHE_NAME.split(/_/, 2);
+            const search = tokens.length == 2 && tokens[0] + "_";
+            return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+        });
+    }));
+});
+
+// @ts-check
+/* global CACHE_NAME */
+/**
+ * @param {FetchEvent} event
+ */
+self.addEventListener("fetch", event => {
+    //	if (event.request.url.indexOf("data:") != 0) {
+    const handler = SW.router.getHandler(event.request.url, event);
+    console.log({
+        mode: event.request.mode,
+        handler,
+        url: event.request.url
+    });
+    //	console.log({ url: event.request.url, handler });
+    if (handler != undef) {
+        event.respondWith(handler.handle(event).catch(error => {
+            console.error("😭", error);
+            return fetch(event.request);
+        }));
     }
-    return true;
 });

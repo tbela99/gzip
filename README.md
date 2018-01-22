@@ -40,11 +40,11 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 
 # Progressive Web App
 
-Offline mode capabilities using one of these PWA network strategy:
+Offline mode capabilities using one of these PWA network strategy
 
 ### Network cache strategies
 
-0. Cache only (currently disabled in the settings page)
+0. Cache only
 1. Network only
 1. Cache first, falling back to network
 1. Network first, falling back to cache
@@ -60,11 +60,22 @@ You can provide the list of url to load when the service worker is installed lik
 2. The app can be installed as a standalone desktop application (tested on wndows 10) with google chrome as long as you provide a 512x512 icon.
 3. Alternative links to native mobile apps can be provided and the preference can be configured
 
+### Web Push
+
+0. Manage Web Push subscription using OneSignal
+1. Added basic push notification settings for Joomla articles
+
+### Service worker router api
+
+Add routes to customize fetch event networking startegy by using either a static route or a regexp
+
 ## Roadmap
 
+### High priority list
+
 1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
+1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. Investigate service worker and SRI issue
-1. Service worker cache expiration api (using localforage or another lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
 1. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
@@ -74,14 +85,14 @@ You can provide the list of url to load when the service worker is installed lik
 1. IMAGES: Implement support for <pictures> element see [here](https://www.smashingmagazine.com/2013/10/automate-your-responsive-images-with-mobify-js/)
 1. CORS for PWA:https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins | https://developers.google.com/web/updates/2016/09/foreign-fetch | https://stackoverflow.com/questions/35626269/how-to-use-service-worker-to-cache-cross-domain-resources-if-the-response-is-404
 1. CSS: deduplicate, merge properties, rewrite rules, etc
-1. PWA: Web Push Notification. see [here](https://serviceworke.rs/web-push.html)
 1. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria) and [here](https://gist.github.com/ebidel/188a513b1cd5e77d4d1453a4b6d060b0)
 1. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
+1. Foreign fetch api? - only supported by chrome right now [here](https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins)
 
-## May be implemented
+### Low priority list
 
-These a low priority tasks.
-
+0. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
+1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
 1. Mobile apps deep link?
 1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
 1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization ?
@@ -90,7 +101,11 @@ These a low priority tasks.
 
 # V2.1
 
-0. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
+0. Added push notifications using onesignal
+1. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
+1. Precached urls list. You can now provide a list of urls that will be precached when the service worker is installed.
+1. Added router api. Add routes to customize fetch event networking strategy by using either a static route or a regexp
+1. Rebuild service worker and the manifest whenever the plugin is installed or the settings are updated
 
 # V2.0
 
@@ -105,3 +120,38 @@ These a low priority tasks.
 # V1.1
 
 0. CSS: preload web fonts
+
+# V1.0
+
+this release implements to to bottom page loading optimization
+
+## SRI (Sub resources integrity)
+
+0. generate SRI for javascript and css files
+
+## Critical CSS Path
+
+0. generate critical css path based on the list of selectors you provide.
+
+## Javascript
+
+0. fetch files hosted on remote servers
+1. minify javascript files
+1. merge javascript files
+1. minify inline javascript
+1. ignore files based on pattern
+1. remove javascript files that match a pattern
+1. remove duplicates
+1. move javascript at the bottom of the page
+
+## CSS
+
+0. fetch files hosted on remote servers
+1. minify css files
+1. merge css files (flatten @import)
+1. minify inline css
+1. ignore files based on pattern
+1. remove css files that match a pattern
+1. remove duplicates
+1. move css at the bottom of the page
+1. load css in a non blocking way

@@ -5,7 +5,7 @@
 	"use strict;";
 
 	const Utils = {
-		implement: function(target) {
+		implement(target) {
 			const proto = target.prototype,
 				args = [].slice.call(arguments, 1);
 			let i, source, key;
@@ -66,12 +66,19 @@
 
 			return target;
 		},
-		merge: merge,
-		reset: reset,
+		merge,
+		reset,
 
+		//	btoa(str) {
+		//		return btoa(unescape(encodeURIComponent(str)));
+		//	},
+
+		//	atob(str) {
+		//		return decodeURIComponent(escape(atob(str)));
+		//	},
 		// extend a function to accept either a key/value or an object hash as arguments
 		// ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
-		extendArgs: function(fn) {
+		extendArgs(fn) {
 			return function(key) {
 				if (typeof key == "object") {
 					const args = [].slice.call(arguments, 1);
@@ -87,7 +94,7 @@
 				return this;
 			};
 		},
-		getAllPropertiesName: function(object) {
+		getAllPropertiesName(object) {
 			const properties = [];
 			let current = object,
 				props,

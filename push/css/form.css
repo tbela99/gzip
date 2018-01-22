@@ -1,0 +1,30 @@
+.input-group {
+  position: relative;
+  display: table;
+  border-collapse: separate;
+  max-width: 300px;
+}
+.input-group .input-group-btn {
+  position: relative;
+  font-size: 0;
+  white-space: nowrap;
+  width: 1%;
+  vertical-align: middle;
+}
+.input-group .form-control {
+  z-index: 2;
+  float: left;
+  width: 100%;
+  margin-bottom: 0;
+}
+.input-group .form-control,
+.input-group .input-group-addon,
+.input-group .input-group-btn {
+  display: table-cell;
+}
+.wait {
+  cursor: busy;
+}
+.wait > * {
+  pointer-events: none;
+}

@@ -12,7 +12,7 @@ SW.strategies.add("nf", async (event, cache) => {
 			throw new Error("Network error");
 		}
 
-		if (SW.strategies.isCacheableResponse(response)) {
+		if (SW.strategies.isCacheableRequest(event.request, response)) {
 			const cloned = response.clone();
 			caches.open(CACHE_NAME).then(function(cache) {
 				cache.put(event.request, cloned);

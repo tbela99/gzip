@@ -51,6 +51,76 @@ class PlgSystemGzip extends JPlugin
     protected $worker_id = '';
     protected $manifest_id = '';
 
+    public function onInstallerAfterInstaller($model, $package, $installer, $result) {
+
+        if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
+                
+            $this->cleanCache();
+        }
+    }
+
+    public function onContentPrepareForm($form, $data) {
+
+        if ($form->getName() == 'com_content.article') {
+            
+            $document = JFactory::getDocument();
+            
+            $document->addStylesheet(JURI::root(true).'/plugins/system/gzip/push/css/form.css');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/dist/fetch.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.ready.js');
+            $document->addScript(JURI::root(true).'/plugins/system/gzip/push/js/form.js');
+
+            JFactory::getLanguage()->load('plg_system_gzip', __DIR__);
+
+            JFormHelper::addFieldPath(__DIR__.'/push/fields');
+
+            $root = dom_import_simplexml($form->getXml());
+
+            $testUser = $this->params->get('gzip.onesignal.web_push_test_user');
+
+        //    $router = JApplicationSite::getRouter();
+            
+            // , false, -1
+        //    $url = $router->build('index.php?option=com_content&id='.$data->id)->toString(['scheme', 'host', 'port', 'path', 'query', 'fragment']);
+
+            foreach(simplexml_load_file(__DIR__.'/push/forms/com_content/article.xml')->children() as $child) {
+
+                if (!empty($testUser)) {
+
+                    foreach($child->xpath('//fields[@name="push"]') as $field) {
+
+                        // web_push_test_url
+                    //    foreach($field->xpath('./field[@name="web_push_test_url"]') as $node) {
+
+                    //        $node['default'] = $url;
+                    //    }
+
+                        foreach($field->xpath('./field[@name="sendtest"]') as $node) {
+
+                            $option = $node->addChild('option');
+
+                            $option['value'] = $testUser;
+                            $option['text'] = $testUser;
+                        }
+
+                        foreach($field->xpath('./field[@name="web_push_test_title"]') as $node) {
+
+                            $node['default'] = $data->title;
+                        }
+
+                        foreach($field->xpath('./field[@name="web_push_test_content"]') as $node) {
+
+                            $node['default'] = strip_tags($data->introtext);
+                        }
+                    }
+                }
+
+                $root->insertBefore($root->ownerDocument->importNode(dom_import_simplexml($child), true), $root->firstChild);
+            }
+        }
+    }
+
     public function onAfterRoute() {
 
         $document = JFactory::getDocument();
@@ -63,145 +133,19 @@ class PlgSystemGzip extends JPlugin
             }
 
             if(!empty($this->options['pwaenabled'])) {
-
-                $document->addScriptDeclaration(str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js')));
-            }
-        }
-    }
-
-    protected function updateManifest($options) {
-        
-        $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
-
-        if(!is_dir($path)) {
-
-            $old_mask = umask();
-
-            umask(022);
-            mkdir($path, 0755, true);
-            umask($old_mask);            
-        }
-
-        $config = JFactory::getConfig();
-
-        $short_name = $options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $options['pwa_app_short_name'];
-        $name = $options['pwa_app_name'] === '' ? $config->get('sitename') : $options['pwa_app_name'];
-        $description = $options['pwa_app_description'] === '' ? $config->get('MetaDesc') : $options['pwa_app_description'];
-        $start_url = $options['pwa_app_start_url'] === '' ? JURI::root(true).'/' : $options['pwa_app_start_url'];
-
-        $start_url .= (strpos($start_url, '?') === false ? '?' : '&'). 'utm_source=web_app_manifest';
-
-        $manifest = [
-            'scope' => JURI::root(true).'/',
-            'short_name' => substr($short_name, 0, 12),
-            'name' => $name,
-            'description' => $description,
-        //    'icons' => $this->options['pwa_app_icons'],
-            'start_url' => $start_url,
-            'background_color' => $options['pwa_app_bg_color'],
-            'theme_color' => $options['pwa_app_theme_color'],
-            'display' => $options['pwa_app_display']
-        ];
-
-        $native_apps = [];
-
-        if(!empty($options['pwa_app_native_android'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'play',
-                'url' => $options['pwa_app_native_android'],
-                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
-            ];
-        }
-
-        if(!empty($options['pwa_app_native_ios'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'itunes',
-                'url' => $options['pwa_app_native_ios'],
-                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
-            ];
-        }
-
-        if(!empty($native_apps)) {
-
-            $manifest['prefer_related_applications'] = (bool) $options['pwa_app_native'];
-            $manifest['related_applications'] = $native_apps;
-        }
-
-    //    var_dump($options['pwa_app_icons_path']);die;
-
-    //    for($i = 1; $i < 7; $i++) {
-
-            if(!empty($options['pwa_app_icons_path'])) {
-
-            //    $file = $options[$name];
-               
-                $dir = JPATH_SITE.'/images/'.$options['pwa_app_icons_path'];
-
-                if(is_dir($dir)) {
-
-                    foreach(new DirectoryIterator($dir) as $file) {
-
-                        if($file->isFile() && preg_match('#\.((jpg)|(png)|(webp))$#i', $file, $match)) {
-
-                            $size = getimagesize($file->getPathName());
-
-                            $max = max($size[0], $size[1]);
-
-                            $manifest['icons'][] = [
-
-                                'src' => JUri::root(true).'/images/'.$options['pwa_app_icons_path'].'/'.$file,
-                                'sizes' => $size[0].'x'.$size[1],
-                                'type' => image_type_to_mime_type($size[2])
-                            ];
-                        }
-                    }
-                }
-            }
-    //    }
-
-        file_put_contents($path.'manifest.json', json_encode(array_filter($manifest, function ($value) {
-
-            if(is_array($value)) {
-
-                $value = array_filter($value, function ($v) { return $v !== ''; });
-            }
-
-            return $value !== '' && !is_null($value) && count($value) != 0;
-        })));
-        
-        file_put_contents($path.'manifest_version', hash_file('sha1', $path.'manifest.json'));
-    }
-    
-    protected function updateServiceWorker($options) {
-
-        $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
-
-        if(!is_dir($path)) {
-
-            $old_mask = umask();
-
-            umask(022);
-            mkdir($path, 0755, true);
-            umask($old_mask);            
-        }
-
-        $preloaded_urls = empty($options['pwa_app_cache_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_urls'], -1, PREG_SPLIT_NO_EMPTY);
-        $exclude_urls = empty($options['pwa_app_cache_exclude_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_exclude_urls'], -1, PREG_SPLIT_NO_EMPTY);
                 
-        $exclude_urls[] = JUri::root(true).'/administrator';
-        $exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
 
-        $search = ['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"'];
-        $replace = ['v_'.file_get_contents(__DIR__.'/worker_version'), empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], \JUri::root(true), json_encode($exclude_urls), json_encode($preloaded_urls)];
+                $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
 
-        file_put_contents($path.'serviceworker.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
-        file_put_contents($path.'serviceworker.min.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js')));
-        file_put_contents($path.'worker_version', hash_file('sha1', $path.'serviceworker.min.js'));
-    //    exit;
+                $onesignal = (array) $this->options['onesignal'];
+                if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
+
+                    $script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
+                }
+
+                $document->addScriptDeclaration( $script);
+            }
+        }
     }
     
     public function onExtensionAfterSave($context, $table, $isNew, $data) {
@@ -209,6 +153,8 @@ class PlgSystemGzip extends JPlugin
         if ($context == 'com_plugins.plugin' && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
             $options = $data['params']['gzip'];
+
+            $this->cleanCache();
 
             $this->updateManifest($options);
             $this->updateServiceWorker($options);
@@ -219,7 +165,9 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterInitialise() {
 
-        if(JFactory::getApplication()->isSite()) {
+        $app = JFactory::getApplication();
+
+        if($app->isSite()) {
 
             $options = $this->params->get('gzip');
 
@@ -349,6 +297,44 @@ class PlgSystemGzip extends JPlugin
             // "start_url": "./?utm_source=web_app_manifest",
             // manifeste url
         }
+
+        else if ($app->isAdmin()) {
+            
+            if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['task']) && strpos($_POST['task'], 'gzip.') === 0) {
+
+                $token = JSession::getFormToken();
+
+                if (isset($_POST[$token]) && $_POST[$token] == 1) {
+                    
+                    $data = $app->input->post->get('jform', [], 'array');
+                    
+                    $router = JApplicationSite::getRouter();
+                    
+                    $uri = $router->build('index.php?option=com_content&view=article&id='.$data['id'].'&catid='.$data['catid']);
+
+                //    error_log(var_export(JUri::root().str_replace(JUri::base(true).'/', '', $uri->toString()), true));
+                //    error_log(var_export(JUri::base(true), true));
+                //    die;
+
+                    //$article->title, $article->link, $article->id, $article->catid
+                    $result = Onesignal\Onesignal::sendArticlePushNotification(
+                            $this->params->get('gzip.onesignal.web_push_app_id'), 
+                            $this->params->get('gzip.onesignal.web_push_api_key'), 
+                            !empty($data['push']['sendtest']) ? $data['push']['sendtest'] : null,
+                            $data['title'], 
+                            JUri::root().str_replace(JUri::base(true).'/', '', $uri->toString()), 
+                            $data['id'], 
+                            $data['catid']
+                        );
+
+                    echo json_encode($result);
+                    
+                //    error_log(var_export($result, true));
+                }
+
+                exit;
+            }
+        }
     }
 
     public function onAfterRender() {
@@ -386,7 +372,7 @@ class PlgSystemGzip extends JPlugin
 
         foreach (['js', 'css', 'img', 'ch'] as $key) {
 
-            $path = $key.'/';
+            $path = $_SERVER['SERVER_NAME'].'/'.$key.'/';
 
             if (isset($options['hashfiles']) && $options['hashfiles'] == 'content') {
 
@@ -415,7 +401,6 @@ class PlgSystemGzip extends JPlugin
         $body = Gzip\GZipHelper::parseCss($body, $options);
         $body = Gzip\GZipHelper::parseScripts($body, $options);
         $body = Gzip\GZipHelper::parseURLs($body, $options);
-    //    $body = Gzip\GZipHelper::parsePWA($body, $options);
 
         $profiler->mark('done');
 
@@ -450,5 +435,190 @@ class PlgSystemGzip extends JPlugin
         }
 
         $app->setBody($body);
+    }
+
+    protected function updateManifest($options) {
+        
+        $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
+
+        if(!is_dir($path)) {
+
+            $old_mask = umask();
+
+            umask(022);
+            mkdir($path, 0755, true);
+            umask($old_mask);            
+        }
+
+        $config = JFactory::getConfig();
+
+        $short_name = $options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $options['pwa_app_short_name'];
+        $name = $options['pwa_app_name'] === '' ? $config->get('sitename') : $options['pwa_app_name'];
+        $description = $options['pwa_app_description'] === '' ? $config->get('MetaDesc') : $options['pwa_app_description'];
+        $start_url = $options['pwa_app_start_url'] === '' ? JURI::root(true).'/' : $options['pwa_app_start_url'];
+
+        $start_url .= (strpos($start_url, '?') === false ? '?' : '&'). 'utm_source=web_app_manifest';
+
+        $manifest = [
+            'scope' => JURI::root(true).'/',
+            'short_name' => substr($short_name, 0, 12),
+            'name' => $name,
+            'description' => $description,
+            'start_url' => $start_url,
+            'background_color' => $options['pwa_app_bg_color'],
+            'theme_color' => $options['pwa_app_theme_color'],
+            'display' => $options['pwa_app_display']
+        ];
+
+        if(!empty($options['onesignal'])) {
+
+            $manifest['gcm_sender_id'] = '482941778795';
+        }
+
+        $native_apps = [];
+
+        if(!empty($options['pwa_app_native_android'])) {
+
+            $native_apps[] = [
+
+                'platform' => 'play',
+                'url' => $options['pwa_app_native_android'],
+                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
+            ];
+        }
+
+        if(!empty($options['pwa_app_native_ios'])) {
+
+            $native_apps[] = [
+
+                'platform' => 'itunes',
+                'url' => $options['pwa_app_native_ios'],
+                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
+            ];
+        }
+
+        if(!empty($native_apps)) {
+
+            $manifest['prefer_related_applications'] = (bool) $options['pwa_app_native'];
+            $manifest['related_applications'] = $native_apps;
+        }
+
+        if(!empty($options['pwa_app_icons_path'])) {
+
+            $dir = JPATH_SITE.'/images/'.$options['pwa_app_icons_path'];
+
+            if(is_dir($dir)) {
+
+                foreach(new DirectoryIterator($dir) as $file) {
+
+                    if($file->isFile() && preg_match('#\.((jpg)|(png)|(webp))$#i', $file, $match)) {
+
+                        $size = getimagesize($file->getPathName());
+
+                        $max = max($size[0], $size[1]);
+
+                        $manifest['icons'][] = [
+
+                            'src' => JUri::root(true).'/images/'.$options['pwa_app_icons_path'].'/'.$file,
+                            'sizes' => $size[0].'x'.$size[1],
+                            'type' => image_type_to_mime_type($size[2])
+                        ];
+                    }
+                }
+            }
+        }
+
+        file_put_contents($path.'manifest.json', json_encode(array_filter($manifest, function ($value) {
+
+            if(is_array($value)) {
+
+                $value = array_filter($value, function ($v) { return $v !== ''; });
+            }
+
+            return $value !== '' && !is_null($value) && count($value) != 0;
+        })));
+        
+        file_put_contents($path.'manifest_version', hash_file('sha1', $path.'manifest.json'));
+    }
+    
+    protected function updateServiceWorker($options) {
+
+        $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
+
+        if(!is_dir($path)) {
+
+            $old_mask = umask();
+
+            umask(022);
+            mkdir($path, 0755, true);
+            umask($old_mask);            
+        }
+
+        $preloaded_urls = empty($options['pwa_app_cache_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_urls'], -1, PREG_SPLIT_NO_EMPTY);
+        $exclude_urls = empty($options['pwa_app_cache_exclude_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_exclude_urls'], -1, PREG_SPLIT_NO_EMPTY);
+                
+        $exclude_urls[] = JUri::root(true).'/administrator';
+        $exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
+
+        $import_scripts = '';
+        $onesignal = (array) $options['onesignal'];
+
+        if(!empty($onesignal['enabled'])) {
+
+            $import_scripts .= 'importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js");';
+        }
+
+        $hash = hash('sha1', json_encode($options).file_get_contents(__DIR__.'/worker_version'));
+
+        $search = ['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"'];
+        $replace = ['v_'.$hash, empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], \JUri::root(true), json_encode($exclude_urls), json_encode($preloaded_urls), $import_scripts];
+
+        $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
+
+        file_put_contents($path.'serviceworker.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
+        file_put_contents($path.'serviceworker.min.js', $data);
+        // => update the service worker whenever the manifest changes
+        file_put_contents($path.'worker_version', hash('sha1', json_encode($options).$hash.$data));
+    }
+
+    protected function cleanCache() {
+    
+        //
+        $path = JPATH_SITE.'/cache/z/app/';
+
+        if (is_dir($path)) {
+
+            $paths = [new DirectoryIterator($path)];
+
+            while(count($parts) > 0) {
+
+                $dir = array_shift($parts);
+
+                foreach($dir as $file) {
+
+                    if ($file->isDir() && !$file->isDot()) {
+
+                        $parts[] = $file;
+
+                        foreach(
+                            [
+                                "manifest.json", 
+                                "manifest_version",
+                                "serviceworker.js", 
+                                "serviceworker.min.js", 
+                                "worker_version" 
+                            ] as $f) {
+
+                            $f = $file->getPathName().'/'.$f;
+
+                            if(is_file($f)) {
+
+                                unlink($f);
+                            }
+                        }
+                    }
+                }
+            }
+        }        
     }
 }
