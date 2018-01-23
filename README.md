@@ -91,7 +91,8 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ### Low priority list
 
-0. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
+0. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
+1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
 1. Mobile apps deep link?
 1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)

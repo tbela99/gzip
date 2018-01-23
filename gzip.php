@@ -312,12 +312,7 @@ class PlgSystemGzip extends JPlugin
                     
                     $uri = $router->build('index.php?option=com_content&view=article&id='.$data['id'].'&catid='.$data['catid']);
 
-                //    error_log(var_export(JUri::root().str_replace(JUri::base(true).'/', '', $uri->toString()), true));
-                //    error_log(var_export(JUri::base(true), true));
-                //    die;
-
-                    //$article->title, $article->link, $article->id, $article->catid
-                    $result = Onesignal\Onesignal::sendArticlePushNotification(
+                    $result = OneSignal\OneSignal::sendArticlePushNotification(
                             $this->params->get('gzip.onesignal.web_push_app_id'), 
                             $this->params->get('gzip.onesignal.web_push_api_key'), 
                             !empty($data['push']['sendtest']) ? $data['push']['sendtest'] : null,
@@ -327,9 +322,8 @@ class PlgSystemGzip extends JPlugin
                             $data['catid']
                         );
 
+                    header('Content-Type: application/json; charset=utf8');
                     echo json_encode($result);
-                    
-                //    error_log(var_export($result, true));
                 }
 
                 exit;
