@@ -34,7 +34,12 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field type="spacer" hr="true" />
+                </fields>
+            </fieldset>
+            <fieldset name="http_cache" label="HTTP">
+                <field type="spacer" label="Configure HTTP settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
                     <field type="spacer" label="HTTP Push" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
@@ -53,12 +58,6 @@
                     <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION" type="radio" class="btn-group" default="time">
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
-                    </field>
-                    <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
-                        <option value="none">JNone</option>
-                        <option value="sha256">SHA256</option>
-                        <option value="sha384">SHA384</option>
-                        <option value="sha512">SHA512</option>
                     </field>
                 </fields>
             </fieldset>
@@ -134,6 +133,10 @@
                     <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
+                    </field>                    
+                    <field name="debug_pwa" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
                     </field>
                     <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION" type="list" default="cn">
                         <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
@@ -201,6 +204,23 @@
                     </field>
                     <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
                     <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
+                </fields>
+            </fieldset>
+            <fieldset name="security" label="Security">
+                <field type="spacer" label="Configure Security settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                <field type="spacer" label="Sub Resource Integrity" />
+                    <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
+                        <option value="none">JNone</option>
+                        <option value="sha256">SHA256</option>
+                        <option value="sha384">SHA384</option>
+                        <option value="sha512">SHA512</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Misc" />
+                    <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default=""/>
+                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" pattern="^[a-zA-Z0-9_-]{0,}$" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset><!--
             <fieldset name="advanced">

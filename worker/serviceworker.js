@@ -16,5 +16,3 @@ const scope = "{scope}";
 let undef; //
 
 console.log(self);
-
-// -> importScript indexDb

@@ -39,7 +39,7 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
   ./router/sw.router.js\
   ./serviceworker.config.js\
   ./service/sw.service.install.js ./service/sw.service.activate.js  ./service/sw.service.fetch.js 
-uglifyjs --ecma=6 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,drop_console=true\
+uglifyjs --ecma=6 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
 #  ./filter/sw.filter.js --mangle-props
 #google-closure-compiler-js --compilationLevel=ADVANCED --assumeFunctionWrapper=true --languageOut=ES6 ./dist/serviceworker.min.js > ./dist/serviceworker.g.min.js

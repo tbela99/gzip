@@ -1,14 +1,17 @@
 ## Page Optimizer Plugin
 
-This plugin is complementary to [HTML Minifier](/projects/WO/repos/html-minifier/) plugin. It performs advanced page optimizations which drastically improve the page performance score over various tools. Here are some of them:
+This plugin is complementary to [HTML Minifier](/projects/WO/repos/html-minifier/) plugin. It performs two things:
+
+* advanced page optimizations which drastically improve the page performance score over various tools.
+* turn the website into an installable Progressive Web Application
 
 # Known issue
 
-It looks like subresources integrity is broken when service worker is enabled
+Enabling SRI may cause javascript and css to not load if you use a cdn (cloudflare?). They modify the file content and this results in the resource being blocked by the browser.
 
 # General improvements
 
-* Sub-resources integrity check: computed for script and link (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
+* Sub-resources integrity check: computed for javascript and css files (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
 * Push resources (require http 2 protocol). you can configure which resources will be pushed
 * Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
 * Range requests are supported for cached resources
@@ -42,7 +45,7 @@ Any selector that affects the page rendering is a good candidate (set dimensions
 
 Offline mode capabilities using one of these PWA network strategy
 
-### Network cache strategies
+## Network cache strategies
 
 0. Cache only
 1. Network only
@@ -50,32 +53,31 @@ Offline mode capabilities using one of these PWA network strategy
 1. Network first, falling back to cache
 1. Cache, with network update - stale while revalidate <- this is the default
 
-### PWA preloaded resources
+## PWA preloaded resources
 
 You can provide the list of url to load when the service worker is installed like icons, logo, css files, web pages, etc ...
 
-### Installable web app
+## Installable web app
 
 1. The app can be installed as a standalone web app with google chrome on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
 2. The app can be installed as a standalone desktop application (tested on wndows 10) with google chrome as long as you provide a 512x512 icon.
 3. Alternative links to native mobile apps can be provided and the preference can be configured
 
-### Web Push
+## Web Push
 
 0. Manage Web Push subscription using OneSignal
 1. Added basic push notification settings for Joomla articles
 
-### Service worker router api
+## Service worker router api
 
 Add routes to customize fetch event networking startegy by using either a static route or a regexp
 
-## Roadmap
+# Roadmap
 
-### High priority list
+## High priority list
 
 1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
 1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
-1. Investigate service worker and SRI issue
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
 1. Remove <Link rel=preload> http header and use <link> HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
@@ -89,7 +91,7 @@ Add routes to customize fetch event networking startegy by using either a static
 1. Clear Site Data api see [here](https://www.w3.org/TR/clear-site-data/)
 1. Foreign fetch api? - only supported by chrome right now [here](https://filipbech.github.io/2017/02/service-worker-and-caching-from-other-origins)
 
-### Low priority list
+## Low priority list
 
 0. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
 1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
@@ -98,17 +100,19 @@ Add routes to customize fetch event networking startegy by using either a static
 1. PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)
 1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization ?
 
-## Change History
+# Change History
 
-# V2.1
+## V2.1
 
 0. Added push notifications using onesignal
-1. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android)
+1. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android é windows 10 / firefox android)
 1. Precached urls list. You can now provide a list of urls that will be precached when the service worker is installed.
 1. Added router api. Add routes to customize fetch event networking strategy by using either a static route or a regexp
 1. Rebuild service worker and the manifest whenever the plugin is installed or the settings are updated
+1. Override meta name=generator with custom text
+1. Add a secret token to prevent administrator access
 
-# V2.0
+## V2.0
 
 0. PWA: implement network strategies:
 
@@ -118,23 +122,23 @@ Add routes to customize fetch event networking startegy by using either a static
 * Network first, falling back to cache
 * Cache, with network update
 
-# V1.1
+## V1.1
 
 0. CSS: preload web fonts
 
-# V1.0
+## V1.0
 
 this release implements to to bottom page loading optimization
 
-## SRI (Sub resources integrity)
+### SRI (Sub resources integrity)
 
 0. generate SRI for javascript and css files
 
-## Critical CSS Path
+### Critical CSS Path
 
 0. generate critical css path based on the list of selectors you provide.
 
-## Javascript
+### Javascript
 
 0. fetch files hosted on remote servers
 1. minify javascript files
@@ -145,7 +149,7 @@ this release implements to to bottom page loading optimization
 1. remove duplicates
 1. move javascript at the bottom of the page
 
-## CSS
+### CSS
 
 0. fetch files hosted on remote servers
 1. minify css files

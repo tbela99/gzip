@@ -290,20 +290,12 @@ SW.strategies = function() {
 		 * @param {Request} request
 		 * @param {Response} response
 		 */
-        isCacheableRequest: (request, response) => {
-            console.log({
-                mode: request.mode,
-                sameorigin: new URL(request.url, self.origin).origin == self.origin,
-                method: request.method == "GET",
-                reponse_valid: response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
-                response.type == "default") && response.ok && !response.bodyUsed,
-                r: ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || // https://www.w3.org/TR/SRI/#h-note6
-                response.type == "default") && response.ok && !response.bodyUsed
-            });
-            // https://www.w3.org/TR/SRI/#h-note6
-            return ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || response.type == "default") && response.ok && !response.bodyUsed;
-        }
+        // https://www.w3.org/TR/SRI/#h-note6
+        isCacheableRequest: (request, response) => ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || response.type == "default") && response.ok && !response.bodyUsed
     };
+    // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
+    // if http response != 200 <- hmmm don't want to cache this <- stop it!
+    // if auth != basic <- are you private? <- stop it!
     strategy[Symbol.iterator] = (() => map[Symbol.iterator]());
     Object.defineProperty(strategy, "size", {
         get: () => map.size
@@ -591,12 +583,6 @@ self.addEventListener("activate", function(event) {
 self.addEventListener("fetch", event => {
     //	if (event.request.url.indexOf("data:") != 0) {
     const handler = SW.router.getHandler(event.request.url, event);
-    console.log({
-        mode: event.request.mode,
-        handler,
-        url: event.request.url
-    });
-    //	console.log({ url: event.request.url, handler });
     if (handler != undef) {
         event.respondWith(handler.handle(event).catch(error => {
             console.error("😭", error);

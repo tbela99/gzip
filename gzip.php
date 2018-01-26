@@ -123,27 +123,29 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterRoute() {
 
-        $document = JFactory::getDocument();
+        if(JFactory::getApplication()->isSite()) {
+            
+            $document = JFactory::getDocument();
 
-        if(JFactory::getApplication()->isSite() && $document->getType() == 'html') {
+            if($document->getType() == 'html') {
+                    
+                if(!empty($this->options['debug'])) {
 
-            if(!empty($this->options['debug'])) {
-
-                $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
-            }
-
-            if(!empty($this->options['pwaenabled'])) {
-                
-
-                $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
-
-                $onesignal = (array) $this->options['onesignal'];
-                if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
-
-                    $script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
+                    $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
                 }
 
-                $document->addScriptDeclaration( $script);
+                if(!empty($this->options['pwaenabled'])) {                    
+
+                    $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
+
+                    $onesignal = (array) $this->options['onesignal'];
+                    if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
+
+                        $script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
+                    }
+
+                    $document->addScriptDeclaration( $script);
+                }
             }
         }
     }
@@ -199,7 +201,7 @@ class PlgSystemGzip extends JPlugin
             // fetch worker.js
             if(preg_match('#^'.$dirname.'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
 
-                $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+                $debug = $this->params->get('gzip.debug_pwa') ? '' : '.min';
 
                 $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/serviceworker'.$debug.'.js';
 
@@ -299,6 +301,13 @@ class PlgSystemGzip extends JPlugin
         }
 
         else if ($app->isAdmin()) {
+
+            $secret = $this->params->get('gzip.admin_secret');
+
+            if (!is_null($secret) && $_SERVER['REQUEST_METHOD'] == 'GET' && JFactory::getUser()->get('id') == 0 && !array_key_exists($secret, $_GET)) {
+
+                $app->redirect(JURI::root(true).'/');
+            }
             
             if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['task']) && strpos($_POST['task'], 'gzip.') === 0) {
 
@@ -328,6 +337,18 @@ class PlgSystemGzip extends JPlugin
 
                 exit;
             }
+        }
+    }
+
+    public function onAfterDispatch() {
+
+        $document = JFactory::getDocument();
+
+        $generator = $this->params->get('gzip.metagenerator');
+
+        if(!is_null($generator)) {
+
+            $document->setGenerator($generator);
         }
     }
 

@@ -6,6 +6,6 @@ if ("serviceWorker" in navigator) {
         scope: "{scope}"
     }).catch(function(error) {
         //	console.log(error);
-        console.log("😭", error);
+        console.error("😭", error);
     });
 }
