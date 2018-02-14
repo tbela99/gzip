@@ -21,7 +21,7 @@ class GZipHelper {
     static $options = [];
     static $regReduce;
     static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
-    static $pwacache = [];
+//    static $pwacache = [];
     static $pushed = array(
         "gif" => array('as' => 'image'),
         "jpg" => array('as' => 'image'),
@@ -43,6 +43,8 @@ class GZipHelper {
         "svg" => array('as' => 'image')
     );
     static $marks = [];
+
+    // can use http cache / url rewriting
     static $accepted = array(
         "gif" => "image/gif",
         "jpg" => "image/jpeg",
@@ -61,8 +63,11 @@ class GZipHelper {
         "ttf" => "application/x-font-ttf",
         "woff" => "application/x-font-woff",
         "woff2" => "application/font-woff2",
-        "svg" => "image/svg+xml"
+        "svg" => "image/svg+xml",
+        'mp3' => 'audio/mpeg'
     );
+
+    // what's the use of this?
     static $encoded = array(
         "gif" => "image/gif",
         "jpg" => "image/jpeg",
@@ -79,7 +84,7 @@ class GZipHelper {
 
     static $pwa_network_strategy = '';
 
-    public static function getChecksum($file, callable $hashFile, $algo = 'sha256') {
+    public static function getChecksum($file, callable $hashFile, $algo = 'sha256', $integrity = false) {
 
         $hash = $hashFile($file);
 
@@ -99,7 +104,7 @@ class GZipHelper {
             'hash' => $hash, //
             //    'crossorigin' => 'anonymous',
             'algo' => $algo,
-            'integrity' => empty($algo) || $algo == 'none' ? '' : $algo . "-" . base64_encode(hash_file($algo, $file, true))
+            'integrity' => empty($algo) || $algo == 'none' || empty($integrity) ? '' : $algo . "-" . base64_encode(hash_file($algo, $file, true))
         ];
 
         file_put_contents($path, '<?php $checksum = ' . var_export($checksum, true) . ';');
@@ -327,7 +332,6 @@ class GZipHelper {
         $hashFile = static::getHashMethod($options);
 
         $replace = [];
-
         $body = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
 
             $hash = '--ht' . crc32($matches[0]) . 'ht--';
@@ -354,27 +358,28 @@ class GZipHelper {
 
         $profiler->mark('parse urls');
 
-        static::$pwacache = [];
+    //    static::$pwacache = [];
 
-        $body = preg_replace_callback('#<([^\s\\>]+)\s([^>]+)>#si', function ($matches) use($checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base) {
+        $body = preg_replace_callback('#<([^\s\\>]+)\s([^>]+)>#si', function ($matches) use($checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
 
             $tag = $matches[1];
 
-            return preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~', function ( $matches) use($tag, $checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base) {
+            return preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:-]+)=(["\'])(.*?)\3([\r\n\t ])?~', function ( $matches) use($tag, $checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
 
-                switch (strtolower($matches[2])) {
+                $attr = strtolower($matches[2]);
 
-                    case 'src':
-                //    case 'data':
-                    case 'href':
+                if (isset($options['parse_url_attr'][$attr])) {
+
+                //    case 'src':
+                //    case 'href':
 
                         $file = static::getName($matches[4]);
-
+        
                         if (static::isFile($file)) {
 
                             $name = preg_replace('~[#?].*$~', '', $file);
 
-                            if (is_file($name)) {
+                        //    if (is_file($name)) {
 
                                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
@@ -404,7 +409,7 @@ class GZipHelper {
 
                                     unset($pushed[$base . $file]);
 
-                                    $checkSumData = static::getChecksum($name, $hashFile, $checksum);
+                                    $checkSumData = static::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
 
                                     $file = 'media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file;
 
@@ -414,7 +419,7 @@ class GZipHelper {
                                         $pushed[$base . $file] = $push_data;
                                     }
 
-                                    static::$pwacache[] = $base . $file;
+                                //    static::$pwacache[] = $base . $file;
 
                                     $result = ' ' . $matches[2] . '="' . $file . '" ';
 
@@ -428,11 +433,11 @@ class GZipHelper {
 
                                     return $result;
                                 }
-                            }
+                        //    }
                         }
 
-                        static::$pwacache[] = \JRoute::_($file, false);
-                        break;
+                    //    static::$pwacache[] = \JRoute::_($file, false);
+                    //    break;
                 }
 
                 return $matches[0];
@@ -1052,10 +1057,10 @@ class GZipHelper {
 
         $profiler->mark("done parse <style>");
 
-        foreach ($links as $link) {
+    //    foreach ($links as $link) {
 
-            static::$pwacache[$link['href']] = $link['href'];
-        }
+    //        static::$pwacache[$link['href']] = $link['href'];
+    //    }
 
         static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
@@ -1090,7 +1095,9 @@ class GZipHelper {
             return false;
         }
 
-        return is_file(preg_replace('~(#|\?).*$~', '', $name));
+        $name = preg_replace('~(#|\?).*$~', '', $name);
+
+        return is_file($name) || is_file(utf8_decode($name));
     }
 
     protected static function extractFontFace($block) {
@@ -1493,7 +1500,7 @@ class GZipHelper {
             $body = str_replace(array_keys($comments), array_values($comments), $body);
         }
 
-        static::$pwacache = array_merge(static::$pwacache, $files);
+    //    static::$pwacache = array_merge(static::$pwacache, $files);
         static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;

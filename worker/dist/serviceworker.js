@@ -1,7 +1,8 @@
 /* do not edit! */
 // @ts-check
-/* eslint wrap-iife: 0 */
 /* main service worker file */
+// build ba6ee78 2018-02-14 15:28:48-05:00
+/* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -9,18 +10,17 @@
 
 "{IMPORT_SCRIPTS}";
 
-const SW = Object.create(null);
+const undef = null;
+
+ //
+const SW = Object.create(undef);
 
 const CACHE_NAME = "{CACHE_NAME}";
 
 const scope = "{scope}";
 
 // const defaultStrategy = "{defaultStrategy}";
-let undef;
-
-//
-console.log(self);
-
+//console.log(self);
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
@@ -105,18 +105,28 @@ console.log(self);
         }
     };
     function merge(target) {
-        const deep = target === true, args = [].slice.call(arguments, 1);
-        let i, source, prop, value;
+        const args = [].slice.call(arguments, 1);
+        let deep = typeof target == "boolean", i, source, prop, value;
         if (deep === true) {
+            deep = target;
             target = args.shift();
         }
         for (i = 0; i < args.length; i++) {
             source = args[i];
+            if (source == undef) {
+                continue;
+            }
             for (prop in source) {
                 value = source[prop];
                 switch (typeof value) {
                   case "object":
-                    target[prop] = deep == true ? merge(deep, value == undef ? value : Array.isArray(value) ? [] : {}, value) : value;
+                    if (value == undef || !deep) {
+                        target[prop] = value;
+                    } else {
+                        target[prop] = merge(deep, typeof target[prop] == "object" && target[prop] != undef ? target[prop] : Array.isArray(value) ? [] : {}, 
+                        //
+                        value);
+                    }
                     break;
 
                   default:
@@ -134,7 +144,7 @@ console.log(self);
             name = properties[i];
             descriptor = Object.getOwnPropertyDescriptor(object, name);
             //
-            if (object[name] == undef || typeof object[name] != "object" || descriptor == undef || (!("value" in descriptor) || !(descriptor.writable && descriptor.configurable))) {
+                        if (object[name] == undef || typeof object[name] != "object" || descriptor == undef || (!("value" in descriptor) || !(descriptor.writable && descriptor.configurable))) {
                 continue;
             }
             object[name] = merge(true, Array.isArray(object[name]) ? [] : {}, reset(object[name]));
@@ -200,7 +210,7 @@ console.log(self);
                 }
             }
             //    sticky = !!sticky;
-            Object.defineProperty(event, "sticky", {
+                        Object.defineProperty(event, "sticky", {
                 value: !!sticky
             });
             self.$events[name].push(event);
@@ -218,7 +228,7 @@ console.log(self);
             while (i && i--) {
                 event = events[i];
                 // do not remove sticky events, unless sticky === true
-                if (fn == undef && !sticky || event.fn == fn && (!event.sticky || event.sticky == sticky)) {
+                                if (fn == undef && !sticky || event.fn == fn && (!event.sticky || event.sticky == sticky)) {
                     self.$events[name].splice(i, 1);
                 }
             }
@@ -272,7 +282,7 @@ SW.strategies = function() {
                 //	await SW.resolve("prefetch", event.request);
                 const response = await handle(event);
                 //	await SW.resolve("postfetch", event.request, response);
-                console.log({
+                                console.log({
                     mode: event.request.mode,
                     response
                 });
@@ -296,7 +306,7 @@ SW.strategies = function() {
     // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
     // if http response != 200 <- hmmm don't want to cache this <- stop it!
     // if auth != basic <- are you private? <- stop it!
-    strategy[Symbol.iterator] = (() => map[Symbol.iterator]());
+        strategy[Symbol.iterator] = (() => map[Symbol.iterator]());
     Object.defineProperty(strategy, "size", {
         get: () => map.size
     });
@@ -311,7 +321,7 @@ SW.strategies.add("nf", async (event, cache) => {
     try {
         const response = await fetch(event.request);
         //	.then(response => {
-        if (response == undef) {
+                if (response == undef) {
             throw new Error("Network error");
         }
         if (SW.strategies.isCacheableRequest(event.request, response)) {
@@ -321,7 +331,8 @@ SW.strategies.add("nf", async (event, cache) => {
             });
         }
         return response;
-    } catch (e) {}
+        //	})
+        } catch (e) {}
     return cache.match(event.request);
 });
 
@@ -362,6 +373,7 @@ SW.strategies.add("cn", async event => {
         return networkResponse;
     });
     return response || fetchPromise;
+    //	});
 });
 
 // @ts-check
@@ -388,16 +400,15 @@ SW.strategies.add("co", event => caches.match(event.request));
     }
     class Router {
         constructor() {
-            this.routes = Object.create(null);
+            this.routes = Object.create(undef);
             this.handlers = [];
-            this.defaultHandler = Object.create(null);
+            this.defaultHandler = Object.create(undef);
         }
         /**
 		 *
 		 * @param {string} url
 		 * @param {FetchEvent} event
-		 */
-        getHandler(url, event) {
+		 */        getHandler(url, event) {
             const method = event != undef && event.request.method || "GET";
             const routes = this.routes[method] || [];
             let route, i = routes.length;
@@ -440,7 +451,7 @@ SW.strategies.add("co", event => caches.match(event.request));
             const self = this;
             SW.Utils.reset(this);
             //	console.log(self);
-            self.path = path;
+                        self.path = path;
             self.handler = {
                 handle: async event => {
                     let result = await self.resolve("beforeroute", event);
@@ -472,7 +483,7 @@ SW.strategies.add("co", event => caches.match(event.request));
                     }
                 }
             });
-        }
+            /**/        }
     }
     SW.Utils.merge(true, DefaultRouter.prototype, SW.PromiseEvent);
     class RegExpRouter extends DefaultRouter {
@@ -481,7 +492,7 @@ SW.strategies.add("co", event => caches.match(event.request));
 		 * @param {string} url
 		 * @param {Request} event
 		 */
-        match(url) {
+        match(url /*, event*/) {
             //	console.log({ url, regexpp: this.path });
             return /^https?:/.test(url) && this.path.test(url);
         }
@@ -494,8 +505,7 @@ SW.strategies.add("co", event => caches.match(event.request));
         /**
 		 *
 		 * @param {string} url
-		 */
-        match(url) {
+		 */        match(url /*, event*/) {
             const u = new URL(url);
             return /^https?:/.test(url) && u.origin == this.url.origin && u.pathname.indexOf(this.url.pathname) == 0;
         }
@@ -504,7 +514,7 @@ SW.strategies.add("co", event => caches.match(event.request));
     Router.RegExpRouter = RegExpRouter;
     Router.ExpressRouter = ExpressRouter;
     //	Router.DataRouter = DataRouter;
-    SW.Router = Router;
+        SW.Router = Router;
     SW.router = router;
 })(SW);
 
@@ -531,6 +541,12 @@ let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
+if (!strategies.has(defaultStrategy)) {
+    // default browser behavior
+    defaultStrategy = "no";
+}
+
+//console.log({ SW });
 router.setDefaultHandler(strategies.get(defaultStrategy));
 
 // register strategies routers
@@ -543,15 +559,10 @@ for (entry of strategies) {
     router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
 });
 
-if (!strategies.has(defaultStrategy)) {
-    // default browser behavior
-    defaultStrategy = "no";
-}
-
-console.log({
-    SW
-});
-
+//let x;
+//for (x of SW.strategies) {
+//	console.log(x);
+//}
 // @ts-check
 /* global CACHE_NAME */
 self.addEventListener("install", function(event) {
@@ -589,4 +600,5 @@ self.addEventListener("fetch", event => {
             return fetch(event.request);
         }));
     }
+    //	}
 });

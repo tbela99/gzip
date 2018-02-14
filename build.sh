@@ -32,13 +32,13 @@ uglifyjs --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,w
 #
 #
 #
-uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=6 --output ./dist/serviceworker.js\
+uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=6\
  -- ./serviceworker.js ./utils/sw.utils.js ./event/sw.event.promise.js \
   ./network/sw.strategies.js ./network/sw.strategies.network_first.js ./network/sw.strategies.cache_first.js ./network/sw.strategies.cache_network.js\
   ./network/sw.strategies.network_only.js ./network/sw.strategies.cache_only.js\
   ./router/sw.router.js\
   ./serviceworker.config.js\
-  ./service/sw.service.install.js ./service/sw.service.activate.js  ./service/sw.service.fetch.js 
+  ./service/sw.service.install.js ./service/sw.service.activate.js  ./service/sw.service.fetch.js | sed "s/build-date/$(date '+%F %H:%M:%S%:z')/g" | sed "s/build-id/$(git rev-parse --short HEAD)/g"  > ./dist/serviceworker.js
 uglifyjs --ecma=6 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
 #  ./filter/sw.filter.js --mangle-props

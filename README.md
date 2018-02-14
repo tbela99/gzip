@@ -47,7 +47,7 @@ Offline mode capabilities using one of these PWA network strategy
 
 ## Network cache strategies
 
-0. Cache only
+1. Cache only
 1. Network only
 1. Cache first, falling back to network
 1. Network first, falling back to cache
@@ -65,7 +65,7 @@ You can provide the list of url to load when the service worker is installed lik
 
 ## Web Push
 
-0. Manage Web Push subscription using OneSignal
+1. Manage Web Push subscription using OneSignal
 1. Added basic push notification settings for Joomla articles
 
 ## Service worker router api
@@ -93,7 +93,8 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Low priority list
 
-0. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
+1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
+1. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
 1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
 1. Mobile apps deep link?
@@ -104,7 +105,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V2.1
 
-0. Added push notifications using onesignal
+1. Added push notifications using onesignal
 1. Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android é windows 10 / firefox android)
 1. Precached urls list. You can now provide a list of urls that will be precached when the service worker is installed.
 1. Added router api. Add routes to customize fetch event networking strategy by using either a static route or a regexp
@@ -114,7 +115,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V2.0
 
-0. PWA: implement network strategies:
+1. PWA: implement network strategies:
 
 * Cache only (disabled)
 * Network only
@@ -124,7 +125,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V1.1
 
-0. CSS: preload web fonts
+1. CSS: preload web fonts
 
 ## V1.0
 
@@ -132,15 +133,15 @@ this release implements to to bottom page loading optimization
 
 ### SRI (Sub resources integrity)
 
-0. generate SRI for javascript and css files
+1. generate SRI for javascript and css files
 
 ### Critical CSS Path
 
-0. generate critical css path based on the list of selectors you provide.
+1. generate critical css path based on the list of selectors you provide.
 
 ### Javascript
 
-0. fetch files hosted on remote servers
+1. fetch files hosted on remote servers
 1. minify javascript files
 1. merge javascript files
 1. minify inline javascript
@@ -151,7 +152,7 @@ this release implements to to bottom page loading optimization
 
 ### CSS
 
-0. fetch files hosted on remote servers
+1. fetch files hosted on remote servers
 1. minify css files
 1. merge css files (flatten @import)
 1. minify inline css

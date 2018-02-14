@@ -16,9 +16,16 @@ $useEtag = strpos($uri, '1/') === 0;
 
 $uri = explode('/', $uri, $useEtag ? 3 : 2);
 
-$file = preg_replace('~[#|?].*$~', '', end($uri));
+$file = urldecode(preg_replace('~[#|?].*$~', '', end($uri)));
 
-if(!is_file($file)) {
+$utf8_file = utf8_decode($file);
+
+if (is_file($utf8_file)) {
+	
+	$file = $utf8_file;
+}
+
+else if(!is_file($file)) {
 
     header("HTTP/1.1 404 Not Found");
     exit;

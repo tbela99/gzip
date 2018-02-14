@@ -117,32 +117,44 @@
 	};
 
 	function merge(target) {
-		const deep = target === true,
-			args = [].slice.call(arguments, 1);
-		let i, source, prop, value;
+		const args = [].slice.call(arguments, 1);
+		let deep = typeof target == "boolean",
+			i,
+			source,
+			prop,
+			value;
 
 		if (deep === true) {
+			deep = target;
 			target = args.shift();
 		}
 
 		for (i = 0; i < args.length; i++) {
 			source = args[i];
 
+			if (source == undef) {
+				continue;
+			}
+
 			for (prop in source) {
 				value = source[prop];
 
 				switch (typeof value) {
 				case "object":
-					target[prop] =
-							deep == true
-								? merge(
-									deep,
-									value == undef
-										? value
-										: Array.isArray(value) ? [] : {},
-									value
-								)
-								: value;
+					if (value == undef || !deep) {
+						target[prop] = value;
+					} else {
+						target[prop] = merge(
+							deep,
+							typeof target[prop] == "object" &&
+								target[prop] != undef
+								? target[prop]
+								: Array.isArray(value) ? [] : {},
+							//
+							value
+						);
+					}
+
 					break;
 
 				default:

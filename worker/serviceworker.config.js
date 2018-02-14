@@ -20,6 +20,13 @@ let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
+if (!strategies.has(defaultStrategy)) {
+	// default browser behavior
+	defaultStrategy = "no";
+}
+
+//console.log({ SW });
+
 router.setDefaultHandler(strategies.get(defaultStrategy));
 
 // register strategies routers
@@ -33,13 +40,6 @@ for (entry of strategies) {
 "{exclude_urls}".forEach((path) => {
 	router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
 });
-
-if (!strategies.has(defaultStrategy)) {
-	// default browser behavior
-	defaultStrategy = "no";
-}
-
-console.log({ SW });
 
 //let x;
 

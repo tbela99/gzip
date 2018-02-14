@@ -3,8 +3,8 @@
     <name>plg_system_gzip</name>
     <author>Thierry Bela</author>
     <creationDate>August 2016</creationDate>
-    <copyright>Copyright (C) 2005 - 2016 Open Source Matters. All rights reserved.</copyright>
-    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <copyright>Copyright (C) 2005 - 2016 Thierry Bela.</copyright>
+    <license>MIT License</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>www.tbela.net</authorUrl>
     <version>2.1.1</version>
@@ -59,6 +59,7 @@
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                     </field>
+                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
                 </fields>
             </fieldset>
             <fieldset name="javascript" label="Javascript Settings">
@@ -220,7 +221,13 @@
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Misc" />
                     <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default=""/>
-                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" pattern="^[a-zA-Z0-9_-]{0,}$" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
+                    <field name="admin_area_locked" label="PLG_GZIP_FIELD_ADMIN_AREA_LOCKED_LABEL" description="PLG_GZIP_FIELD_ADMIN_AREA_LOCKED_DESCRIPTION" type="list" 
+                        class="btn-group" default="0" 
+                        onchange="document.getElementById('jform_params_gzip_admin_secret').disabled=this.selectedIndex!=0;">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="admin_secret" required="required" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" pattern="^[a-zA-Z0-9_-]{0,}$" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset><!--
             <fieldset name="advanced">

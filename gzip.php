@@ -59,65 +59,86 @@ class PlgSystemGzip extends JPlugin
         }
     }
 
-    public function onContentPrepareForm($form, $data) {
+    public function onContentPrepareForm(JForm $form, $data) {
 
-        if ($form->getName() == 'com_content.article') {
-            
-            $document = JFactory::getDocument();
-            
-            $document->addStylesheet(JURI::root(true).'/plugins/system/gzip/push/css/form.css');
-            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/dist/fetch.js');
-            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.js');
-            $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.ready.js');
-            $document->addScript(JURI::root(true).'/plugins/system/gzip/push/js/form.js');
+        switch ($form->getName()) {
 
-            JFactory::getLanguage()->load('plg_system_gzip', __DIR__);
+            case 'com_content.article':
+                
+                $document = JFactory::getDocument();
+                
+                $document->addStylesheet(JURI::root(true).'/plugins/system/gzip/push/css/form.css');
+                $document->addScript(JURI::root(true).'/plugins/system/gzip/js/dist/fetch.js');
+                $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.js');
+                $document->addScript(JURI::root(true).'/plugins/system/gzip/js/lib/lib.ready.js');
+                $document->addScript(JURI::root(true).'/plugins/system/gzip/push/js/form.js');
 
-            JFormHelper::addFieldPath(__DIR__.'/push/fields');
+                JFactory::getLanguage()->load('plg_system_gzip', __DIR__);
 
-            $root = dom_import_simplexml($form->getXml());
+                JFormHelper::addFieldPath(__DIR__.'/push/fields');
 
-            $testUser = $this->params->get('gzip.onesignal.web_push_test_user');
+                $root = dom_import_simplexml($form->getXml());
 
-        //    $router = JApplicationSite::getRouter();
-            
-            // , false, -1
-        //    $url = $router->build('index.php?option=com_content&id='.$data->id)->toString(['scheme', 'host', 'port', 'path', 'query', 'fragment']);
+                $testUser = $this->params->get('gzip.onesignal.web_push_test_user');
 
-            foreach(simplexml_load_file(__DIR__.'/push/forms/com_content/article.xml')->children() as $child) {
+                foreach(simplexml_load_file(__DIR__.'/push/forms/com_content/article.xml')->children() as $child) {
 
-                if (!empty($testUser)) {
+                    if (!empty($testUser)) {
 
-                    foreach($child->xpath('//fields[@name="push"]') as $field) {
+                        foreach($child->xpath('//fields[@name="push"]') as $field) {
 
-                        // web_push_test_url
-                    //    foreach($field->xpath('./field[@name="web_push_test_url"]') as $node) {
+                            foreach($field->xpath('./field[@name="sendtest"]') as $node) {
 
-                    //        $node['default'] = $url;
-                    //    }
+                                $option = $node->addChild('option');
 
-                        foreach($field->xpath('./field[@name="sendtest"]') as $node) {
+                                $option['value'] = $testUser;
+                                $option['text'] = $testUser;
+                            }
 
-                            $option = $node->addChild('option');
+                            foreach($field->xpath('./field[@name="web_push_test_title"]') as $node) {
 
-                            $option['value'] = $testUser;
-                            $option['text'] = $testUser;
+                                $node['default'] = $data->title;
+                            }
+
+                            foreach($field->xpath('./field[@name="web_push_test_content"]') as $node) {
+
+                                $node['default'] = strip_tags($data->introtext);
+                            }
                         }
+                    }
 
-                        foreach($field->xpath('./field[@name="web_push_test_title"]') as $node) {
+                    $root->insertBefore($root->ownerDocument->importNode(dom_import_simplexml($child), true), $root->firstChild);
+                }
 
-                            $node['default'] = $data->title;
-                        }
+            break;
 
-                        foreach($field->xpath('./field[@name="web_push_test_content"]') as $node) {
+            case 'com_plugins.plugin':
 
-                            $node['default'] = strip_tags($data->introtext);
+                $object = $data;
+
+                if (is_array($data)) {
+
+                    $object = new \Joomla\Registry\Registry($data);
+                }
+
+                if (is_callable([$data, 'getProperties'])) {
+
+                    $object = new \Joomla\Registry\Registry($data->getProperties());
+                }
+                
+                if ($object->get('name') == 'plg_system_gzip') {
+
+                    if(empty($object->get('params.gzip.admin_area_locked'))) {
+
+                        foreach ($form->getXml()->xpath('//field[@name="admin_secret"]') as $field) {
+
+                            $field['disabled'] = 'disabled';
+                            break;
                         }
                     }
                 }
 
-                $root->insertBefore($root->ownerDocument->importNode(dom_import_simplexml($child), true), $root->firstChild);
-            }
+                break;
         }
     }
 
@@ -150,9 +171,9 @@ class PlgSystemGzip extends JPlugin
         }
     }
     
-    public function onExtensionAfterSave($context, $table, $isNew, $data) {
+    public function onExtensionAfterSave($context, $table, $isNew, $data = []) {
 
-        if ($context == 'com_plugins.plugin' && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
+        if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
             $options = $data['params']['gzip'];
 
@@ -178,6 +199,10 @@ class PlgSystemGzip extends JPlugin
                 $this->options = (array) $options;
             }
 
+            $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#\s,#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
+            $this->options['parse_url_attr']['href'] = '';
+            $this->options['parse_url_attr']['src'] = '';
+			
             if(!empty($this->options['pwaenabled'])) {
 
                 $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
@@ -580,7 +605,7 @@ class PlgSystemGzip extends JPlugin
 
         if(!empty($onesignal['enabled'])) {
 
-            $import_scripts .= 'importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js");';
+            $import_scripts .= 'importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")';
         }
 
         $hash = hash('sha1', json_encode($options).file_get_contents(__DIR__.'/worker_version'));
