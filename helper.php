@@ -18,6 +18,7 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 
 class GZipHelper {
 
+    const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)=(["\'])(.*?)\3([\r\n\t ])?~';
     static $options = [];
     static $regReduce;
     static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
@@ -67,7 +68,7 @@ class GZipHelper {
         'mp3' => 'audio/mpeg'
     );
 
-    // what's the use of this?
+    // what's the use of this? base64 encoded image?
     static $encoded = array(
         "gif" => "image/gif",
         "jpg" => "image/jpeg",
@@ -364,7 +365,7 @@ class GZipHelper {
 
             $tag = $matches[1];
 
-            return preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:-]+)=(["\'])(.*?)\3([\r\n\t ])?~', function ( $matches) use($tag, $checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
+            return preg_replace_callback(static::regexAttr, function ($matches) use($tag, $checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
 
                 $attr = strtolower($matches[2]);
 
@@ -411,7 +412,7 @@ class GZipHelper {
 
                                     $checkSumData = static::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
 
-                                    $file = 'media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file;
+                                    $file = \JURI::root(true).'/media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file;
 
                                     if (!empty($push_data)) {
 
@@ -545,7 +546,7 @@ class GZipHelper {
                 }
             }
 
-            return str_replace('./', '', implode('/', $return));
+            return str_replace('/./', '', implode('/', $return));
         }
 
         return $path;
@@ -1279,27 +1280,44 @@ class GZipHelper {
         // parse scripts
         $body = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$inline_js, &$js, &$files, &$scripts, &$ignored, $path, $fetch_remote, $ignore, $remove) {
 
-            // ignore custom type
-            preg_match('#\btype=(["\'])(.*?)\1#', $matches[1], $match);
+            $attributes = [];
 
-            if (!empty($match) && stripos($match[2], 'javascript') === false) {
+            if(preg_match_all(static::regexAttr, $matches[1], $attr)) {
+
+                foreach ($attr[2] as $k => $att) {
+
+                    $attributes[$att] = $attr[4][$k];
+                }
+            }
+
+            // ignore custom type
+         //   preg_match('#\btype=(["\'])(.*?)\1#', $matches[1], $match);
+
+            if (isset($attributes['type']) && stripos($attributes['type'], 'javascript') === false) {
 
                 return $matches[0];
 
-            } else if (!empty($match)) {
+            } 
 
-                $matches[1] = str_replace($match[0], '', $matches[1]);
-            }
+            $position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
+            
+            //else {
+
+            //    $matches[1] = str_replace($match[0], '', $matches[1]);
+           // }
+
+           unset($attributes['type']);
 
             if (!empty($matches[2])) {
 
-                $inline_js[] = $matches[2];
+                $inline_js[$position][] = $matches[2];                
+                return '';
             }
 
             // ignore custom type
-            if (preg_match('#\bsrc=(["\'])(.*?)\1#', $matches[1], $match)) {
+            if (isset($attributes['src'])) {
 
-                $name = static::getName($match[2]);
+                $name = static::getName($attributes['src']);
 
                 foreach ($remove as $r) {
 
@@ -1313,8 +1331,8 @@ class GZipHelper {
 
                     if (strpos($name, $i) !== false) {
 
-                        $ignored[$name] = 1;
-                        break;
+                        $ignored[$position][$name] = $attributes['src'];
+                        return '';
                     }
                 }
 
@@ -1346,8 +1364,8 @@ class GZipHelper {
                     }
                 }
 
-                $files[$name] = $name;
-                $scripts[$name] = '<script' . $matches[1] . '></script>';
+                $files[$position][$name] = $name;
+                $scripts[$position][$name] = '<script' . $matches[1] . '></script>';
             }
 
             return '';
@@ -1370,34 +1388,37 @@ class GZipHelper {
             // compress all js files
             $replace = [];
 
-            foreach ($files as $key => $file) {
+            foreach($files as $position => $fileList) {
 
-                if (!static::isFile($file)) {
+                foreach ($fileList as $key => $file) {
 
-                    continue;
-                }
+                    if (!static::isFile($file)) {
 
-                $name = preg_replace(array('#(^-)|([.-]min)|(cache/|-js/|-)|(\.?js)#', '#[^a-z0-9]+#i'), array('', '-'), $file);
-
-                $js_file = $path . $name . '-min.js';
-                $hash_file = $path . $name . '.php';
-
-                $hash = $hashFile($file);
-
-                if (!is_file($js_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash) {
-
-                    $gzip = static::js($file, $remote_service);
-
-                    if ($gzip !== false) {
-
-                        file_put_contents($js_file, $gzip);
-                        file_put_contents($hash_file, $hash);
+                        continue;
                     }
-                }
 
-                if (is_file($js_file) && is_file($hash_file) && file_get_contents($hash_file) == $hash) {
+                    $name = preg_replace(array('#(^-)|([.-]min)|(cache/|-js/|-)|(\.?js)#', '#[^a-z0-9]+#i'), array('', '-'), $file);
 
-                    $files[$key] = $js_file;
+                    $js_file = $path . $name . '-min.js';
+                    $hash_file = $path . $name . '.php';
+
+                    $hash = $hashFile($file);
+
+                    if (!is_file($js_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash) {
+
+                        $gzip = static::js($file, $remote_service);
+
+                        if ($gzip !== false) {
+
+                            file_put_contents($js_file, $gzip);
+                            file_put_contents($hash_file, $hash);
+                        }
+                    }
+
+                    if (is_file($js_file) && is_file($hash_file) && file_get_contents($hash_file) == $hash) {
+
+                        $files[$position][$key] = $js_file;
+                    }
                 }
             }
         }
@@ -1407,53 +1428,51 @@ class GZipHelper {
 
         if (!empty($options['mergejs'])) {
 
-            $hash = '';
+            foreach($files as $position => $filesList) {
+                
+                $hash = '';
 
-            foreach ($files as $key => $file) {
+                foreach ($filesList as $key => $file) {
 
-                if (!isset($ignored[$key])) {
+                    if (!isset($ignored[$key])) {
 
-                    $hash .= $hashFile($file) . '.' . $file;
-                }
-            }
-
-            if (!empty($hash)) {
-
-                $hash = crc32($hash);
-            }
-
-            $name = $path . static::shorten($hash);
-            $js_file = $name . '.js';
-            $hash_file = $name . '.php';
-
-            $createFile = !is_file($js_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash;
-
-            $content = [];
-
-            foreach ($files as $key => $file) {
-
-                if (isset($ignored[$key]) || !static::isFile($file)) {
-
-                    continue;
+                        $hash .= $hashFile($file) . '.' . $file;
+                    }
                 }
 
-                if ($createFile) {
+                if (!empty($hash)) {
 
-                    $content[] = trim(file_get_contents($file), ';');
+                    $hash = crc32($hash);
                 }
 
-                unset($files[$key]);
-            }
+                $name = $path . static::shorten($hash);
+                $js_file = $name . '.js';
+                $hash_file = $name . '.php';
 
-            if (!empty($content)) {
+                $createFile = !is_file($js_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash;
 
-                file_put_contents($js_file, implode(';', $content));
-                file_put_contents($hash_file, $hash);
-            }
+                $content = [];
 
-            if (is_file($js_file) && is_file($hash_file) && file_get_contents($hash_file) == $hash) {
+                foreach ($filesList as $key => $file) {
 
-                $files = array_merge([$js_file => $js_file], $files);
+                    if ($createFile) {
+
+                        $content[] = trim(file_get_contents($file), ';');
+                    }
+
+                    unset($files[$position][$key]);
+                }
+                    
+                if (!empty($content)) {
+
+                    file_put_contents($js_file, implode(';', $content));
+                    file_put_contents($hash_file, $hash);
+                }
+
+                if (is_file($js_file) && is_file($hash_file) && file_get_contents($hash_file) == $hash) {
+
+                    $files[$position] = array_merge([$js_file => $js_file], $files[$position]);
+                }
             }
         }
 
@@ -1461,37 +1480,124 @@ class GZipHelper {
 
         if (!empty($options['minifyjs'])) {
 
-            if (!empty($inline_js)) {
+            foreach($inline_js as $position => $js) {
+                    
+                foreach($js as $key => $data) {
 
-                $jSqueeze = new JSqueeze();
-                $inline_js = [trim($jSqueeze->squeeze(implode(';', $inline_js)), ';')];
+                    if (!empty($data)) {
+
+                        
+                        $jSqueeze = new JSqueeze();                  
+                        $inline_js[$position][$key] = trim($jSqueeze->squeeze($data), ';');
+                        
+                    }
+                }
             }
         }
 
-        $script = '';
+        $script = [
+    
+            'head' => '',
+            'body' => ''
+        ];
 
         $profiler->mark('replace <script>');
 
-        if (!empty($files)) {
+        $async = false;
 
-            if (count($files) == 1 && empty($inline_js)) {
+        foreach ($ignored as $position => $fileList) {
 
-                $script = '<script async defer src="' . array_shift($files) . '"></script>';
+        //    $script[$position] .=  implode('', $content);
 
+            
+            $attr = '';
+            $hasScript = !empty($inline_js[$position]) && empty($files[$position]);
+
+            if ($hasScript) {
+
+                $async = true;
+                $attr = ' onload="il(\''.$position.'\')"';
             }
 
-            else {
+            $script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
 
-                $script = '<script src="' . implode('"></script><script src="', $files) . '"></script>';
+            if ($hasScript) {
+
+                $script[$position] .= '<script type="text/foo">' . trim(implode(';', $inline_js[$position]), ';') . '</script>';
+                unset($inline_js[$position]);
             }
         }
 
-        if (!empty($inline_js)) {
+        foreach($files as $position => $fileList) {
+                
+            if (!empty($fileList)) {
 
-            $script .= '<script>' . trim(implode(';', $inline_js), ';') . '</script>';
+                if (count($fileList) == 1) {
+
+                    //  && empty($inline_js[$position])
+
+                    $attr = '';
+                    $hasScript = !empty($inline_js[$position]);
+
+                    if ($hasScript) {
+
+                        $async = true;
+                        $attr = ' onload="il(\''.$position.'\')"';
+                    }
+
+                    $script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
+
+                    if ($hasScript) {
+
+                        $script[$position] .= '<script type="text/foo">' . trim(implode(';', $inline_js[$position]), ';') . '</script>';
+                        unset($inline_js[$position]);
+                    }
+                }
+
+                else {
+
+                    $script[$position] = '<script src="' . implode('"></script><script src="', $fileList) . '"></script>';
+                }
+            }
         }
 
-        $body = str_replace('</body>', $script . '</body>', $body);
+        foreach($inline_js as $position => $content) {
+            
+            if (!empty($content)) {
+
+                $script[$position] .= '<script>' . trim(implode(';', $content), ';') . '</script>';
+            }
+        }
+        
+        $strings = [];
+        $replace = [];
+
+        if ($async) {
+                
+            if (!isset($script['body'])) {
+
+                $script['head'] = '';
+            }
+
+            $script['head'] = '<script>'.file_get_contents(__DIR__.'/loader.min.js').'</script>'.$script['head'];
+        }
+
+        foreach ($script as $position => $content) {
+
+            if (empty($content)) {
+
+                continue;
+            }
+
+            $tag = '</'.$position.'>';
+            $strings[] = $tag;
+            $replace[] = $content.$tag;
+        }
+
+        if (!empty($strings)) {
+                
+            $body = str_replace($strings, $replace, $body);
+        }
 
         $profiler->mark('done replace <script>');
 

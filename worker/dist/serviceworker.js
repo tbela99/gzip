@@ -1,7 +1,7 @@
 /* do not edit! */
 // @ts-check
 /* main service worker file */
-// build ba6ee78 2018-02-14 15:28:48-05:00
+// build b407c95 2018-02-15 23:18:49-05:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -581,7 +581,8 @@ self.addEventListener("activate", function(event) {
         return caches.keys().then(function(keyList) {
             const tokens = CACHE_NAME.split(/_/, 2);
             const search = tokens.length == 2 && tokens[0] + "_";
-            return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+            // delete older instances
+                        return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
         });
     }));
 });

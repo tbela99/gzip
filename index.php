@@ -16,7 +16,8 @@ $useEtag = strpos($uri, '1/') === 0;
 
 $uri = explode('/', $uri, $useEtag ? 3 : 2);
 
-$file = urldecode(preg_replace('~[#|?].*$~', '', end($uri)));
+$file = preg_replace('~[#|?].*$~', '', end($uri));
+$file = strpos($file, '%20') === false ? $file : urldecode($file);
 
 $utf8_file = utf8_decode($file);
 

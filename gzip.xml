@@ -18,6 +18,7 @@
         <folder>push</folder>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
+        <filename>loader.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
