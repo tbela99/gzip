@@ -19,6 +19,7 @@
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
         <filename>loader.min.js</filename>
+        <filename>cssloader.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
@@ -111,6 +112,8 @@
                         <!--<option value="1">JYes</option>-->
                         <option value="0">JNo</option>
                     </field>
+                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images Settings">

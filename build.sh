@@ -8,6 +8,8 @@ cd $DIR
 #
 uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
   --warn --mangle --keep-fnames --output ./loader.min.js -- ./loader.js
+uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
+  --warn --mangle --keep-fnames --output ./cssloader.min.js -- ./cssloader.js
 #
 #
 #

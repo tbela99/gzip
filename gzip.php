@@ -410,6 +410,16 @@ class PlgSystemGzip extends JPlugin
             $options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
         }
 
+        if(!empty($options['cssignore'])) {
+
+            $options['cssignore'] = preg_split('#\s+#s', $options['cssignore'], -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        if(!empty($options['cssremove'])) {
+
+            $options['cssremove'] = preg_split('#\s+#s', $options['cssremove'], -1, PREG_SPLIT_NO_EMPTY);
+        }
+
         foreach (['js', 'css', 'img', 'ch'] as $key) {
 
             $path = $_SERVER['SERVER_NAME'].'/'.$key.'/';

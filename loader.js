@@ -14,8 +14,13 @@ function il(position) {
 					const parent = oldScript.parentElement;
 					script.text = oldScript.text;
 
-					parent.insertBefore(script, oldScript);
-					parent.removeChild(oldScript);
+					try {
+						parent.insertBefore(script, oldScript);
+						parent.removeChild(oldScript);
+					} catch (e) {
+						console.error(e);
+						console.log(script.text);
+					}
 				};
 			}(scripts[i], document.createElement("script"))),
 			0
