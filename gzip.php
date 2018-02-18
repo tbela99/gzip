@@ -126,16 +126,16 @@ class PlgSystemGzip extends JPlugin
                     $object = new \Joomla\Registry\Registry($data->getProperties());
                 }
                 
-                if ($object->get('name') == 'plg_system_gzip') {
-
-                    if(empty($object->get('params.gzip.admin_area_locked'))) {
+                if ($object->get('type') == 'plugin' && $object->get('element') == 'gzip' && $object->get('folder') == 'system') {
+					
+                //    if(empty($object->get('params.gzip.admin_area_locked'))) {
 
                         foreach ($form->getXml()->xpath('//field[@name="admin_secret"]') as $field) {
 
-                            $field['disabled'] = 'disabled';
+                            $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', \JURI::root());
                             break;
                         }
-                    }
+                //    }
                 }
 
                 break;
@@ -171,6 +171,25 @@ class PlgSystemGzip extends JPlugin
         }
     }
     
+    public function onExtensionBeforeSave($context, $table, $isNew, $data = []) {
+
+		//  pattern="^([a-zA-Z0-9_-]*)$"
+        if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
+
+            $options = $data['params']['gzip'];
+			
+			if (isset($options['admin_secret'])) {
+				
+				if (!preg_match('#^([a-zA-Z0-9_-]*)$#', $options['admin_secret'])) {
+					
+					throw new \Exception('Invalid admin secret. You can only use numbers, letters, "_" and "-"', 400);
+				}
+			}
+        }
+
+        return true;
+    }
+
     public function onExtensionAfterSave($context, $table, $isNew, $data = []) {
 
         if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
@@ -328,6 +347,8 @@ class PlgSystemGzip extends JPlugin
         else if ($app->isAdmin()) {
 
             $secret = $this->params->get('gzip.admin_secret');
+
+        //    var_export($secret);die;
 
             if (!is_null($secret) && $_SERVER['REQUEST_METHOD'] == 'GET' && JFactory::getUser()->get('id') == 0 && !array_key_exists($secret, $_GET)) {
 

@@ -225,13 +225,7 @@
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Misc" />
                     <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default=""/>
-                    <field name="admin_area_locked" label="PLG_GZIP_FIELD_ADMIN_AREA_LOCKED_LABEL" description="PLG_GZIP_FIELD_ADMIN_AREA_LOCKED_DESCRIPTION" type="list" 
-                        class="btn-group" default="0" 
-                        onchange="document.getElementById('jform_params_gzip_admin_secret').disabled=this.selectedIndex!=0;">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="admin_secret" required="required" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" pattern="^[a-zA-Z0-9_-]{0,}$" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
+                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset><!--
             <fieldset name="advanced">

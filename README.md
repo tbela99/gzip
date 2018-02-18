@@ -16,6 +16,8 @@ Enabling SRI may cause javascript and css to not load if you use a cdn (cloudfla
 * Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
 * Range requests are supported for cached resources
 
+1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
+
 # Javascript Improvements
 
 * Fetch remote javascript files locally
@@ -76,7 +78,6 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## High priority list
 
-1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the footer
 1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
@@ -112,6 +113,7 @@ Add routes to customize fetch event networking startegy by using either a static
 1. Rebuild service worker and the manifest whenever the plugin is installed or the settings are updated
 1. Override meta name=generator with custom text
 1. Add a secret token to prevent administrator access
+1. Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
 
 ## V2.0
 
