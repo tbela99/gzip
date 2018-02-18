@@ -186,11 +186,15 @@
 	};
 
 	function merge(target) {
-		const deep = target === true,
-			args = Array.prototype.slice.call(arguments, 1);
-		let i, source, prop, value;
+		const args = Array.prototype.slice.call(arguments, 1);
+		let deep = typeof target == "boolean",
+			i,
+			source,
+			prop,
+			value;
 
-		if (deep === true) {
+		if (deep) {
+			deep = target;
 			target = args.shift();
 		}
 
@@ -202,16 +206,18 @@
 
 				switch (typeof value) {
 				case "object":
-					target[prop] =
-							deep == true
-								? merge(
-									deep,
-									value == undef
-										? value
-										: value instanceof Array ? [] : {},
-									value
-								)
-								: value;
+					if (value == undef || !deep) {
+						target[prop] = value;
+					} else {
+						target[prop] = merge(
+							deep,
+							typeof source[prop] == "object" &&
+								source[prop] != undef
+								? source[prop]
+								: value instanceof Array ? [] : {},
+							value
+						);
+					}
 					break;
 
 				default:

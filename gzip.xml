@@ -3,8 +3,8 @@
     <name>plg_system_gzip</name>
     <author>Thierry Bela</author>
     <creationDate>August 2016</creationDate>
-    <copyright>Copyright (C) 2005 - 2016 Open Source Matters. All rights reserved.</copyright>
-    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <copyright>Copyright (C) 2005 - 2016 Thierry Bela.</copyright>
+    <license>MIT License</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>www.tbela.net</authorUrl>
     <version>2.1.1</version>
@@ -18,6 +18,8 @@
         <folder>push</folder>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
+        <filename>loader.min.js</filename>
+        <filename>cssloader.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
@@ -34,7 +36,12 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field type="spacer" hr="true" />
+                </fields>
+            </fieldset>
+            <fieldset name="http_cache" label="HTTP">
+                <field type="spacer" label="Configure HTTP settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
                     <field type="spacer" label="HTTP Push" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
@@ -54,12 +61,7 @@
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                     </field>
-                    <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
-                        <option value="none">JNone</option>
-                        <option value="sha256">SHA256</option>
-                        <option value="sha384">SHA384</option>
-                        <option value="sha512">SHA512</option>
-                    </field>
+                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
                 </fields>
             </fieldset>
             <fieldset name="javascript" label="Javascript Settings">
@@ -110,6 +112,8 @@
                         <!--<option value="1">JYes</option>-->
                         <option value="0">JNo</option>
                     </field>
+                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images Settings">
@@ -132,6 +136,10 @@
                 <field type="spacer" label="Networking settings" />
                 <fields name="gzip">
                     <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>                    
+                    <field name="debug_pwa" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -201,6 +209,23 @@
                     </field>
                     <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
                     <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
+                </fields>
+            </fieldset>
+            <fieldset name="security" label="Security">
+                <field type="spacer" label="Configure Security settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                <field type="spacer" label="Sub Resource Integrity" />
+                    <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
+                        <option value="none">JNone</option>
+                        <option value="sha256">SHA256</option>
+                        <option value="sha384">SHA384</option>
+                        <option value="sha512">SHA512</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Misc" />
+                    <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default=""/>
+                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset><!--
             <fieldset name="advanced">

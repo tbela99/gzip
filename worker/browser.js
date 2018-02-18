@@ -9,6 +9,6 @@ if ("serviceWorker" in navigator) {
 		//    })
 		catch(function(error) {
 			//	console.log(error);
-			console.log("😭", error);
+			console.error("😭", error);
 		});
 }

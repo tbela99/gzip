@@ -8,6 +8,7 @@ self.addEventListener("activate", function(event) {
 				const tokens = CACHE_NAME.split(/_/, 2);
 				const search = tokens.length == 2 && tokens[0] + "_";
 
+				// delete older instances
 				return Promise.all(
 					keyList.map(
 						(key) =>

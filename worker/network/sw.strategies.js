@@ -34,19 +34,20 @@ SW.strategies = (function() {
 		 * @param {Request} request
 		 * @param {Response} response
 		 */
-		isCacheableRequest: (request, response) => ("cors" == request.mode ||
-					new URL(request.url, self.origin).origin == self.origin) &&
-				request.method == "GET" &&
-				response != undef &&
-				// https://www.w3.org/TR/SRI/#h-note6
-				(response.type == "basic" || 
-					response.type == "default") &&
-				response.ok &&
-				!response.bodyUsed;
+		// https://www.w3.org/TR/SRI/#h-note6
+		isCacheableRequest: (request, response) =>
+			("cors" == request.mode ||
+				new URL(request.url, self.origin).origin == self.origin) &&
+			request.method == "GET" &&
+			response != undef &&
+			(response.type == "basic" || response.type == "default") &&
+			response.ok &&
+			!response.bodyUsed
+	};
 
-		// if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
-		// if http response != 200 <- hmmm don't want to cache this <- stop it!
-		// if auth != basic <- are you private? <- stop it!
+	// if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
+	// if http response != 200 <- hmmm don't want to cache this <- stop it!
+	// if auth != basic <- are you private? <- stop it!
 
 	strategy[Symbol.iterator] = () => map[Symbol.iterator]();
 	Object.defineProperty(strategy, "size", { get: () => map.size });

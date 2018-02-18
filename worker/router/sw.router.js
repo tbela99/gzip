@@ -11,9 +11,9 @@
 
 	class Router {
 		constructor() {
-			this.routes = Object.create(null);
+			this.routes = Object.create(undef);
 			this.handlers = [];
-			this.defaultHandler = Object.create(null);
+			this.defaultHandler = Object.create(undef);
 		}
 
 		/**
