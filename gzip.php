@@ -127,15 +127,12 @@ class PlgSystemGzip extends JPlugin
                 }
                 
                 if ($object->get('type') == 'plugin' && $object->get('element') == 'gzip' && $object->get('folder') == 'system') {
-					
-                //    if(empty($object->get('params.gzip.admin_area_locked'))) {
+                
+                    foreach ($form->getXml()->xpath('//field[@name="admin_secret"]') as $field) {
 
-                        foreach ($form->getXml()->xpath('//field[@name="admin_secret"]') as $field) {
-
-                            $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', \JURI::root());
-                            break;
-                        }
-                //    }
+                        $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', \JURI::root());
+                        break;
+                    }
                 }
 
                 break;
@@ -276,7 +273,7 @@ class PlgSystemGzip extends JPlugin
 
                 if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
 
-                    $debug = ''; // $this->params->get('gzip.debug') ? '' : '.min';
+                    $debug = '';
 
                     header('Cache-Control: max-age=86400');
                     header('Content-Type: application/manifest+json;charset=utf-8');
@@ -407,6 +404,7 @@ class PlgSystemGzip extends JPlugin
             return;
         }
 
+        
         $options = $this->options;
         $prefix = 'cache/z/';
 
@@ -464,46 +462,23 @@ class PlgSystemGzip extends JPlugin
 
         $body = $app->getBody();
 
-        $profiler = JProfiler::getInstance('_gzip_');
+        $profiler = JProfiler::getInstance('Application');
 
         Gzip\GZipHelper::$options = $options;
 
+        $profiler->mark('beforeParseImages');
         $body = Gzip\GZipHelper::parseImages($body, $options);
+
+        $profiler->mark('afterParseImages');
         $body = Gzip\GZipHelper::parseCss($body, $options);
+
+        $profiler->mark('afterParseCss');
         $body = Gzip\GZipHelper::parseScripts($body, $options);
+        
+        $profiler->mark('afterParseScripts');
         $body = Gzip\GZipHelper::parseURLs($body, $options);
 
-        $profiler->mark('done');
-
-        if(!empty($options['debug'])) {
-
-            $quote = empty($options['minifyhtml']) ? '"' : '';
-            $body = preg_replace('#<html #', '<html data-prf='.$quote. htmlspecialchars(implode("\n", array_map(function ($mark) {
-
-                $m = [
-
-                  'time' => +$mark->time,
-                  'totalTime' => $mark->totalTime,
-                  'label' => $mark->label,
-                  'memory' => +$mark->memory,
-                  'totalMemory' => $mark->totalMemory
-                ];
-
-                return json_encode($m);
-
-            }, array_merge(Gzip\GZipHelper::$marks, $profiler->getMarks()))), ENT_QUOTES).$quote.' ', $body, 1);
-        }
-
-        if(!empty($options['pwacachepages']) && !empty($options['pwacachelifetime'])) {
-
-            $app->allowCache(true);
-
-            $dt = gmdate('D, d M Y H:i:s', time()).' GMT';
-
-            $app->setHeader('Date', $dt, true );
-            $app->setHeader('Last-Modified', $dt, true );
-            $app->setHeader('Cache-Control', /*'no-cache,no-store,'.*/ 'max-age='.(int) $options['pwacachelifetime'].',must-revalidate', true);
-        }
+        $profiler->mark('afterParseURLs');
 
         $app->setBody($body);
     }

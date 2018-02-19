@@ -78,6 +78,11 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## High priority list
 
+1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
+1. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
+1. IMAGES: Implement progressive images loading with intersectionObserver [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
+1. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
+1. IMAGES: Implement support for <pictures> element see [here]
 1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
@@ -94,7 +99,6 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Low priority list
 
-1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
 1. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
 1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)

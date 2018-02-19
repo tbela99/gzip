@@ -43,7 +43,7 @@ class GZipHelper {
         "woff2" => array('as' => 'font'),
         "svg" => array('as' => 'image')
     );
-    static $marks = [];
+ //   static $marks = [];
 
     // can use http cache / url rewriting
     static $accepted = array(
@@ -69,6 +69,7 @@ class GZipHelper {
     );
 
     // what's the use of this? base64 encoded image?
+    /*
     static $encoded = array(
         "gif" => "image/gif",
         "jpg" => "image/jpeg",
@@ -82,6 +83,7 @@ class GZipHelper {
         "woff2" => "application/font-woff2",
         "svg" => "image/svg+xml"
     );
+    */
 
     static $pwa_network_strategy = '';
 
@@ -355,9 +357,9 @@ class GZipHelper {
 
         $checksum = !empty($options['checksum']) ? $options['checksum'] : false;
 
-        $profiler = \JProfiler::getInstance('_url_');
+    //    $profiler = \JProfiler::getInstance('Application');
 
-        $profiler->mark('parse urls');
+    //    $profiler->mark('parse urls');
 
     //    static::$pwacache = [];
 
@@ -447,9 +449,9 @@ class GZipHelper {
 
         }, $body);
 
-        $profiler->mark('end parse urls');
+    //    $profiler->mark('end parse urls');
 
-        $profiler->mark('push urls');
+    //    $profiler->mark('push urls');
 
         if (!empty($pushed)) {
 
@@ -483,14 +485,14 @@ class GZipHelper {
             }
         }
 
-        $profiler->mark('end push urls');
+    //    $profiler->mark('end push urls');
 
         if (!empty($replace)) {
 
             return str_replace(array_keys($replace), array_values($replace), $body);
         }
 
-        static::$marks = array_merge(static::$marks, $profiler->getMarks());
+    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
     }
@@ -653,11 +655,11 @@ class GZipHelper {
 
         $async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
-        $profiler = \JProfiler::getInstance('_css_');
+    //    $profiler = \JProfiler::getInstance('Application');
 
-        $profiler->mark("parse <links>");
+    //    $profiler->mark("parse <links>");
 
-        $body = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $profiler, $path) {
+        $body = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
 
             $attributes = [];
 
@@ -746,10 +748,10 @@ class GZipHelper {
         }, $body);
 
         
-        $profiler->mark("done parse <link>");
+    //    $profiler->mark("done parse <link>");
         $hashFile = static::getHashMethod($options);
 
-        $profiler->mark("minify <links>");
+    //    $profiler->mark("minify <links>");
 
         $minify = !empty($options['minifycss']);
 
@@ -797,9 +799,9 @@ class GZipHelper {
         }
 
 
-        $profiler->mark("done minify <links>");
+    //    $profiler->mark("done minify <links>");
 
-        $profiler->mark("merge css ");
+    //    $profiler->mark("merge css ");
 
         if (!empty($options['mergecss'])) {
             
@@ -850,11 +852,11 @@ class GZipHelper {
                                     $css .= $media;
                                 }
 
-                                $profiler->mark("merge expand " . $name . " ");
+                            //    $profiler->mark("merge expand " . $name . " ");
 
                                 $css .= static::expandCss(file_get_contents($name), dirname($name), $path);
 
-                                $profiler->mark("done merge expand " . $attr['href'] . " ");
+                           //     $profiler->mark("done merge expand " . $attr['href'] . " ");
 
                                 if (!is_null($media)) {
 
@@ -940,8 +942,8 @@ class GZipHelper {
         }
         */
 
-        $profiler->mark("parse <links>");
-        $profiler->mark("parse <style>");
+    //    $profiler->mark("parse <links>");
+     //   $profiler->mark("parse <style>");
 
      //   $css = [];
 
@@ -972,7 +974,7 @@ class GZipHelper {
         
         if (!empty($options['criticalcssenabled'])) {
 
-            $profiler->mark("critical path css lookup");
+       //     $profiler->mark("critical path css lookup");
 
             $critical_path = isset($options['criticalcssclass']) ? $options['criticalcssclass'] : '';
 
@@ -1072,11 +1074,11 @@ class GZipHelper {
         //        $links['head']['critical'] = $critical_path;
         //    }
 
-            $profiler->mark("done critical path css lookup");
+       //     $profiler->mark("done critical path css lookup");
         }
 
         // extract web fonts
-        $profiler->mark("extract web fonts");
+     //   $profiler->mark("extract web fonts");
 
         $css = '';
         $web_fonts = '';
@@ -1124,7 +1126,7 @@ class GZipHelper {
             $links['head']['webfonts'] = empty($minifier) ? $web_fonts : $minifier->minify($web_fonts);
         }
 
-        $profiler->mark("done extract web fonts");
+    //    $profiler->mark("done extract web fonts");
 
         /*
 
@@ -1173,9 +1175,9 @@ class GZipHelper {
         }
         */
 
-        $profiler->mark("done parse <style>");
+     //   $profiler->mark("done parse <style>");
 
-        $profiler->mark("merge links & styles");
+    //    $profiler->mark("merge links & styles");
 
         $head_string = '';
         $body_string = '';
@@ -1265,9 +1267,9 @@ class GZipHelper {
             $body = str_replace($search, $replace, $body);
         }
 
-        $profiler->mark("done links & styles");
+    //    $profiler->mark("done links & styles");
 
-        static::$marks = array_merge(static::$marks, $profiler->getMarks());
+    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
     }
@@ -1455,7 +1457,7 @@ class GZipHelper {
 
         $comments = [];
 
-        $profiler = \JProfiler::getInstance('_css_');
+    //    $profiler = \JProfiler::getInstance('Application');
 
         $body = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$comments) {
 
@@ -1485,7 +1487,7 @@ class GZipHelper {
         $fetch_remote = !empty($options['fetchjs']);
         $remote_service = !empty($options['minifyjsservice']);
 
-        $profiler->mark('parse <script>');
+    //    $profiler->mark('parse <script>');
 
         // parse scripts
         $body = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, $path, $fetch_remote, $ignore, $remove) {
@@ -1596,7 +1598,7 @@ class GZipHelper {
 
         }, $body);
 
-        $profiler->mark('done parse <script>');
+  //      $profiler->mark('done parse <script>');
 
         $hashFile = static::getHashMethod($options);
 
@@ -1605,7 +1607,7 @@ class GZipHelper {
 
         $replace = [];
 
-        $profiler->mark('minify <script>');
+   //     $profiler->mark('minify <script>');
 
         if (!empty($options['minifyjs'])) {
 
@@ -1650,8 +1652,8 @@ class GZipHelper {
             }
         }
 
-        $profiler->mark('done minify <script>');
-        $profiler->mark('merge <script>');
+   //     $profiler->mark('done minify <script>');
+   //     $profiler->mark('merge <script>');
 
         if (!empty($options['mergejs'])) {
 
@@ -1707,7 +1709,7 @@ class GZipHelper {
             }
         }
 
-        $profiler->mark('done merge <script>');
+    //    $profiler->mark('done merge <script>');
 
         if (!empty($options['minifyjs'])) {
 
@@ -1735,7 +1737,7 @@ class GZipHelper {
             'body' => ''
         ];
 
-        $profiler->mark('replace <script>');
+    //    $profiler->mark('replace <script>');
 
         $async = false;
 
@@ -1842,7 +1844,7 @@ class GZipHelper {
             $body = str_replace($strings, $replace, $body);
         }
 
-        $profiler->mark('done replace <script>');
+    //    $profiler->mark('done replace <script>');
 
         if (!empty($comments)) {
 
@@ -1850,7 +1852,7 @@ class GZipHelper {
         }
 
     //    static::$pwacache = array_merge(static::$pwacache, $files);
-        static::$marks = array_merge(static::$marks, $profiler->getMarks());
+    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
     }
