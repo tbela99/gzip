@@ -115,11 +115,9 @@
 				arguments.length > 1 ? [].slice.call(arguments, 1) : [];
 
 			return Promise.all(
-				(self.$events[name] || []).concat().map(function(event) {
-					return new Promise(function(resolve) {
-						resolve(event.cb.apply(self, args));
-					});
-				})
+				(self.$events[name] || []).concat().map((event) => new Promise((resolve) => {
+					resolve(event.cb.apply(self, args));
+				}))
 			);
 		},
 		addPseudo(name, fn) {

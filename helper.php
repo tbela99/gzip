@@ -18,7 +18,8 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 
 class GZipHelper {
 
-    const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)=(["\'])(.*?)\3([\r\n\t ])?~';
+    // match empty attributes <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
+    const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~';
     static $options = [];
     static $regReduce;
     static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
@@ -343,6 +344,22 @@ class GZipHelper {
             return $hash;
         }, $body);
 
+        $body = preg_replace_callback('#(<script(\s[^>]*)?>)(.*?)</script>#s', function ($matches) use(&$replace) {
+
+            $hash = '--ht' . crc32($matches[3]) . 'ht--';
+            $replace[$hash] = $matches[3];
+
+            return $matches[1].$hash.'</script>';
+        }, $body);
+
+        $body = preg_replace_callback('#(<style(\s[^>]*)?>)(.*?)</style>#s', function ($matches) use(&$replace) {
+
+            $hash = '--ht' . crc32($matches[3]) . 'ht--';
+            $replace[$hash] = $matches[3];
+
+            return $matches[1].$hash.'</style>';
+        }, $body);
+
         // TODO: parse url() in styles
         $pushed = [];
         $types = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && isset($options['h2push']) ? array_flip($options['h2push']) : [];
@@ -363,11 +380,15 @@ class GZipHelper {
 
     //    static::$pwacache = [];
 
-        $body = preg_replace_callback('#<([^\s\\>]+)\s([^>]+)>#si', function ($matches) use($checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
+        $domains = [];
+
+    //    echo $body;die;
+
+        $body = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
             $tag = $matches[1];
 
-            return preg_replace_callback(static::regexAttr, function ($matches) use($tag, $checksum, $hashFile, $accepted, &$pushed, $types, $hashmap, $base, $options) {
+            return '<'.$matches[1].' '.preg_replace_callback(static::regexAttr, function ($matches) use($tag, $checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
                 $attr = strtolower($matches[2]);
 
@@ -376,8 +397,18 @@ class GZipHelper {
                 //    case 'src':
                 //    case 'href':
 
-                        $file = static::getName($matches[4]);
+                        $file = static::getName($matches[6]);
         
+                        if (preg_match('#^(https?:)?(//[^/]+)#', $file, $domain)) {
+
+                            if (empty($domain[1])) {
+
+                                $domain[1] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https:' : 'http:';
+                            }
+
+                            $domains[$domain[1].$domain[2]] = $domain[1].$domain[2];
+                        }
+
                         if (static::isFile($file)) {
 
                             $name = preg_replace('~[#?].*$~', '', $file);
@@ -445,7 +476,7 @@ class GZipHelper {
 
                 return $matches[0];
 
-            }, $matches[0]);
+            }, $matches[2]).'>';
 
         }, $body);
 
@@ -485,14 +516,21 @@ class GZipHelper {
             }
         }
 
-    //    $profiler->mark('end push urls');
+        if (!empty($domains)) {
+
+            unset($domains[(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https' : 'http').'://'.$_SERVER['SERVER_NAME']]);
+            unset($domains['http://get.adobe.com']);
+
+            if (!empty($domains)) {
+                    
+                $replace['<head>'] = '<head><link rel="preconnect" crossorigin href="'.implode('"><link rel="preconnect" crossorigin href="', $domains).'">';
+            }
+        }
 
         if (!empty($replace)) {
 
             return str_replace(array_keys($replace), array_values($replace), $body);
         }
-
-    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
     }
@@ -667,7 +705,7 @@ class GZipHelper {
 
                 foreach ($attr[2] as $k => $att) {
 
-                    $attributes[$att] = $attr[4][$k];
+                    $attributes[$att] = $attr[6][$k];
                 }
             }
 
@@ -955,7 +993,7 @@ class GZipHelper {
 
                 foreach ($attr[2] as $k => $att) {
 
-                    $attributes[$att] = $attr[4][$k];
+                    $attributes[$att] = $attr[6][$k];
                 }
             }
 
@@ -1179,6 +1217,9 @@ class GZipHelper {
 
     //    $profiler->mark("merge links & styles");
 
+        $search = [];
+        $replace = [];
+
         $head_string = '';
         $body_string = '';
 
@@ -1189,7 +1230,8 @@ class GZipHelper {
 
         if (isset($links['head']['webfonts'])) {
 
-            $head_string .= $links['head']['webfonts'];
+            $search[] = '<head>';
+            $replace[] = '<head>'.$links['head']['webfonts'];
             unset($links['head']['webfonts']);
         }
 
@@ -1246,9 +1288,6 @@ class GZipHelper {
                 }
             }
         }
-
-        $search = [];
-        $replace = [];
 
         if ($head_string !== '') {
 
@@ -1498,7 +1537,7 @@ class GZipHelper {
 
                 foreach ($attr[2] as $k => $att) {
 
-                    $attributes[$att] = $attr[4][$k];
+                    $attributes[$att] = $attr[6][$k];
                 }
             }
 

@@ -1,6 +1,11 @@
 ## Page Optimizer Plugin
 
-This plugin is complementary to [HTML Minifier](/projects/WO/repos/html-minifier/) plugin. It performs two things:
+There are additional plugins that help optmizing and profiling your page
+
+* [Server Timing Plugin](/projects/PWA/repos/server-timing/) enable the sevrer timing http headers
+* [HTML Minifier](/projects/WO/repos/html-minifier/) minify html in an html5 compliant way.
+
+This performs many things:
 
 * advanced page optimizations which drastically improve the page performance score over various tools.
 * turn the website into an installable Progressive Web Application
@@ -25,6 +30,7 @@ Enabling SRI may cause javascript and css to not load if you use a cdn (cloudfla
 * Ignore javascript files that match a pattern
 * Remove javascript files that match a pattern
 * Move javascript at the bottom of the page
+* load javascript in a non blocking way if there is only one javascript file in the page.
 
 # CSS Improvements
 
@@ -32,6 +38,7 @@ Enabling SRI may cause javascript and css to not load if you use a cdn (cloudfla
 * Merge css files (this process @import directive)
 * Do not process css files that match a pattern
 * Remove css files that match a pattern
+* Ignore css files that match a pattern
 * Load css files in a non blocking way
 
 # Critical CSS Path
@@ -78,7 +85,8 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## High priority list
 
-1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
+1. handle multiple rel values with stylesheet (example "alternate stylesheet")
+1. prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?
 1. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
 1. IMAGES: Implement progressive images loading with intersectionObserver [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
 1. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
@@ -99,7 +107,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Low priority list
 
-1. Manage the service worker settings from the from end (unregister, delete cache, etc ...)?
+1. Manage the service worker settings from the front end (unregister, delete cache, etc ...)?
 1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
 1. Mobile apps deep link?
@@ -107,6 +115,11 @@ Add routes to customize fetch event networking startegy by using either a static
 1. Integrate https://www.xarg.org/project/php-facedetect/ and https://onthe.io/learn/en/category/analytic/How-to-detect-face-in-image-with-PHP for better image optimization ?
 
 # Change History
+
+## V2.2
+
+1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
+1. automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
 
 ## V2.1
 
