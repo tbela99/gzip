@@ -33,6 +33,12 @@ cd ../worker
 #sed 's/LIB/SW/g' ../js/lib/lib.event.js > network/sw.event.js
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/browser.js -- ./browser.js
 uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.js > ./dist/browser.min.js
+#
+#
+uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/browser.uninstall.js -- ./browser.uninstall.js
+uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.uninstall.js > ./dist/browser.uninstall.min.js
+#
+#
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/onesignal.js -- ./onesignal/onesignal.js
 uglifyjs --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/onesignal.js > ./dist/onesignal.min.js
 # google-closure-compiler-js --compilationLevel=ADVANCED --assumeFunctionWrapper=false --languageOut=ES6 ./dist/browser.js > ./dist/browser.g.min.js

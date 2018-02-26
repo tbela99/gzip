@@ -9,10 +9,7 @@ This performs many things:
 
 * advanced page optimizations which drastically improve the page performance score over various tools.
 * turn the website into an installable Progressive Web Application
-
-# Known issue
-
-Enabling SRI may cause javascript and css to not load if you use a cdn (cloudflare?). They modify the file content and this results in the resource being blocked by the browser.
+* compute SRI for css and javascript files
 
 # General improvements
 
@@ -85,13 +82,15 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## High priority list
 
-1. handle multiple rel values with stylesheet (example "alternate stylesheet")
+1. resize images for mobile / tablet and leverage < img srcset > (even in css?)
+1. serve webp whenever the browser supports it
+1. resize images for mobile / tablet in css
 1. prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?
 1. IMAGES: read this [here](https://kinsta.com/blog/optimize-images-for-web/)
+1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. IMAGES: Implement progressive images loading with intersectionObserver [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/)
 1. IMAGES: Implement images delivery optimization see [here](https://www.smashingmagazine.com/2017/04/content-delivery-network-optimize-images/) and [here](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints)
 1. IMAGES: Implement support for <pictures> element see [here]
-1. Service worker cache expiration api (using localforage or a lightweight indexDb library)
 1. Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1. Messaging API (broadcasting messages to and from all/single clients)
 1. Remove < Link rel=preload > http header and use < link > HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
@@ -107,6 +106,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Low priority list
 
+1. Fetch remote resources periodically (css and javascript). right now they are updated only once.
 1. Manage the service worker settings from the front end (unregister, delete cache, etc ...)?
 1. Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1. Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
@@ -118,8 +118,10 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V2.2
 
+1. Disabling service worker will actually uninstall it
 1. Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
 1. automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
+1. Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
 
 ## V2.1
 

@@ -152,6 +152,8 @@ class PlgSystemGzip extends JPlugin
                     $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
                 }
 
+                $script = '';
+
                 if(!empty($this->options['pwaenabled'])) {                    
 
                     $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
@@ -161,9 +163,15 @@ class PlgSystemGzip extends JPlugin
 
                         $script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
                     }
-
-                    $document->addScriptDeclaration( $script);
                 }
+
+                else {
+                    
+                    $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js'));
+
+                }
+
+                $document->addScriptDeclaration( $script);
             }
         }
     }
@@ -215,11 +223,12 @@ class PlgSystemGzip extends JPlugin
                 $this->options = (array) $options;
             }
 
-            $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#\s,#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
+            $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
             $this->options['parse_url_attr']['src'] = '';
-			
-            if(!empty($this->options['pwaenabled'])) {
+            
+            // do not render blank js file when service worker is disabled
+        //    if(!empty($this->options['pwaenabled'])) {
 
                 $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
 
@@ -230,7 +239,7 @@ class PlgSystemGzip extends JPlugin
 
                 $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
                 $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
-            }
+        //    }
 
             $dirname = dirname($_SERVER['SCRIPT_NAME']);
 

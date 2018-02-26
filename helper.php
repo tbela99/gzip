@@ -16,14 +16,24 @@ use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
  * and open the template in the editor.
  */
 
+define('WEBP', function_exists('imagewebp') && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
+
 class GZipHelper {
 
     // match empty attributes <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
     const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~';
     static $options = [];
     static $regReduce;
-    static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
+//    static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
 //    static $pwacache = [];
+    static $images = array(
+        "gif" => array('as' => 'image'),
+        "jpg" => array('as' => 'image'),
+    //    "jpeg" => array('as' => 'image'),
+        "png" => array('as' => 'image'),
+        "webp" => array('as' => 'image')
+    );
+
     static $pushed = array(
         "gif" => array('as' => 'image'),
         "jpg" => array('as' => 'image'),
@@ -398,7 +408,7 @@ class GZipHelper {
                 //    case 'href':
 
                         $file = static::getName($matches[6]);
-        
+
                         if (preg_match('#^(https?:)?(//[^/]+)#', $file, $domain)) {
 
                             if (empty($domain[1])) {
@@ -711,13 +721,6 @@ class GZipHelper {
 
             if (!empty($attributes)) {
 
-            //    $attr = array_flip($match[1]);
-
-            //    foreach ($attributes as $key => $value) {
-
-            //        $attr[$key] = $match[3][$value];
-            //    }
-
                 if (isset($attributes['rel']) && $attributes['rel'] == 'stylesheet' && isset($attributes['href'])) {
 
                     $name = static::getName($attributes['href']);
@@ -789,8 +792,6 @@ class GZipHelper {
     //    $profiler->mark("done parse <link>");
         $hashFile = static::getHashMethod($options);
 
-    //    $profiler->mark("minify <links>");
-
         $minify = !empty($options['minifycss']);
 
         if ($minify) {
@@ -835,11 +836,6 @@ class GZipHelper {
                 }                    
             }
         }
-
-
-    //    $profiler->mark("done minify <links>");
-
-    //    $profiler->mark("merge css ");
 
         if (!empty($options['mergecss'])) {
             
@@ -933,57 +929,6 @@ class GZipHelper {
 
             $minifier = new CSSmin;
         }
-
-        /*
-        $position = $async ? 'body' : 'head';
-
-        if ($async) {
-
-            $body = str_replace('</body>', implode('', array_map(function ($link) use($options) {
-
-                        $css = '<link';
-
-                        if (isset($link['media'])) {
-
-                            $link['onload'] = 'this.media=&apos;' . str_replace(['"', "'", "\n"], ['&quot;', "\&apos;", ' '], $link['media']) . '&apos;;this.removeAttribute(&apos;onload&apos;)';
-                        } else {
-
-                            $link['onload'] = '[&apos;media&apos;,&apos;onload&apos;].forEach(function(p){this.removeAttribute(p)},this)';
-                        }
-
-                        $link['media'] = 'none';
-
-                        foreach ($link as $key => $value) {
-
-                            $css .= ' ' . $key . '="' . $value . '"';
-                        }
-
-                        return $css . '>';
-
-                    }, $links)) . '</body>', $body);
-
-            $profiler->mark("done merge css");
-        } else {
-
-            $body = str_replace('</head>', implode('', array_map(function ($link) use($options) {
-
-                                $css = '<link';
-
-                                foreach ($link as $key => $value) {
-
-                                    $css .= ' ' . $key . '="' . $value . '"';
-                                }
-
-                                return $css . '>';
-                            }, $links)) . '</head>', $body);
-
-        }
-        */
-
-    //    $profiler->mark("parse <links>");
-     //   $profiler->mark("parse <style>");
-
-     //   $css = [];
 
         $body = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use(&$links, $minifier) {
 
@@ -1107,12 +1052,6 @@ class GZipHelper {
             //    array_unshift($css, $critical_path);                
                 $links['head']['critical'] = empty($minifier) ? $critical_path : $minifier->minify($critical_path);
           }
-
-
-        //        $links['head']['critical'] = $critical_path;
-        //    }
-
-       //     $profiler->mark("done critical path css lookup");
         }
 
         // extract web fonts
@@ -1152,11 +1091,6 @@ class GZipHelper {
                 return false;
 
             }, $fonts[1])));
-
-        //    if(!empty($web_fonts)) {
-
-        //         $body = str_replace('<head>', '<head>'.$web_fonts, $body);
-        //    }
         }
 
         if (!empty($web_fonts)) {
@@ -1164,64 +1098,12 @@ class GZipHelper {
             $links['head']['webfonts'] = empty($minifier) ? $web_fonts : $minifier->minify($web_fonts);
         }
 
-    //    $profiler->mark("done extract web fonts");
-
-        /*
-
-        if (!empty($css)) {
-
-            $css = implode('', $css);
-
-            if (!empty($options['minifycss'])) {
-
-                if (empty($minifier)) {
-
-                    $minifier = new CSSmin;
-                }
-
-                $css = $minifier->minify($css);
-            }
-
-            $web_fonts = '';
-
-            // font preloading - need to be fixed, an invalid url is returned
-            if(preg_match_all('#url\(([^)]+)\)#', $css, $fonts)) {
-
-                $web_fonts = implode("\n", array_unique(array_map(function ($url) use($path) {
-
-                    $url = preg_replace('#(^["\'])([^\1])\1#', '$2', trim($url));
-
-                    $ext = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-
-                    if(isset(static::$accepted[$ext]) && strpos(static::$accepted[$ext], 'font') !== false) {
-
-                        //
-                        return '<!-- $path '.$path.' - $url '.$url.' --><link rel="preload" href="'.$url.'" as="font">';
-                    }
-
-                    return false;
-
-                }, $fonts[1])));
-
-                if(!empty($web_fonts)) {
-
-                    $body = str_replace('<head>', '<head>'.$web_fonts, $body);
-                }
-            }
-
-            $body = str_replace('</head>', '<style>' . $css . '</style></head>', $body);
-        }
-        */
-
-     //   $profiler->mark("done parse <style>");
-
-    //    $profiler->mark("merge links & styles");
-
         $search = [];
         $replace = [];
 
         $head_string = '';
         $body_string = '';
+        $noscript = '';
 
         if ($async) {
 
@@ -1266,16 +1148,29 @@ class GZipHelper {
 
                     foreach ($link as $attr => $value) {
 
-
                         $css .=' '.$attr.'="'.$value.'"';
                     }
 
                     $css .= '>';
 
+                    if ($async) {
+
+                        if (isset($link['media'])) {
+
+                            $noscript .= str_replace(['data-media', ' onload="_l(this)"', ' media="none"'], ['media', ''], $css);
+                        }
+
+                        else {
+
+                            $noscript .= $css;
+                        }
+                    }
+
                     $links[$position]['links'][$key] = $css;
                 }
 
                 ${$position.'_string'} .= implode('', $links[$position]['links']);
+                        
             }
 
             if (!empty($blob['style'])) {
@@ -1289,7 +1184,12 @@ class GZipHelper {
             }
         }
 
-        if ($head_string !== '') {
+        if ($head_string !== '' || $noscript != '') {
+
+            if ($noscript != '') {
+
+                $head_string .= '<noscript>'.$noscript.'</noscript>';
+            }
 
             $search[] = '</head>';
             $replace[] = $head_string.'</head>';
@@ -1908,25 +1808,38 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-        if (!empty($options['imageremote'])) {
+    //    if (!empty($options['imageremote'])) {
 
             $path = $options['img_path'];
 
             // parse scripts
-            $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path) {
+            $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options) {
+
+                $attributes = [];
+                
+                if(preg_match_all(static::regexAttr, $matches[1], $attrib)) {
+
+                    foreach($attrib[2] as $key => $attr) {
+
+                        $attributes[$attr] = $attrib[6][$key];
+                    }
+                }
+
+                $file = null;
+                $pathinfo = null;
 
                 // ignore custom type
-                if (preg_match('#\bsrc=(["\'])(.*?)\1#', $matches[1], $match)) {
+                if (isset($attributes['src'])) {
 
-                    $name = static::getName($match[2]);
+                    $name = static::getName($attributes['src']);
+                    $file = preg_replace('/(#|\?).*$/', '', $name);
 
-                    if (preg_match('#^(https?:)?//#', $name)) {
+					$basename = preg_replace('/(#|\?).*$/', '', basename($name));
+					$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
 
-                        $basename = preg_replace('/(#|\?).*$/', '', basename($name));
+                    if (!empty($options['imageremote']) && preg_match('#^(https?:)?//#', $name)) {
 
-                        if (preg_match('#\.((svg)|(jpg)|(png)|(gif))$#i', $basename)) {
-
-                            $pathinfo = pathinfo($basename, PATHINFO_EXTENSION);
+                        if (isset(static::$accepted[$pathinfo]) && strpos(static::$accepted[$pathinfo], 'image/') !== false) {
 
                             if (strpos($name, '//') === 0) {
 
@@ -1947,15 +1860,83 @@ class GZipHelper {
 
                             if (is_file($local)) {
 
-                                return str_replace($match[0], ' src="' . $local . '" ', $matches[0]);
+                                $attributes['src'] = $local;
+                                $file = $local;
                             }
                         }
+                    } 
+
+                    if (static::isFile($file)) {
+                    
+                        $sizes = \getimagesize($file);
+
+                        // end fetch remote files
+                        if(isset($options['imagedimensions'])) {
+
+                            if (!isset($attributes['width']) && !isset($attributes['height'])) {
+
+                                $attributes['width'] = $sizes[0];
+                                $attributes['height'] = $sizes[1];
+                            }
+                        }
+
+                        if (!empty($options['imageconvert']) &&  WEBP && $pathinfo != 'webp') {
+                            
+                            $newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
+
+                            if (!is_file($newFile)) {
+
+                                $img = null;
+
+                                switch ($pathinfo) {
+
+                                    case 'gif':
+
+                                        $img = \imagecreatefromgif($file);
+                                        break;
+
+                                    case 'png':
+
+                                        $img = \imagecreatefrompng($file);
+                                        break;
+
+                                    case 'jpg':
+
+                                        $img = \imagecreatefromjpeg($file);
+                                        break;
+                                }
+							}
+
+                           if ($img) {
+
+                                \imagewebp($img, $newFile);
+                           }
+
+						   if (\is_file($newFile)) {
+							   
+								$attributes['src'] = $newFile; 
+								$file = $newFile;
+						   }
+                        }
                     }
+                    
+
+                    if (!isset($attributes['alt'])) {
+
+                        $attributes['alt'] = '';
+                    }
+
+                    return '<img '.implode(' ', array_map(function ($value, $key) {
+
+                        return $key .= '="'.$value.'"';
+
+                    }, $attributes, array_keys($attributes))).
+                    '>';
                 }
 
                 return $matches[0];
             }, $body);
-        }
+    //    }
 
         return $body;
     }
