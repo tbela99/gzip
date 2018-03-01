@@ -352,6 +352,7 @@ class GZipHelper {
             $replace[$hash] = $matches[0];
 
             return $hash;
+
         }, $body);
 
         $body = preg_replace_callback('#(<script(\s[^>]*)?>)(.*?)</script>#s', function ($matches) use(&$replace) {
@@ -402,10 +403,23 @@ class GZipHelper {
 
                 $attr = strtolower($matches[2]);
 
-                if (isset($options['parse_url_attr'][$attr])) {
+                if ($attr == 'srcset') {
 
-                //    case 'src':
-                //    case 'href':
+                    $return = [];
+
+                    foreach (explode(',', $matches[6]) as $chunk) {
+
+                        $parts = explode(' ', $chunk);
+
+                        $name = trim($parts[0]);
+
+                        $return[] = (static::isFile($name) ? static::url($name) : $name).' '.$parts[1];
+                    }
+
+                    return ' '.$attr.'="'.implode(',', $return);
+                }
+
+                if (isset($options['parse_url_attr'][$attr])) {
 
                         $file = static::getName($matches[6]);
 
@@ -422,8 +436,6 @@ class GZipHelper {
                         if (static::isFile($file)) {
 
                             $name = preg_replace('~[#?].*$~', '', $file);
-
-                        //    if (is_file($name)) {
 
                                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
@@ -1218,7 +1230,7 @@ class GZipHelper {
         return preg_replace(static::$regReduce, '', $name);
     }
 
-    public static function shorten($id, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@+=,') {
+    public static function shorten($id, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
 
         $base = strlen($alphabet);
         $short = '';
@@ -1918,8 +1930,82 @@ class GZipHelper {
 								$file = $newFile;
 						   }
                         }
-                    }
-                    
+
+						// responsive images?
+						if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
+
+							// build mq based on actual image size
+							$maxwidth = $sizes[0];
+							$mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
+
+								return $size < $maxwidth;								
+                            });
+
+                            // we need to resize the images
+                            if (!empty($mq)) {
+
+                                $image = null;
+                                $resource = null;
+                                $method = empty($options['imagesresizestrategy']) ? 'CROP_CENTER' : $options['imagesresizestrategy'];
+                                $const = constant('\Image\Image::'.$method);
+                                $hash = sha1($file);
+                                $short_name = strtolower(str_replace('CROP_', '', $method));
+                                $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
+                                
+                                $images = array_map(function ($size) use($file, $hash, $short_name, $path) {
+
+                                    return $path.$hash.'-'.$short_name.'-'.$size.'-'.basename($file);
+
+                                }, $mq);
+
+                                $srcset = [];
+
+                                foreach ($images as $k => $img) {
+
+                                    if (!\is_file($img)) {
+
+                                        if (\is_null($image)) {
+
+                                            if (!\is_file($crop)) {
+                                                    
+                                                $image = new \Image\Image($file);
+
+                                                // resize image to use less memory
+                                                if ($maxwidth > 1200) {
+
+                                                    $image->setSize(1200);
+                                                }
+                                                
+                                                $image->resizeAndCrop($mq[$k], null, $method)->save($crop);
+                                            }
+                                            
+                                            else {
+
+                                                $image = new \Image\Image($crop);
+                                            }
+                                        }
+
+                                        $image->setSize($mq[$k])->save($img);
+                                    }
+
+                                    $srcset[] = $img.' '.$mq[$k].'w';
+                                }
+
+                                $srcset[] = $file.' '.$sizes[0].'w';
+                                $maxwidth = end($mq) + 1;
+
+                                $mq = array_map(function ($size) {
+
+                                    return '(max-width: '.$size.'px)';
+                                });
+
+                                $mq[] = '(min-width: '.$maxwidth.'px)';
+
+                                $attributes['srcset'] = implode(',', $srcset);
+                                $attributes['sizes'] = implode(',', $mq);
+                            }						
+						}
+					}
 
                     if (!isset($attributes['alt'])) {
 
@@ -1930,13 +2016,12 @@ class GZipHelper {
 
                         return $key .= '="'.$value.'"';
 
-                    }, $attributes, array_keys($attributes))).
-                    '>';
+					}, 
+					$attributes, array_keys($attributes))).'>';
                 }
 
                 return $matches[0];
             }, $body);
-    //    }
 
         return $body;
     }

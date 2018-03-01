@@ -140,7 +140,15 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="imagesresizestrategy" label="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_LABEL"
+                        description="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_DESCRIPTION" type="list" default="CROP_CENTER">
+                        <option value="CROP_DEFAULT">JOPTION_IMAGE_RESIZE_CROP_DEFAULT</option>
+                        <option value="CROP_CENTER">JOPTION_IMAGE_RESIZE_CROP_CENTER</option>
+                        <option value="CROP_ENTROPY">JOPTION_IMAGE_RESIZE_CROP_ENTROPY</option>
+                        <option value="CROP_FACE">JOPTION_IMAGE_RESIZE_CROP_FACE</option>
+                    </field>
                     <field name="sizes" label="PLG_GZIP_FIELD_IMAGE_SIZES_LABEL" multiple="multiple" description="PLG_GZIP_FIELD_IMAGE_SIZES_DESCRIPTION" type="list" default="">
+                        <option value="1024">1024px</option>
                         <option value="768">768px</option>
                         <option value="320">320px</option>
                     </field>

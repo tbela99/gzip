@@ -7,13 +7,16 @@
  * @author abidibo abidibo@gmail.com
  * 
  * @author Thierry Bela
- * extended to add face detection and namespacing
-    
-    
+ * extended to add face detection and namespacing, better crop area detection    
  */
 
  namespace Image;
-
+ 
+ // php 7.1
+ if (!defined('IMAGETYPE_WEBP') && function_exists('imagecreatefromwebp')) {
+	 
+	 define('IMAGETYPE_WEBP', 'webp');
+ }
 
 /**
  * @brief Classe per il trattamento di immagini
@@ -24,21 +27,16 @@
 class Image {
 
     private $_abspath;
-    private $_image;
-    private $_width;
-    private $_height;
+    private $__image;
+ //   private $_width;
+  //  private $_height;
     private $_image_type;
 	
 	const CROP_DEFAULT = 1;
 	const CROP_CENTER = 2;
 	const CROP_ENTROPY = 3;
-    const CROP_FACE = 4;
-    
-    const IMAGE_JPEG = IMAGETYPE_JPEG;
-    const IMAGE_GIF = IMAGETYPE_GIF;
-    const IMAGE_PNG = IMAGETYPE_PNG;
-    const IMAGE_WEBP = IMAGETYPE_WEBP;
-
+	const CROP_FACE = 4;
+	
     /**
      * @brief Costruttore
      * @param string $abspath percorso assoluto del file
@@ -51,21 +49,22 @@ class Image {
 
         $image_info = getimagesize($abspath);
         $this->_abspath = $abspath;
-        $this->_width = $image_info[0];
-        $this->_height = $image_info[1];
+    //    $this->_width = $image_info[0];
+    //    $this->_height = $image_info[1];
         $this->_image_type = $image_info[2];
-
+		
         if($this->_image_type == IMAGETYPE_JPEG) {
             $this->_image = imagecreatefromjpeg($abspath);
         }
-        elseif($this->_type == IMAGETYPE_GIF) {
+        elseif($this->_image_type == IMAGETYPE_GIF) {
             $this->_image = imagecreatefromgif($abspath);
         }
-        elseif($this->_type == IMAGETYPE_PNG) {
+        elseif($this->_image_type == IMAGETYPE_PNG) {
             $this->_image = imagecreatefrompng($abspath);
         }
-        elseif($this->_type == IMAGETYPE_WEBP) {
+        elseif(function_exists('imagecreatefromwebp') && strtolower(pathinfo($abspath, PATHINFO_EXTENSION)) == 'webp') {
             $this->_image = imagecreatefromwebp($abspath);
+			$this->_image_type = IMAGETYPE_WEBP;
         }
         else {
             throw new InvalidArgumentException ('Unsupported image type', 400);
@@ -100,52 +99,80 @@ class Image {
     }
 
     /**
+     * 
+     *
+     * @param resource $image
+     * @return void
+     */
+    public function setResource($image) {
+        $this->_image = $image;
+        return $this;
+    }
+
+    /**
      * @brief Salva l'immagine su filesystem
      * @param string $abspath percorso (default il percorso originale dell'immagine)
      * @param int $compression compressione, default 75
      * @param string $permission permessi
      * @return void
      */
-    public function save($abspath = null, $type = NULL, $compression=75) {
-//
-   //     if(is_null($abspath)) {
-   //         $abspath = $this->_abspath;
-   //     }
+    public function save($abspath = null, $compression=75) {
+   
+		$type = $this->_image_type;
+		
+		if (!is_null($abspath)) {
+        
+            $extension = strtolower(pathinfo($abspath, PATHINFO_EXTENSION));
 
-        if (is_null($type)) {
-
-            $type = $this->_image_type;
-        }
-
-        switch ($type) {
-
-            case IMAGETYPE_JPEG:
-
-                imagejpeg($this->_image, $abspath, $compression);
-                break;
+			switch($extension) {
+			
+				case 'jpg':
+				
+					$type = IMAGETYPE_JPEG;
+					break;
+				case 'png':
+				
+					$type = IMAGETYPE_PNG;
+					break;
+				case 'gif':
+				
+					$type = IMAGETYPE_GIF;
+					break;
+				case 'webp':
                 
-            case IMAGETYPE_GIF:
+                    if (defined('IMAGETYPE_WEBP')) {
+                            
+                        $type = IMAGETYPE_WEBP;
+                    
+					    break;
+                    }
 
-                imagegif($this->_image, $abspath);
-                break;
+                default:
 
-            case IMAGETYPE_PNG: 
+                    throw new \InvalidArgumentException('Unsupported file type '.$extension, 400);
+			}
+		}
 
-                imagepng($this->_image, $abspath);
-                break;
-
-            case IMAGETYPE_WEBP:
-
-                imagewebp($this->_image, $abspath);
-                break;
-
-            default:
-            
-                throw new \InvalidArgumentException('Invalid image type specified '.$type, 400);
+        if($type == IMAGETYPE_JPEG) {
+            imagejpeg($this->_image, $abspath, $compression);
+        }
+        elseif($type == IMAGETYPE_GIF) {
+            imagegif($this->_image, $abspath);
+        }
+        elseif($type == IMAGETYPE_PNG) {
+            imagepng($this->_image, $abspath);
+        }
+        elseif($type == IMAGETYPE_WEBP) {
+            imagewebp($this->_image, $abspath, $compression);
         }
     }
 
-    public function resizeAndCrop($width, $height, $method = Image::CROP_DEFAULT, $x0 = 0, $y0 = 0, $options = array()) {
+    public function resizeAndCrop($width, $height = null, $method = Image::CROP_DEFAULT, $x0 = 0, $y0 = 0, $options = array()) {
+
+        if (\is_null($height)) {
+
+            $height = $this->getHeight() * $width / $this->getWidth();
+        }
 
         switch ($method) {
 
@@ -154,9 +181,9 @@ class Image {
                 $this->cropEntropy($width, $height, $options);
                 break;
                 
-            case Image::CROP_CENTER:
+            case Image::CROP_FACE:
 
-                $this->cropCenter($width, $height, $options);
+                $this->cropFace($width, $height, $options);
                 break;
                 
             case Image::CROP_CENTER:
@@ -183,7 +210,18 @@ class Image {
      * @return void
      */
     public function crop($width, $height, $x0, $y0, $options = array()) {
-        $this->_image = $this->cropImage($this->_image, $width, $height, $x0, $y0, $options);
+		
+		
+		$size = $this->getBestFit($width, $height, $width, $height);
+				
+		$x0 = max(0, $x0 - $size['width'] / 2);
+		$y0 = max(0, $y0 - $size['height'] / 2);
+				
+		$x0 = min($x0, $this->getWidth() - $size['width']);
+		$y0 = min($y0, $this->getHeight() - $size['width']);
+			
+        $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
+		$this->setSize($width, $height, $options );
     }
 
     /**
@@ -194,11 +232,48 @@ class Image {
      * @return void
      */
     public function cropCenter($width, $height, $options = array()) {
-        $x0 = (imagesx($this->_image) - $width)/2;
-        $y0 = (imagesy($this->_image) - $height)/2;
-        $this->_image = $this->cropImage($this->_image, $width, $height, $x0, $y0, $options);
+		
+		$size = $this->getBestFit($width, $height, $width, $height);
+						
+        $x0 = ($this->getWidth() - $size['width'])/2;
+        $y0 = ($this->getHeight() - $size['height'])/2;
+				
+        $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
+		$this->setSize($width, $height, $options );
     }
 	
+	protected function getBestFit($width, $height, $regionWidth, $regionHeight) {
+	
+			 // ($this->faceRects);
+			
+			// get best crop size 
+			$scale = $width > $height ? $height / $width : $width / $height;
+			
+		//	if ($crX != $crY) {
+			$side = min($this->getWidth(), $this->getHeight()); // * $scale;
+				
+				// crop the image with our region inside
+			$newWidth = $width > $height ? $side : $side * $scale;
+			$newHeight = $width > $height ? $side * $scale : $side;
+//			/ max($rect['x'], $rect['y']);
+		//	}
+		
+			$scale = min($newWidth, $newHeight) / max($regionWidth, $regionHeight);
+			
+			return ['width' => $newWidth, 'height' => $newHeight];
+			
+		//	var_dump($scale);
+		
+		//	var_dump(['$crX' => $crX, '$crY' => $crY, '$scale' => $scale, '$width' => $width, '$height' => $height,  '$zoneW' => $zoneW, '$zoneH' => $zoneH]);
+			
+		//	$x0 = max(0, $rect['x'] + ($rect['width'] - $crX) / 2);
+		//	$y0 = max(0, $rect['y'] + ($rect['height'] - $crY) / 2);
+		
+	//	return ['$scale' => $scale, 'x' => max(0, $rect['x'] + ($rect['width'] - $crX) / 2), 'y' => max(0, $rect['y'] + ($rect['height'] - $crY) / 2), $crX, $crY];
+			
+			
+}
+
 	public function cropFace($width, $height, $options = array()) {
 		
 		$this->detectFaces();
@@ -211,17 +286,80 @@ class Image {
 		else {
             
             // x, y width, height
-            $rect = array_shift($this->faceRects);
-            
-            $x0 = max(0, $rect['x']+ ($rect['width'] - $width) / 2); //;
-            $y0 = max(0, $rect['y'] + ($rect['height'] - $height) / 2);
-            
-            $this->_image = $this->cropImage($this->_image, $width, $height, $x0, $y0, $options);
+			$x0 = null;
+			$y0 = null;
+			$x1 = null;
+			$y1 = null;
+			
+			foreach($this->faceRects as $rect) {
+				
+				if (is_null($x0) || $x0 > $rect['x']) {
+					
+					$x0 = $rect['x'];
+				}
+				
+				if (is_null($y0) || $y0 > $rect['y']) {
+					
+					$y0 = $rect['y'];
+				}
+				
+				if (is_null($x1) || $x1 < $rect['x'] + $rect['width']) {
+					
+					$x1 = $rect['x'] + $rect['width'];
+				}
+				
+				if (is_null($y1) || $y1 < $rect['y'] + $rect['height']) {
+					
+					$y1 = $rect['y'] + $rect['height'];
+				}
+			}
+			
+			
+            $rect = ['x' => $x0, 'width' => $x1 - $x0, 'y' => $y0, 'height' => $y1 - $y0];
+			
+			if ($rect['y'] > 500) {
+				
+				$rect['y'] -= 500;
+			//	$rect['width'] += 200;
+			}
+					
+			if ($rect['y'] > 300) {
+				
+				$rect['y'] -= 300;
+			//	$rect['width'] += 200;
+			}
+					
+			else if ($rect['y'] > 200) {
+				
+				$rect['y'] -= 200;
+			//	$rect['width'] += 200;
+			}
+			else {
+				
+				$rect['y'] = 0;
+			//	$rect['width'] += 200;
+			}
+						
+			
+			$size = $this->getBestFit($width, $height, $rect['width'], $rect['width']);
+						
+			$x0 = max(0, $rect['x'] + ($rect['width'] - $size['width']) / 2);
+			$y0 = max(0, $rect['y'] + ($rect['height'] - $size['height']) / 2);
+			
+			$x0 = min($x0, $this->getWidth() - $size['width']);
+			$y0 = min($y0, $this->getHeight() - $size['width']);
+			
+		//	$r1 = $rect['width'] / $rect['height'];
+		//	$r2 = $width / $height;
+			
+			// make this rect feat into a scaled rectangle with width / height dimensions
+			
+            // crop and resize
+            $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
 			// compute rect that contains all the faces
 		}
-     //   $x0 = (imagesx($this->_image) - $width)/2;
-     //   $y0 = (imagesy($this->_image) - $height)/2;
-     //   $this->_image = $this->cropImage($this->_image, $width, $height, $x0, $y0, $options);
+		
+		$this->setSize($width, $height, $options );
 	}
 
     /**
@@ -233,6 +371,7 @@ class Image {
      */
     public function cropEntropy($width, $height, $options = array()) {
         $this->_image = $this->cropImageEntropy($this->_image, $width, $height, $options);
+		$this->setSize($width, $height, $options );
     }
 	
 	protected function detectFaces() {
@@ -244,16 +383,19 @@ class Image {
 		
 		$this->faceRects = [];
 		
-		$maxScale = min($this->_width/$this->classifierSize[0], $this->_height/$this->classifierSize[1]);
-		$grayImage = array_fill(0, $this->_width, array_fill(0, $this->_height, null));
-		$img = array_fill(0, $this->_width, array_fill(0, $this->_height, null));
-		$squares = array_fill(0, $this->_width, array_fill(0, $this->_height, null));
+		$width = $this->getWidth();
+		$height = $this->getHeight();
 		
-		for($i = 0; $i < $this->_width; $i++)
+		$maxScale = min($width/$this->classifierSize[0], $height/$this->classifierSize[1]);
+		$grayImage = array_fill(0, $width, array_fill(0, $height, null));
+		$img = array_fill(0, $width, array_fill(0, $height, null));
+		$squares = array_fill(0, $width, array_fill(0, $height, null));
+		
+		for($i = 0; $i < $width; $i++)
 		{
 			$col=0;
 			$col2=0;
-			for($j = 0; $j < $this->_height; $j++)
+			for($j = 0; $j < $height; $j++)
 			{
 				$colors = imagecolorsforindex($this->_image, imagecolorat($this->_image, $i, $j));
 		
@@ -276,9 +418,9 @@ class Image {
 			$step = (int)($scale*24*$increment);
 			$size = (int)($scale*24);
 			
-			for($i = 0; $i < $this->_width-$size; $i += $step)
+			for($i = 0; $i < $width-$size; $i += $step)
 			{
-				for($j = 0; $j < $this->_height-$size; $j += $step)
+				for($j = 0; $j < $height-$size; $j += $step)
 				{
 					$pass = true;
 					$k = 0;
@@ -355,6 +497,30 @@ class Image {
     }
 
     /**
+     * @brief Resize dell'immagine alle dimensioni fornite
+     * @param resource $image resource dell'immagine
+     * @param int $width Larghezza della thumb
+     * @param int $height Altezza della thumb
+     * @param array $options Opzioni.
+     * @return resource immagine ridimensionata
+     */
+    public function setSize($width, $height = null, $options = array()) {
+
+        if (is_null($height)) {
+
+            $height = $this->getHeight() * $width / $this->getWidth();
+        }
+
+        if ($width == $this->getWidth() && $height == $this->getHeight()) {
+
+            return $this;
+        }
+ 
+        $this->_image = $this->resizeImage($this->_image, $width, $height, $options);
+        return $this;
+    }
+
+    /**
      * @brief Crop dell'immagine nella parte con maggiore entropia
      * @param resource $image resource immagine
      * @param int $width larghezza crop
@@ -371,7 +537,16 @@ class Image {
         $left_x = $this->slice($image, $width, 'h');
         $top_y = $this->slice($image, $height, 'v');
 
-        $new_image = $this->cropImage($image, $width, $height, $left_x, $top_y, $options);
+		$size = $this->getBestFit($width, $height, $width, $height);
+				
+		$left_x = max(0, $left_x - $size['width'] / 2);
+		$top_y = max(0, $top_y - $size['height'] / 2);
+						
+		$left_x = min($left_x, $this->getWidth() - $size['width']);
+		$top_y = min($top_y, $this->getHeight() - $size['width']);
+			
+						
+        $new_image = $this->cropImage($image, $size['width'], $size['height'], $left_x, $top_y, $options);
 
         return $new_image;
     }
@@ -535,6 +710,37 @@ class Image {
         // $value is always 0.0 or negative, so transform into positive scalar value
         return -$value;
     }
+}
+
+class Rect
+{
+	public $x1;
+	public $x2;
+	public $y1;
+	public $y2;
+	public $weight;
+	
+	public function __construct($x1, $x2, $y1, $y2, $weight)
+	{
+		$this->x1 = $x1;
+		$this->x2 = $x2;
+		$this->y1 = $y1;
+		$this->y2 = $y2;
+		$this->weight = $weight;
+	}
+	
+	public static function fromString($text)
+	{
+		$tab = explode(" ", $text);
+		$x1 = intval($tab[0]);
+		$x2 = intval($tab[1]);
+		$y1 = intval($tab[2]);
+		$y2 = intval($tab[3]);
+		$f = floatval($tab[4]);
+		
+		return new Rect($x1, $x2, $y1, $y2, $f);
+	}
+
 }
 
 
