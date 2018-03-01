@@ -1,14 +1,10 @@
 // @ts-check
 /* global CACHE_NAME */
-self.addEventListener("install", function(event) {
+self.addEventListener("install", event => {
 	event.waitUntil(
-		caches.
-			open(CACHE_NAME).
-			then(function(cache) {
-				return cache.addAll("{preloaded_urls}");
-			}).
-			then(function() {
-				return self.skipWaiting();
-			})
+		caches.open(CACHE_NAME).then(async cache => {
+			await cache.addAll("{preloaded_urls}");
+			return self.skipWaiting();
+		})
 	);
 });

@@ -1,7 +1,7 @@
 /* do not edit! */
 // @ts-check
 /* main service worker file */
-// build 0b4a56a 2018-02-16 23:04:52-05:00
+// build ec07517 2018-02-22 18:52:12-05:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -241,11 +241,9 @@ const scope = "{scope}";
             name = name.toLowerCase();
             const self = this;
             const args = arguments.length > 1 ? [].slice.call(arguments, 1) : [];
-            return Promise.all((self.$events[name] || []).concat().map(function(event) {
-                return new Promise(function(resolve) {
-                    resolve(event.cb.apply(self, args));
-                });
-            }));
+            return Promise.all((self.$events[name] || []).concat().map(event => new Promise(resolve => {
+                resolve(event.cb.apply(self, args));
+            })));
         },
         addPseudo(name, fn) {
             this.$pseudo[name] = fn;
@@ -565,25 +563,23 @@ for (entry of strategies) {
 //}
 // @ts-check
 /* global CACHE_NAME */
-self.addEventListener("install", function(event) {
-    event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
-        return cache.addAll("{preloaded_urls}");
-    }).then(function() {
+self.addEventListener("install", event => {
+    event.waitUntil(caches.open(CACHE_NAME).then(async cache => {
+        await cache.addAll("{preloaded_urls}");
         return self.skipWaiting();
     }));
 });
 
 // @ts-check
 /* global CACHE_NAME */
-self.addEventListener("activate", function(event) {
+self.addEventListener("activate", event => {
     // delete old app owned caches
-    event.waitUntil(self.clients.claim().then(function() {
-        return caches.keys().then(function(keyList) {
-            const tokens = CACHE_NAME.split(/_/, 2);
-            const search = tokens.length == 2 && tokens[0] + "_";
-            // delete older instances
-                        return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
-        });
+    event.waitUntil(self.clients.claim().then(async () => {
+        const keyList = await caches.keys();
+        const tokens = CACHE_NAME.split(/_/, 2);
+        const search = tokens.length == 2 && tokens[0] + "_";
+        // delete older instances
+                return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
     }));
 });
 
@@ -593,7 +589,6 @@ self.addEventListener("activate", function(event) {
  * @param {FetchEvent} event
  */
 self.addEventListener("fetch", event => {
-    //	if (event.request.url.indexOf("data:") != 0) {
     const handler = SW.router.getHandler(event.request.url, event);
     if (handler != undef) {
         event.respondWith(handler.handle(event).catch(error => {
