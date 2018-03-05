@@ -16,6 +16,7 @@
         <folder>language</folder>
         <folder>worker/dist</folder>
         <folder>push</folder>
+        <filename>autoload.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
         <filename>loader.min.js</filename>
@@ -137,6 +138,14 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="imageresize" label="PLG_GZIP_FIELD_IMAGE_RESIZE_LABEL" description="PLG_GZIP_FIELD_IMAGE_RESIZE_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="imagecssresize" label="PLG_GZIP_FIELD_IMAGE_CSS_RESIZE_LABEL" description="PLG_GZIP_FIELD_IMAGE_CSS_RESIZE_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="imagesvgplaceholder" label="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_LABEL" description="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
