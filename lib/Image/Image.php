@@ -27,7 +27,7 @@
 class Image {
 
     private $_abspath;
-    private $_image;
+    private $_image = null;
  //   private $_width;
   //  private $_height;
     private $_image_type;
@@ -48,7 +48,13 @@ class Image {
 			$this->load($abspath);
         }
 	}
-	
+    
+    /**
+     * Load image
+     *
+     * @param string $file
+     * @return \Image\Image this instance
+     */
 	public function load ($file) {
 
         if(!is_file($file)) {
@@ -291,19 +297,6 @@ class Image {
 		$svg->loadImageFromResource($this->_image);
 		$svg->process();
 
-        /*
-		if (is_null($path)) {
-
-			header('Content-type: image/svg+xml');
-			echo $svg->getSVG(1);
-		}
-
-		else {
-
-			file_put_contents($path, $svg->getSVG(1));
-        }
-        */
-
 		return $svg->getSVG(1);
 	}
 	
@@ -383,7 +376,7 @@ class Image {
 		return $this->setSize($width, $height, $options );
     }
 	
-	protected function getBestFit($width, $height, $regionWidth, $regionHeight) {
+	public function getBestFit($width, $height, $regionWidth, $regionHeight) {
 	
 			 // ($this->faceRects);
 			

@@ -444,7 +444,7 @@ class PlgSystemGzip extends JPlugin
 
         Gzip\GZipHelper::$options = $options;
 
-        $profiler->mark('beforeParseImages');
+    //    $profiler->mark('beforeParseImages');
         $body = Gzip\GZipHelper::parseImages($body, $options);
 
         $profiler->mark('afterParseImages');
@@ -457,7 +457,6 @@ class PlgSystemGzip extends JPlugin
         $body = Gzip\GZipHelper::parseURLs($body, $options);
 
         $profiler->mark('afterParseURLs');
-
         $app->setBody($body);
     }
 
