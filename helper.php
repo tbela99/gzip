@@ -21,9 +21,13 @@ define('WEBP', function_exists('imagewebp') && strpos($_SERVER['HTTP_ACCEPT'], '
 class GZipHelper {
 
     // match empty attributes <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
-    const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~';
+    const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
+    const regexUrl = '#url\(([^)]+)\)#';
     static $options = [];
     static $regReduce;
+
+    static $cssBackgrounds = [];
+
 //    static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
 //    static $pwacache = [];
     static $images = array(
@@ -385,15 +389,7 @@ class GZipHelper {
 
         $checksum = !empty($options['checksum']) ? $options['checksum'] : false;
 
-    //    $profiler = \JProfiler::getInstance('Application');
-
-    //    $profiler->mark('parse urls');
-
-    //    static::$pwacache = [];
-
         $domains = [];
-
-    //    echo $body;die;
 
         $body = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
@@ -416,7 +412,7 @@ class GZipHelper {
                         $return[] = (static::isFile($name) ? static::url($name) : $name).' '.$parts[1];
                     }
 
-                    return ' '.$attr.'="'.implode(',', $return);
+                    return ' '.$attr.'="'.implode(',', $return).'"';
                 }
 
                 if (isset($options['parse_url_attr'][$attr])) {
@@ -664,10 +660,11 @@ class GZipHelper {
                 }
             }
 
-            return "\n" . ' /* url ' . $matches[1] .
+            return // "\n" . ' /* url ' . $matches[1] .
                 // -> uncomment to debug
                 // ' isFile: '.(static::isFile($file) ? 'true '.preg_replace('~[#?].*$~', '', static::getName($file)).' -> '.static::url($file) : 'false').
-                ' */ ' . "\n" . "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
+              //  ' */ ' . "\n" . 
+                "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $csspath) {
@@ -714,10 +711,6 @@ class GZipHelper {
         $remove = isset($options['cssremove']) ? $options['cssremove'] : [];
 
         $async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
-
-    //    $profiler = \JProfiler::getInstance('Application');
-
-    //    $profiler->mark("parse <links>");
 
         $body = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
 
@@ -800,6 +793,9 @@ class GZipHelper {
             return $matches[0];
         }, $body);
 
+        $profiler = \JProfiler::getInstance('Application');
+        $profiler->mark('afterParseLinks');
+
         
     //    $profiler->mark("done parse <link>");
         $hashFile = static::getHashMethod($options);
@@ -849,6 +845,8 @@ class GZipHelper {
             }
         }
 
+		$profiler->mark('afterMinifyLinks');
+		
         if (!empty($options['mergecss'])) {
             
             foreach ($links as $position => $blob) {
@@ -935,6 +933,8 @@ class GZipHelper {
             }
         }
 
+		$profiler->mark('afterMergeLinks');
+		
         $minifier = null;
 
         if ($minify) {
@@ -964,14 +964,20 @@ class GZipHelper {
             $links[$position]['style'][] = empty($minifier) ? $matches[2] : $minifier->minify($matches[2]);
 
             return '';
-        }, $body);
+		}, $body);
+		
+		
+		$profiler->mark('afterParseStyles');
+		
+		$parseCritical = !empty($options['criticalcssenabled']);
+		$parseCssResize = !empty($options['imagecssresize']);
 
-        
-        if (!empty($options['criticalcssenabled'])) {
+        if ($parseCritical || $parseCssResize) {
 
        //     $profiler->mark("critical path css lookup");
 
             $critical_path = isset($options['criticalcssclass']) ? $options['criticalcssclass'] : '';
+            $background_css_path = '';
 
             $styles = ['html', 'body'];
 
@@ -997,8 +1003,6 @@ class GZipHelper {
             # '#((html)|(body))#si'
             $regexp = '#(^|[>\s,~+},])((' . implode(')|(', $styles) . '))([\s:,~+\[{>,]|$)#si';
 
-            # echo $regexp;die;
-
             foreach($links as $blob) {
 
                 if (!empty($blob['links'])) {
@@ -1017,54 +1021,132 @@ class GZipHelper {
                         $info = pathinfo($fname);
 
                         $name = $info['dirname'] . '/' . $info['filename'] . '-crit';
+                        $bgname = $info['dirname'] . '/' . $info['filename'] . '-bg';
 
                         $css_file = $name . '.css';
                         $css_hash = $name . '.php';
 
-                        if (!is_file($css_file) || file_get_contents($css_hash) != $hash) {
+                        $css_bg_file = $name . '-bg.css';
+                        $css_bg_hash = $name . '-bg.php';
 
-                            $oCssParser = new \Sabberworm\CSS\Parser(file_get_contents($fname));
-                            $oCssDocument = $oCssParser->parse();
+						$content = null;
+						
+						if ($parseCssResize) {
+								
+							if (!is_file($css_bg_file) || file_get_contents($css_bg_hash) != $hash) {
 
-                            $local_css = '';
-                            $local_font_face = '';
+								$content = file_get_contents($fname);
 
-                            foreach ($oCssDocument->getContents() as $block) {
+								$oCssParser = new \Sabberworm\CSS\Parser($content);
+								$oCssDocument = $oCssParser->parse();
 
-                                $local_css .= static::extractCssRules($block, $regexp);
-                                $local_font_face .= static::extractFontFace($block);
-                            }
+								$css_background = '';
 
-                            $local_css = $local_font_face.$local_css;
+								foreach ($oCssDocument->getContents() as $block) {
 
-                            if (!empty($local_css)) {
+									// extractCssBackground
+									$css_background .= static::extractCssBackground($block);
+								}
 
-                                if (!empty($minifier)) {
+								if (!empty($css_background)) {
 
-                                    $local_css = $minifier->minify($local_css);
-                                }
+									if (!empty($minifier)) {
 
-                                file_put_contents($css_file, $local_css);
-                                file_put_contents($css_hash, $hash);
-                            }
-                        }
+										$css_background = $minifier->minify($css_background);
+									}
+								}
 
-                        if (is_file($css_file) && file_get_contents($css_hash) == $hash) {
+							//	$css_background = static::expandCss($css_background, dirname($css_bg_file));
+                            	$background_css_path .= $css_background;
 
-                            $critical_path .= static::expandCss(file_get_contents($css_file), dirname($css_file));
-                        }
+								\file_put_contents($css_bg_file, $css_background);
+								\file_put_contents($css_bg_hash, $hash);
+							}
+
+							else {
+
+								$background_css_path .= \file_get_contents($css_bg_file);
+							}
+						}
+
+						if ($parseCritical) {
+								
+							if (!is_file($css_file) || file_get_contents($css_hash) != $hash) {
+
+								if (is_null($content)) {
+
+									$content = file_get_contents($fname);
+								}
+
+								if (!isset($oCssParser)) {
+										
+									$oCssParser = new \Sabberworm\CSS\Parser($content);
+								}
+
+								if (!isset($oCssDocument)) {
+										
+									$oCssDocument = $oCssParser->parse();
+								}
+
+								$local_css = '';
+								$local_font_face = '';
+
+								foreach ($oCssDocument->getContents() as $block) {
+
+									$local_css .= static::extractCssRules(clone $block, $regexp);
+									$local_font_face .= static::extractFontFace(clone $block);
+								}
+
+								$local_css = $local_font_face.$local_css;
+
+								if (!empty($local_css)) {
+
+									if (!empty($minifier)) {
+
+										$local_css = $minifier->minify($local_css);
+									}
+
+									$local_css = static::expandCss($local_css, dirname($css_file));
+
+									\file_put_contents($css_file, $local_css);
+									\file_put_contents($css_hash, $hash);
+								}
+							}
+
+							else {
+
+								$critical_path .= file_get_contents($css_file);
+							}
+						}
                     }
                 }
             }
 
-            # echo var_export($critical_path, true);die;
+            if ($background_css_path !== '') {
+
+                $hash = crc32($background_css_path);
+
+                $background_css_file = $name . '-build.css';
+                $background_css_hash = $name . '-build.php';
+                                
+                if (!is_file($background_css_file) || file_get_contents($background_css_hash) != $hash) {
+
+                    \file_put_contents($background_css_file, static::buildCssBackground($background_css_path, $options));
+                }
+
+                $background_css_path = \file_get_contents($background_css_file);
+            }
+
+            $critical_path = $background_css_path.$critical_path;
 
             if (!empty($critical_path)) {
 
             //    array_unshift($css, $critical_path);                
                 $links['head']['critical'] = empty($minifier) ? $critical_path : $minifier->minify($critical_path);
-          }
-        }
+          	}
+		}
+		
+        $profiler->mark('afterParseCriticalCss');
 
         // extract web fonts
      //   $profiler->mark("extract web fonts");
@@ -1220,8 +1302,37 @@ class GZipHelper {
 
     //    $profiler->mark("done links & styles");
 
-    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
+	//    static::$marks = array_merge(static::$marks, $profiler->getMarks());
+	
+	
+		if(!empty($options['imagecssresize'])) {
 
+			$body = preg_replace_callback('#<html([>]*)>#', function ($matches) {
+
+			preg_match_all(static::regexAttr, $matches[1], $attr);
+
+			$attributes = [];
+
+			foreach($attr[2] as $key => $at) {
+
+				$attributes[$at] = $attr[6][$key];
+			}
+
+			$attributes['class'] = isset($attributes['class']) ? $attributes['class'].' ' : '';
+			$attributes['class'] .= 'resize-css-images';
+
+			$result = '<html';
+
+			foreach ($attributes as $key => $value) {
+
+				$result .= ' '.$key.'="'.$value.'"';
+			}
+
+			return $result .'>';
+
+			}, $body, 1);
+		}
+	
         return $body;
     }
 
@@ -1330,6 +1441,211 @@ class GZipHelper {
                     foreach ($block->getContents() as $b) {
 
                         $content .= static::extractCssRules($b, $regexp);
+                    }
+
+                    if ($content !== '') {
+
+                        $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+                    }
+
+                    return $content;
+            }
+        }
+
+        return '';
+    }
+
+    protected static function buildCssBackground($css, array $options = []) {
+
+		$result = '';
+
+        if (!empty($options['css_sizes'])) {
+
+            if (preg_match_all(static::regexUrl, $css, $matches)) {
+
+                $files = [];
+
+                foreach($matches[1] as $file) {
+
+                    if (static::isFile($file) && preg_match('#\.(png)|(jpg)#i', $file)) {
+
+                        $size = \getimagesize($file);
+
+                        reset($options['css_sizes']);
+
+                        foreach ($options['css_sizes'] as $s) {
+
+                            if ($size[0] > $s) {
+
+                                $files[$s][] = ['file' => $file, 'width' => $s];
+                            }
+                        }
+                    }
+                }
+
+                $image = new \Image\Image();
+                
+                $path = $options['img_path'];
+                $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+                $const = constant('\Image\Image::'.$method);
+                $short_name = strtolower(str_replace('CROP_', '', $method));
+
+                foreach ($files as $size => $data) {
+
+                    $replace = [];
+
+                    foreach ($data as $d) {
+                            
+                        $file = $d['file'];
+                        
+                        // generate resized file & replace in css
+                        $hash = sha1($file);
+                        $crop =  $path.$hash.'-'. $short_name.'-'.$size.'-'.basename($file);
+
+                        if (!is_file($crop)) {
+
+                            $image->load($file);
+
+                            if ($d['width'] > 1200) {
+
+                                $image->setSize(1200);
+                            }
+                            
+                            $image->resizeAndCrop($size, null, $method)->save($crop);
+                        }
+
+                        $replace[$file] = static::url($crop, $options);
+                    }
+
+                    if (!empty($replace)) {
+
+                        $content = file_get_contents($fname);
+
+                        $oCssParser = new \Sabberworm\CSS\Parser(str_replace(array_keys($replace), array_values($replace), $css));
+                        $oCssDocument = $oCssParser->parse();
+
+                        $css_background = '';
+
+                        foreach ($oCssDocument->getContents() as $block) {
+
+                            // extractCssBackground
+                            $css_background .= static::extractCssBackground($block, $size, '.resize-css-images ');
+                        }
+
+                        if (!empty($css_background)) {
+
+                            $result .= '@media (max-width: '.$size.'px) {'.$css_background. '}';
+                        }
+                    }
+                }
+            }
+		}
+		
+        if ($result !== '') {
+
+            $cachefiles = !empty($options['cachefiles']);
+        
+            return \preg_replace_callback('#url\(([^)]+)\)#s', function ($matches) use($cachefiles) {
+
+                $file = $matches[1];
+                
+                if ($cachefiles) {
+                    
+                    $file = static::url($file);
+                }
+
+                else {
+
+                    if (static::isFile($file)) {
+
+                        $file = \Juri::root(true).'/'.$file;
+                    }
+                }
+
+                return 'url('.$file.')';
+
+            }, $result);
+        }
+
+        return $result;
+    }
+
+    protected static function extractCssBackground($block, $matchSize = null, $prefix = null) {
+
+        if ($block instanceof DeclarationBlock) {
+
+            $selectors = implode(',', $block->getSelectors());
+            $rules = [];
+
+            $block->createShorthands();
+
+            foreach ($block->getRulesAssoc() as $rule) {
+
+                $name = $rule->getRule();
+
+                if ($name == 'background' || $name == 'background-image') {
+                            
+                    // extract rules and replace with @media (max-width: witdh) { selector { background-image: url() [, url(), url(), ...]}}
+                    if(preg_match_all(static::regexUrl, $rule->getValue(), $matches)) {
+
+                        $images = [];
+
+                        $isValid = false;
+
+                        foreach ($matches[1] as $file) {
+
+                            $file = preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($file));
+
+                            $fileName = static::getName($file);
+
+                            if (strpos($fileName, 'media/z/') === 0) {
+
+                                $fileName = preg_replace('#^media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
+                            }
+
+                            $images[] = $fileName;
+
+                            if (static::isFile($fileName) && preg_match('#\.(png)|(jpg)#i', $fileName)) {
+
+                                $isValid = true;
+
+                                if (!is_null($matchSize)) {
+
+                                    $size = \getimagesize($fileName);
+
+                                    $isValid = $size[0] == $matchSize;
+                                }
+                            }
+                        }
+
+                        if ($isValid) {
+
+                            $rules[] = $prefix.$selectors.'{background-image: url('.implode('),url(', $images).');}';
+                        }
+                    }
+                }
+            }
+
+            if (!empty($rules)) {
+
+                return implode('', $rules);
+            }
+
+            return '';
+
+        } else if ($block instanceof AtRuleBlockList) {
+
+            $atRuleName = $block->atRuleName();
+
+            switch($atRuleName) {
+
+                case 'media':
+
+                    $content = '';
+
+                    foreach ($block->getContents() as $b) {
+
+                        $content .= static::extractCssBackground($b, $matchSize, $prefix);
                     }
 
                     if ($content !== '') {
@@ -1808,6 +2124,166 @@ class GZipHelper {
         return $body;
     }
 
+    protected static function parseSVGAttribute($value, $attr, $tag) {
+	 
+        // remove unit
+        if ($tag == 'svg' && ($attr == 'width' || $attr == 'height')) {
+           
+           $value = (float) $value;
+        }
+        
+	 // shrink color
+	 if ($attr == 'fill') {
+	
+		if (preg_match('#rgb\s*\(([^)]+)\)#i', $value, $matches)) {
+			
+			$matches = explode(',', $matches[1]);
+			$value = sprintf('#%02x%02x%02x', +$matches[0], +$matches[1], +$matches[2]);
+		}
+		 
+		if(strpos($value, '#') === 0) {
+			
+			if (
+				$value[1] == $value[2] &&
+				$value[3] == $value[4] &&
+				$value[5] == $value[6]) {
+
+				return '#'.$value[1].$value[3].$value[5];
+			}
+		}
+	 }
+        
+        //trim float numbers to precision 1
+        $value = preg_replace_callback('#(\d+)\.(\d)(\d+)#', function ($matches) {
+            
+            if ($matches[2] == 0) {
+               
+               return $matches[1];
+            }
+            
+            if ($matches[1] == 0) {
+                   
+                if ($matches[2] == 0) {
+                   
+                   return 0;
+                }
+               
+            
+               return '.'.$matches[2];
+            }
+            
+           return $matches[1].'.'.$matches[2];
+           
+        }, $value);
+        
+        if ($tag == 'path' && $attr == 'd') {
+                
+            // trim commands
+            $value = str_replace(',', ' ', $value);		 
+            $value = preg_replace('#([\r\n\t ]+)?([A-Z-])([\r\n\t ]+)?#si', '$2', $value);
+        }
+        
+        // remove extra space
+        $value = preg_replace('#[\r\t\n ]+#', ' ', $value);	 
+        return trim($value);
+    }
+
+    public static function minifySVG ($svg /*, $options = [] */) {
+
+        // remove comments & stuff
+        $svg = preg_replace([
+        
+            '#<\?xml .*?>#',
+            '#<!DOCTYPE .*?>#si',
+            '#<!--.*?-->#s',
+            '#<metadata>.*?</metadata>#s'
+        ], '', $svg);
+        
+        // remove extra space
+        $svg = preg_replace(['#([\r\n\t ]+)<#s', '#>([\r\n\t ]+)#s'],  ['<', '>'], $svg);
+            
+        $cdata = [];
+        
+        $svg = preg_replace_callback('#\s*<!\[CDATA\[(.*?)\]\]>#s', function ($matches) use(&$cdata) {
+            
+            $key = '--cdata'.crc32($matches[0]).'--';
+            
+            $cdata[$key] = '<![CDATA['."\n".preg_replace(['#^([\r\n\t ]+)#ms', '#([\r\n\t ]+)$#sm'], '', $matches[1]).']]>';
+            
+            return $key;
+            
+        }, $svg);
+
+        $svg = preg_replace_callback('#([\r\n\t ])?<([a-zA-Z0-9:-]+)([^>]*?)(\/?)>#s', function ($matches) {
+	 
+            $attributes = '';
+                        
+            if (preg_match_all(static::regexAttr, $matches[3], $attrib)) {
+               
+               foreach ($attrib[2] as $key => $value) {
+                   
+                   if (
+                       //$value == 'id' || 
+                      // $value == 'viewBox' || 
+                       $value == 'preserveAspectRatio' || 
+                       $value == 'version') {
+                   
+                       continue;
+                   }
+                
+                    if ($value == 'svg') {
+                        
+                        switch ($attrib[6][$key]) {
+                        
+                            case 'width':
+                            case 'height':
+                            case 'xmlns':
+                            
+                                break;
+                                
+                            default:
+                            
+                                continue;
+                        }
+                    }
+                
+                   $attributes .= ' '.$value.'="'.static::parseSVGAttribute($attrib[6][$key], $value, $matches[2]).'"';
+               }
+            }            
+           
+           return '<'.$matches[2].$attributes.$matches[4].'>';
+       },  $svg);
+
+       return str_replace(array_keys($cdata), array_values($cdata), $svg);
+    }
+
+    public static function generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, array $options, $path, $hash, $method, $short_name) {
+
+        if (!empty($options['imagesvgplaceholder'])) {
+
+            $short_name = strtolower(str_replace('CROP_', '', $method));
+
+            $svg = $path.$hash.'-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.svg';
+
+            if (!is_file($svg)) {
+                
+            //    if (!empty($images)) {
+                    
+                    $clone = clone $image;
+                    file_put_contents($svg, 'data:image/svg+xml;base64,'.base64_encode(static::minifySVG($clone->load($file)->resizeAndCrop(min($clone->getWidth(), 1024), null, $method)->setSize(200)->toSvg())));
+            //    }
+            }
+
+            if (is_file($svg)) {
+                
+            //    $style = !empty($attributes['style']) ? $attributes['style'].';' : '';
+                return 'background:no-repeat url(\''.file_get_contents($svg).'\');background-size:cover';
+            }
+        }
+
+        return '';
+    }
+
     public static function parseImages($body, array $options = []) {
 
         if (empty($options['imageenabled'])) {
@@ -1820,208 +2296,213 @@ class GZipHelper {
             static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
-    //    if (!empty($options['imageremote'])) {
+        $path = $options['img_path'];
 
-            $path = $options['img_path'];
+        // parse scripts
+        $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options) {
 
-            // parse scripts
-            $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options) {
+            $attributes = [];
+            
+            if(preg_match_all(static::regexAttr, $matches[1], $attrib)) {
 
-                $attributes = [];
-                
-                if(preg_match_all(static::regexAttr, $matches[1], $attrib)) {
+                foreach($attrib[2] as $key => $attr) {
 
-                    foreach($attrib[2] as $key => $attr) {
-
-                        $attributes[$attr] = $attrib[6][$key];
-                    }
+                    $attributes[$attr] = $attrib[6][$key];
                 }
+            }
 
-                $file = null;
-                $pathinfo = null;
+            $file = null;
+            $pathinfo = null;
 
-                // ignore custom type
-                if (isset($attributes['src'])) {
+            // ignore custom type
+            if (isset($attributes['src'])) {
 
-                    $name = static::getName($attributes['src']);
-                    $file = preg_replace('/(#|\?).*$/', '', $name);
+                $name = static::getName($attributes['src']);
+                $file = preg_replace('/(#|\?).*$/', '', $name);
 
-					$basename = preg_replace('/(#|\?).*$/', '', basename($name));
-					$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+                $basename = preg_replace('/(#|\?).*$/', '', basename($name));
+                $pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
 
-                    if (!empty($options['imageremote']) && preg_match('#^(https?:)?//#', $name)) {
+                if (!empty($options['imageremote']) && preg_match('#^(https?:)?//#', $name)) {
 
-                        if (isset(static::$accepted[$pathinfo]) && strpos(static::$accepted[$pathinfo], 'image/') !== false) {
+                    if (isset(static::$accepted[$pathinfo]) && strpos(static::$accepted[$pathinfo], 'image/') !== false) {
 
-                            if (strpos($name, '//') === 0) {
+                        if (strpos($name, '//') === 0) {
 
-                                $name = \JURI::getInstance()->getScheme() . ':' . $name;
-                            }
-
-                            $local = $path . sha1($name) . '.' . $pathinfo;
-
-                            if (!is_file($local)) {
-
-                                $content = static::getContent($name);
-
-                                if ($content !== false) {
-
-                                    file_put_contents($local, $content);
-                                }
-                            }
-
-                            if (is_file($local)) {
-
-                                $attributes['src'] = $local;
-                                $file = $local;
-                            }
+                            $name = \JURI::getInstance()->getScheme() . ':' . $name;
                         }
-                    } 
 
-                    if (static::isFile($file)) {
-                    
-                        $sizes = \getimagesize($file);
+                        $local = $path . sha1($name) . '.' . $pathinfo;
 
-                        // end fetch remote files
-                        if(isset($options['imagedimensions'])) {
+                        if (!is_file($local)) {
 
-                            if (!isset($attributes['width']) && !isset($attributes['height'])) {
+                            $content = static::getContent($name);
 
-                                $attributes['width'] = $sizes[0];
-                                $attributes['height'] = $sizes[1];
+                            if ($content !== false) {
+
+                                file_put_contents($local, $content);
                             }
                         }
 
-                        if (!empty($options['imageconvert']) &&  WEBP && $pathinfo != 'webp') {
+                        if (is_file($local)) {
+
+                            $attributes['src'] = $local;
+                            $file = $local;
+                        }
+                    }
+                } 
+
+                if (static::isFile($file)) {
+                
+                    $sizes = \getimagesize($file);
+
+                    // end fetch remote files
+                    if(isset($options['imagedimensions'])) {
+
+                        if (!isset($attributes['width']) && !isset($attributes['height'])) {
+
+                            $attributes['width'] = $sizes[0];
+                            $attributes['height'] = $sizes[1];
+                        }
+                    }
+
+                    if (!empty($options['imageconvert']) &&  WEBP && $pathinfo != 'webp') {
+                        
+                        $newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
+
+                        if (!is_file($newFile)) {
+
+                            $img = null;
+
+                            switch ($pathinfo) {
+
+                                case 'gif':
+
+                                    $img = \imagecreatefromgif($file);
+                                    break;
+
+                                case 'png':
+
+                                    $img = \imagecreatefrompng($file);
+                                    break;
+
+                                case 'jpg':
+
+                                    $img = \imagecreatefromjpeg($file);
+                                    break;
+                            }
+                        }
+
+                        if ($img) {
+
+                            \imagewebp($img, $newFile);
+                        }
+
+                        if (\is_file($newFile)) {
                             
-                            $newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
-
-                            if (!is_file($newFile)) {
-
-                                $img = null;
-
-                                switch ($pathinfo) {
-
-                                    case 'gif':
-
-                                        $img = \imagecreatefromgif($file);
-                                        break;
-
-                                    case 'png':
-
-                                        $img = \imagecreatefrompng($file);
-                                        break;
-
-                                    case 'jpg':
-
-                                        $img = \imagecreatefromjpeg($file);
-                                        break;
-                                }
-							}
-
-                           if ($img) {
-
-                                \imagewebp($img, $newFile);
-                           }
-
-						   if (\is_file($newFile)) {
-							   
-								$attributes['src'] = $newFile; 
-								$file = $newFile;
-						   }
+                            $attributes['src'] = $newFile; 
+                            $file = $newFile;
                         }
+                    }
 
-						// responsive images?
-						if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
+                    $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+                    $const = constant('\Image\Image::'.$method);
+                    $hash = sha1($file);
+                    $short_name = strtolower(str_replace('CROP_', '', $method));
+                    $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
-							// build mq based on actual image size
-							$maxwidth = $sizes[0];
-							$mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
+                    $image = new \Image\Image();
 
-								return $size < $maxwidth;								
+                    // generate svg placeholder for faster image preview
+                    $style = !empty($attributes['style']) ? $attributes['style'].';' : '';
+                    $style .= static::generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, $options, $path, $hash, $method, $short_name);
+
+                    if ($style !== '') {
+                            
+                        $attributes['style'] = $style;
+                    }
+
+                    // responsive images?
+                    if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
+
+                        // build mq based on actual image size
+                        $maxwidth = $sizes[0];
+                        $mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
+
+                            return $size < $maxwidth;								
+                        });
+
+                        if (!empty($mq)) {
+
+                        //    $image = null;
+                            $resource = null;
+                            
+                            $images = array_map(function ($size) use($file, $hash, $short_name, $path) {
+
+                                return $path.$hash.'-'.$short_name.'-'.$size.'-'.basename($file);
+
+                            }, $mq);
+
+                            $srcset = [];
+
+                            foreach ($images as $k => $img) {
+
+                                if (!\is_file($img)) {
+
+                                        if (!\is_file($crop)) {
+
+											if (\is_null($image->getResource())) {
+
+												$image->load($file);
+																	
+											    if ($maxwidth > 1200) {
+
+											        $image->setSize(1200);
+											    }												
+											}
+                                                
+                                            $clone = clone $image;                                                                                     
+
+                                            // resize image to use less memory
+                                            $clone->resizeAndCrop($mq[$k], null, $method)->save($crop);
+                                        //    }
+                                        }
+                                }
+
+                                $srcset[] = $img.' '.$mq[$k].'w';
+                            }
+
+                            $srcset[] = $file.' '.$sizes[0].'w';
+                            $maxwidth = end($mq) + 1;
+
+                            $mq = array_map(function ($size) {
+
+                                return '(max-width: '.$size.'px)';
                             });
 
-                            // we need to resize the images
-                            if (!empty($mq)) {
+                            $mq[] = '(min-width: '.$maxwidth.'px)';
 
-                                $image = null;
-                                $resource = null;
-                                $method = empty($options['imagesresizestrategy']) ? 'CROP_CENTER' : $options['imagesresizestrategy'];
-                                $const = constant('\Image\Image::'.$method);
-                                $hash = sha1($file);
-                                $short_name = strtolower(str_replace('CROP_', '', $method));
-                                $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
-                                
-                                $images = array_map(function ($size) use($file, $hash, $short_name, $path) {
-
-                                    return $path.$hash.'-'.$short_name.'-'.$size.'-'.basename($file);
-
-                                }, $mq);
-
-                                $srcset = [];
-
-                                foreach ($images as $k => $img) {
-
-                                    if (!\is_file($img)) {
-
-                                        if (\is_null($image)) {
-
-                                            if (!\is_file($crop)) {
-                                                    
-                                                $image = new \Image\Image($file);
-
-                                                // resize image to use less memory
-                                                if ($maxwidth > 1200) {
-
-                                                    $image->setSize(1200);
-                                                }
-                                                
-                                                $image->resizeAndCrop($mq[$k], null, $method)->save($crop);
-                                            }
-                                            
-                                            else {
-
-                                                $image = new \Image\Image($crop);
-                                            }
-                                        }
-
-                                        $image->setSize($mq[$k])->save($img);
-                                    }
-
-                                    $srcset[] = $img.' '.$mq[$k].'w';
-                                }
-
-                                $srcset[] = $file.' '.$sizes[0].'w';
-                                $maxwidth = end($mq) + 1;
-
-                                $mq = array_map(function ($size) {
-
-                                    return '(max-width: '.$size.'px)';
-                                });
-
-                                $mq[] = '(min-width: '.$maxwidth.'px)';
-
-                                $attributes['srcset'] = implode(',', $srcset);
-                                $attributes['sizes'] = implode(',', $mq);
-                            }						
-						}
-					}
-
-                    if (!isset($attributes['alt'])) {
-
-                        $attributes['alt'] = '';
+                            $attributes['srcset'] = implode(',', $srcset);
+                            $attributes['sizes'] = implode(',', $mq);
+                        }						
                     }
-
-                    return '<img '.implode(' ', array_map(function ($value, $key) {
-
-                        return $key .= '="'.$value.'"';
-
-					}, 
-					$attributes, array_keys($attributes))).'>';
                 }
 
-                return $matches[0];
-            }, $body);
+                if (!isset($attributes['alt'])) {
+
+                    $attributes['alt'] = '';
+                }
+
+                return '<img '.implode(' ', array_map(function ($value, $key) {
+
+                    return $key .= '="'.$value.'"';
+
+                }, 
+                $attributes, array_keys($attributes))).'>';
+            }
+
+            return $matches[0];
+        }, $body);
 
         return $body;
     }

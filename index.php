@@ -8,7 +8,7 @@ chdir('../..');
 
 $uri = $_SERVER['REQUEST_URI'];
 
-$matches = preg_split('#/media/z/((('.implode(')|(', ['nf', 'cf', 'cn', 'no', 'co']).'))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
+$matches = preg_split('#/media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
 
 $uri = end($matches);
 

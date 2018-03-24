@@ -27,7 +27,7 @@
 class Image {
 
     private $_abspath;
-    private $__image;
+    private $_image = null;
  //   private $_width;
   //  private $_height;
     private $_image_type;
@@ -41,29 +41,44 @@ class Image {
      * @brief Costruttore
      * @param string $abspath percorso assoluto del file
      */
-    public function __construct($abspath) {
+    public function __construct($abspath = null) {
 
-        if(!is_file($abspath)) {
-            throw new Exception('File doesn\'t exists', 404);
+        if(!is_null($abspath)) {
+			
+			$this->load($abspath);
         }
+	}
+    
+    /**
+     * Load image
+     *
+     * @param string $file
+     * @return \Image\Image this instance
+     */
+	public function load ($file) {
 
-        $image_info = getimagesize($abspath);
-        $this->_abspath = $abspath;
+        if(!is_file($file)) {
+
+            throw new \Exception('File doesn\'t exists', 404);
+        }		
+		
+        $image_info = getimagesize($file);
+        $this->_abspath = $file;
     //    $this->_width = $image_info[0];
     //    $this->_height = $image_info[1];
         $this->_image_type = $image_info[2];
 		
         if($this->_image_type == IMAGETYPE_JPEG) {
-            $this->_image = imagecreatefromjpeg($abspath);
+            $this->_image = imagecreatefromjpeg($file);
         }
         elseif($this->_image_type == IMAGETYPE_GIF) {
-            $this->_image = imagecreatefromgif($abspath);
+            $this->_image = imagecreatefromgif($file);
         }
         elseif($this->_image_type == IMAGETYPE_PNG) {
-            $this->_image = imagecreatefrompng($abspath);
+            $this->_image = imagecreatefrompng($file);
         }
-        elseif(function_exists('imagecreatefromwebp') && strtolower(pathinfo($abspath, PATHINFO_EXTENSION)) == 'webp') {
-            $this->_image = imagecreatefromwebp($abspath);
+        elseif(function_exists('imagecreatefromwebp') && strtolower(pathinfo($file, PATHINFO_EXTENSION)) == 'webp') {
+            $this->_image = imagecreatefromwebp($file);
 			$this->_image_type = IMAGETYPE_WEBP;
         }
         else {
@@ -72,8 +87,18 @@ class Image {
 
         imagealphablending($this->_image, false);
         imagesavealpha($this->_image, true);
-    }
 
+        return $this;
+	}
+
+	public function __clone() {
+
+		if ($this->_image) {
+
+			$this->_image = $this->cloneImage($this->_image);
+		}
+	}
+	
     /**
      * @brief Ritorna la larghezza dell'immagine
      * @return int larghezza immagine in px
@@ -165,8 +190,116 @@ class Image {
         elseif($type == IMAGETYPE_WEBP) {
             imagewebp($this->_image, $abspath, $compression);
         }
+
+        return $this;
     }
 
+	protected function getLuminance($pixel){
+		$pixel = sprintf('%06x',$pixel);
+		$red = hexdec(substr($pixel,0,2))*0.30;
+		$green = hexdec(substr($pixel,2,2))*0.59;
+		$blue = hexdec(substr($pixel,4))*0.11;
+		return $red+$green+$blue;
+	}
+	
+	public function detectEgdes() {
+
+		$image = $this->cloneImage($this->_image);
+
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		imagefilter($image,IMG_FILTER_GAUSSIAN_BLUR);
+		$destination = imagecreatetruecolor($width, $height);
+
+	//	imagecolortransparent ($destination, imagecolorallocate($destination, 255, 255, 255));
+
+				// looping through ALL pixels!!
+		for($x=1;$x<$width-1;$x++){
+			for($y=1;$y<$height - 1;$y++){
+				// getting gray value of all surrounding pixels
+				$pixel_up = $this->getLuminance(imagecolorat($image,$x,$y-1));
+				$pixel_down = $this->getLuminance(imagecolorat($image,$x,$y+1)); 
+				$pixel_left = $this->getLuminance(imagecolorat($image,$x-1,$y));
+				$pixel_right = $this->getLuminance(imagecolorat($image,$x+1,$y));
+				$pixel_up_left = $this->getLuminance(imagecolorat($image,$x-1,$y-1));
+				$pixel_up_right = $this->getLuminance(imagecolorat($image,$x+1,$y-1));
+				$pixel_down_left = $this->getLuminance(imagecolorat($image,$x-1,$y+1));
+				$pixel_down_right = $this->getLuminance(imagecolorat($image,$x+1,$y+1));
+				
+				// appliying convolution mask
+				$conv_x = ($pixel_up_right+($pixel_right*2)+$pixel_down_right)-($pixel_up_left+($pixel_left*2)+$pixel_down_left);
+				$conv_y = ($pixel_up_left+($pixel_up*2)+$pixel_up_right)-($pixel_down_left+($pixel_down*2)+$pixel_down_right);
+				
+				// calculating the distance
+				#$gray = sqrt($conv_x*$conv_x+$conv_y+$conv_y);
+				$gray = abs($conv_x)+abs($conv_y);
+				
+				// inverting the distance not to get the negative image                
+				$gray = 255-$gray;
+				
+				// adjusting distance if it's greater than 255 or less than zero (out of color range)
+				if($gray > 255){
+					$gray = 255;
+				}
+				if($gray < 0){
+					$gray = 0;
+				}
+				
+				// creation of the new gray
+				$new_gray  = imagecolorallocate($destination,$gray,$gray,$gray);
+				
+				// adding the gray pixel to the new image        
+				imagesetpixel($destination,$x,$y,$new_gray);            
+			}
+		}
+
+	//	imagetruecolortopalette ($destination, false , 8);
+		return (new Image())->setResource($destination);
+	}
+
+	protected function getDominantColor($image) {
+
+		$width = imagesx($image);
+		$height = imagesy($image);
+
+		$total = 0;
+		$rTotal = 0;
+		$gTotal = 0;
+		$bTotal = 0;
+		
+		for ($x=0;$x<$width;$x++) {
+			for ($y=0;$y< $height;$y++) {
+
+				$rgb = imagecolorat($image,$x,$y);
+				$r   = ($rgb >> 16) & 0xFF;
+				$g   = ($rgb >> 8) & 0xFF;
+				$b   = $rgb & 0xFF;
+				$rTotal += $r;
+				$gTotal += $g;
+				$bTotal += $b;
+				$total++;
+			}
+		}
+
+		return [round($rTotal / $total), round($gTotal / $total), round($bTotal / $total)];
+	}
+
+	public function toHexColor ($color) {
+
+		return '#'.\dechex($color[0]).\dechex($color[1]).\dechex($color[2]);
+	}
+
+	public function toSvg() {
+
+		$svg =  new \Potracio\Potracio(['fill' => $this->toHexColor($this->getDominantColor($this->_image))]);
+
+		$svg->loadImageFromResource($this->_image);
+		$svg->process();
+
+		return $svg->getSVG(1);
+	}
+	
     public function resizeAndCrop($width, $height = null, $method = Image::CROP_DEFAULT, $x0 = 0, $y0 = 0, $options = array()) {
 
         if (\is_null($height)) {
@@ -221,7 +354,8 @@ class Image {
 		$y0 = min($y0, $this->getHeight() - $size['width']);
 			
         $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
-		$this->setSize($width, $height, $options );
+        return $this->setSize($width, $height, $options );
+        
     }
 
     /**
@@ -239,10 +373,10 @@ class Image {
         $y0 = ($this->getHeight() - $size['height'])/2;
 				
         $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
-		$this->setSize($width, $height, $options );
+		return $this->setSize($width, $height, $options );
     }
 	
-	protected function getBestFit($width, $height, $regionWidth, $regionHeight) {
+	public function getBestFit($width, $height, $regionWidth, $regionHeight) {
 	
 			 // ($this->faceRects);
 			
@@ -359,7 +493,7 @@ class Image {
 			// compute rect that contains all the faces
 		}
 		
-		$this->setSize($width, $height, $options );
+		return $this->setSize($width, $height, $options );
 	}
 
     /**
@@ -371,7 +505,7 @@ class Image {
      */
     public function cropEntropy($width, $height, $options = array()) {
         $this->_image = $this->cropImageEntropy($this->_image, $width, $height, $options);
-		$this->setSize($width, $height, $options );
+		return $this->setSize($width, $height, $options );
     }
 	
 	protected function detectFaces() {
@@ -486,9 +620,9 @@ class Image {
     public function resizeImage($image, $width, $height, $options = array()) {
 
     //    $allow_enlarge = false; //gOpt('allow_enlarge', $options, true);
-        if(/*!$allow_enlarge and*/ ($width > imagesx($image) or $height > imagesy($image))) {
-            return $image;
-        }
+    //    if(/*!$allow_enlarge and*/ ($width > imagesx($image) or $height > imagesy($image))) {
+    //        return $image;
+    //    }
 
         $new_image = imagecreatetruecolor($width, $height);
         imagecopyresampled($new_image, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
