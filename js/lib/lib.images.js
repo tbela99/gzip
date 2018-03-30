@@ -46,8 +46,13 @@
 
 	// return a promise
 	LIB.images = merge(Object.create(null), {
+        /**
+		 *
+         * @param string selector
+         * @param object options
+         */
 		lazy: function(selector, options) {
-			const images = [].slice.apply(document.querySelectorAll(selector));
+			const images = [].slice.apply((options && options.container || document).querySelectorAll(selector));
 			const observer = merge(true, Object.create(null), LIB.Event);
 			const io = new IntersectionObserver(function(entries) {
 				let i = entries.length,
@@ -58,6 +63,7 @@
 					entry = entries[i];
 
 					if (entry.isIntersecting) {
+
 						io.unobserve(entry.target);
 
 						index = images.indexOf(entry.target);

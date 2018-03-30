@@ -399,7 +399,7 @@ class GZipHelper {
 
                 $attr = strtolower($matches[2]);
 
-                if ($attr == 'srcset') {
+                if ($attr == 'srcset' || $attr == 'data-srcset') {
 
                     $return = [];
 
@@ -2277,7 +2277,7 @@ class GZipHelper {
             if (is_file($svg)) {
                 
             //    $style = !empty($attributes['style']) ? $attributes['style'].';' : '';
-                return 'background:no-repeat url(\''.file_get_contents($svg).'\');background-size:cover';
+                return file_get_contents($svg);
             }
         }
 
@@ -2413,13 +2413,19 @@ class GZipHelper {
 
                     $image = new \Image\Image();
 
-                    // generate svg placeholder for faster image preview
-                    $style = !empty($attributes['style']) ? $attributes['style'].';' : '';
-                    $style .= static::generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, $options, $path, $hash, $method, $short_name);
+					// generate svg placeholder for faster image preview
+					if (!empty($options['imagesvgplaceholder'])) {
+							
+						$class = !empty($attributes['class']) ? $attributes['class'].' ' : '';
+						$attributes['class'] = $class.'image-placeholder';
+					}
 
-                    if ($style !== '') {
+                    $src = static::generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, $options, $path, $hash, $method, $short_name);
+
+                    if ($src !== '') {
                             
-                        $attributes['style'] = $style;
+						$attributes['src'] = $src;
+						$attributes['data-src'] = $file;
                     }
 
                     // responsive images?
@@ -2482,10 +2488,10 @@ class GZipHelper {
 
                             $mq[] = '(min-width: '.$maxwidth.'px)';
 
-                            $attributes['srcset'] = implode(',', $srcset);
+                            $attributes['data-srcset'] = implode(',', $srcset);
                             $attributes['sizes'] = implode(',', $mq);
                         }						
-                    }
+					}
                 }
 
                 if (!isset($attributes['alt'])) {

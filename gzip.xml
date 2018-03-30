@@ -21,6 +21,7 @@
         <filename>cacert.pem</filename>
         <filename>loader.min.js</filename>
         <filename>cssloader.min.js</filename>
+        <filename>imagesloader.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
