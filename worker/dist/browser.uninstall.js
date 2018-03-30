@@ -1,6 +1,6 @@
 /* do not edit! */
 // @ts-check
-// Service worker browser client
+// Service worker browser client uninstall
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
         let registration, i = registrations.length;

@@ -1,1 +1,1 @@
-var LIB = Object.create(null);
+var LIB = LIB || Object.create(null);

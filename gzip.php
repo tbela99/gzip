@@ -115,11 +115,18 @@ class PlgSystemGzip extends JPlugin
             $document = JFactory::getDocument();
 
             if($document->getType() == 'html') {
-                    
-                if(!empty($this->options['debug'])) {
 
-                    $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
-                }
+				if (!empty($this->options['imagesvgplaceholder'])) {
+
+					$document->addScript('plugins/system/gzip/js/dist/lib.min.js');
+					$document->addScript('plugins/system/gzip/js/dist/lib.images.min.js');
+					$document->addScriptDeclaration(str_replace('{script-src}', \Gzip\GZipHelper::url(JURI::root(true).'/plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader.min.js')));
+				}
+                    
+            //    if(!empty($this->options['debug'])) {
+
+            //        $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
+            //    }
 
                 $script = '';
 
@@ -195,6 +202,7 @@ class PlgSystemGzip extends JPlugin
             $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
             $this->options['parse_url_attr']['src'] = '';
+            $this->options['parse_url_attr']['data-src'] = '';
             
             // do not render blank js file when service worker is disabled
         //    if(!empty($this->options['pwaenabled'])) {

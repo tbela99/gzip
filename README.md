@@ -96,7 +96,6 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## High priority list
 
-1.  resize images for mobile / tablet in css
 1.  IMAGES: Implement progressive images loading with intersectionObserver [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/) and async decoding see [here](https://medium.com/dailyjs/image-loading-with-image-decode-b03652e7d2d2)
 1.  prerender images using primitive.js svg generation https://github.com/ondras/primitive.js/blob/master/js/app.js
 1.  prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?
@@ -125,6 +124,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 1.  optimized image lazyloader
 1.  generate svg placeholder from images for quick preview
+1.  resize css images for mobile / tablet
 
 ## V2.2
 
