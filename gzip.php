@@ -621,15 +621,15 @@ class PlgSystemGzip extends JPlugin
 
             $paths = [new DirectoryIterator($path)];
 
-            while(count($parts) > 0) {
+            while(count($paths) > 0) {
 
-                $dir = array_shift($parts);
+                $dir = array_shift($paths);
 
                 foreach($dir as $file) {
 
                     if ($file->isDir() && !$file->isDot()) {
 
-                        $parts[] = $file;
+	                    $paths[] = $file;
 
                         foreach(
                             [

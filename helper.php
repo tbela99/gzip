@@ -58,7 +58,6 @@ class GZipHelper {
         "woff2" => array('as' => 'font'),
         "svg" => array('as' => 'image')
     );
- //   static $marks = [];
 
     // can use http cache / url rewriting
     static $accepted = array(
@@ -83,23 +82,6 @@ class GZipHelper {
         'mp3' => 'audio/mpeg'
     );
 
-    // what's the use of this? base64 encoded image?
-    /*
-    static $encoded = array(
-        "gif" => "image/gif",
-        "jpg" => "image/jpeg",
-        "jpeg" => "image/jpeg",
-        "png" => "image/png",
-        "ico" => "image/x-icon",
-        "eot" => "application/vnd.ms-fontobject",
-        "otf" => "application/x-font-otf",
-        "ttf" => "application/x-font-ttf",
-        "woff" => "application/x-font-woff",
-        "woff2" => "application/font-woff2",
-        "svg" => "image/svg+xml"
-    );
-    */
-
     static $pwa_network_strategy = '';
 
     public static function getChecksum($file, callable $hashFile, $algo = 'sha256', $integrity = false) {
@@ -110,6 +92,7 @@ class GZipHelper {
 
         if (is_file($path)) {
 
+        	// $checksum defined in $path;
             include $path;
 
             if (isset($checksum['hash']) && $checksum['hash'] == $hash && isset($checksum['algo']) && $checksum['algo'] == $algo) {
@@ -667,7 +650,7 @@ class GZipHelper {
                 "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
         },
             //resolve import directive, note import directive in imported css will NOT be processed
-            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $csspath) {
+            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
 
                 $file = trim($matches[1]);
 
@@ -687,7 +670,7 @@ class GZipHelper {
 
             //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
 
-                return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $csspath);
+                return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $path);
             }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
         );
 
@@ -1519,8 +1502,6 @@ class GZipHelper {
 
                     if (!empty($replace)) {
 
-                        $content = file_get_contents($fname);
-
                         $oCssParser = new \Sabberworm\CSS\Parser(str_replace(array_keys($replace), array_values($replace), $css));
                         $oCssDocument = $oCssParser->parse();
 
@@ -1788,7 +1769,6 @@ class GZipHelper {
                     $script .= ' '.$name.'="'.$value.'"';
                 }
 
-
                 return $script.'>'.$matches[2].'</script>';
             }
 
@@ -1853,7 +1833,7 @@ class GZipHelper {
                     if (is_file($local)) {
 
                         $name = $local;
-                        $matches[1] = str_replace($match[2], $local, $matches[1]);
+                        $matches[1] = str_replace($attributes['src'], $local, $matches[1]);
                     }
                 }
 
@@ -2356,7 +2336,10 @@ class GZipHelper {
                 
                     $sizes = \getimagesize($file);
 
-                    // end fetch remote files
+	                $maxwidth = $sizes[0];
+	                $img = null;
+
+	                // end fetch remote files
                     if(isset($options['imagedimensions'])) {
 
                         if (!isset($attributes['width']) && !isset($attributes['height'])) {
@@ -2371,8 +2354,6 @@ class GZipHelper {
                         $newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
 
                         if (!is_file($newFile)) {
-
-                            $img = null;
 
                             switch ($pathinfo) {
 
@@ -2432,7 +2413,6 @@ class GZipHelper {
                     if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
 
                         // build mq based on actual image size
-                        $maxwidth = $sizes[0];
                         $mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
 
                             return $size < $maxwidth;								

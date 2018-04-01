@@ -1,43 +1,78 @@
 ## Page Optimizer Plugin
 
-There are additional plugins that help optmizing and profiling your page
+Do you want to improve your website by
+- improving loading performance?
+- enable offline capabilities via service worker?
+- or turn it into a pwa?
 
-*   [Server Timing Plugin](/projects/PWA/repos/server-timing/) enable the sevrer timing http headers
+This extension allows you to do all of these things.
+
+There are additional plugins that help optmizing and profiling your page or server
+
+*   [Server Timing Plugin](/projects/PWA/repos/server-timing/) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
 *   [HTML Minifier](/projects/WO/repos/html-minifier/) minify html in an html5 compliant way.
-
-This performs many things:
-
-*   advanced page optimizations which drastically improve the page performance score over various tools.
-*   turn the website into an installable Progressive Web Application
-*   compute SRI for css and javascript files
 
 # General improvements
 
+*   advanced page optimizations which drastically improve the page performance score over various tools.
+*   turn the website into an installable Progressive Web Application
 *   Sub-resources integrity check: computed for javascript and css files (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
 *   Push resources (require http 2 protocol). you can configure which resources will be pushed
-*   Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
-*   Range requests are supported for cached resources (you can cache audio & video content)
 *   Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
 *   force script and css to be ignored by the optimizer by setting 'data-ignore="true"' attribute
-*   connect to domains faster: automatically detect domains and add < link rel=preconnect >
+*   connect to domains faster: automatically detect domains and add < link rel=preconnect > header
+
+# Moving script and css position in the page
+
+script and css position can be controlled by add 'data-position' attribute to the tag. possible values are
+
+*   head: move the file to the head (if not present yet)
+*   ignore: ignore the file
+*   missing tag or other values means move to the footer of the page.
+
+# Caching
+
+*   Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
+*   Range requests are supported for cached resources (you can cache audio & video content)
+
+# SRI
+
+*   compute SRI for css and javascript files
+
+If you use a cdn, you will need to disable cdn optimizations for css and javascript. They must not alter css and javascript
+
+# Critical CSS Path
+
+Eliminate **FOUC** by providing critical css path selectors. See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info. 
+The critical path enable instant page rendering by providing a minimal set of selectors and classes used to render the visible part of the page before the stylesheets are loaded.
+Any selector that affects the page rendering is a good candidate (set dimensions, define positioning, fonts, sections background color, etc..). 
+There is no automatic extraction and you must provide these settings to extract css classes.
+
+*   CSS class definitions for critical css path
+*   A list of selectors to extract from the page css
+*   The web fonts are extracted automatically and preloaded
 
 # Images
 
 *   deliver images in webp format when the browser signals it supports it
 *   generate svg placeholder from images for quick image preview
 *   generate responsive images automatically
+*   generate svg placeholder for images for faster page load
+*   lazyload images that are using svg placeholder
 
 ## Responsive images
 
 *   automatically add srcset and sizes for images. Only necessary images are generated. Images smaller that the breakpoint are ignored.
 *   resize and crop images using a one of these methods (face detection, entropy, center or default).
 *   configure breakpoints used to create smaller images
-*   scrset images url is automatically rewritten when http cache is enabled
+*   scrset urls are automatically rewritten when http cache is enabled
+*   automatically resize css background images. You can configure breakpoints for this feature.
 
 # Javascript Improvements
 
 *   Fetch remote javascript files locally
 *   Merge javascript files
+*   Minify javascript files
 *   Ignore javascript files that match a pattern
 *   Remove javascript files that match a pattern
 *   Move javascript at the bottom of the page
@@ -47,19 +82,11 @@ This performs many things:
 
 *   Fetch remote css files, images and fonts and store them locally
 *   Merge css files (this process @import directive)
+*   Minify css files
 *   Do not process css files that match a pattern
 *   Remove css files that match a pattern
 *   Ignore css files that match a pattern
 *   Load css files in a non blocking way
-
-# Critical CSS Path
-
-See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info. The critical path enable instant page rendering by providing classes used to render the page before the stylesheets are loaded.
-Any selector that affects the page rendering is a good candidate (set dimensions, define positioning, fonts, sections background color, etc..). There is no automatic extraction and you must provide these settings to extract css classes.
-
-*   CSS class definitions for critical css path
-*   A list of selectors to extract from the page css
-*   The web fonts are extracted automatically and preloaded
 
 # Progressive Web App
 
@@ -80,7 +107,7 @@ You can provide the list of urls to load when the service worker is installed li
 ## Installable web app
 
 1.  The app can be installed as a standalone web app with google chrome / firefox on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
-2.  The app can be installed as a standalone desktop application (tested on wndows 10) with google chrome as long as you provide a 512x512 icon.
+2.  The app can be installed as a standalone desktop application (tested on windows 10) with google chrome as long as you provide a 512x512 icon.
 3.  Alternative links to native mobile apps can be provided and the preference can be configured
 
 ## Web Push
@@ -90,13 +117,22 @@ You can provide the list of urls to load when the service worker is installed li
 
 ## Service worker router api
 
-Add routes to customize fetch event networking startegy by using either a static route or a regexp
+Add routes to customize fetch event networking strategy by using either a static route or a regexp
+
+## Exclude resources from the service worker management
+
+You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
+
+# Misc
+
+*   Joomla administrator is excluded from the service worker cached resources
+*   You can secure your Joomla administrator access by defining a secret access token.
 
 # Roadmap
 
 ## High priority list
 
-1.  IMAGES: Implement progressive images loading with intersectionObserver [here](https://jmperezperez.com/medium-image-progressive-loading-placeholder/) and async decoding see [here](https://medium.com/dailyjs/image-loading-with-image-decode-b03652e7d2d2)
+1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts. right now they are updated only once and forever
 1.  prerender images using primitive.js svg generation https://github.com/ondras/primitive.js/blob/master/js/app.js
 1.  prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?
 1.  Service worker cache expiration api (using localforage or a lightweight indexDb library)
@@ -111,7 +147,6 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## Low priority list
 
-1.  Fetch remote resources periodically (configurable) (css and javascript). right now they are updated only once.
 1.  Manage the service worker settings from the front end (notify when a new version is available, manually unregister, delete cache, etc ...)?
 1.  Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 1.  Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
@@ -125,9 +160,7 @@ Add routes to customize fetch event networking startegy by using either a static
 1.  optimized image lazyloader
 1.  generate svg placeholder from images for quick preview
 1.  resize css images for mobile / tablet
-
-## V2.2
-
+1.  IMAGES: Implement progressive images loading with intersectionObserver
 1.  remove '+' '=' and ',' from the hash generation alphabet
 1.  Responsive images: resize images using breakpoints and leverage < img srcset >
 1.  serve webp whenever the browser/webserver (using gd) supports it
@@ -135,6 +168,7 @@ Add routes to customize fetch event networking startegy by using either a static
 1.  Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
 1.  automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
 1.  Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
+
 
 ## V2.1
 
@@ -149,7 +183,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V2.0
 
-1.  PWA: implement network strategies:
+###  PWA: implement network strategies:
 
 *   Cache only (disabled)
 *   Network only
@@ -159,7 +193,7 @@ Add routes to customize fetch event networking startegy by using either a static
 
 ## V1.1
 
-1.  CSS: preload web fonts
+  CSS: preload web fonts
 
 ## V1.0
 
