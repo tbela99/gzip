@@ -6,8 +6,8 @@
  * @package     GZip Plugin
  * @subpackage  System.Gzip
  *
- * @copyright   Copyright (C) 2005 - 2016 Inimov.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ * @license     MIT License
  */
 
 defined('_JEXEC') or die;
