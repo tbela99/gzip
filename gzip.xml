@@ -7,7 +7,7 @@
     <license>MIT License</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>www.tbela.net</authorUrl>
-    <version>2.1.1</version>
+    <version>2.2</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>js/lib</folder>
@@ -277,4 +277,7 @@
             -->
         </fields>
     </config>
+    <updateservers>
+        <server type="extension" priority="1" name="plg_system_gzip_updates">https://github.com/tbela99/gzip/blob/master/gzip.xml</server>
+    </updateservers>
 </extension>
