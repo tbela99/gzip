@@ -21,13 +21,13 @@ class PlgSystemGzip extends JPlugin
     protected $worker_id = '';
     protected $manifest_id = '';
 
-    public function onInstallerAfterInstaller($model, $package, $installer, $result) {
+  //  public function onInstallerAfterInstaller($model, $package, $installer, $result) {
 
-        if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
+   //     if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
                 
-            $this->cleanCache();
-        }
-    }
+    //        $this->cleanCache();
+    //    }
+   // }
 
     public function onContentPrepareForm(JForm $form, $data) {
 

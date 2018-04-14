@@ -278,6 +278,6 @@
         </fields>
     </config>
     <updateservers>
-        <server type="extension" priority="1" name="plg_system_gzip_updates">https://github.com/tbela99/gzip/blob/master/gzip.xml</server>
+        <server type="extension" priority="1" name="plg_system_gzip_updates">https://raw.githubusercontent.com/tbela99/gzip/master/gzip.xml</server>
     </updateservers>
 </extension>
