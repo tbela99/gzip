@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Property;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Value\URL;
 
 /**

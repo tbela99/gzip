@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Property;
 
+defined('_JEXEC') or die;
+
 /**
  * Class representing a single CSS selector. Selectors have to be split by the comma prior to being passed into this class.
  */

@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\CSSList;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Property\AtRule;
 
 /**

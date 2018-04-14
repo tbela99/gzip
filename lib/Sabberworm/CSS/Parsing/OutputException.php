@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Parsing;
 
+defined('_JEXEC') or die;
+
 /**
 * Thrown if the CSS parsers attempts to print something invalid
 */

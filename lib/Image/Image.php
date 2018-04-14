@@ -5,13 +5,15 @@
  *
  * @copyright 2014 Otto srl (http://www.opensource.org/licenses/mit-license.php) The MIT License
  * @author abidibo abidibo@gmail.com
- * 
- * @author Thierry Bela
- * extended to add face detection and namespacing, better crop area detection    
+ * @author Thierry Bela.
+ *
+ * extended to add face detection and namespacing, better crop area detection
  */
 
  namespace Image;
- 
+
+ defined('_JEXEC') or die;
+
  // php 7.1
  if (!defined('IMAGETYPE_WEBP') && function_exists('imagecreatefromwebp')) {
 	 

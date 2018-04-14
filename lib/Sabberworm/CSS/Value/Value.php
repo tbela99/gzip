@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Renderable;
 
 abstract class Value implements Renderable {

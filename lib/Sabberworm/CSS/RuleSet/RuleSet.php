@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\RuleSet;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\Renderable;
 use Sabberworm\CSS\Comment\Commentable;

@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Rule;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Renderable;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\Value;

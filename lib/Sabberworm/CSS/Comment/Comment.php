@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Comment;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Renderable;
 
 class Comment implements Renderable {

@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
+
 class CSSString extends PrimitiveValue {
 
 	private $sString;

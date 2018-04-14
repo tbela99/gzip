@@ -2,6 +2,7 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
 
 class URL extends PrimitiveValue {
 
