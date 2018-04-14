@@ -2,7 +2,9 @@
 
 namespace Sabberworm\CSS;
 
-use Sabberworm\CSS\Parsing\OutputException;
+defined('_JEXEC') or die;
+
+use \CSS\Parsing\OutputException;
 
 class OutputFormat {
 	/**

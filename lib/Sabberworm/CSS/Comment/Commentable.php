@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Comment;
 
+defined('_JEXEC') or die;
+
 interface Commentable {
 
 	/**

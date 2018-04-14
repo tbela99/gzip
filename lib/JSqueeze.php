@@ -11,6 +11,8 @@
 
 namespace Patchwork;
 
+defined('_JEXEC') or die;
+
 /*
 *
 * This class shrinks Javascript code

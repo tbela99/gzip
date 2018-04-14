@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\CSSList;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\Renderable;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\RuleSet\RuleSet;

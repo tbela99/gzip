@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Parsing;
 
+defined('_JEXEC') or die;
+
 class SourceException extends \Exception {
 	private $iLineNo;
 	public function __construct($sMessage, $iLineNo = 0) {

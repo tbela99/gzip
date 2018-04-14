@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
+
 class Color extends CSSFunction {
 
 	public function __construct($aColor, $iLineNo = 0) {

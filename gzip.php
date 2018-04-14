@@ -1,7 +1,5 @@
 <?php
 
-//use Patchwork\JSqueeze;
-
 /**
  * @package     GZip Plugin
  * @subpackage  System.Gzip *

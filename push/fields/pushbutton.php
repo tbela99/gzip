@@ -3,12 +3,17 @@
 defined('JPATH_PLATFORM') or die;
 
 /**
- * Color Form Field class for the Joomla Platform.
- * This implementation is designed to be compatible with HTML5's `<input type="color">`
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
- * @link   http://www.w3.org/TR/html-markup/input.color.html
- * @since  11.3
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ * @since       V2.1
  */
+
 class JFormFieldPushButton extends JFormField
 {
 	/**

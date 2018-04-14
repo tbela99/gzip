@@ -2,6 +2,8 @@
 
 namespace Patchwork;
 
+defined('_JEXEC') or die;
+
 /*!
  * cssmin.php v2.4.8-4
  * Author: Tubal Martin - http://tubalmartin.me/

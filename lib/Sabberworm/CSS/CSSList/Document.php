@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\CSSList;
 
+defined('_JEXEC') or die;
+
 /**
  * The root CSSList of a parsed file. Contains all top-level css contents, mostly declaration blocks, but also any @-rules encountered.
  */

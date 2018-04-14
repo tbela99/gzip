@@ -1,15 +1,16 @@
 <?php
 
-//use Patchwork\JSqueeze;
-
 /**
- * @package     GZip Plugin
- * @subpackage  System.Gzip
- *
  * @package     GZip Plugin
  * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
  */
+
 
 defined('_JEXEC') or die;
 

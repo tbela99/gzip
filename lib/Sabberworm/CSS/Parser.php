@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS;
 
+defined('_JEXEC') or die;
+
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\CSSList\Document;
 use Sabberworm\CSS\CSSList\KeyFrame;

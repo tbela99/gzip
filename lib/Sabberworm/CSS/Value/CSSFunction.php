@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
+
 class CSSFunction extends ValueList {
 
 	private $sName;

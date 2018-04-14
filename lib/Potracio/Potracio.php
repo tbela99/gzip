@@ -1,5 +1,8 @@
 <?php
 namespace Potracio;
+
+defined('_JEXEC') or die;
+
 /*  Potracio - Port by Otamay (2017) (https://github.com/Otamay/potracio.git)
  * A PHP Port of Potrace (http://potrace.sourceforge.net),
  * ported from https://github.com/kilobtye/potrace. Info below:

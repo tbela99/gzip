@@ -2,6 +2,8 @@
 
 namespace Sabberworm\CSS\Value;
 
+defined('_JEXEC') or die;
+
 abstract class ValueList extends Value {
 
 	protected $aComponents;
