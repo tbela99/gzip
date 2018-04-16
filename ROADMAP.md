@@ -3,6 +3,9 @@
 
 ## High priority list
 
+1.  Enable CDN / cookieless domain support 
+1.  Use blurry image preview as an alternative to SVG
+1.  Add a thrid option for service worker (disable, enable, force removal). right now enable is handled as "force removal"
 1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts. right now they are updated only once and forever
 1.  prerender images using primitive.js svg generation https://github.com/ondras/primitive.js/blob/master/js/app.js
 1.  prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?

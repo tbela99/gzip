@@ -33,8 +33,6 @@ class GZipHelper {
 
     static $cssBackgrounds = [];
 
-//    static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
-//    static $pwacache = [];
     static $images = array(
         "gif" => array('as' => 'image'),
         "jpg" => array('as' => 'image'),
