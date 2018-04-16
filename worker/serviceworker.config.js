@@ -1,7 +1,20 @@
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* main service worker file */
 /* global SW, scope */
+
+/**
+ *
+ * main service worker file
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 
 "use strict;";
 

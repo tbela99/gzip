@@ -1,7 +1,19 @@
 /* do not edit! */
 // @ts-check
-/* main service worker file */
-// build 065a58a 2018-03-29 20:48:06-04:00
+/**
+ *
+ * main service worker file
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+/*  */
+// build 89cc04f 2018-04-14 19:50:32-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -24,6 +36,17 @@ const scope = "{scope}";
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 !function() {
     "use strict;";
     const Utils = {
@@ -157,6 +180,17 @@ const scope = "{scope}";
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // promisified event api on(event, handler) => resolve(event, [args...])
 // promisified event api on({event: handler, event2: handler2}) => resolve(event, [args...])
 !function() {
@@ -266,6 +300,17 @@ const scope = "{scope}";
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 SW.strategies = function() {
     const map = new Map();
     const strategy = {
@@ -314,6 +359,17 @@ SW.strategies = function() {
 // @ts-check
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 SW.strategies.add("nf", async (event, cache) => {
     "use strict;";
     try {
@@ -337,6 +393,17 @@ SW.strategies.add("nf", async (event, cache) => {
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, CACHE_NAME */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 SW.strategies.add("cf", async event => {
     "use strict;";
     let response = await caches.match(event.request);
@@ -357,6 +424,17 @@ SW.strategies.add("cf", async event => {
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
 // stale while revalidate
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 SW.strategies.add("cn", async event => {
     "use strict;";
     const response = await caches.match(event.request);
@@ -377,18 +455,51 @@ SW.strategies.add("cn", async event => {
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // or simply don't call event.respondWith, which will result in default browser behaviour
 SW.strategies.add("no", event => fetch(event.request));
 
 // @ts-check
 /* global SW */
 /* eslint wrap-iife: 0 */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // If a match isn't found in the cache, the response
 // will look like a connection error);
 SW.strategies.add("co", event => caches.match(event.request));
 
 // @ts-check
 /* global SW, scope, undef */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 (function(SW) {
     function normalize(method) {
         if (method == undef || method == "HEAD") {
@@ -518,8 +629,20 @@ SW.strategies.add("co", event => caches.match(event.request));
 
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* main service worker file */
 /* global SW, scope */
+/**
+ *
+ * main service worker file
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 "use strict;";
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
@@ -563,6 +686,17 @@ for (entry of strategies) {
 //}
 // @ts-check
 /* global CACHE_NAME */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 self.addEventListener("install", event => {
     event.waitUntil(caches.open(CACHE_NAME).then(async cache => {
         await cache.addAll("{preloaded_urls}");
@@ -572,6 +706,17 @@ self.addEventListener("install", event => {
 
 // @ts-check
 /* global CACHE_NAME */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 self.addEventListener("activate", event => {
     // delete old app owned caches
     event.waitUntil(self.clients.claim().then(async () => {
@@ -585,6 +730,17 @@ self.addEventListener("activate", event => {
 
 // @ts-check
 /* global CACHE_NAME */
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 /**
  * @param {FetchEvent} event
  */

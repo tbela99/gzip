@@ -66,6 +66,13 @@
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
                 </fields>
             </fieldset>
+            <fieldset name="cdn" label="CDN">
+                <field name="cdn[0]" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />
+                <field name="cdn[1]" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
+                <field name="cdn[2]" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
+                <field name="cdntypes" label="PLG_GZIP_FIELD_CDN_TYPES_LABEL" description="PLG_GZIP_FIELD_CDN_TYPES_DESCRIPTION" type="cdntypes" />
+                <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
+            </fieldset>
             <fieldset name="javascript" label="Javascript Settings">
                 <field type="spacer" label="Configure Javascript settings" />
                 <field type="spacer" hr="true" />
@@ -181,7 +188,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>                    
-                    <field name="debug_pwa" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
