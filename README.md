@@ -1,6 +1,7 @@
 ## Page Optimizer Plugin
 
 Do you want to improve your website by
+
 - improving loading performance?
 - enable offline capabilities via service worker?
 - or turn it into a pwa?
@@ -9,8 +10,8 @@ This extension allows you to do all of these things.
 
 There are additional plugins that help optmizing and profiling your page or server
 
-*   [Server Timing Plugin](/projects/PWA/repos/server-timing/) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
-*   [HTML Minifier](/projects/WO/repos/html-minifier/) minify html in an html5 compliant way.
+*   [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
+*   [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
 
 # General improvements
 
