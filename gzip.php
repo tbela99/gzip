@@ -21,14 +21,6 @@ class PlgSystemGzip extends JPlugin
     protected $worker_id = '';
     protected $manifest_id = '';
 
-  //  public function onInstallerAfterInstaller($model, $package, $installer, $result) {
-
-   //     if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
-                
-    //        $this->cleanCache();
-    //    }
-   // }
-
     public function onContentPrepareForm(JForm $form, $data) {
 
         switch ($form->getName()) {
@@ -97,8 +89,26 @@ class PlgSystemGzip extends JPlugin
                 }
                 
                 if ($object->get('type') == 'plugin' && $object->get('element') == 'gzip' && $object->get('folder') == 'system') {
+
+                	$xml = $form->getXml();
+                	$keys = array_keys(\Gzip\GZipHelper::$accepted);
+
+                	foreach ($xml->xpath('//fieldset[@name="cdn"]/fields[@name="gzip"]/field[@name="cdn_types"]') as $field) {
+
+						//$field['checked'] = 'js,css';
+						// check all types
+						// $field['checked'] = implode(',', $keys);
+
+		                foreach ($keys as $key) {
+
+			                $node = $field->addChild('option', strtoupper($key));
+			                $node['value'] = $key;
+		                }
+
+		                break;
+	                }
                 
-                    foreach ($form->getXml()->xpath('//field[@name="admin_secret"]') as $field) {
+                    foreach ($xml->xpath('//field[@name="admin_secret"]') as $field) {
 
                         $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', \JURI::root());
                         break;
@@ -112,8 +122,8 @@ class PlgSystemGzip extends JPlugin
     public function onAfterRoute() {
 
         if(JFactory::getApplication()->isSite()) {
-            
-            $document = JFactory::getDocument();
+
+	        $document = JFactory::getDocument();
 
             if($document->getType() == 'html') {
 
@@ -123,32 +133,31 @@ class PlgSystemGzip extends JPlugin
 					$document->addScript('plugins/system/gzip/js/dist/lib.images.min.js');
 					$document->addScriptDeclaration(str_replace('{script-src}', \Gzip\GZipHelper::url(JURI::root(true).'/plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader.min.js')));
 				}
-                    
-            //    if(!empty($this->options['debug'])) {
 
-            //        $document->addScriptDeclaration('console.log(document.documentElement.dataset.prf);');
-            //    }
+                if(!empty($this->options['pwaenabled'])) {
 
-                $script = '';
+					if ($this->options['pwaenabled'] == 1) {
 
-                if(!empty($this->options['pwaenabled'])) {                    
+						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
 
-                    $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
+						$onesignal = (array) $this->options['onesignal'];
+						if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
 
-                    $onesignal = (array) $this->options['onesignal'];
-                    if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
+							$script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
+						}
+					}
 
-                        $script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
-                    }
+					// force service worker uninstall
+					else if ($this->options['pwaenabled'] == -1) {
+
+						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js'));
+					}
                 }
 
-                else {
-                    
-                    $script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js'));
+                if (!empty($script)) {
 
+	                $document->addScriptDeclaration( $script);
                 }
-
-                $document->addScriptDeclaration( $script);
             }
         }
     }
@@ -179,9 +188,9 @@ class PlgSystemGzip extends JPlugin
             $options = $data['params']['gzip'];
 
             $this->cleanCache();
-
             $this->updateManifest($options);
             $this->updateServiceWorker($options);
+	        $this->updateOptions($options);
         }
 
         return true;
@@ -195,10 +204,80 @@ class PlgSystemGzip extends JPlugin
 
             $options = $this->params->get('gzip');
 
-            if(!empty($options)) {
+	        if(!empty($options)) {
 
                 $this->options = (array) $options;
             }
+
+	        if (!is_file('cache/z/app/config.php')) {
+
+		        $this->updateOptions($options);
+	        }
+
+            if (!empty($this->options['cdn'])) {
+
+	            $this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
+            }
+
+        //    if (empty($this->options['cdn'])) {
+
+	    //        $this->options['cdn'][] = \JUri::root(true) . '/';
+        //    }
+
+	    //    $this->options['cdn'] = array_values($this->options['cdn']);
+
+	        $this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https' : 'http';
+
+	        foreach ($this->options['cdn'] as $key => $option) {
+
+		    //    unset($this->options['cdn'][$key]);
+
+	        //	if () {
+
+			        $this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
+		    //    }
+	        }
+
+	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
+				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^/?media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#'];
+
+	        if (!isset($this->options['cdn_types'])) {
+
+		        $this->options['cdn_types'] = array_keys(\Gzip\GZipHelper::$accepted);
+	        }
+
+	        $this->options['static_types'] = [];
+
+	        foreach ($this->options['cdn_types'] as $type) {
+
+	        	if (isset(\Gzip\GZipHelper::$accepted[$type])) {
+
+			        $this->options['static_types'][$type] = \Gzip\GZipHelper::$accepted[$type];
+		        }
+	        }
+
+	        if (!empty($this->options['cdntypes_custom'])) {
+
+	        	foreach (explode("\n", $this->options['cdntypes_custom']) as $option) {
+
+	        		$option = trim($option);
+
+	        		if ($option !== '') {
+
+	        			$option = explode(' ', $option, 2);
+
+	        			if (count($option) == 2) {
+
+					        $this->options['static_types'][$option[0]] = $option[1];
+				        }
+			        }
+		        }
+	        }
+
+	        \Gzip\GZipHelper::$hosts = $this->options['cdn'];
+	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
+
+	        //    var_dump($this->options);die;
 
             $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
@@ -206,7 +285,7 @@ class PlgSystemGzip extends JPlugin
             $this->options['parse_url_attr']['data-src'] = '';
             
             // do not render blank js file when service worker is disabled
-        //    if(!empty($this->options['pwaenabled'])) {
+            if(!empty($this->options['pwaenabled'])) {
 
                 $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
 
@@ -217,7 +296,7 @@ class PlgSystemGzip extends JPlugin
 
                 $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
                 $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
-        //    }
+            }
 
             $dirname = dirname($_SERVER['SCRIPT_NAME']);
 
@@ -260,7 +339,7 @@ class PlgSystemGzip extends JPlugin
 
                 if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
 
-                    $debug = '';
+                //    $debug = '';
 
                     header('Cache-Control: max-age=86400');
                     header('Content-Type: application/manifest+json;charset=utf-8');
@@ -324,6 +403,8 @@ class PlgSystemGzip extends JPlugin
                 }
             }
 
+        //    var_dump($this->options);die;
+
             // "start_url": "./?utm_source=web_app_manifest",
             // manifeste url
         }
@@ -331,8 +412,6 @@ class PlgSystemGzip extends JPlugin
         else if ($app->isAdmin()) {
 
             $secret = $this->params->get('gzip.admin_secret');
-
-        //    var_export($secret);die;
 
             if (!is_null($secret) && $_SERVER['REQUEST_METHOD'] == 'GET' && JFactory::getUser()->get('id') == 0 && !array_key_exists($secret, $_GET)) {
 
@@ -391,8 +470,7 @@ class PlgSystemGzip extends JPlugin
             return;
         }
 
-        
-        $options = $this->options;
+	    $options = $this->options;
         $prefix = 'cache/z/';
 
         if(!empty($options['pwaenabled'])) {
@@ -469,9 +547,23 @@ class PlgSystemGzip extends JPlugin
         $app->setBody($body);
     }
 
+	public function onInstallerAfterInstaller($model, $package, $installer, $result) {
+
+		if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
+
+			$this->cleanCache();
+			$this->updateOptions((array) $this->params->get('gzip'));
+		}
+	}
+
     protected function updateManifest($options) {
-        
-        $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
+
+	    if(empty($options['pwa_app_manifest'])) {
+
+	    	return;
+	    }
+
+	    $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
 
         if(!is_dir($path)) {
 
@@ -572,8 +664,134 @@ class PlgSystemGzip extends JPlugin
         
         file_put_contents($path.'manifest_version', hash_file('sha1', $path.'manifest.json'));
     }
+
+    protected function updateOptions($options) {
+
+	    $path = JPATH_SITE.'/cache/z/app/';
+
+	    if(!is_dir($path)) {
+
+		    $old_mask = umask();
+
+		    umask(022);
+		    mkdir($path, 0755, true);
+		    umask($old_mask);
+	    }
+
+	    $custom_types = [];
+
+	    if (!empty($options['cdntypes_custom'])) {
+
+		    foreach (explode("\n", $options['cdntypes_custom']) as $option) {
+
+			    $option = trim($option);
+
+			    if ($option !== '') {
+
+				    $option = explode(' ', $option, 2);
+
+				    if (count($option) == 2) {
+
+					    $custom_types[$option[0]] = $option[1];
+				    }
+			    }
+		    }
+	    }
+
+	    $hosts = [];
+
+	    if (!empty($options['cdn'])) {
+
+		    $hosts = is_object($options['cdn']) ? array_unique(array_filter(array_values(get_object_vars($options['cdn'])))) : $options['cdn'];
+
+		    foreach ($hosts as $key => $host) {
+
+	    		$hosts[$key] = preg_replace('#([a-zA-Z]+:)?(//)?([^/]+).*$#', '$3', $host);
+		    }
+
+		    $hosts = array_unique($hosts);
+	    }
+
+	    $types = [];
+
+	    if (isset($options['cdn_types'])) {
+
+	    	foreach ($options['cdn_types'] as $type) {
+
+	    		if (isset(\Gzip\GZipHelper::$accepted[$type])) {
+
+	    			$types[$type] = \Gzip\GZipHelper::$accepted[$type];
+			    }
+		    }
+	    }
+
+	    else {
+
+	    	$types = \Gzip\GZipHelper::$accepted;
+	    }
+
+	    if (!empty($options['cdntypes_custom'])) {
+
+		    foreach (explode("\n", $options['cdntypes_custom']) as $option) {
+
+			    $option = trim($option);
+
+			    if ($option !== '') {
+
+				    $option = explode(' ', $option, 2);
+
+				    if (count($option) == 2) {
+
+					    $types[$option[0]] = $option[1];
+				    }
+			    }
+		    }
+	    }
+
+	    $accepted_types = \Gzip\GZipHelper::$accepted;
+
+	    if (!empty($options['mimetypes_custom'])) {
+
+		    foreach (explode("\n", $options['mimetypes_custom']) as $option) {
+
+			    $option = trim($option);
+
+			    if ($option !== '') {
+
+				    $option = explode(' ', $option, 2);
+
+				    if (count($option) == 2) {
+
+					    $accepted_types[$option[0]] = $option[1];
+				    }
+			    }
+		    }
+	    }
+
+	    $data = [
+
+	    	'cors' => !empty($options['cdn_cors']) || $options['checksum'] != 'none',
+		    'custom_types' => $custom_types,
+		    'eTag' => $options['hashfiles'] == 'content',
+		    'hosts' => array_values($hosts),
+		    'valid_mimetypes' => $accepted_types,
+		    'static_mimetypes' => $types
+	    ];
+
+	    file_put_contents($path.'config.php','<?php defined("JPATH_PLATFORM") or die;'.
+		    "\n\nclass GzipHelperConfig {\n\n".implode(";\n", array_map(function ($key, $value) {
+
+		    	return "\tconst ".strtoupper($key)." = ".var_export($value, true);
+
+		    }, array_keys($data), $data)).";\n".'}');
+    }
     
     protected function updateServiceWorker($options) {
+
+	    if (empty($options['pwaenabled'])) {
+
+	    	return;
+	    }
 
         $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
 
@@ -620,17 +838,17 @@ class PlgSystemGzip extends JPlugin
 
         if (is_dir($path)) {
 
-            $paths = [new DirectoryIterator($path)];
+        //    $paths = [];
 
-            while(count($paths) > 0) {
+        //    while(count($paths) > 0) {
 
-                $dir = array_shift($paths);
+            //    $dir = array_shift($paths);
 
-                foreach($dir as $file) {
+                foreach(new DirectoryIterator($path) as $file) {
 
                     if ($file->isDir() && !$file->isDot()) {
 
-	                    $paths[] = $file;
+	                //    $paths[] = $file;
 
                         foreach(
                             [
@@ -650,7 +868,7 @@ class PlgSystemGzip extends JPlugin
                         }
                     }
                 }
-            }
+        //    }
         }        
     }
 }

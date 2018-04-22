@@ -1,5 +1,4 @@
 /* do not edit! */
-// @ts-check
 /**
  *
  * main service worker file
@@ -12,8 +11,9 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
 /*  */
-// build 89cc04f 2018-04-14 19:50:32-04:00
+// build 26a38fd 2018-04-18 19:45:26-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -33,9 +33,6 @@ const scope = "{scope}";
 
 // const defaultStrategy = "{defaultStrategy}";
 //console.log(self);
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, undef */
 /**
  *
  * @package     GZip Plugin
@@ -47,6 +44,9 @@ const scope = "{scope}";
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, undef */
 !function() {
     "use strict;";
     const Utils = {
@@ -177,9 +177,6 @@ const scope = "{scope}";
     SW.Utils = Utils;
 }();
 
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, undef */
 /**
  *
  * @package     GZip Plugin
@@ -191,6 +188,9 @@ const scope = "{scope}";
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, undef */
 // promisified event api on(event, handler) => resolve(event, [args...])
 // promisified event api on({event: handler, event2: handler2}) => resolve(event, [args...])
 !function() {
@@ -297,9 +297,6 @@ const scope = "{scope}";
     Utils.merge(true, SW, Event);
 }();
 
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, undef */
 /**
  *
  * @package     GZip Plugin
@@ -311,6 +308,9 @@ const scope = "{scope}";
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, undef */
 SW.strategies = function() {
     const map = new Map();
     const strategy = {
@@ -325,9 +325,10 @@ SW.strategies = function() {
                 //	await SW.resolve("prefetch", event.request);
                 const response = await handle(event);
                 //	await SW.resolve("postfetch", event.request, response);
-                                console.log({
+                                console.info({
                     mode: event.request.mode,
-                    response
+                    request: event.request.url,
+                    response: response && response.url
                 });
                 return response;
             }
@@ -356,9 +357,6 @@ SW.strategies = function() {
     return strategy;
 }();
 
-// @ts-check
-/* global SW, CACHE_NAME */
-/* eslint wrap-iife: 0 */
 /**
  *
  * @package     GZip Plugin
@@ -370,6 +368,9 @@ SW.strategies = function() {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global SW, CACHE_NAME */
+/* eslint wrap-iife: 0 */
 SW.strategies.add("nf", async (event, cache) => {
     "use strict;";
     try {
@@ -390,9 +391,6 @@ SW.strategies.add("nf", async (event, cache) => {
     return cache.match(event.request);
 });
 
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, CACHE_NAME */
 /**
  *
  * @package     GZip Plugin
@@ -404,6 +402,9 @@ SW.strategies.add("nf", async (event, cache) => {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, CACHE_NAME */
 SW.strategies.add("cf", async event => {
     "use strict;";
     let response = await caches.match(event.request);
@@ -420,10 +421,6 @@ SW.strategies.add("cf", async event => {
     return response;
 });
 
-// @ts-check
-/* global SW, CACHE_NAME */
-/* eslint wrap-iife: 0 */
-// stale while revalidate
 /**
  *
  * @package     GZip Plugin
@@ -435,6 +432,10 @@ SW.strategies.add("cf", async event => {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global SW, CACHE_NAME */
+/* eslint wrap-iife: 0 */
+// stale while revalidate
 SW.strategies.add("cn", async event => {
     "use strict;";
     const response = await caches.match(event.request);
@@ -452,9 +453,6 @@ SW.strategies.add("cn", async event => {
     //	});
 });
 
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW */
 /**
  *
  * @package     GZip Plugin
@@ -466,12 +464,12 @@ SW.strategies.add("cn", async event => {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW */
 // or simply don't call event.respondWith, which will result in default browser behaviour
 SW.strategies.add("no", event => fetch(event.request));
 
-// @ts-check
-/* global SW */
-/* eslint wrap-iife: 0 */
 /**
  *
  * @package     GZip Plugin
@@ -483,12 +481,13 @@ SW.strategies.add("no", event => fetch(event.request));
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global SW */
+/* eslint wrap-iife: 0 */
 // If a match isn't found in the cache, the response
 // will look like a connection error);
 SW.strategies.add("co", event => caches.match(event.request));
 
-// @ts-check
-/* global SW, scope, undef */
 /**
  *
  * @package     GZip Plugin
@@ -500,6 +499,8 @@ SW.strategies.add("co", event => caches.match(event.request));
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global SW, scope, undef */
 (function(SW) {
     function normalize(method) {
         if (method == undef || method == "HEAD") {
@@ -627,9 +628,6 @@ SW.strategies.add("co", event => caches.match(event.request));
     SW.router = router;
 })(SW);
 
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, scope */
 /**
  *
  * main service worker file
@@ -643,6 +641,9 @@ SW.strategies.add("co", event => caches.match(event.request));
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, scope */
 "use strict;";
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
@@ -684,8 +685,6 @@ for (entry of strategies) {
 //for (x of SW.strategies) {
 //	console.log(x);
 //}
-// @ts-check
-/* global CACHE_NAME */
 /**
  *
  * @package     GZip Plugin
@@ -697,6 +696,8 @@ for (entry of strategies) {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global CACHE_NAME */
 self.addEventListener("install", event => {
     event.waitUntil(caches.open(CACHE_NAME).then(async cache => {
         await cache.addAll("{preloaded_urls}");
@@ -704,8 +705,6 @@ self.addEventListener("install", event => {
     }));
 });
 
-// @ts-check
-/* global CACHE_NAME */
 /**
  *
  * @package     GZip Plugin
@@ -717,6 +716,8 @@ self.addEventListener("install", event => {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global CACHE_NAME */
 self.addEventListener("activate", event => {
     // delete old app owned caches
     event.waitUntil(self.clients.claim().then(async () => {
@@ -728,8 +729,6 @@ self.addEventListener("activate", event => {
     }));
 });
 
-// @ts-check
-/* global CACHE_NAME */
 /**
  *
  * @package     GZip Plugin
@@ -741,6 +740,8 @@ self.addEventListener("activate", event => {
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global CACHE_NAME */
 /**
  * @param {FetchEvent} event
  */

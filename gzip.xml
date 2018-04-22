@@ -41,7 +41,7 @@
                 </fields>
             </fieldset>
             <fieldset name="http_cache" label="HTTP">
-                <field type="spacer" label="Configure HTTP settings" />
+                <field type="spacer" label="Configure HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field type="spacer" label="HTTP Push" />
@@ -59,21 +59,30 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION" type="radio" class="btn-group" default="time">
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                     </field>
+                    <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
                 </fields>
             </fieldset>
             <fieldset name="cdn" label="CDN">
-                <field name="cdn[0]" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />
-                <field name="cdn[1]" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
-                <field name="cdn[2]" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
-                <field name="cdntypes" label="PLG_GZIP_FIELD_CDN_TYPES_LABEL" description="PLG_GZIP_FIELD_CDN_TYPES_DESCRIPTION" type="cdntypes" />
-                <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
+                <fields name="gzip">
+                    <fields name="cdn">
+                        <field name="1" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />
+                        <field name="2" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
+                        <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
+                    </fields>
+                    <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
+                    <field name="cdn_types" type="checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
+                </fields>
             </fieldset>
-            <fieldset name="javascript" label="Javascript Settings">
+            <fieldset name="javascript" label="Javascript">
                 <field type="spacer" label="Configure Javascript settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -89,18 +98,21 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="minifyjsservice" label="PLG_GZIP_FIELD_MINIFYJSSERVICE_LABEL" description="PLG_GZIP_FIELD_MINIFYJSSERVICE_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <!--<option value="1">JYes</option>-->
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                     <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
-            <fieldset name="css" label="CSS Settings">
+            <fieldset name="css" label="CSS">
                 <field type="spacer" label="Configure Css settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
+                        <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
+                        <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
+                        <option value="optional">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_OPTIONAL</option>
+                        <option value="block">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_BLOCK</option>
+                        <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
+                    </field>
                     <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION" type="radio" class="btn-group" default="1">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -117,15 +129,11 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="minifycssservice" label="PLG_GZIP_FIELD_MINIFYCSS_SERVICE_LABEL" description="PLG_GZIP_FIELD_MINIFYCSSSERVICE_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <!--<option value="1">JYes</option>-->
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                     <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
-            <fieldset name="images" label="Images Settings">
+            <fieldset name="images" label="Images">
                 <field type="spacer" label="Configure images settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -179,18 +187,15 @@
                     </field>
                 </fields>
             </fieldset>
-            <fieldset name="pwa" label="PWA Settings">
+            <fieldset name="pwa" label="PWA">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Networking settings" />
                 <fields name="gzip">
-                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
-                    </field>                    
-                    <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
+                        <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
                     </field>
                     <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION" type="list" default="cn">
                         <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
@@ -199,6 +204,10 @@
                         <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
                         <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
                         <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                    </field>
+                    <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
                     </field>
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="App manifest settings" />
@@ -231,9 +240,8 @@
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
                 </fields>
             </fieldset>
-            
             <fieldset name="webpush" label="Web Push">
-                <field type="spacer" label="Configure Web Push Settings" />
+                <field type="spacer" label="Configure Web Push" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="OneSignal app settings" />   
                 <fields name="gzip">    
@@ -261,7 +269,7 @@
                 </fields>
             </fieldset>
             <fieldset name="security" label="Security">
-                <field type="spacer" label="Configure Security settings" />
+                <field type="spacer" label="Configure Security" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                 <field type="spacer" label="Sub Resource Integrity" />
