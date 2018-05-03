@@ -1,7 +1,3 @@
-// @ts-check
-/* global SW */
-/* eslint wrap-iife: 0 */
-
 /**
  *
  * @package     GZip Plugin
@@ -13,6 +9,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* global SW */
+/* eslint wrap-iife: 0 */
 
 // If a match isn't found in the cache, the response
 // will look like a connection error);

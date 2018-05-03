@@ -1,8 +1,3 @@
-// @ts-check
-/* global SW, CACHE_NAME */
-/* eslint wrap-iife: 0 */
-// stale while revalidate
-
 /**
  *
  * @package     GZip Plugin
@@ -14,6 +9,11 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* global SW, CACHE_NAME */
+/* eslint wrap-iife: 0 */
+// stale while revalidate
 
 SW.strategies.add("cn", async event => {
 	"use strict;";

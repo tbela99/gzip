@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  *
  * main service worker file
@@ -12,6 +10,8 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
 
 /*  */
 

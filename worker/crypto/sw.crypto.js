@@ -1,7 +1,3 @@
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW */
-
 /**
  *
  * @package     GZip Plugin
@@ -13,6 +9,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW */
 
 SW.crypto = (function() {
 	function hex(buffer) {

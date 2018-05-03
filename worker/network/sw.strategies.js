@@ -1,7 +1,3 @@
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, undef */
-
 /**
  *
  * @package     GZip Plugin
@@ -14,6 +10,13 @@
  * @license     MIT License
  */
 
+// @ts-check
+/* eslint wrap-iife: 0 */
+/*global SW, undef */
+
+/**
+ *
+ */
 SW.strategies = (function() {
 	const map = new Map();
 
@@ -23,7 +26,7 @@ SW.strategies = (function() {
 		 * @param {String} name
 		 * @param {function} handle
 		 */
-		add: (name, handle, scheme) =>
+		add: (name, handle) =>
 			map.set(name, {
 				name,
 				handle: async event => {
@@ -31,16 +34,43 @@ SW.strategies = (function() {
 					const response = await handle(event);
 					//	await SW.resolve("postfetch", event.request, response);
 
-					console.log({ mode: event.request.mode, response });
+					console.info({ mode: event.request.mode, request: event.request.url, response: response && response.url });
 
 					return response;
 				}
 			}),
+        /**
+		 *
+         * @returns {IterableIterator<any>}
+         */
 		keys: () => map.keys(),
+        /**
+		 *
+         * @returns {IterableIterator<any>}
+         */
 		values: () => map.values(),
+        /**
+		 *
+         * @returns {IterableIterator<[any]>}
+         */
 		entries: () => map.entries(),
+        /**
+		 *
+         * @param {String} name
+         * @returns {any}
+         */
 		get: name => map.get(name),
+        /**
+		 *
+         * @param {String} name
+         * @returns {boolean}
+         */
 		has: name => map.has(name),
+        /**
+		 *
+         * @param {String} name
+         * @returns {boolean}
+         */
 		delete: name => map.delete(name),
 		/**
 		 *

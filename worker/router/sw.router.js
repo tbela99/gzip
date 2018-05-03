@@ -1,6 +1,3 @@
-// @ts-check
-/* global SW, scope, undef */
-
 /**
  *
  * @package     GZip Plugin
@@ -12,6 +9,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* global SW, scope, undef */
+
 (function(SW) {
 	function normalize(method) {
 		if (method == undef || method == "HEAD") {

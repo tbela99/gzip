@@ -131,6 +131,14 @@ You can specify which resource are not managed by the service worker by specifyi
 
 # Change History
 
+## V2.3
+
+1.  Enable CDN / cookieless domain support 
+1.  Enable CORS headers for cached resources
+1.  extend the list of file type supported by the cdn or cookieless domain
+1.  extend the list of file type supported by the url rewrite feature
+1.  Add a third option for service worker (disable, enable, force removal). right now enable is handled as "force removal"
+
 ## V2.2
 
 1.  optimized image lazyloader

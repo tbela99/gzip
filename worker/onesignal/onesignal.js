@@ -1,6 +1,3 @@
-// @ts-check
-/* wrap-iife: 0 */
-
 /**
  *
  * @package     GZip Plugin
@@ -12,6 +9,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* wrap-iife: 0 */
+
 !(function(script, body) {
 	script.src = "https://cdn.onesignal.com/sdks/OneSignalSDK.js";
 	script.defer = true;

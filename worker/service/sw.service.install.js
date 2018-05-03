@@ -1,6 +1,3 @@
-// @ts-check
-/* global CACHE_NAME */
-
 /**
  *
  * @package     GZip Plugin
@@ -12,6 +9,9 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global CACHE_NAME */
+
 self.addEventListener("install", event => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then(async cache => {

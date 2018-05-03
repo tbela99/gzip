@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Service worker browser client uninstall
  * @package     GZip Plugin
@@ -10,6 +9,7 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
 	navigator.serviceWorker.getRegistrations().then(function(registrations) {
 		let registration,

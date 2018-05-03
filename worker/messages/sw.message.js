@@ -1,9 +1,3 @@
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, BroadcastChannel */
-// untested code
-
-
 /**
  *
  * @package     GZip Plugin
@@ -15,6 +9,12 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, BroadcastChannel */
+// untested code
+
 
 SW.message = {
     post (data, resolve, reject) {

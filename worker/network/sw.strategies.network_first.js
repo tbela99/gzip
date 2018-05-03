@@ -1,7 +1,3 @@
-// @ts-check
-/* global SW, CACHE_NAME */
-/* eslint wrap-iife: 0 */
-
 /**
  *
  * @package     GZip Plugin
@@ -13,6 +9,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global SW, CACHE_NAME */
+/* eslint wrap-iife: 0 */
+
 SW.strategies.add("nf", async (event, cache) => {
 	"use strict;";
 

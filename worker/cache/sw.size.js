@@ -1,4 +1,3 @@
-// @ts-check
 /* global SW, CACHE_NAME */
 
 /**
@@ -13,6 +12,7 @@
  * @license     MIT License
  */
 
+// @ts-check
 SW.getCacheSize = async function() {
 
     const cache = await caches.open(CACHE_NAME);

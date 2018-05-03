@@ -1,7 +1,3 @@
-// @ts-check
-/* eslint wrap-iife: 0 */
-/* global SW, scope */
-
 /**
  *
  * main service worker file
@@ -15,6 +11,10 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+
+// @ts-check
+/* eslint wrap-iife: 0 */
+/* global SW, scope */
 
 "use strict;";
 
@@ -37,8 +37,6 @@ if (!strategies.has(defaultStrategy)) {
 	// default browser behavior
 	defaultStrategy = "no";
 }
-
-//console.log({ SW });
 
 router.setDefaultHandler(strategies.get(defaultStrategy));
 

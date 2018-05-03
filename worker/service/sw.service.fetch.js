@@ -1,6 +1,3 @@
-// @ts-check
-/* global CACHE_NAME */
-
 /**
  *
  * @package     GZip Plugin
@@ -12,10 +9,14 @@
  * @license     LGPL v3
  * @license     MIT License
  */
+// @ts-check
+/* global CACHE_NAME */
+
 
 /**
  * @param {FetchEvent} event
  */
+
 self.addEventListener("fetch", (event) => {
 	const handler = SW.router.getHandler(event.request.url, event);
 

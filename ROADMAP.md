@@ -3,6 +3,7 @@
 
 ## High priority list
 
+1.  Configure service worker route strategy per resource type from the Joomla administrator
 1.  Use blurry image preview as an alternative to SVG
 1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts. right now they are updated only once and forever
 1.  prerender images using primitive.js svg generation https://github.com/ondras/primitive.js/blob/master/js/app.js

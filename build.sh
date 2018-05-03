@@ -6,11 +6,11 @@ cd $DIR
 #
 #
 #
-uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
+uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle --keep-fnames --output ./loader.min.js -- ./loader.js
-uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
+uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle --keep-fnames --output ./cssloader.min.js -- ./cssloader.js
-uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
+uglifyjs  --ecma=8 --compress passes=3,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle --keep-fnames --output ./imagesloader.min.js -- ./imagesloader.js
 #
 #
@@ -51,7 +51,7 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
   ./router/sw.router.js\
   ./serviceworker.config.js\
   ./service/sw.service.install.js ./service/sw.service.activate.js  ./service/sw.service.fetch.js | sed "s/build-date/$(date '+%F %H:%M:%S%:z')/g" | sed "s/build-id/$(git rev-parse --short HEAD)/g"  > ./dist/serviceworker.js
-uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log"]\
+uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
 #  ./filter/sw.filter.js --mangle-props
 #
