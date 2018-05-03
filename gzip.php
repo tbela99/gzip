@@ -678,7 +678,13 @@ class PlgSystemGzip extends JPlugin
 		    umask($old_mask);
 	    }
 
-	    $custom_types = [];
+        $custom_types = [];
+        
+        if (is_object($options)) {
+
+            $options = get_object_vars($options);
+        }
+
 
 	    if (!empty($options['cdntypes_custom'])) {
 
