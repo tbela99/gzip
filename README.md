@@ -124,6 +124,12 @@ Add routes to customize fetch event networking strategy by using either a static
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
+# CDN and Cookieless Domains
+
+* Configure up to 3 domains from which resources will be loaded. 
+* You can also configure which kind of resource are loaded from these domains.
+* CORS headers are automatically added for responses sent from these domains
+
 # Misc
 
 *   Joomla administrator is excluded from the service worker cached resources
@@ -138,6 +144,7 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  extend the list of file type supported by the cdn or cookieless domain
 1.  extend the list of file type supported by the url rewrite feature
 1.  Add a third option for service worker (disable, enable, force removal). right now enable is handled as "force removal"
+1.  Configure service worker route strategy per resource type from the Joomla administrator
 
 ## V2.2
 

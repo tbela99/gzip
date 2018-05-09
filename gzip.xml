@@ -73,6 +73,11 @@
             </fieldset>
             <fieldset name="cdn" label="CDN">
                 <fields name="gzip">
+                
+                    <field name="cnd_enabled" label="PLG_GZIP_FIELD_CDN_ENABLED_LABEL" description="PLG_GZIP_FIELD_CDN_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <fields name="cdn">
                         <field name="1" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />
                         <field name="2" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
@@ -187,7 +192,7 @@
                     </field>
                 </fields>
             </fieldset>
-            <fieldset name="pwa" label="PWA">
+            <fieldset name="pwa" label="Service Worker">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Networking settings" />

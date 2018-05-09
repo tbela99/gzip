@@ -15,8 +15,11 @@
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, scope */
+/** @var {string} scope */
+/** @var {object} SW */
 
 "use strict;";
+
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
 //SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {

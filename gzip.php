@@ -202,7 +202,7 @@ class PlgSystemGzip extends JPlugin
 
         if($app->isSite()) {
 
-            $options = $this->params->get('gzip');
+            $options = (array) $this->params->get('gzip');
 
 	        if(!empty($options)) {
 
@@ -224,9 +224,16 @@ class PlgSystemGzip extends JPlugin
 	    //        $this->options['cdn'][] = \JUri::root(true) . '/';
         //    }
 
-	    //    $this->options['cdn'] = array_values($this->options['cdn']);
+		//    $this->options['cdn'] = array_values($this->options['cdn']);
+		
+		//	var_dump($_SERVER['HTTPS']);die;
 
-	        $this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https' : 'http';
+			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+			
+			if (is_object($this->options['cdn'])) {
+
+				$this->options['cdn'] = array_values(get_object_vars($this->options['cdn']));
+			}
 
 	        foreach ($this->options['cdn'] as $key => $option) {
 
@@ -239,7 +246,7 @@ class PlgSystemGzip extends JPlugin
 	        }
 
 	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
-				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^/?media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#'];
+				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^/?media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
 	        if (!isset($this->options['cdn_types'])) {
 
@@ -274,7 +281,7 @@ class PlgSystemGzip extends JPlugin
 		        }
 	        }
 
-	        \Gzip\GZipHelper::$hosts = $this->options['cdn'];
+	        \Gzip\GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
 	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
 
 	        //    var_dump($this->options);die;
@@ -403,8 +410,6 @@ class PlgSystemGzip extends JPlugin
                 }
             }
 
-        //    var_dump($this->options);die;
-
             // "start_url": "./?utm_source=web_app_manifest",
             // manifeste url
         }
@@ -470,8 +475,10 @@ class PlgSystemGzip extends JPlugin
             return;
         }
 
-	    $options = $this->options;
-        $prefix = 'cache/z/';
+		$options = $this->options;
+
+		// segregate http and https cache
+        $prefix = 'cache/z/'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
 
         if(!empty($options['pwaenabled'])) {
 
@@ -538,7 +545,8 @@ class PlgSystemGzip extends JPlugin
         $body = Gzip\GZipHelper::parseCss($body, $options);
 
         $profiler->mark('afterParseCss');
-        $body = Gzip\GZipHelper::parseScripts($body, $options);
+		$body = Gzip\GZipHelper::parseScripts($body, $options);
+		
         
         $profiler->mark('afterParseScripts');
         $body = Gzip\GZipHelper::parseURLs($body, $options);

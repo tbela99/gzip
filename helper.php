@@ -74,8 +74,6 @@ class GZipHelper {
         "woff2" => array('as' => 'font')
     );
 
- //   static $hosts = [];
-
     // can use http cache / url rewriting
     static $accepted = array(
 	    "js" => "text/javascript",
@@ -181,7 +179,7 @@ class GZipHelper {
 
         $scheme = \JUri::getInstance()->getScheme();
 
-        static $hash;
+		static $hash;
 
         if (is_null($hash)) {
 
@@ -489,7 +487,7 @@ class GZipHelper {
 
 				            if (empty($domain[1])) {
 
-					            $domain[1] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https:' : 'http:';
+					            $domain[1] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https:' : 'http:';
 				            }
 
 				            $domains[$domain[1].$domain[2]] = $domain[1].$domain[2];
@@ -548,7 +546,7 @@ class GZipHelper {
 
         if (!empty($domains)) {
 
-            unset($domains[(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https' : 'http').'://'.$_SERVER['SERVER_NAME']]);
+            unset($domains[(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.$_SERVER['SERVER_NAME']]);
             unset($domains['http://get.adobe.com']);
 
             if (!empty($domains)) {
@@ -567,30 +565,32 @@ class GZipHelper {
 
     public static function url($file) {
 
-        $name = preg_replace('~[#?].*$~', '', static::getName($file));
+		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
+		$hash = isset($hash[2]) ? $hash[1].$hash[2]: '';
 
+		$name = static::getName($file);
+		
         if (strpos($name, 'data:') === 0) {
 
             return $file;
-        }
+		}
+		
+        if (static::isFile($name)) {
 
-        if (static::isFile($file)) {
-
-            if (is_file($name) && strpos($name, 'media/z/') !== 0) {
+            if (strpos($name, 'media/z/') !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-
-                $accepted = static::accepted();
-
+				$accepted = static::accepted();
+				
                 if (isset($accepted[$ext])) {
 
                     $hashFile = static::getHashMethod();
 
-                    return static::getHost('/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file);
+                    return static::getHost('/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
                 }
             }
 
-            return static::getHost('/' . $file);
+            return static::getHost('/' . $name.$hash);
         }
 
         return $file;
@@ -631,8 +631,8 @@ class GZipHelper {
 
                 $path .= '/';
             }
-        }
-
+		}
+		
         $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
 
             $file = trim(str_replace(array("'", '"'), "", $matches[1]));
@@ -640,14 +640,16 @@ class GZipHelper {
             if (strpos($file, 'data:') === 0) {
 
                 return $matches[0];
-            }
+			}
+			
+			$name = static::getName($file);
 
             if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
 
                 $file = static::resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
             }
 
-            else {
+        //    else {
 
                 if (preg_match('#^(https?:)?//#', $file)) {
 
@@ -669,14 +671,55 @@ class GZipHelper {
                             $file .= $match[2];
                         }
                     }
-                }
-            }
+				}
+				
+			//	else {
 
-            return // "\n" . ' /* url ' . $matches[1] .
+					if(preg_match('#^([a-z]+:)?//#', $path)) {
+
+						$content = static::getContent($path.substr($file, 1));
+
+						if ($content !== false) {
+
+							preg_match('~(.*?)([#?].*)?$~', $file, $match);
+	
+							$file = 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. static::shorten(crc32($file)) . '-' . basename($match[1]);
+	
+							if (!is_file($file)) {
+	
+								file_put_contents($file, $content);
+							}
+	
+							if (isset($match[2])) {
+	
+								$file .= $match[2];
+							}
+						}
+					//	return $path.su
+					}
+
+					else {
+							
+						if ($file[0] == '/') {
+
+							return 'url(' . static::getHost($file).')';
+						}
+					}
+				//	else {
+
+					//	var_dump($file, static::getHost($file));die;
+						return 'url(' . static::url($file).')';
+				//	}
+					
+				//	var_dump($path.$file, static::getName($file));die;
+			//	}
+		//	}
+
+        //    return // "\n" . ' /* url ' . $matches[1] .
                 // -> uncomment to debug
                 // ' isFile: '.(static::isFile($file) ? 'true '.preg_replace('~[#?].*$~', '', static::getName($file)).' -> '.static::url($file) : 'false').
               //  ' */ ' . "\n" . 
-                "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
+            //    "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
@@ -710,6 +753,11 @@ class GZipHelper {
     }
 
     public static function getHost($file) {
+
+		if (preg_match('#^([a-z]+:)?//#i', $file)) {
+
+			return $file;
+		}
 
 	    $count = count(static::$hosts);
 
@@ -1403,7 +1451,7 @@ class GZipHelper {
             return false;
         }
 
-        $name = preg_replace('~(#|\?).*$~', '', $name);
+    //    $name = preg_replace('~(#|\?).*$~', '', $name);
 
         return is_file($name) || is_file(utf8_decode($name));
     }
