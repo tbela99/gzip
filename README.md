@@ -128,7 +128,7 @@ You can specify which resource are not managed by the service worker by specifyi
 
 * Configure up to 3 domains from which resources will be loaded. 
 * You can also configure which kind of resource are loaded from these domains.
-* CORS headers are automatically added for responses sent from these domains
+* CORS headers are automatically added for responses sent from these domains.
 
 # Misc
 
@@ -143,8 +143,9 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  Enable CORS headers for cached resources
 1.  extend the list of file type supported by the cdn or cookieless domain
 1.  extend the list of file type supported by the url rewrite feature
-1.  Add a third option for service worker (disable, enable, force removal). right now enable is handled as "force removal"
+1.  Add a third option for service worker (disable, enable, force removal).
 1.  Configure service worker route strategy per resource type from the Joomla administrator
+1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts.
 
 ## V2.2
 

@@ -1,6 +1,7 @@
 #!/bin/sh -x
 ## you need to install uglify-es
 # npm install -g uglify-es
+## before you run uglify on WSL, you need to install it there
 DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $DIR
 #

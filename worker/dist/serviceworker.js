@@ -13,7 +13,7 @@
  */
 // @ts-check
 /*  */
-// build 26a38fd 2018-04-18 19:45:26-04:00
+// build bb56582 2018-05-09 23:50:57-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -310,7 +310,10 @@ const scope = "{scope}";
  */
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* global SW, undef */
+/*global SW, undef */
+/**
+ *
+ */
 SW.strategies = function() {
     const map = new Map();
     const strategy = {
@@ -319,7 +322,7 @@ SW.strategies = function() {
 		 * @param {String} name
 		 * @param {function} handle
 		 */
-        add: (name, handle, scheme) => map.set(name, {
+        add: (name, handle) => map.set(name, {
             name,
             handle: async event => {
                 //	await SW.resolve("prefetch", event.request);
@@ -333,11 +336,38 @@ SW.strategies = function() {
                 return response;
             }
         }),
+        /**
+		 *
+         * @returns {IterableIterator<any>}
+         */
         keys: () => map.keys(),
+        /**
+		 *
+         * @returns {IterableIterator<any>}
+         */
         values: () => map.values(),
+        /**
+		 *
+         * @returns {IterableIterator<[any]>}
+         */
         entries: () => map.entries(),
+        /**
+		 *
+         * @param {String} name
+         * @returns {any}
+         */
         get: name => map.get(name),
+        /**
+		 *
+         * @param {String} name
+         * @returns {boolean}
+         */
         has: name => map.has(name),
+        /**
+		 *
+         * @param {String} name
+         * @returns {boolean}
+         */
         delete: name => map.delete(name),
         /**
 		 *
@@ -644,6 +674,8 @@ SW.strategies.add("co", event => caches.match(event.request));
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, scope */
+/** @var {string} scope */
+/** @var {object} SW */
 "use strict;";
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
@@ -668,7 +700,6 @@ if (!strategies.has(defaultStrategy)) {
     defaultStrategy = "no";
 }
 
-//console.log({ SW });
 router.setDefaultHandler(strategies.get(defaultStrategy));
 
 // register strategies routers

@@ -590,7 +590,7 @@ class GZipHelper {
                 }
             }
 
-            return static::getHost('/' . $name.$hash);
+            return preg_match('~^(https?:)//~', $name) ? $name.$hash :  static::getHost('/' . $name.$hash);
         }
 
         return $file;
@@ -1696,7 +1696,7 @@ class GZipHelper {
                                 $fileName = preg_replace('#^media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
                             }
 
-                            $images[] = $fileName;
+                            $images[] = static::url($fileName);
 
                             if (static::isFile($fileName) && preg_match('#\.(png)|(jpg)#i', $fileName)) {
 
