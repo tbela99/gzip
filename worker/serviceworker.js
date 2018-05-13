@@ -30,5 +30,4 @@ const CACHE_NAME = "{CACHE_NAME}";
 const scope = "{scope}";
 // const defaultStrategy = "{defaultStrategy}";
 
-
 //console.log(self);

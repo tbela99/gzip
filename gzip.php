@@ -831,7 +831,8 @@ class PlgSystemGzip extends JPlugin
 
         if(!empty($onesignal['enabled'])) {
 
-            $import_scripts .= 'importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")';
+			// one signal is blocked by adblockers and this kills the service worker. we need to catch the error here
+            $import_scripts .= 'try {importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")}catch(e){console.error("😭", e)}';
 		}
 		
 		// additional routing startegies
