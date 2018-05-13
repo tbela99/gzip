@@ -1,178 +1,215 @@
 <?php
 
-/**
- * @package     GZip Plugin
- * @subpackage  System.Gzip *
- * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
- *
- * dual licensed
- *
- * @license     LGPL v3
- * @license     MIT License
- */
+	/**
+	 * Serve files with cache headers.
+	 *
+	 * - supports range requests
+	 * - can send CORS headers
+	 * - user can extend supported mimetypes by editing the plugin settings
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
 
-const JPATH_PLATFORM = 1;
+	const JPATH_PLATFORM = 1;
 
-/**
- * serve files with cache headers. Supports range headers
- */
-ob_start();
+	ob_start();
 
-chdir('../..');
+	chdir('../..');
 
-$uri = $_SERVER['REQUEST_URI'];
+	if (is_file('cache/z/app/config.php')) {
 
-$matches = preg_split('#/media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
+		//
+		include 'cache/z/app/config.php';
 
-$uri = end($matches);
+		if (class_exists('GzipHelperConfig')) {
 
-$useEtag = strpos($uri, '1/') === 0;
+			// CORS enabled?
+			if (!empty(GzipHelperConfig::CORS)) {
 
-$uri = explode('/', $uri, $useEtag ? 3 : 2);
+				header('Access-Control-Allow-Origin: *');
+			}
 
-$file = preg_replace('~[#|?].*$~', '', end($uri));
-$file = strpos($file, '%20') === false ? $file : urldecode($file);
+			// cookieless domain?
+			if (!empty(GzipHelperConfig::HOSTS) && in_array($_SERVER['SERVER_NAME'], GzipHelperConfig::HOSTS)) {
 
-$utf8_file = utf8_decode($file);
+				header('Access-Control-Allow-Origin: *');
 
-if (is_file($utf8_file)) {
-	
-	$file = $utf8_file;
-}
+				if (isset($_SERVER['HTTP_COOKIE'])) {
 
-else if(!is_file($file)) {
+					$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
 
-    header("HTTP/1.1 404 Not Found");
-    exit;
-}
+					$expiry = time() - 1000;
 
-require 'plugins/system/gzip/helper.php';
+					foreach ($cookies as $cookie) {
 
-$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-$accepted = Gzip\GZipHelper::accepted();
+						$parts = explode('=', $cookie);
 
-if(!isset($accepted[$ext])) {
+						$name = trim($parts[0]);
+						setcookie($name, '', $expiry);
+						setcookie($name, '', $expiry, '/');
+					}
+				}
+			}
+		}
+	}
 
-    header('HTTP/1.1 403 Forbidden');
-    exit;
-}
+	$uri = $_SERVER['REQUEST_URI'];
 
-$mtime = filemtime($file);
-$range = [];
-$size = 0;
+	$matches = preg_split('#/media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
 
-if(empty($useEtag) && isset($_SERVER['HTTP_RANGE'])) {
+	$uri = end($matches);
 
-    $useEtag = 1;
-}
+	$useEtag = strpos($uri, '1/') === 0;
 
-if(isset($_SERVER['HTTP_RANGE'])) {
+	$uri = explode('/', $uri, $useEtag ? 3 : 2);
 
-    $size = filesize($file);
-    $ranges = preg_split('#(^bytes=)|[\s,]#', $_SERVER['HTTP_RANGE'], -1, PREG_SPLIT_NO_EMPTY);
+	$file = preg_replace('~[#|?].*$~', '', end($uri));
+	$file = strpos($file, '%20') === false ? $file : urldecode($file);
 
-    foreach ($ranges as $range) {
+	$utf8_file = utf8_decode($file);
 
-        $range = explode('-', $range);
+	if (is_file($utf8_file)) {
 
-        if(
-            count($range) != 2 ||
-            ($range[0] === '' && $range[1] === '') ||
-            $range[0] > $size - 1 ||
-            $range[1] > $size - 1 ||
-            ($range[1] !== '' && $range[1] < $range[0])
-        ) {
+		$file = $utf8_file;
+	}
 
-            header('HTTP/1.1 416 Range Not Satisfiable');
-            exit;
-        }
-    }
+	else if(!is_file($file)) {
 
-    $range = explode('-', array_shift($ranges));
+		header("HTTP/1.1 404 Not Found");
+		exit;
+	}
 
-    if($range[0] === '') {
+	require 'plugins/system/gzip/helper.php';
 
-        $range[0] = 0;
-    }
+	$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+	$accepted = defined('GzipHelperConfig::VALID_MIMETYPES') ? GzipHelperConfig::VALID_MIMETYPES : Gzip\GZipHelper::accepted();
 
-    if($range[1] === '') {
+	if(!isset($accepted[$ext])) {
 
-        $range[1] = $size - 1;
-    }
+		header('HTTP/1.1 403 Forbidden');
+		exit;
+	}
 
-    header('HTTP/1.1 206 Partial Content');
-    header('Content-Length:'.($range[1] - $range[0] + 1));
-    header('Content-Range: bytes '.$range[0].'-'.$range[1].'/'.$size);
-}
+	$mtime = filemtime($file);
+	$range = [];
+	$size = 0;
 
-if($useEtag) {
+	if(empty($useEtag) && isset($_SERVER['HTTP_RANGE'])) {
 
-    $etag = Gzip\GZipHelper::shorten(hash_file('crc32b', $file));
+		$useEtag = 1;
+	}
 
-    if(!empty($range)) {
+	if(isset($_SERVER['HTTP_RANGE'])) {
 
-        $etag .= '-'.implode('R', $range);
-    }
+		$size = filesize($file);
+		$ranges = preg_split('#(^bytes=)|[\s,]#', $_SERVER['HTTP_RANGE'], -1, PREG_SPLIT_NO_EMPTY);
 
-    if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
+		foreach ($ranges as $range) {
 
-        header('HTTP/1.1 304 Not Modified');
-        exit;
-    }
+			$range = explode('-', $range);
 
-    header('ETag: ' . $etag);
-}
+			if(
+				count($range) != 2 ||
+				($range[0] === '' && $range[1] === '') ||
+				$range[0] > $size - 1 ||
+				$range[1] > $size - 1 ||
+				($range[1] !== '' && $range[1] < $range[0])
+			) {
 
-else if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $mtime) {
+				header('HTTP/1.1 416 Range Not Satisfiable');
+				exit;
+			}
+		}
 
-    header('HTTP/1.1 304 Not Modified');
-    exit;
-}
+		$range = explode('-', array_shift($ranges));
 
-header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $mtime));
+		if($range[0] === '') {
 
-if(preg_match('#(text)|xml#', $accepted[$ext])) {
+			$range[0] = 0;
+		}
 
-    header('Content-Type: '.$accepted[$ext].';charset=utf-8');
-}
-else {
+		if($range[1] === '') {
 
-    header('Content-Type: '.$accepted[$ext]);
-}
+			$range[1] = $size - 1;
+		}
 
-header('Accept-Ranges: bytes');
+		header('HTTP/1.1 206 Partial Content');
+		header('Content-Length:'.($range[1] - $range[0] + 1));
+		header('Content-Range: bytes '.$range[0].'-'.$range[1].'/'.$size);
+	}
+
+	if($useEtag) {
+
+		$etag = Gzip\GZipHelper::shorten(hash_file('crc32b', $file));
+
+		if(!empty($range)) {
+
+			$etag .= '-'.implode('R', $range);
+		}
+
+		if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {
+
+			header('HTTP/1.1 304 Not Modified');
+			exit;
+		}
+
+		header('ETag: ' . $etag);
+	}
+
+	else if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $mtime) {
+
+		header('HTTP/1.1 304 Not Modified');
+		exit;
+	}
+
+	header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $mtime));
+
+	if(preg_match('#(text)|(xml)#', $accepted[$ext])) {
+
+		header('Content-Type: '.$accepted[$ext].';charset=utf-8');
+	}
+	else {
+
+		header('Content-Type: '.$accepted[$ext]);
+	}
+
+	header('Accept-Ranges: bytes');
 //header('Content-Type: '.$accepted[$ext].';charset=utf-8');
-header('Cache-Control: public, max-age=31536000, immutable');
+	header('Cache-Control: public, max-age=31536000, immutable');
 
-$dt = new DateTime();
+	$dt = new DateTime();
 
-$dt->modify('+2months');
+	$dt->modify('+2months');
 
 
-header('Expires: ' . gmdate('D, d M Y H:i:s T', $dt->getTimestamp()));
+	header('Expires: ' . gmdate('D, d M Y H:i:s T', $dt->getTimestamp()));
 
-#ob_get_clean();
+	if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
 
-if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
+		$cur = $range[0];
+		$end = $range[1];
 
-    $cur = $range[0];
-    $end = $range[1];
+		$handle = fopen($file, 'rb');
 
-    $handle = fopen($file, 'rb');
+		if($cur > 0) {
 
-    if($cur > 0) {
+			fseek($handle, $cur);
+		}
 
-        fseek($handle, $cur);
-    }
+		while(!feof($handle) && $cur <= $end && (connection_status() == 0))
+		{
+			print fread($handle, min(1024 * 16, ($end - $cur) + 1));
+			$cur += 1024 * 16;
+		}
 
-    while(!feof($handle) && $cur <= $end && (connection_status() == 0))
-    {
-      print fread($handle, min(1024 * 16, ($end - $cur) + 1));
-      $cur += 1024 * 16;
-    }
+		fclose($handle);
+		exit;
+	}
 
-    fclose($handle);
-    exit;
-}
-
-readfile($file);
+	readfile($file);

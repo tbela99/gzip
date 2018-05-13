@@ -397,17 +397,6 @@ class Image {
 			$scale = min($newWidth, $newHeight) / max($regionWidth, $regionHeight);
 			
 			return ['width' => $newWidth, 'height' => $newHeight];
-			
-		//	var_dump($scale);
-		
-		//	var_dump(['$crX' => $crX, '$crY' => $crY, '$scale' => $scale, '$width' => $width, '$height' => $height,  '$zoneW' => $zoneW, '$zoneH' => $zoneH]);
-			
-		//	$x0 = max(0, $rect['x'] + ($rect['width'] - $crX) / 2);
-		//	$y0 = max(0, $rect['y'] + ($rect['height'] - $crY) / 2);
-		
-	//	return ['$scale' => $scale, 'x' => max(0, $rect['x'] + ($rect['width'] - $crX) / 2), 'y' => max(0, $rect['y'] + ($rect['height'] - $crY) / 2), $crX, $crY];
-			
-			
 }
 
 	public function cropFace($width, $height, $options = array()) {

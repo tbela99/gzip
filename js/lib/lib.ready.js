@@ -1,6 +1,18 @@
 // @ts-check
 /* global LIB, document */
 /* eslint wrap-iife: 0 */
+
+/**
+ * async css loader
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 LIB.ready = function () {
 	
     'use strict;';

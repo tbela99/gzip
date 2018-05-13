@@ -17,6 +17,7 @@ defined('JPATH_PLATFORM') or die;
 
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
+use Sabberworm\CSS\Rule\Rule;
 use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
@@ -28,13 +29,22 @@ class GZipHelper {
     // match empty attributes <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
     const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
     const regexUrl = '#url\(([^)]+)\)#';
+
+    static $regReduce = '';
+
+    // JURI::root(true);
+    static $uri = '';
+
+    // JURI::root();
+    static $url = '';
+
     static $options = [];
-    static $regReduce;
 
     static $cssBackgrounds = [];
+    static $hosts = [];
 
-//    static $attr = '#(\S+)=(["\'])([^\2]*?)\2#si';
-//    static $pwacache = [];
+    static $static_types = [];
+
     static $images = array(
         "gif" => array('as' => 'image'),
         "jpg" => array('as' => 'image'),
@@ -51,6 +61,7 @@ class GZipHelper {
         "webp" => array('as' => 'image'),
         "swf" => array('as' => 'object'),
         "ico" => array('as' => 'image'),
+        "svg" => array('as' => 'image'),
         "txt" => [],
         "js" => array('as' => 'script'),
         "css" => array('as' => 'style'),
@@ -60,30 +71,29 @@ class GZipHelper {
         "otf" => array('as' => 'font'),
         "ttf" => array('as' => 'font'),
         "woff" => array('as' => 'font'),
-        "woff2" => array('as' => 'font'),
-        "svg" => array('as' => 'image')
+        "woff2" => array('as' => 'font')
     );
 
     // can use http cache / url rewriting
     static $accepted = array(
-        "gif" => "image/gif",
-        "jpg" => "image/jpeg",
-        "jpeg" => "image/jpeg",
-        "png" => "image/png",
-        "webp" => "image/webp",
+	    "js" => "text/javascript",
+	    "css" => "text/css",
+	    "eot" => "application/vnd.ms-fontobject",
+	    "otf" => "application/x-font-otf",
+	    "ttf" => "application/x-font-ttf",
+	    "woff" => "application/x-font-woff",
+	    "woff2" => "application/font-woff2",
+	    "ico" => "image/x-icon",
+	    "gif" => "image/gif",
+	    "jpg" => "image/jpeg",
+	    "jpeg" => "image/jpeg",
+	    "png" => "image/png",
+	    "webp" => "image/webp",
+        "svg" => "image/svg+xml",
         "swf" => "application/x-shockwave-flash",
-        "ico" => "image/x-icon",
         "txt" => "text/plain",
-        "js" => "text/javascript",
-        "css" => "text/css",
         "xml" => "text/xml",
         "pdf" => "application/pdf",
-        "eot" => "application/vnd.ms-fontobject",
-        "otf" => "application/x-font-otf",
-        "ttf" => "application/x-font-ttf",
-        "woff" => "application/x-font-woff",
-        "woff2" => "application/font-woff2",
-        "svg" => "image/svg+xml",
         'mp3' => 'audio/mpeg'
     );
 
@@ -92,8 +102,9 @@ class GZipHelper {
     public static function getChecksum($file, callable $hashFile, $algo = 'sha256', $integrity = false) {
 
         $hash = $hashFile($file);
-
         $path = (isset(static::$options['ch_path']) ? static::$options['ch_path'] : 'cache/z/ch/'.$_SERVER['SERVER_NAME'].'/') . $hash . '-' . basename($file) . '.checksum.php';
+
+	    $checksum = [];
 
         if (is_file($path)) {
 
@@ -168,26 +179,28 @@ class GZipHelper {
 
         $scheme = \JUri::getInstance()->getScheme();
 
-        static $hash;
+		static $hash;
 
         if (is_null($hash)) {
 
-            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme) {
+			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+
+            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme . $file));
+                    return static::shorten(crc32($scheme. $salt. $file));
                 }
 
-                return static::shorten(crc32($scheme . filemtime($file)));
-            } : function ($file) use($scheme) {
+                return static::shorten(crc32($scheme. $salt. filemtime($file)));
+            } : function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme . $file));
+                    return static::shorten(crc32($scheme. $salt . $file));
                 }
 
-                return static::shorten(crc32($scheme . hash_file('crc32b', $file)));
+                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
             };
         }
 
@@ -329,11 +342,6 @@ class GZipHelper {
             return $body;
         }
 
-        if (!isset(static::$regReduce)) {
-
-            static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
-        }
-
         $accepted = static::accepted();
         $hashFile = static::getHashMethod($options);
 
@@ -382,107 +390,123 @@ class GZipHelper {
         $body = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
             $tag = $matches[1];
+	        $attributes = [];
 
-            return '<'.$matches[1].' '.preg_replace_callback(static::regexAttr, function ($matches) use($tag, $checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
+	        if (preg_match_all(static::regexAttr, $matches[2],$attrib)) {
 
-                $attr = strtolower($matches[2]);
+            	foreach ($attrib[2] as $key => $value) {
 
-                if ($attr == 'srcset' || $attr == 'data-srcset') {
+            		$attributes[$value] = $attrib[6][$key];
+	            }
 
-                    $return = [];
+	            $url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 
-                    foreach (explode(',', $matches[6]) as $chunk) {
+	            foreach ($url_attr as $attr) {
 
-                        $parts = explode(' ', $chunk);
+		            if (isset($attributes[$attr]) && ($attr == 'srcset' || $attr == 'data-srcset')) {
 
-                        $name = trim($parts[0]);
+			            $return = [];
 
-                        $return[] = (static::isFile($name) ? static::url($name) : $name).' '.$parts[1];
-                    }
+			            foreach (explode(',', $attributes[$attr]) as $chunk) {
 
-                    return ' '.$attr.'="'.implode(',', $return).'"';
-                }
+				            $parts = explode(' ', $chunk);
 
-                if (isset($options['parse_url_attr'][$attr])) {
+				            $name = trim($parts[0]);
 
-                        $file = static::getName($matches[6]);
+				            $return[] = (static::isFile($name) ? static::url($name) : $name).' '.$parts[1];
+			            }
 
-                        if (preg_match('#^(https?:)?(//[^/]+)#', $file, $domain)) {
+			            $attributes[$attr] = implode(',', $return);
+		            }
 
-                            if (empty($domain[1])) {
+		            if (isset($attributes[$attr]) && isset($options['parse_url_attr'][$attr])) {
 
-                                $domain[1] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https:' : 'http:';
-                            }
+			            $file = static::getName($attributes[$attr]);
 
-                            $domains[$domain[1].$domain[2]] = $domain[1].$domain[2];
-                        }
+			            if (static::isFile($file)) {
 
-                        if (static::isFile($file)) {
+				            $name = preg_replace('~[#?].*$~', '', $file);
 
-                            $name = preg_replace('~[#?].*$~', '', $file);
+				            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
-                                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+				            if (isset(static::$static_types[$ext])) {
 
-                                $push_data = empty($types) ? false : static::canPush($name, $ext);
+				            	$attributes['crossorigin'] = 'anonymous';
+				            }
 
-                                if (!empty($push_data)) {
+				            $push_data = empty($types) ? false : static::canPush($name, $ext);
 
-                                    if (!isset($types['all']) && (empty($push_data['as']) || empty($types[$push_data['as']]))) {
+				            if (!empty($push_data)) {
 
-                                        unset($push_data);
-                                    } else {
+					            if (!isset($types['all']) && (empty($push_data['as']) || empty($types[$push_data['as']]))) {
 
-                                        if (isset($push_data['as']) && isset($hashmap[$push_data['as']])) {
+						            unset($push_data);
+					            }
 
-                                            $push_data['score'] = $hashmap[$push_data['as']];
-                                        } else {
+					            else {
 
-                                            $push_data['score'] = count($hashmap);
-                                        }
+						            if (isset($push_data['as']) && isset($hashmap[$push_data['as']])) {
 
-                                        $push_data['href'] = $file;
-                                        $pushed[$base . $file] = $push_data;
-                                    }
-                                }
+							            $push_data['score'] = $hashmap[$push_data['as']];
+						            } else {
 
-                                if (isset($accepted[$ext])) {
+							            $push_data['score'] = count($hashmap);
+						            }
 
-                                    unset($pushed[$base . $file]);
+						            $push_data['href'] = static::getHost($file);
+						            $pushed[$base . $file] = $push_data;
+					            }
+				            }
 
-                                    $checkSumData = static::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
+				            if (isset($accepted[$ext])) {
 
-                                    $file = \JURI::root(true).'/media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file;
+					            unset($pushed[$base . $file]);
 
-                                    if (!empty($push_data)) {
+					            $checkSumData = static::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
 
-                                        $push_data['href'] = $file;
-                                        $pushed[$base . $file] = $push_data;
-                                    }
+					            $file = static::getHost('/media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
 
-                                //    static::$pwacache[] = $base . $file;
+					            if (!empty($push_data)) {
 
-                                    $result = ' ' . $matches[2] . '="' . $file . '" ';
+						            $push_data['href'] = $file;
+						            $pushed[$file] = $push_data;
+					            }
 
-                                    if(!empty($checksum) && $checksum != 'none') {
+					            $attributes[$attr] = $file ;
 
-                                        if ($tag == 'script' || ($tag == 'link' && $ext == 'css')) {
+					            if(!empty($checksum) && $checksum != 'none') {
 
-                                            $result .= 'integrity="' . $checkSumData['integrity'] . '" crossorigin="anonymous" ';
-                                        }
-                                    }
+						            if ($tag == 'script' || ($tag == 'link' && $ext == 'css')) {
 
-                                    return $result;
-                                }
-                        //    }
-                        }
+							            $attributes['integrity'] = $checkSumData['integrity'];
+							            $attributes['crossorigin'] = 'anonymous';
+						            }
+					            }
+				            }
+			            }
 
-                    //    static::$pwacache[] = \JRoute::_($file, false);
-                    //    break;
-                }
+			            if (preg_match('#^(https?:)?(//[^/]+)#', $file, $domain)) {
 
-                return $matches[0];
+				            if (empty($domain[1])) {
 
-            }, $matches[2]).'>';
+					            $domain[1] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https:' : 'http:';
+				            }
+
+				            $domains[$domain[1].$domain[2]] = $domain[1].$domain[2];
+			            }
+
+		            }
+	            }
+            }
+
+            $result = '<'.$tag;
+
+	        foreach ($attributes as $key => $value) {
+
+	        	$result .= ' '.$key.($value === '' ? '' : '="'.$value.'"');
+	        }
+
+	        return $result .'>';
 
         }, $body);
 
@@ -524,7 +548,7 @@ class GZipHelper {
 
         if (!empty($domains)) {
 
-            unset($domains[(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'ON' ? 'https' : 'http').'://'.$_SERVER['SERVER_NAME']]);
+            unset($domains[(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.$_SERVER['SERVER_NAME']]);
             unset($domains['http://get.adobe.com']);
 
             if (!empty($domains)) {
@@ -543,30 +567,32 @@ class GZipHelper {
 
     public static function url($file) {
 
-        $name = preg_replace('~[#?].*$~', '', static::getName($file));
+		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
+		$hash = isset($hash[2]) ? $hash[1].$hash[2]: '';
 
+		$name = static::getName($file);
+		
         if (strpos($name, 'data:') === 0) {
 
             return $file;
-        }
+		}
+		
+        if (static::isFile($name)) {
 
-        if (static::isFile($file)) {
-
-            if (is_file($name) && strpos($name, 'media/z/') !== 0) {
+            if (strpos($name, 'media/z/') !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-
-                $accepted = static::accepted();
-
+				$accepted = static::accepted();
+				
                 if (isset($accepted[$ext])) {
 
                     $hashFile = static::getHashMethod();
 
-                    return \JURI::root(true) . '/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file;
+                    return static::getHost('/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
                 }
             }
 
-            return \JURI::root(true) . '/' . $file;
+            return preg_match('~^(https?:)?//~', $name) ? $name.$hash :  static::getHost('/' . $name.$hash);
         }
 
         return $file;
@@ -607,8 +633,8 @@ class GZipHelper {
 
                 $path .= '/';
             }
-        }
-
+		}
+		
         $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
 
             $file = trim(str_replace(array("'", '"'), "", $matches[1]));
@@ -616,14 +642,16 @@ class GZipHelper {
             if (strpos($file, 'data:') === 0) {
 
                 return $matches[0];
-            }
+			}
+			
+			$name = static::getName($file);
 
             if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
 
                 $file = static::resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
             }
 
-            else {
+        //    else {
 
                 if (preg_match('#^(https?:)?//#', $file)) {
 
@@ -645,14 +673,42 @@ class GZipHelper {
                             $file .= $match[2];
                         }
                     }
-                }
-            }
+				}
+				
+			//	else {
 
-            return // "\n" . ' /* url ' . $matches[1] .
-                // -> uncomment to debug
-                // ' isFile: '.(static::isFile($file) ? 'true '.preg_replace('~[#?].*$~', '', static::getName($file)).' -> '.static::url($file) : 'false').
-              //  ' */ ' . "\n" . 
-                "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
+					if(preg_match('#^([a-z]+:)?//#', $path)) {
+
+						$content = static::getContent($path.substr($file, 1));
+
+						if ($content !== false) {
+
+							preg_match('~(.*?)([#?].*)?$~', $file, $match);
+	
+							$file = 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. static::shorten(crc32($file)) . '-' . basename($match[1]);
+	
+							if (!is_file($file)) {
+	
+								file_put_contents($file, $content);
+							}
+	
+							if (isset($match[2])) {
+	
+								$file .= $match[2];
+							}
+						}
+					//	return $path.su
+					}
+
+					else {
+							
+						if ($file[0] == '/') {
+
+							return 'url(' . static::getHost($file).')';
+						}
+					}
+
+					return 'url(' . static::url($file).')';
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
@@ -673,21 +729,51 @@ class GZipHelper {
 
                 $isFile = static::isFile($file);
 
-            //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
-
-                return "\n" . '/* @ import ' . $file . ' ' . dirname($file) . ' */' . "\n" . static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $path);
+                return "\n" .
+	            //    '/* @ import ' . $file . ' ' . dirname($file) . ' */' .
+	            //    "\n" .
+	                static::expandCss($isFile ? file_get_contents($file) : static::getContent($file), dirname($file), $path);
             }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
         );
 
         return $css;
     }
 
+    public static function getHost($file) {
+
+		if (preg_match('#^([a-z]+:)?//#i', $file)) {
+
+			return $file;
+		}
+
+	    $count = count(static::$hosts);
+
+	    if ($count > 0) {
+
+		    $ext = \pathinfo(static::getName($file), PATHINFO_EXTENSION);
+
+		    if (isset(static::$static_types[strtolower($ext)])) {
+
+			    if ($count == 1) {
+
+				    return static::$hosts[0].$file;
+			    }
+
+			    $host = crc32($file) % $count;
+
+			    if ($host < 0) {
+
+				    $host += $count;
+			    }
+
+			    return static::$hosts[$host].$file;
+		    }
+	    }
+
+	    return $file;
+    }
+
     public static function parseCss($body, array $options = []) {
-
-        if (!isset(static::$regReduce)) {
-
-            static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
-        }
 
         $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
@@ -1082,7 +1168,7 @@ class GZipHelper {
 								foreach ($oCssDocument->getContents() as $block) {
 
 									$local_css .= static::extractCssRules(clone $block, $regexp);
-									$local_font_face .= static::extractFontFace(clone $block);
+									$local_font_face .= static::extractFontFace(clone $block, $options);
 								}
 
 								$local_css = $local_font_face.$local_css;
@@ -1114,8 +1200,8 @@ class GZipHelper {
 
                 $hash = crc32($background_css_path);
 
-                $background_css_file = $name . '-build.css';
-                $background_css_hash = $name . '-build.php';
+                $background_css_file = $path . $hash . '-build.css';
+                $background_css_hash = $path . $hash . '-build.php';
                                 
                 if (!is_file($background_css_file) || file_get_contents($background_css_hash) != $hash) {
 
@@ -1352,12 +1438,12 @@ class GZipHelper {
             return false;
         }
 
-        $name = preg_replace('~(#|\?).*$~', '', $name);
+    //    $name = preg_replace('~(#|\?).*$~', '', $name);
 
         return is_file($name) || is_file(utf8_decode($name));
     }
 
-    protected static function extractFontFace($block) {
+    protected static function extractFontFace($block, $options = []) {
 
         $content = '';
 
@@ -1373,7 +1459,7 @@ class GZipHelper {
 
                     foreach ($block->getContents() as $b) {
 
-                        $result .= static::extractFontFace($b);
+                        $result .= static::extractFontFace($b, $options);
                     }
 
                     if($result !== '') {
@@ -1384,6 +1470,14 @@ class GZipHelper {
                     break;
 
                 case 'font-face':
+
+                	if (!empty($options['fontdisplay']) && !empty($block->getRules('src'))) {
+
+                		$rule = new \Sabberworm\CSS\Rule\Rule('font-display');
+
+                		$rule->setValue($options['fontdisplay']);
+                		$block->addRule($rule);
+	                }
 
                     $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . implode('', $block->getRules()) . '}';
 
@@ -1589,7 +1683,7 @@ class GZipHelper {
                                 $fileName = preg_replace('#^media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
                             }
 
-                            $images[] = $fileName;
+                            $images[] = static::url($fileName);
 
                             if (static::isFile($fileName) && preg_match('#\.(png)|(jpg)#i', $fileName)) {
 
@@ -1696,17 +1790,7 @@ class GZipHelper {
 
     public static function parseScripts($body, array $options = []) {
 
-        if (!isset(static::$regReduce)) {
-
-            static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
-        }
-
         $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
-
-        if (!isset(static::$regReduce)) {
-
-            static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
-        }
 
         $comments = [];
 
@@ -2274,11 +2358,6 @@ class GZipHelper {
         if (empty($options['imageenabled'])) {
 
             return $body;
-        }
-
-        if (!isset(static::$regReduce)) {
-
-            static::$regReduce = '#^((' . \JUri::root() . ')|(' . \JURI::root(true) . '/))#';
         }
 
         $path = $options['img_path'];

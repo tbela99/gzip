@@ -1,7 +1,19 @@
 /* do not edit! */
+/**
+ *
+ * main service worker file
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
-/* main service worker file */
-// build 065a58a 2018-03-29 20:48:06-04:00
+/*  */
+// build 509e986 2018-05-12 22:13:58-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -21,6 +33,17 @@ const scope = "{scope}";
 
 // const defaultStrategy = "{defaultStrategy}";
 //console.log(self);
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
@@ -154,6 +177,17 @@ const scope = "{scope}";
     SW.Utils = Utils;
 }();
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, undef */
@@ -263,9 +297,23 @@ const scope = "{scope}";
     Utils.merge(true, SW, Event);
 }();
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* global SW, undef */
+/*global SW, undef */
+/**
+ *
+ */
 SW.strategies = function() {
     const map = new Map();
     const strategy = {
@@ -274,24 +322,58 @@ SW.strategies = function() {
 		 * @param {String} name
 		 * @param {function} handle
 		 */
-        add: (name, handle, scheme) => map.set(name, {
+        add: (name, handle) => map.set(name, {
             name,
             handle: async event => {
                 //	await SW.resolve("prefetch", event.request);
                 const response = await handle(event);
                 //	await SW.resolve("postfetch", event.request, response);
-                                console.log({
-                    mode: event.request.mode,
-                    response
+                                console.info({
+                    strategy: name,
+                    responseMode: response.type,
+                    requestMode: event.request.mode,
+                    ok: response.ok,
+                    bodyUsed: response.bodyUsed,
+                    responseType: response && response.type,
+                    isCacheableRequest: strategy.isCacheableRequest(event.request, response),
+                    request: event.request.url,
+                    response: response && response.url
                 });
                 return response;
             }
         }),
+        /**
+		 *
+		 * @returns {IterableIterator<any>}
+		 */
         keys: () => map.keys(),
+        /**
+		 *
+		 * @returns {IterableIterator<any>}
+		 */
         values: () => map.values(),
+        /**
+		 *
+		 * @returns {IterableIterator<[any]>}
+		 */
         entries: () => map.entries(),
+        /**
+		 *
+		 * @param {String} name
+		 * @returns {any}
+		 */
         get: name => map.get(name),
+        /**
+		 *
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
         has: name => map.has(name),
+        /**
+		 *
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
         delete: name => map.delete(name),
         /**
 		 *
@@ -299,7 +381,7 @@ SW.strategies = function() {
 		 * @param {Response} response
 		 */
         // https://www.w3.org/TR/SRI/#h-note6
-        isCacheableRequest: (request, response) => ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || response.type == "default") && response.ok && !response.bodyUsed
+        isCacheableRequest: (request, response) => response != undef && ("cors" == response.type || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response.ok && [ "default", "cors", "basic" ].includes(response.type) && !response.bodyUsed
     };
     // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
     // if http response != 200 <- hmmm don't want to cache this <- stop it!
@@ -311,6 +393,17 @@ SW.strategies = function() {
     return strategy;
 }();
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
@@ -334,6 +427,17 @@ SW.strategies.add("nf", async (event, cache) => {
     return cache.match(event.request);
 });
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, CACHE_NAME */
@@ -353,6 +457,17 @@ SW.strategies.add("cf", async event => {
     return response;
 });
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
@@ -374,12 +489,34 @@ SW.strategies.add("cn", async event => {
     //	});
 });
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW */
 // or simply don't call event.respondWith, which will result in default browser behaviour
 SW.strategies.add("no", event => fetch(event.request));
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global SW */
 /* eslint wrap-iife: 0 */
@@ -387,6 +524,17 @@ SW.strategies.add("no", event => fetch(event.request));
 // will look like a connection error);
 SW.strategies.add("co", event => caches.match(event.request));
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global SW, scope, undef */
 (function(SW) {
@@ -409,12 +557,16 @@ SW.strategies.add("co", event => caches.match(event.request));
 		 */        getHandler(url, event) {
             const method = event != undef && event.request.method || "GET";
             const routes = this.routes[method] || [];
-            let route, i = routes.length;
-            while (i && i--) {
+            const j = routes.length;
+            let route, i = 0;
+            for (;i < j; i++) {
                 route = routes[i];
-                if (route.match(url)) {
+                if (route.match(url, event)) {
                     console.log({
                         match: "match",
+                        strategy: route.strategy,
+                        name: route.constructor.name,
+                        path: route.path,
                         url,
                         route
                     });
@@ -450,6 +602,7 @@ SW.strategies.add("co", event => caches.match(event.request));
             SW.Utils.reset(this);
             //	console.log(self);
                         self.path = path;
+            self.strategy = handler.name;
             self.handler = {
                 handle: async event => {
                     let result = await self.resolve("beforeroute", event);
@@ -488,9 +641,8 @@ SW.strategies.add("co", event => caches.match(event.request));
         /**
 		 *
 		 * @param {string} url
-		 * @param {Request} event
 		 */
-        match(url /*, event*/) {
+        match(url) {
             //	console.log({ url, regexpp: this.path });
             return /^https?:/.test(url) && this.path.test(url);
         }
@@ -516,10 +668,24 @@ SW.strategies.add("co", event => caches.match(event.request));
     SW.router = router;
 })(SW);
 
+/**
+ *
+ * main service worker file
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* main service worker file */
 /* global SW, scope */
+/** @var {string} scope */
+/** @var {object} SW */
 "use strict;";
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
@@ -533,34 +699,47 @@ const Router = SW.Router;
 
 const router = SW.router;
 
-const handler = strategies.get("no");
-
 let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
-if (!strategies.has(defaultStrategy)) {
-    // default browser behavior
-    defaultStrategy = "no";
+// excluded urls fallback on network only
+for (entry of "{exclude_urls}") {
+    router.registerRoute(new Router.RegExpRouter(new RegExp(entry), strategies.get("no")));
 }
 
-//console.log({ SW });
-router.setDefaultHandler(strategies.get(defaultStrategy));
+// excluded urls fallback on network only
+for (entry of "{network_strategies}") {
+    router.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0])));
+}
 
 // register strategies routers
 for (entry of strategies) {
     router.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
 }
 
-// excluded urls fallback on network only
-"{exclude_urls}".forEach(path => {
-    router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
-});
+if (!strategies.has(defaultStrategy)) {
+    // default browser behavior
+    defaultStrategy = "no";
+}
+
+router.setDefaultHandler(strategies.get(defaultStrategy));
 
 //let x;
 //for (x of SW.strategies) {
 //	console.log(x);
 //}
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global CACHE_NAME */
 self.addEventListener("install", event => {
@@ -570,6 +749,17 @@ self.addEventListener("install", event => {
     }));
 });
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global CACHE_NAME */
 self.addEventListener("activate", event => {
@@ -583,6 +773,17 @@ self.addEventListener("activate", event => {
     }));
 });
 
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
 // @ts-check
 /* global CACHE_NAME */
 /**

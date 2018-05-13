@@ -1,7 +1,21 @@
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+
 // @ts-check
 /* eslint wrap-iife: 0 */
 /* global SW, BroadcastChannel */
 // untested code
+
+
 SW.message = {
     post (data, resolve, reject) {
 

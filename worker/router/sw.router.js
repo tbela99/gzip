@@ -1,5 +1,18 @@
+/**
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+
 // @ts-check
 /* global SW, scope, undef */
+
 (function(SW) {
 	function normalize(method) {
 		if (method == undef || method == "HEAD") {
@@ -24,14 +37,22 @@
 		getHandler(url, event) {
 			const method = (event != undef && event.request.method) || "GET";
 			const routes = this.routes[method] || [];
+			const j = routes.length;
 			let route,
-				i = routes.length;
+				i = 0;
 
-			while (i && i--) {
+			for (; i < j; i++) {
 				route = routes[i];
 
-				if (route.match(url)) {
-					console.log({ match: "match", url, route });
+				if (route.match(url, event)) {
+					console.log({
+						match: "match",
+						strategy: route.strategy,
+						name: route.constructor.name,
+						path: route.path,
+						url,
+						route
+					});
 					return route.handler;
 				}
 			}
@@ -79,6 +100,7 @@
 			//	console.log(self);
 
 			self.path = path;
+			self.strategy = handler.name;
 			self.handler = {
 				handle: async event => {
 					let result = await self.resolve("beforeroute", event);
@@ -134,9 +156,8 @@
 		/**
 		 *
 		 * @param {string} url
-		 * @param {Request} event
 		 */
-		match(url /*, event*/) {
+		match(url) {
 			//	console.log({ url, regexpp: this.path });
 			return /^https?:/.test(url) && this.path.test(url);
 		}

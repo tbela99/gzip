@@ -1,7 +1,22 @@
+/**
+ *
+ * main service worker file
+ *
+ * @package     GZip Plugin
+ * @subpackage  System.Gzip *
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* main service worker file */
 /* global SW, scope */
+/** @var {string} scope */
+/** @var {object} SW */
 
 "use strict;";
 
@@ -15,19 +30,26 @@
 const strategies = SW.strategies;
 const Router = SW.Router;
 const router = SW.router;
-const handler = strategies.get("no");
 let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
-if (!strategies.has(defaultStrategy)) {
-	// default browser behavior
-	defaultStrategy = "no";
+// excluded urls fallback on network only
+for (entry of "{exclude_urls}") {
+	router.registerRoute(
+		new Router.RegExpRouter(new RegExp(entry), strategies.get("no"))
+	);
 }
 
-//console.log({ SW });
-
-router.setDefaultHandler(strategies.get(defaultStrategy));
+// excluded urls fallback on network only
+for (entry of "{network_strategies}") {
+	router.registerRoute(
+		new Router.RegExpRouter(
+			new RegExp(entry[1], "i"),
+			strategies.get(entry[0])
+		)
+	);
+}
 
 // register strategies routers
 for (entry of strategies) {
@@ -36,10 +58,12 @@ for (entry of strategies) {
 	);
 }
 
-// excluded urls fallback on network only
-"{exclude_urls}".forEach((path) => {
-	router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
-});
+if (!strategies.has(defaultStrategy)) {
+	// default browser behavior
+	defaultStrategy = "no";
+}
+
+router.setDefaultHandler(strategies.get(defaultStrategy));
 
 //let x;
 

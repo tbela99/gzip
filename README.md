@@ -1,16 +1,17 @@
 ## Page Optimizer Plugin
 
 Do you want to improve your website by
-- improving loading performance?
-- enable offline capabilities via service worker?
-- or turn it into a pwa?
+
+*   improving loading performance?
+*   enable offline capabilities via service worker?
+*   or turn it into a pwa?
 
 This extension allows you to do all of these things.
 
 There are additional plugins that help optmizing and profiling your page or server
 
-*   [Server Timing Plugin](/projects/PWA/repos/server-timing/) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
-*   [HTML Minifier](/projects/WO/repos/html-minifier/) minify html in an html5 compliant way.
+*   [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
+*   [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
 
 # General improvements
 
@@ -43,9 +44,9 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 
 # Critical CSS Path
 
-Eliminate **FOUC** by providing critical css path selectors. See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info. 
+Eliminate **FOUC** by providing critical css path selectors. See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info.
 The critical path enable instant page rendering by providing a minimal set of selectors and classes used to render the visible part of the page before the stylesheets are loaded.
-Any selector that affects the page rendering is a good candidate (set dimensions, define positioning, fonts, sections background color, etc..). 
+Any selector that affects the page rendering is a good candidate (set dimensions, define positioning, fonts, sections background color, etc..).
 There is no automatic extraction and you must provide these settings to extract css classes.
 
 *   CSS class definitions for critical css path
@@ -123,12 +124,32 @@ Add routes to customize fetch event networking strategy by using either a static
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
+# CDN and Cookieless Domains
+
+*   Configure up to 3 domains from which resources will be loaded.
+*   You can also configure which kind of resource are loaded from these domains.
+*   CORS headers are automatically added for responses sent from these domains.
+
 # Misc
 
 *   Joomla administrator is excluded from the service worker cached resources
 *   You can secure your Joomla administrator access by defining a secret access token.
 
 # Change History
+
+## V2.3
+
+1.  Web fonts preloading: Choose how the text is rendered while web fonts are loading by customizing font-display
+1.  Enable CDN / cookieless domain support
+1.  Enable CORS headers for cached resources
+1.  The service worker is able to intercept CDN files as long as they are sent with CORS headers
+1.  Access to the website through CDN / cookieless domain can be redirected to a custom domain
+1.  Extend the list of file type supported by the cdn or cookieless domain
+1.  Extend the list of file type supported by the url rewrite feature
+1.  Choose how the text is rendered while web fonts are loading by customizing font-display
+1.  Add a third option for service worker (disable, enable, force removal).
+1.  Configure service worker route strategy per resource type from the Joomla administrator
+1.  Implement the beforeinstallprompt event. see [here](https://w3c.github.io/manifest/#beforeinstallpromptevent-interface)
 
 ## V2.2
 
@@ -144,7 +165,6 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
 1.  Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
 
-
 ## V2.1
 
 1.  Added push notifications using onesignal
@@ -158,7 +178,7 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.0
 
-###  PWA: implement network strategies:
+### PWA: implement network strategies:
 
 *   Cache only (disabled)
 *   Network only
@@ -168,7 +188,7 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V1.1
 
-  CSS: preload web fonts
+CSS: preload web fonts
 
 ## V1.0
 
