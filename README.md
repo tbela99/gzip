@@ -141,8 +141,9 @@ You can specify which resource are not managed by the service worker by specifyi
 
 1.  Enable CDN / cookieless domain support
 1.  Enable CORS headers for cached resources
-1.  extend the list of file type supported by the cdn or cookieless domain
-1.  extend the list of file type supported by the url rewrite feature
+1.  Extend the list of file type supported by the cdn or cookieless domain
+1.  Extend the list of file type supported by the url rewrite feature
+1.  Choose how the text is rendered while web fonts are loading by customizing font-display
 1.  Add a third option for service worker (disable, enable, force removal).
 1.  Configure service worker route strategy per resource type from the Joomla administrator
 1.  Implement the beforeinstallprompt event. see [here](https://w3c.github.io/manifest/#beforeinstallpromptevent-interface)
