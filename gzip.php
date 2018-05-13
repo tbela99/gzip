@@ -209,8 +209,8 @@ class PlgSystemGzip extends JPlugin
 	        if(!empty($options)) {
 
                 $this->options = (array) $options;
-            }
-
+			}
+			
 	        if (!is_file('cache/z/app/config.php')) {
 
 		        $this->updateOptions($options);
@@ -218,17 +218,8 @@ class PlgSystemGzip extends JPlugin
 
             if (!empty($this->options['cdn'])) {
 
-	            $this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
+				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
             }
-
-        //    if (empty($this->options['cdn'])) {
-
-	    //        $this->options['cdn'][] = \JUri::root(true) . '/';
-        //    }
-
-		//    $this->options['cdn'] = array_values($this->options['cdn']);
-		
-		//	var_dump($_SERVER['HTTPS']);die;
 
 			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
 			
@@ -237,14 +228,17 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'] = array_values(get_object_vars($this->options['cdn']));
 			}
 
+			$domain = !empty($this->options['cdn_redirect']) ? preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn_redirect']) : '';
+
 	        foreach ($this->options['cdn'] as $key => $option) {
 
-		    //    unset($this->options['cdn'][$key]);
+				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
+				
+				if ($domain !== '' && preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn'][$key]) == $_SERVER['SERVER_NAME']) {
 
-	        //	if () {
-
-			        $this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
-		    //    }
+					header('Location: //'.$domain.$_SERVER['REQUEST_URI'], true, 301);
+					$app->close();
+				}
 	        }
 
 	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),

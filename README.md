@@ -139,8 +139,11 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.3
 
+1.  Web fonts preloading: Choose how the text is rendered while web fonts are loading by customizing font-display
 1.  Enable CDN / cookieless domain support
 1.  Enable CORS headers for cached resources
+1.  The service worker is able to intercept CDN files as long as they are sent with CORS headers
+1.  Access to the website through CDN / cookieless domain can be redirected to a custom domain
 1.  Extend the list of file type supported by the cdn or cookieless domain
 1.  Extend the list of file type supported by the url rewrite feature
 1.  Choose how the text is rendered while web fonts are loading by customizing font-display
