@@ -280,8 +280,6 @@ class PlgSystemGzip extends JPlugin
 	        \Gzip\GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
 	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
 
-	        //    var_dump($this->options);die;
-
             $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
             $this->options['parse_url_attr']['src'] = '';

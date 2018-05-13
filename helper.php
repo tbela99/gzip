@@ -707,21 +707,8 @@ class GZipHelper {
 							return 'url(' . static::getHost($file).')';
 						}
 					}
-				//	else {
 
-					//	var_dump($file, static::getHost($file));die;
-						return 'url(' . static::url($file).')';
-				//	}
-					
-				//	var_dump($path.$file, static::getName($file));die;
-			//	}
-		//	}
-
-        //    return // "\n" . ' /* url ' . $matches[1] .
-                // -> uncomment to debug
-                // ' isFile: '.(static::isFile($file) ? 'true '.preg_replace('~[#?].*$~', '', static::getName($file)).' -> '.static::url($file) : 'false').
-              //  ' */ ' . "\n" . 
-            //    "url(" . (static::isFile($file) ? static::url($file) : $file) . ")";
+					return 'url(' . static::url($file).')';
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
@@ -741,8 +728,6 @@ class GZipHelper {
                 }
 
                 $isFile = static::isFile($file);
-
-            //    $o = $file . ' ' . var_export([static::isFile($file), preg_match('#^(/|((https?:)?//))#i', $file)], true);
 
                 return "\n" .
 	            //    '/* @ import ' . $file . ' ' . dirname($file) . ' */' .

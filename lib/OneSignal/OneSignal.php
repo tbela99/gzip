@@ -65,8 +65,6 @@ class Onesignal {
 
 	public static function sendRequest($endpoint, $data, array $options = []) {
 
-	//	error_log('curl -v -X POST --data \''.$data.'\' -H "'.implode('" -H "', $options[CURLOPT_HTTPHEADER]).'" '.static::API_ENDPOINT.$endpoint);
-
 		$ch = curl_init(static::API_ENDPOINT.$endpoint);
 		
 		curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/../../cacert.pem');
