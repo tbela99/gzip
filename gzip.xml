@@ -15,6 +15,7 @@
         <folder>lib</folder>
         <folder>language</folder>
         <folder>worker/dist</folder>
+        <folder>worker/css</folder>
         <folder>push</folder>
         <filename>autoload.php</filename>
         <filename>helper.php</filename>
@@ -195,6 +196,12 @@
             <fieldset name="pwa" label="Service Worker">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    </fields>
                 <field type="spacer" label="Networking settings" />
                 <fields name="gzip">
                     <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
@@ -210,10 +217,44 @@
                         <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
                         <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
                     </field>
-                    <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
+                    <fields name ="pwa_network_strategies">
+                        <field name="image" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_IMAGES_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_IMAGES_DESCRIPTION" type="list" default="">
+                            <option value="">JFIELD_OPTION_PWA_NETWORK_STRATEGY_DEFAULT</option>
+                            <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                            <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                            <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                            <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                            <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                            <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        </field>
+                        <field name="js" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_JAVASCRIPT_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_JAVASCRIPT_DESCRIPTION" type="list" default="">
+                            <option value="">JFIELD_OPTION_PWA_NETWORK_STRATEGY_DEFAULT</option>
+                            <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                            <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                            <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                            <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                            <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                            <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        </field>
+                        <field name="css" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_CSS_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_CSS_DESCRIPTION" type="list" default="">
+                            <option value="">JFIELD_OPTION_PWA_NETWORK_STRATEGY_DEFAULT</option>
+                            <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                            <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                            <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                            <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                            <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                            <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        </field>
+                        <field name="font" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_FONTS_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_FONTS_DESCRIPTION" type="list" default="">
+                            <option value="">JFIELD_OPTION_PWA_NETWORK_STRATEGY_DEFAULT</option>
+                            <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                            <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                            <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                            <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                            <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                            <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        </field>
+                    </fields>
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="App manifest settings" />
                     <field name="pwa_app_manifest" label="PLG_GZIP_FIELD_PWA_MANIFEST_LABEL" description="PLG_GZIP_FIELD_PWA_MANIFEST_DESCRIPTION" type="radio" class="btn-group" default="0">

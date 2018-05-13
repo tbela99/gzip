@@ -13,7 +13,7 @@
  */
 // @ts-check
 /*  */
-// build bb56582 2018-05-09 23:50:57-04:00
+// build 509e986 2018-05-12 22:13:58-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -329,7 +329,13 @@ SW.strategies = function() {
                 const response = await handle(event);
                 //	await SW.resolve("postfetch", event.request, response);
                                 console.info({
-                    mode: event.request.mode,
+                    strategy: name,
+                    responseMode: response.type,
+                    requestMode: event.request.mode,
+                    ok: response.ok,
+                    bodyUsed: response.bodyUsed,
+                    responseType: response && response.type,
+                    isCacheableRequest: strategy.isCacheableRequest(event.request, response),
                     request: event.request.url,
                     response: response && response.url
                 });
@@ -338,36 +344,36 @@ SW.strategies = function() {
         }),
         /**
 		 *
-         * @returns {IterableIterator<any>}
-         */
+		 * @returns {IterableIterator<any>}
+		 */
         keys: () => map.keys(),
         /**
 		 *
-         * @returns {IterableIterator<any>}
-         */
+		 * @returns {IterableIterator<any>}
+		 */
         values: () => map.values(),
         /**
 		 *
-         * @returns {IterableIterator<[any]>}
-         */
+		 * @returns {IterableIterator<[any]>}
+		 */
         entries: () => map.entries(),
         /**
 		 *
-         * @param {String} name
-         * @returns {any}
-         */
+		 * @param {String} name
+		 * @returns {any}
+		 */
         get: name => map.get(name),
         /**
 		 *
-         * @param {String} name
-         * @returns {boolean}
-         */
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
         has: name => map.has(name),
         /**
 		 *
-         * @param {String} name
-         * @returns {boolean}
-         */
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
         delete: name => map.delete(name),
         /**
 		 *
@@ -375,7 +381,7 @@ SW.strategies = function() {
 		 * @param {Response} response
 		 */
         // https://www.w3.org/TR/SRI/#h-note6
-        isCacheableRequest: (request, response) => ("cors" == request.mode || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response != undef && (response.type == "basic" || response.type == "default") && response.ok && !response.bodyUsed
+        isCacheableRequest: (request, response) => response != undef && ("cors" == response.type || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response.ok && [ "default", "cors", "basic" ].includes(response.type) && !response.bodyUsed
     };
     // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
     // if http response != 200 <- hmmm don't want to cache this <- stop it!
@@ -551,12 +557,16 @@ SW.strategies.add("co", event => caches.match(event.request));
 		 */        getHandler(url, event) {
             const method = event != undef && event.request.method || "GET";
             const routes = this.routes[method] || [];
-            let route, i = routes.length;
-            while (i && i--) {
+            const j = routes.length;
+            let route, i = 0;
+            for (;i < j; i++) {
                 route = routes[i];
-                if (route.match(url)) {
+                if (route.match(url, event)) {
                     console.log({
                         match: "match",
+                        strategy: route.strategy,
+                        name: route.constructor.name,
+                        path: route.path,
                         url,
                         route
                     });
@@ -592,6 +602,7 @@ SW.strategies.add("co", event => caches.match(event.request));
             SW.Utils.reset(this);
             //	console.log(self);
                         self.path = path;
+            self.strategy = handler.name;
             self.handler = {
                 handle: async event => {
                     let result = await self.resolve("beforeroute", event);
@@ -630,9 +641,8 @@ SW.strategies.add("co", event => caches.match(event.request));
         /**
 		 *
 		 * @param {string} url
-		 * @param {Request} event
 		 */
-        match(url /*, event*/) {
+        match(url) {
             //	console.log({ url, regexpp: this.path });
             return /^https?:/.test(url) && this.path.test(url);
         }
@@ -689,11 +699,24 @@ const Router = SW.Router;
 
 const router = SW.router;
 
-const handler = strategies.get("no");
-
 let entry;
 
 let defaultStrategy = "{defaultStrategy}";
+
+// excluded urls fallback on network only
+for (entry of "{exclude_urls}") {
+    router.registerRoute(new Router.RegExpRouter(new RegExp(entry), strategies.get("no")));
+}
+
+// excluded urls fallback on network only
+for (entry of "{network_strategies}") {
+    router.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0])));
+}
+
+// register strategies routers
+for (entry of strategies) {
+    router.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
+}
 
 if (!strategies.has(defaultStrategy)) {
     // default browser behavior
@@ -701,16 +724,6 @@ if (!strategies.has(defaultStrategy)) {
 }
 
 router.setDefaultHandler(strategies.get(defaultStrategy));
-
-// register strategies routers
-for (entry of strategies) {
-    router.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
-}
-
-// excluded urls fallback on network only
-"{exclude_urls}".forEach(path => {
-    router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
-});
 
 //let x;
 //for (x of SW.strategies) {

@@ -183,22 +183,24 @@ class GZipHelper {
 
         if (is_null($hash)) {
 
-            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme) {
+			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+
+            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme . $file));
+                    return static::shorten(crc32($scheme. $salt. $file));
                 }
 
-                return static::shorten(crc32($scheme . filemtime($file)));
-            } : function ($file) use($scheme) {
+                return static::shorten(crc32($scheme. $salt. filemtime($file)));
+            } : function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme . $file));
+                    return static::shorten(crc32($scheme. $salt . $file));
                 }
 
-                return static::shorten(crc32($scheme . hash_file('crc32b', $file)));
+                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
             };
         }
 
@@ -590,7 +592,7 @@ class GZipHelper {
                 }
             }
 
-            return preg_match('~^(https?:)//~', $name) ? $name.$hash :  static::getHost('/' . $name.$hash);
+            return preg_match('~^(https?:)?//~', $name) ? $name.$hash :  static::getHost('/' . $name.$hash);
         }
 
         return $file;
@@ -1213,8 +1215,8 @@ class GZipHelper {
 
                 $hash = crc32($background_css_path);
 
-                $background_css_file = $hash . '-build.css';
-                $background_css_hash = $hash . '-build.php';
+                $background_css_file = $path . $hash . '-build.css';
+                $background_css_hash = $path . $hash . '-build.php';
                                 
                 if (!is_file($background_css_file) || file_get_contents($background_css_hash) != $hash) {
 

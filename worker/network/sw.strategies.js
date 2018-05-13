@@ -34,43 +34,56 @@ SW.strategies = (function() {
 					const response = await handle(event);
 					//	await SW.resolve("postfetch", event.request, response);
 
-					console.info({ mode: event.request.mode, request: event.request.url, response: response && response.url });
+					console.info({
+						strategy: name,
+						responseMode: response.type,
+						requestMode: event.request.mode,
+						ok: response.ok,
+						bodyUsed: response.bodyUsed,
+						responseType: response && response.type,
+						isCacheableRequest: strategy.isCacheableRequest(
+							event.request,
+							response
+						),
+						request: event.request.url,
+						response: response && response.url
+					});
 
 					return response;
 				}
 			}),
-        /**
+		/**
 		 *
-         * @returns {IterableIterator<any>}
-         */
+		 * @returns {IterableIterator<any>}
+		 */
 		keys: () => map.keys(),
-        /**
+		/**
 		 *
-         * @returns {IterableIterator<any>}
-         */
+		 * @returns {IterableIterator<any>}
+		 */
 		values: () => map.values(),
-        /**
+		/**
 		 *
-         * @returns {IterableIterator<[any]>}
-         */
+		 * @returns {IterableIterator<[any]>}
+		 */
 		entries: () => map.entries(),
-        /**
+		/**
 		 *
-         * @param {String} name
-         * @returns {any}
-         */
+		 * @param {String} name
+		 * @returns {any}
+		 */
 		get: name => map.get(name),
-        /**
+		/**
 		 *
-         * @param {String} name
-         * @returns {boolean}
-         */
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
 		has: name => map.has(name),
-        /**
+		/**
 		 *
-         * @param {String} name
-         * @returns {boolean}
-         */
+		 * @param {String} name
+		 * @returns {boolean}
+		 */
 		delete: name => map.delete(name),
 		/**
 		 *
@@ -79,12 +92,12 @@ SW.strategies = (function() {
 		 */
 		// https://www.w3.org/TR/SRI/#h-note6
 		isCacheableRequest: (request, response) =>
-			("cors" == request.mode ||
+			response != undef &&
+			("cors" == response.type ||
 				new URL(request.url, self.origin).origin == self.origin) &&
 			request.method == "GET" &&
-			response != undef &&
-			(response.type == "basic" || response.type == "default") &&
 			response.ok &&
+			["default", "cors", "basic"].includes(response.type) &&
 			!response.bodyUsed
 	};
 
@@ -93,7 +106,7 @@ SW.strategies = (function() {
 	// if auth != basic <- are you private? <- stop it!
 
 	strategy[Symbol.iterator] = () => map[Symbol.iterator]();
-	Object.defineProperty(strategy, "size", { get: () => map.size });
+	Object.defineProperty(strategy, "size", {get: () => map.size});
 
 	return strategy;
 })();

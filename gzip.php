@@ -138,13 +138,15 @@ class PlgSystemGzip extends JPlugin
 
 					if ($this->options['pwaenabled'] == 1) {
 
-						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
+						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}', '{custom_routes}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : ''), json_encode($strategies)], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
 
 						$onesignal = (array) $this->options['onesignal'];
 						if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
 
 							$script .= str_replace(['{APP_ID}'], [$onesignal['web_push_app_id']], file_get_contents(__DIR__.'/worker/dist/onesignal.min.js'));
 						}
+
+						$document->addStyleDeclaration(file_get_contents(__DIR__.'/worker/css/pwa-app.css'));
 					}
 
 					// force service worker uninstall
@@ -478,8 +480,8 @@ class PlgSystemGzip extends JPlugin
 		$options = $this->options;
 
 		// segregate http and https cache
-        $prefix = 'cache/z/'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
-
+		$prefix = 'cache/z/'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
+		
         if(!empty($options['pwaenabled'])) {
 
             if(empty($options['pwa_network_strategy'])) {
@@ -830,12 +832,50 @@ class PlgSystemGzip extends JPlugin
         if(!empty($onesignal['enabled'])) {
 
             $import_scripts .= 'importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")';
-        }
+		}
+		
+		// additional routing startegies
+		$strategies = [];
+
+		foreach ($options['pwa_network_strategies'] as $key => $value) {
+
+			// use default settings
+			if (empty($value)) {
+
+				continue;
+			}
+
+			if ($value == 'un') {
+
+				$value = 'no';
+			}
+
+			foreach (GZip\GZipHelper::$accepted as $ext => $mime_type) {
+
+				if ($ext == $key || strpos($mime_type, $key) !== false) {
+
+					$strategies[$value][] = $ext;
+				}
+			}
+		}
 
         $hash = hash('sha1', json_encode($options).file_get_contents(__DIR__.'/worker_version'));
 
-        $search = ['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"'];
-        $replace = ['v_'.$hash, empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], \JUri::root(true), json_encode($exclude_urls), json_encode($preloaded_urls), $import_scripts];
+        $search = ['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
+        $replace = [
+			'v_'.$hash, empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
+			\JUri::root(true), 
+			json_encode($exclude_urls), 
+			json_encode($preloaded_urls), 
+			$import_scripts,
+			json_encode(array_map(function ($key, $values) {
+
+					return [$key, '\.(('.implode(')|(', $values).'))([#?].*)?$'];
+				}, 
+				array_keys($strategies), 
+				array_values($strategies)
+			))
+		];
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
 

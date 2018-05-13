@@ -20,7 +20,6 @@
 
 "use strict;";
 
-
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
 //SW.Filter.addRule(SW.Filter.Rules.Prefetch, function(request) {
 //	return request.url.indexOf(scope + "/administrator/") != -1;
@@ -31,17 +30,26 @@
 const strategies = SW.strategies;
 const Router = SW.Router;
 const router = SW.router;
-const handler = strategies.get("no");
 let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
-if (!strategies.has(defaultStrategy)) {
-	// default browser behavior
-	defaultStrategy = "no";
+// excluded urls fallback on network only
+for (entry of "{exclude_urls}") {
+	router.registerRoute(
+		new Router.RegExpRouter(new RegExp(entry), strategies.get("no"))
+	);
 }
 
-router.setDefaultHandler(strategies.get(defaultStrategy));
+// excluded urls fallback on network only
+for (entry of "{network_strategies}") {
+	router.registerRoute(
+		new Router.RegExpRouter(
+			new RegExp(entry[1], "i"),
+			strategies.get(entry[0])
+		)
+	);
+}
 
 // register strategies routers
 for (entry of strategies) {
@@ -50,10 +58,12 @@ for (entry of strategies) {
 	);
 }
 
-// excluded urls fallback on network only
-"{exclude_urls}".forEach((path) => {
-	router.registerRoute(new Router.RegExpRouter(new RegExp(path), handler));
-});
+if (!strategies.has(defaultStrategy)) {
+	// default browser behavior
+	defaultStrategy = "no";
+}
+
+router.setDefaultHandler(strategies.get(defaultStrategy));
 
 //let x;
 
