@@ -2,6 +2,7 @@
 
 ## High priority list
 
+1.  Clear Joomla cache when settings are updated
 1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts.
 1.  Make lazyloaded images indexable. Use either noscript tag or micro data
 1.  Use blurry image preview as an alternative to SVG

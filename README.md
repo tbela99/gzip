@@ -1,4 +1,4 @@
-## Page Optimizer Plugin
+## 0.1. Page Optimizer Plugin
 
 Do you want to improve your website by
 
@@ -13,7 +13,44 @@ There are additional plugins that help optmizing and profiling your page or serv
 *   [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
 *   [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
 
-# General improvements
+<!-- TOC -->
+
+    - [0.1. Page Optimizer Plugin](#01-page-optimizer-plugin)
+
+*   [1. General improvements](#1-general-improvements)
+*   [2. Moving script and css position in the page](#2-moving-script-and-css-position-in-the-page)
+*   [3. Caching](#3-caching)
+*   [4. SRI](#4-sri)
+*   [5. Critical CSS Path](#5-critical-css-path)
+*   [6. Images](#6-images)
+    *   [6.1. Responsive images](#61-responsive-images)
+*   [7. Javascript Improvements](#7-javascript-improvements)
+*   [8. CSS Improvements](#8-css-improvements)
+*   [9. Progressive Web App](#9-progressive-web-app)
+    *   [9.1. Network cache strategies](#91-network-cache-strategies)
+    *   [9.2. PWA preloaded resources](#92-pwa-preloaded-resources)
+    *   [9.3. Installable web app](#93-installable-web-app)
+    *   [9.4. Web Push](#94-web-push)
+    *   [9.5. Service worker router api](#95-service-worker-router-api)
+    *   [9.6. Exclude resources from the service worker management](#96-exclude-resources-from-the-service-worker-management)
+*   [10. CDN and Cookieless Domains](#10-cdn-and-cookieless-domains)
+*   [11. Misc](#11-misc)
+*   [12. Change History](#12-change-history)
+    *   [12.1. V2.3](#121-v23)
+    *   [12.2. V2.2](#122-v22)
+    *   [12.3. V2.1](#123-v21)
+    *   [12.4. V2.0](#124-v20)
+        *   [12.4.1. PWA: implement network strategies:](#1241-pwa-implement-network-strategies)
+    *   [12.5. V1.1](#125-v11)
+    *   [12.6. V1.0](#126-v10)
+        *   [12.6.1. SRI (Sub resources integrity)](#1261-sri-sub-resources-integrity)
+        *   [12.6.2. Critical CSS Path](#1262-critical-css-path)
+        *   [12.6.3. Javascript](#1263-javascript)
+        *   [12.6.4. CSS](#1264-css)
+
+<!-- /TOC -->
+
+# 1. General improvements
 
 *   advanced page optimizations which drastically improve the page performance score over various tools.
 *   turn the website into an installable Progressive Web Application
@@ -23,7 +60,7 @@ There are additional plugins that help optmizing and profiling your page or serv
 *   force script and css to be ignored by the optimizer by setting 'data-ignore="true"' attribute
 *   connect to domains faster: automatically detect domains and add < link rel=preconnect > header
 
-# Moving script and css position in the page
+# 2. Moving script and css position in the page
 
 script and css position can be controlled by add 'data-position' attribute to the tag. possible values are
 
@@ -31,18 +68,18 @@ script and css position can be controlled by add 'data-position' attribute to th
 *   ignore: ignore the file
 *   missing tag or other values means move to the footer of the page.
 
-# Caching
+# 3. Caching
 
 *   Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
 *   Range requests are supported for cached resources (you can cache audio & video content)
 
-# SRI
+# 4. SRI
 
 *   compute SRI for css and javascript files
 
 If you use a cdn, you will need to disable cdn optimizations for css and javascript. They must not alter css and javascript
 
-# Critical CSS Path
+# 5. Critical CSS Path
 
 Eliminate **FOUC** by providing critical css path selectors. See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info.
 The critical path enable instant page rendering by providing a minimal set of selectors and classes used to render the visible part of the page before the stylesheets are loaded.
@@ -53,7 +90,7 @@ There is no automatic extraction and you must provide these settings to extract 
 *   A list of selectors to extract from the page css
 *   The web fonts are extracted automatically and preloaded
 
-# Images
+# 6. Images
 
 *   deliver images in webp format when the browser signals it supports it
 *   generate svg placeholder from images for quick image preview
@@ -61,7 +98,7 @@ There is no automatic extraction and you must provide these settings to extract 
 *   generate svg placeholder for images for faster page load
 *   lazyload images that are using svg placeholder
 
-## Responsive images
+## 6.1. Responsive images
 
 *   automatically add srcset and sizes for images. Only necessary images are generated. Images smaller that the breakpoint are ignored.
 *   resize and crop images using a one of these methods (face detection, entropy, center or default).
@@ -69,7 +106,7 @@ There is no automatic extraction and you must provide these settings to extract 
 *   scrset urls are automatically rewritten when http cache is enabled
 *   automatically resize css background images. You can configure breakpoints for this feature.
 
-# Javascript Improvements
+# 7. Javascript Improvements
 
 *   Fetch remote javascript files locally
 *   Merge javascript files
@@ -79,7 +116,7 @@ There is no automatic extraction and you must provide these settings to extract 
 *   Move javascript at the bottom of the page
 *   load javascript in a non blocking way if there is only one javascript file in the page.
 
-# CSS Improvements
+# 8. CSS Improvements
 
 *   Fetch remote css files, images and fonts and store them locally
 *   Merge css files (this process @import directive)
@@ -89,11 +126,11 @@ There is no automatic extraction and you must provide these settings to extract 
 *   Ignore css files that match a pattern
 *   Load css files in a non blocking way
 
-# Progressive Web App
+# 9. Progressive Web App
 
 Offline mode capabilities can be set to one of these network strategies
 
-## Network cache strategies
+## 9.1. Network cache strategies
 
 1.  Cache only
 1.  Network only
@@ -101,43 +138,43 @@ Offline mode capabilities can be set to one of these network strategies
 1.  Network first, falling back to cache
 1.  Cache, with network update - stale while revalidate <- this is the default
 
-## PWA preloaded resources
+## 9.2. PWA preloaded resources
 
 You can provide the list of urls to load when the service worker is installed like icons, logo, css files, web pages, etc ...
 
-## Installable web app
+## 9.3. Installable web app
 
 1.  The app can be installed as a standalone web app with google chrome / firefox on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
 2.  The app can be installed as a standalone desktop application (tested on windows 10) with google chrome as long as you provide a 512x512 icon.
 3.  Alternative links to native mobile apps can be provided and the preference can be configured
 
-## Web Push
+## 9.4. Web Push
 
 1.  Manage Web Push subscription using OneSignal
 1.  Added basic push notification settings for Joomla articles
 
-## Service worker router api
+## 9.5. Service worker router api
 
 Add routes to customize fetch event networking strategy by using either a static route or a regexp
 
-## Exclude resources from the service worker management
+## 9.6. Exclude resources from the service worker management
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
-# CDN and Cookieless Domains
+# 10. CDN and Cookieless Domains
 
 *   Configure up to 3 domains from which resources will be loaded.
 *   You can also configure which kind of resource are loaded from these domains.
 *   CORS headers are automatically added for responses sent from these domains.
 
-# Misc
+# 11. Misc
 
 *   Joomla administrator is excluded from the service worker cached resources
 *   You can secure your Joomla administrator access by defining a secret access token.
 
-# Change History
+# 12. Change History
 
-## V2.3
+## 12.1. V2.3
 
 1.  Web fonts preloading: Choose how the text is rendered while web fonts are loading by customizing font-display
 1.  Enable CDN / cookieless domain support
@@ -151,7 +188,7 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  Configure service worker route strategy per resource type from the Joomla administrator
 1.  Implement the beforeinstallprompt event. see [here](https://w3c.github.io/manifest/#beforeinstallpromptevent-interface)
 
-## V2.2
+## 12.2. V2.2
 
 1.  optimized image lazyloader
 1.  generate svg placeholder from images for quick preview
@@ -165,7 +202,7 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
 1.  Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
 
-## V2.1
+## 12.3. V2.1
 
 1.  Added push notifications using onesignal
 1.  Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android é windows 10 / firefox android)
@@ -176,9 +213,9 @@ You can specify which resource are not managed by the service worker by specifyi
 1.  Add a secret token to prevent administrator access
 1.  Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
 
-## V2.0
+## 12.4. V2.0
 
-### PWA: implement network strategies:
+### 12.4.1. PWA: implement network strategies:
 
 *   Cache only (disabled)
 *   Network only
@@ -186,23 +223,23 @@ You can specify which resource are not managed by the service worker by specifyi
 *   Network first, falling back to cache
 *   Cache, with network update
 
-## V1.1
+## 12.5. V1.1
 
 CSS: preload web fonts
 
-## V1.0
+## 12.6. V1.0
 
 this release implements to to bottom page loading optimization
 
-### SRI (Sub resources integrity)
+### 12.6.1. SRI (Sub resources integrity)
 
 1.  generate SRI for javascript and css files
 
-### Critical CSS Path
+### 12.6.2. Critical CSS Path
 
 1.  generate critical css path based on the list of selectors you provide.
 
-### Javascript
+### 12.6.3. Javascript
 
 1.  fetch files hosted on remote servers
 1.  minify javascript files
@@ -213,7 +250,7 @@ this release implements to to bottom page loading optimization
 1.  remove duplicates
 1.  move javascript at the bottom of the page
 
-### CSS
+### 12.6.4. CSS
 
 1.  fetch files hosted on remote servers
 1.  minify css files
