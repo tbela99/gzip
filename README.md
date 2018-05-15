@@ -13,6 +13,8 @@ There are additional plugins that help optmizing and profiling your page or serv
 *   [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
 *   [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
 
+![screenshot](Capture.PNG)
+
 <!-- TOC -->
 
     - [0.1. Page Optimizer Plugin](#01-page-optimizer-plugin)
