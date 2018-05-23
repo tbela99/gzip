@@ -16,7 +16,7 @@
 /* eslint wrap-iife: 0 */
 /* global SW, scope */
 /** @var {string} scope */
-/** @var {object} SW */
+/** @var {SWType} SW */
 
 "use strict;";
 

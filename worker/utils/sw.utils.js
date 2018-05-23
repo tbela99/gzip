@@ -89,8 +89,12 @@
 		//	atob(str) {
 		//		return decodeURIComponent(escape(atob(str)));
 		//	},
-		// extend a function to accept either a key/value or an object hash as arguments
-		// ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
+
+		/**
+		 *  extend a function to accept either a key/value or an object as arguments
+		 * 	ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
+		 * @param {Function} fn
+		 */
 		extendArgs(fn) {
 			return function(key) {
 				if (typeof key == "object") {
@@ -162,7 +166,9 @@
 							typeof target[prop] == "object" &&
 								target[prop] != undef
 								? target[prop]
-								: Array.isArray(value) ? [] : {},
+								: Array.isArray(value)
+									? []
+									: {},
 							//
 							value
 						);

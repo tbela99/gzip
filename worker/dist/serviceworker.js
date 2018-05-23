@@ -13,7 +13,7 @@
  */
 // @ts-check
 /*  */
-// build 509e986 2018-05-12 22:13:58-04:00
+// build 9abe434 2018-05-22 20:55:12-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -25,7 +25,10 @@
 const undef = null;
 
  //
-const SW = Object.create(undef);
+/**
+ *
+ * @var {SWType}
+ */ const SW = Object.create(undef);
 
 const CACHE_NAME = "{CACHE_NAME}";
 
@@ -33,6 +36,120 @@ const scope = "{scope}";
 
 // const defaultStrategy = "{defaultStrategy}";
 //console.log(self);
+/**
+ *
+ * type definitions file
+ *
+ * @package     GZip Plugin
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+// @ts-check
+/**
+ * @typedef SWType
+ * @method {callback} SW.resolve
+ * @method {callback} SW.on
+ * @method {callback} SW.off
+ * @property Expiration
+ */
+/**
+ *
+ * @async
+ * @callback routerHandle
+ * @param {FetchEvent} event
+ */
+/**
+ * @typedef routerHandleObject
+ * @property {object} handler
+ * @property {routerHandle} handler.handle
+ */
+/**
+ * @typedef {RegExp|string} routerPath
+ */
+// force uglifyjs to include this file content
+if (false) {}
+
+/* LICENSE: MIT LICENSE | https://github.com/msandrini/minimal-indexed-db */
+/* global window */
+/**
+ * @typedef DBType
+ * @callback count
+ * @callback getEntry
+ * @callback getAll
+ * @callback put
+ * @callback deleteEntry
+ * @callback flush
+ * @callback then
+ * @callback catch
+ */
+/**
+ *
+ * @var {DBType}
+ * */
+const DB = function DB(dbName, key = "id") {
+    return new Promise((resolve, reject) => {
+        const openDBRequest = window.indexedDB.open(dbName, 1);
+        const storeName = `${dbName}_store`;
+        let db;
+        const _upgrade = () => {
+            db = openDBRequest.result;
+            db.createObjectStore(storeName, {
+                keyPath: key
+            });
+        };
+        const _query = (method, readOnly, param = null) => new Promise((resolveQuery, rejectQuery) => {
+            const permission = readOnly ? "readonly" : "readwrite";
+            if (db.objectStoreNames.contains(storeName)) {
+                const transaction = db.transaction(storeName, permission);
+                const store = transaction.objectStore(storeName);
+                const isMultiplePut = method === "put" && param && typeof param.length !== "undefined";
+                let listener;
+                if (isMultiplePut) {
+                    listener = transaction;
+                    param.forEach(entry => {
+                        store.put(entry);
+                    });
+                } else {
+                    listener = store[method](param);
+                }
+                listener.oncomplete = (event => {
+                    resolveQuery(event.target.result);
+                });
+                listener.onsuccess = (event => {
+                    resolveQuery(event.target.result);
+                });
+                listener.onerror = (event => {
+                    rejectQuery(event);
+                });
+            } else {
+                rejectQuery(new Error("Store not found"));
+            }
+        });
+        const methods = {
+            count: () => _query("count", true, keyToUse),
+            getEntry: keyToUse => _query("get", true, keyToUse),
+            getAll: () => _query("getAll", true),
+            put: entryData => _query("put", false, entryData),
+            deleteEntry: keyToUse => _query("delete", false, keyToUse),
+            flush: () => _query("clear", false)
+        };
+        const _successOnBuild = () => {
+            db = openDBRequest.result;
+            resolve(methods);
+        };
+        const _errorOnBuild = e => {
+            reject(new Error(e));
+        };
+        openDBRequest.onupgradeneeded = _upgrade.bind(this);
+        openDBRequest.onsuccess = _successOnBuild.bind(this);
+        openDBRequest.onerror = _errorOnBuild.bind(this);
+    });
+};
+
 /**
  *
  * @package     GZip Plugin
@@ -96,8 +213,11 @@ const scope = "{scope}";
         //	atob(str) {
         //		return decodeURIComponent(escape(atob(str)));
         //	},
-        // extend a function to accept either a key/value or an object hash as arguments
-        // ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
+        /**
+		 *  extend a function to accept either a key/value or an object as arguments
+		 * 	ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
+		 * @param {Function} fn
+		 */
         extendArgs(fn) {
             return function(key) {
                 if (typeof key == "object") {
@@ -201,10 +321,10 @@ const scope = "{scope}";
         $events: {},
         $pseudo: {},
         // accept (event, handler)
-        // Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
+        // Example: on('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
         // accept object with events as keys and handlers as values
-        // Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-        promisify: extendArgs(function(name, fn, sticky) {
+        // Example on({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
+        on: extendArgs(function(name, fn, sticky) {
             const self = this;
             if (fn == undef) {
                 return;
@@ -300,7 +420,7 @@ const scope = "{scope}";
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
+ * @subpackage  System.Gzip
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -319,17 +439,16 @@ SW.strategies = function() {
     const strategy = {
         /**
 		 *
-		 * @param {String} name
-		 * @param {function} handle
+		 * @param {string} key
+		 * @param {routerHandle} handle
 		 */
-        add: (name, handle) => map.set(name, {
-            name,
+        add: (key, handle, name) => map.set(key, {
+            key,
+            name: name == undef ? key : name,
             handle: async event => {
-                //	await SW.resolve("prefetch", event.request);
                 const response = await handle(event);
-                //	await SW.resolve("postfetch", event.request, response);
-                                console.info({
-                    strategy: name,
+                console.info({
+                    strategy: name == undef ? key : name,
                     responseMode: response.type,
                     requestMode: event.request.mode,
                     ok: response.ok,
@@ -344,12 +463,12 @@ SW.strategies = function() {
         }),
         /**
 		 *
-		 * @returns {IterableIterator<any>}
+		 * @returns {IterableIterator<string>}
 		 */
         keys: () => map.keys(),
         /**
 		 *
-		 * @returns {IterableIterator<any>}
+		 * @returns {IterableIterator<routerHandleObject>}
 		 */
         values: () => map.values(),
         /**
@@ -359,8 +478,8 @@ SW.strategies = function() {
         entries: () => map.entries(),
         /**
 		 *
-		 * @param {String} name
-		 * @returns {any}
+		 * @param {string} name
+		 * @returns {routerHandleObject}
 		 */
         get: name => map.get(name),
         /**
@@ -381,7 +500,7 @@ SW.strategies = function() {
 		 * @param {Response} response
 		 */
         // https://www.w3.org/TR/SRI/#h-note6
-        isCacheableRequest: (request, response) => response != undef && ("cors" == response.type || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response.ok && [ "default", "cors", "basic" ].includes(response.type) && !response.bodyUsed
+        isCacheableRequest: (request, response) => response != undef && ("cors" == response.type || new URL(request.url, self.origin).origin == self.origin) && request.method == "GET" && response.ok && [ "default", "cors", "basic", "navigate" ].includes(response.type) && !response.bodyUsed
     };
     // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
     // if http response != 200 <- hmmm don't want to cache this <- stop it!
@@ -407,7 +526,7 @@ SW.strategies = function() {
 // @ts-check
 /* global SW, CACHE_NAME */
 /* eslint wrap-iife: 0 */
-SW.strategies.add("nf", async (event, cache) => {
+SW.strategies.add("nf", async event => {
     "use strict;";
     try {
         const response = await fetch(event.request);
@@ -424,8 +543,10 @@ SW.strategies.add("nf", async (event, cache) => {
         return response;
         //	})
         } catch (e) {}
-    return cache.match(event.request);
-});
+    return caches.match(event.request, {
+        cacheName: CACHE_NAME
+    });
+}, "Network fallback to Cache");
 
 /**
  *
@@ -443,7 +564,9 @@ SW.strategies.add("nf", async (event, cache) => {
 /* global SW, CACHE_NAME */
 SW.strategies.add("cf", async event => {
     "use strict;";
-    let response = await caches.match(event.request);
+    let response = await caches.match(event.request, {
+        cacheName: CACHE_NAME
+    });
     if (response != undef) {
         return response;
     }
@@ -455,7 +578,7 @@ SW.strategies.add("cf", async event => {
         });
     }
     return response;
-});
+}, "Cache fallback to Network");
 
 /**
  *
@@ -474,8 +597,10 @@ SW.strategies.add("cf", async event => {
 // stale while revalidate
 SW.strategies.add("cn", async event => {
     "use strict;";
-    const response = await caches.match(event.request);
-    const fetchPromise = fetch(event.request).then(function(networkResponse) {
+    const response = await caches.match(event.request, {
+        cacheName: CACHE_NAME
+    });
+    const fetchPromise = fetch(event.request).then(networkResponse => {
         // validate response before
         if (SW.strategies.isCacheableRequest(event.request, networkResponse)) {
             const cloned = networkResponse.clone();
@@ -487,7 +612,7 @@ SW.strategies.add("cn", async event => {
     });
     return response || fetchPromise;
     //	});
-});
+}, "Cache and Network Update");
 
 /**
  *
@@ -504,7 +629,7 @@ SW.strategies.add("cn", async event => {
 /* eslint wrap-iife: 0 */
 /* global SW */
 // or simply don't call event.respondWith, which will result in default browser behaviour
-SW.strategies.add("no", event => fetch(event.request));
+SW.strategies.add("no", event => fetch(event.request), "Network Only");
 
 /**
  *
@@ -522,12 +647,13 @@ SW.strategies.add("no", event => fetch(event.request));
 /* eslint wrap-iife: 0 */
 // If a match isn't found in the cache, the response
 // will look like a connection error);
-SW.strategies.add("co", event => caches.match(event.request));
+SW.strategies.add("co", event => caches.match(event.request, {
+    cacheName: CACHE_NAME
+}, "Cache Only"));
 
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -544,30 +670,39 @@ SW.strategies.add("co", event => caches.match(event.request));
         }
         return method.toLowerCase();
     }
-    class Router {
+    /**
+	 * request router class
+	 *
+	 * @property {Object.<string, DefaultRouter[]>} routes
+	 * @property {Object.<string, routerHandle>} defaultHandler
+	 * @method {function} on
+	 * @method {function} off
+	 * @method {function} trigger
+	 *
+	 * @class Router
+	 */    class Router {
         constructor() {
             this.routes = Object.create(undef);
-            this.handlers = [];
             this.defaultHandler = Object.create(undef);
         }
         /**
+		 * get the handler that matches the request event
 		 *
-		 * @param {string} url
 		 * @param {FetchEvent} event
-		 */        getHandler(url, event) {
+		 */        getHandler(event) {
             const method = event != undef && event.request.method || "GET";
             const routes = this.routes[method] || [];
             const j = routes.length;
             let route, i = 0;
             for (;i < j; i++) {
                 route = routes[i];
-                if (route.match(url, event)) {
-                    console.log({
-                        match: "match",
+                if (route.match(event)) {
+                    console.info({
+                        match: true,
                         strategy: route.strategy,
                         name: route.constructor.name,
+                        url: event.request.url,
                         path: route.path,
-                        url,
                         route
                     });
                     return route.handler;
@@ -575,7 +710,12 @@ SW.strategies.add("co", event => caches.match(event.request));
             }
             return this.defaultHandler[method];
         }
-        registerRoute(router, method) {
+        /**
+		 * regeister a handler for an http method
+		 *
+		 * @param {BaseRouter} router router instance
+		 * @param {string} method http method
+		 */        registerRoute(router, method) {
             method = normalize(method);
             if (!(method in this.routes)) {
                 this.routes[method] = [];
@@ -583,7 +723,12 @@ SW.strategies.add("co", event => caches.match(event.request));
             this.routes[method].push(router);
             return this;
         }
-        unregisterRoute(router, method) {
+        /**
+		 * unregister a handler for an http method
+		 *
+		 * @param {BaseRouter} router router instance
+		 * @param {string} method http metho
+		 */        unregisterRoute(router, method) {
             method = normalize(method);
             const route = this.routes[method] || [];
             const index = route.indexOf(router);
@@ -592,19 +737,54 @@ SW.strategies.add("co", event => caches.match(event.request));
             }
             return this;
         }
-        setDefaultHandler(handler, method) {
+        /**
+		 * set the default request handler
+		 *
+		 * @param {routerHandle} handler router instance
+		 * @param {string} method http metho
+		 */        setDefaultHandler(handler, method) {
             this.defaultHandler[normalize(method)] = handler;
         }
     }
-    class DefaultRouter {
-        constructor(path, handler) {
+    /**
+	 * @property {string} strategy router strategy name
+	 * @property {routerPath} path path used to match requests
+	 * @property {routerHandleObject} handler
+	 * @property {object} options
+	 * @method on
+	 * @method off
+	 * @method trigger
+	 *
+	 * @class BaseRouter
+	 */    class BaseRouter {
+        /**
+		 *
+		 * @param {routerPath} path
+		 * @param {routerHandle} handler
+		 * @param {object} options
+		 */
+        constructor(path, handler, options) {
             const self = this;
+            let prop, event, cb;
+            self.options = Object.assign(Object.create(undef), {}, options || {});
+            for (prop in self.options) {
+                if (/^on.+/i.test(prop)) {
+                    event = prop.substr(2);
+                    if (Array.isArray(self.options[prop])) {
+                        for (cb of self.options[prop]) {
+                            self.on(event, cb);
+                        }
+                    } else {
+                        self.on(event, self.options[prop]);
+                    }
+                }
+            }
             SW.Utils.reset(this);
-            //	console.log(self);
-                        self.path = path;
+            self.path = path;
             self.strategy = handler.name;
             self.handler = {
                 handle: async event => {
+                    // before route
                     let result = await self.resolve("beforeroute", event);
                     let response, res;
                     for (response of result) {
@@ -622,49 +802,73 @@ SW.strategies.add("co", event => caches.match(event.request));
                     return response;
                 }
             };
-            self.promisify({
-                beforeroute(event) {
-                    if (event.request.mode == "navigate") {
-                        console.log([ "beforeroute", self, [].slice.call(arguments) ]);
-                    }
-                },
-                afterroute(event, response) {
-                    if (event.request.mode == "navigate") {
-                        console.log([ "afterroute", self, [].slice.call(arguments) ]);
-                    }
-                }
-            });
             /**/        }
     }
-    SW.Utils.merge(true, DefaultRouter.prototype, SW.PromiseEvent);
-    class RegExpRouter extends DefaultRouter {
+    SW.Utils.merge(true, BaseRouter.prototype, SW.PromiseEvent);
+    /**
+	 *
+	 *
+	 * @class RegExpRouter
+	 * @extends BaseRouter
+	 * @inheritdoc
+	 */    class RegExpRouter extends BaseRouter {
         /**
 		 *
-		 * @param {string} url
+		 * @param {FetchEvent} event
 		 */
-        match(url) {
-            //	console.log({ url, regexpp: this.path });
+        match(event) {
+            const url = event.request.url;
             return /^https?:/.test(url) && this.path.test(url);
         }
     }
-    class ExpressRouter extends DefaultRouter {
-        constructor(path, handler) {
-            super(path, handler);
+    /**
+	 * @property {URL} url
+	 * @class ExpressRouter
+	 * @extends BaseRouter
+	 * @inheritdoc
+	 */    class ExpressRouter extends BaseRouter {
+        /**
+		 * @inheritdoc
+		 */
+        /**
+		 * Creates an instance of ExpressRouter.
+		 * @param  {RegExp} path
+		 * @param  {routerHandle} handler
+		 * @param  {object} options
+		 * @memberof ExpressRouter
+		 */
+        constructor(path, handler, options) {
+            super(path, handler, options);
             this.url = new URL(path, self.origin);
         }
         /**
 		 *
-		 * @param {string} url
-		 */        match(url /*, event*/) {
+		 * @param {FetchEvent} event
+		 */        match(event) {
+            const url = event.request.url;
             const u = new URL(url);
             return /^https?:/.test(url) && u.origin == this.url.origin && u.pathname.indexOf(this.url.pathname) == 0;
+        }
+    }
+    /**
+	 *
+	 * @class CallbackRouter
+	 * @extends BaseRouter
+	 * @inheritdoc
+	 */    class CallbackRouter extends BaseRouter {
+        /**
+		 *
+		 * @param {FetchEvent} event
+		 */
+        match(event) {
+            return this.path(event.request.url, event);
         }
     }
     const router = new Router();
     Router.RegExpRouter = RegExpRouter;
     Router.ExpressRouter = ExpressRouter;
-    //	Router.DataRouter = DataRouter;
-        SW.Router = Router;
+    Router.CallbackRouter = CallbackRouter;
+    SW.Router = Router;
     SW.router = router;
 })(SW);
 
@@ -685,7 +889,7 @@ SW.strategies.add("co", event => caches.match(event.request));
 /* eslint wrap-iife: 0 */
 /* global SW, scope */
 /** @var {string} scope */
-/** @var {object} SW */
+/** @var {SWType} SW */
 "use strict;";
 
 // do not cache administrator content -> this can be done in the plugin settings / joomla addministrator
@@ -745,6 +949,7 @@ router.setDefaultHandler(strategies.get(defaultStrategy));
 self.addEventListener("install", event => {
     event.waitUntil(caches.open(CACHE_NAME).then(async cache => {
         await cache.addAll("{preloaded_urls}");
+        await SW.resolve("install");
         return self.skipWaiting();
     }));
 });
@@ -767,9 +972,14 @@ self.addEventListener("activate", event => {
     event.waitUntil(self.clients.claim().then(async () => {
         const keyList = await caches.keys();
         const tokens = CACHE_NAME.split(/_/, 2);
-        const search = tokens.length == 2 && tokens[0] + "_";
+        /**
+			 * @var {boolean|string}
+			 */        const search = tokens.length == 2 && tokens[0] + "_";
         // delete older instances
-                return Promise.all(keyList.map(key => search !== false && key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+                if (search != false) {
+            await Promise.all(keyList.map(key => key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+        }
+        return SW.resolve("activate");
     }));
 });
 
@@ -790,7 +1000,7 @@ self.addEventListener("activate", event => {
  * @param {FetchEvent} event
  */
 self.addEventListener("fetch", event => {
-    const handler = SW.router.getHandler(event.request.url, event);
+    const handler = SW.router.getHandler(event);
     if (handler != undef) {
         event.respondWith(handler.handle(event).catch(error => {
             console.error("😭", error);

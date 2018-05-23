@@ -27,10 +27,11 @@
 		$events: {},
 		$pseudo: {},
 		// accept (event, handler)
-		// Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
+		// Example: on('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
 		// accept object with events as keys and handlers as values
-		// Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-		promisify: extendArgs(function(name, fn, sticky) {
+		// Example on({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
+
+		on: extendArgs(function(name, fn, sticky) {
 			const self = this;
 
 			if (fn == undef) {
@@ -83,7 +84,7 @@
 			}
 
 			//    sticky = !!sticky;
-			Object.defineProperty(event, "sticky", { value: !!sticky });
+			Object.defineProperty(event, "sticky", {value: !!sticky});
 
 			self.$events[name].push(event);
 		}),
@@ -129,9 +130,12 @@
 				arguments.length > 1 ? [].slice.call(arguments, 1) : [];
 
 			return Promise.all(
-				(self.$events[name] || []).concat().map((event) => new Promise((resolve) => {
-					resolve(event.cb.apply(self, args));
-				}))
+				(self.$events[name] || []).concat().map(
+					(event) =>
+						new Promise((resolve) => {
+							resolve(event.cb.apply(self, args));
+						})
+				)
 			);
 		},
 		addPseudo(name, fn) {

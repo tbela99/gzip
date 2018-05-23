@@ -46,7 +46,7 @@
 
 			img.src = oldImage.dataset.src;
 
-			if (img.height > 0 && img.height > 0) {
+			if (img.height > 0 && img.width > 0) {
 				observer.trigger("load", img, oldImage);
 			}
 		}

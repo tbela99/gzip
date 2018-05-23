@@ -46,7 +46,7 @@ uglifyjs --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,w
 #
 #
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
- -- ./serviceworker.js ./utils/sw.utils.js ./event/sw.event.promise.js \
+ -- ./serviceworker.js ./types.js ./db/db.js ./utils/sw.utils.js ./event/sw.event.promise.js \
   ./network/sw.strategies.js ./network/sw.strategies.network_first.js ./network/sw.strategies.cache_first.js ./network/sw.strategies.cache_network.js\
   ./network/sw.strategies.network_only.js ./network/sw.strategies.cache_only.js\
   ./router/sw.router.js\

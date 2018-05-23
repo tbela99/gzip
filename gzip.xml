@@ -18,6 +18,7 @@
         <folder>worker/css</folder>
         <folder>push</folder>
         <filename>autoload.php</filename>
+        <filename>responder.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
         <filename>loader.min.js</filename>
@@ -26,11 +27,6 @@
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
-    <media folder="media" destination="z">
-        <folder>js/dist</folder>
-        <filename>index.php</filename>
-        <filename>.htaccess</filename>
-    </media>
     <config>
         <fields name="params">
             <fieldset name="basic">
@@ -60,13 +56,20 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION" type="radio" class="btn-group" default="time">
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
+                    </field>
+                    <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" size="3" first="1" last="24" step="1" type="integer" class="form-control" default="2"/>
+                    <field name="maxage_unit" label="PLG_GZIP_FIELD_MAXAGE_UNIT_LABEL" description="PLG_GZIP_FIELD_MAXAGE_UNIT_DESCRIPTION" type="list" default="months">
+                        <option value="hours">JOPTION_MAXAGE_UNIT_HOURS</option>
+                        <option value="months">JOPTION_MAXAGE_UNIT_MONTHS</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Misc" />
+                    <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
                     </field>
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
@@ -78,6 +81,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="cdn_access_control_origin" label="PLG_GZIP_FIELD_CDN_ACCESS_CONTROL_ORIGIN_LABEL" type="text" description="PLG_GZIP_FIELD_CDN_CDN_ACCESS_CONTROL_ORIGIN_DESCRIPTION" default="*" />
                     <field name="cdn_redirect" label="PLG_GZIP_FIELD_CDN_REDIRECT_LABEL" type="text" description="PLG_GZIP_FIELD_CDN_REDIRECT_DESCRIPTION" />
                     <fields name="cdn">
                         <field name="1" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />

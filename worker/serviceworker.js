@@ -25,6 +25,11 @@
 "{IMPORT_SCRIPTS}";
 
 const undef = null; //
+
+/**
+ *
+ * @var {SWType}
+ */
 const SW = Object.create(undef);
 const CACHE_NAME = "{CACHE_NAME}";
 const scope = "{scope}";

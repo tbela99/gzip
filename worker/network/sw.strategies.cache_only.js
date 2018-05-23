@@ -16,4 +16,6 @@
 
 // If a match isn't found in the cache, the response
 // will look like a connection error);
-SW.strategies.add("co", (event) => caches.match(event.request));
+SW.strategies.add("co", (event) =>
+	caches.match(event.request, {cacheName: CACHE_NAME}, "Cache Only")
+);

@@ -30,7 +30,9 @@ class GZipHelper {
     const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
     const regexUrl = '#url\(([^)]+)\)#';
 
-    static $regReduce = '';
+	static $regReduce = '';
+	
+	static $route = '';
 
     // JURI::root(true);
     static $uri = '';
@@ -464,7 +466,7 @@ class GZipHelper {
 
 					            $checkSumData = static::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
 
-					            $file = static::getHost('/media/z/'.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
+					            $file = static::getHost(\JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
 
 					            if (!empty($push_data)) {
 
@@ -579,7 +581,7 @@ class GZipHelper {
 		
         if (static::isFile($name)) {
 
-            if (strpos($name, 'media/z/') !== 0) {
+            if (strpos($name, static::$route) !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 				$accepted = static::accepted();
@@ -588,7 +590,7 @@ class GZipHelper {
 
                     $hashFile = static::getHashMethod();
 
-                    return static::getHost('/media/z/'.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
+                    return static::getHost(\JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
                 }
             }
 
@@ -1678,9 +1680,9 @@ class GZipHelper {
 
                             $fileName = static::getName($file);
 
-                            if (strpos($fileName, 'media/z/') === 0) {
+                            if (strpos($fileName, static::$route) === 0) {
 
-                                $fileName = preg_replace('#^media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
+                                $fileName = preg_replace('#^'.static::$route.'(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
                             }
 
                             $images[] = static::url($fileName);

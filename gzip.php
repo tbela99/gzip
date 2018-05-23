@@ -19,7 +19,8 @@ class PlgSystemGzip extends JPlugin
 {
     protected $options = [];
     protected $worker_id = '';
-    protected $manifest_id = '';
+	protected $manifest_id = '';
+	protected $route = '';
 
     public function onContentPrepareForm(JForm $form, $data) {
 
@@ -192,7 +193,6 @@ class PlgSystemGzip extends JPlugin
             $this->cleanCache();
             $this->updateManifest($options);
             $this->updateServiceWorker($options);
-	        $this->updateOptions($options);
         }
 
         return true;
@@ -204,17 +204,16 @@ class PlgSystemGzip extends JPlugin
 
         if($app->isSite()) {
 
+			$this->route = '7BOCz/'; // \Gzip\GZipHelper::shorten(crc32('plugins/system/gzip/r')).'/';
+
+			\Gzip\GZipHelper::$route = $this->route;
+
             $options = (array) $this->params->get('gzip');
 
 	        if(!empty($options)) {
 
                 $this->options = (array) $options;
 			}
-			
-	        if (!is_file('cache/z/app/config.php')) {
-
-		        $this->updateOptions($options);
-	        }
 
             if (!empty($this->options['cdn'])) {
 
@@ -228,21 +227,8 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'] = array_values(get_object_vars($this->options['cdn']));
 			}
 
-			$domain = !empty($this->options['cdn_redirect']) ? preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn_redirect']) : '';
-
-	        foreach ($this->options['cdn'] as $key => $option) {
-
-				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
-				
-				if ($domain !== '' && preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn'][$key]) == $_SERVER['SERVER_NAME']) {
-
-					header('Location: //'.$domain.$_SERVER['REQUEST_URI'], true, 301);
-					$app->close();
-				}
-	        }
-
 	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
-				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^/?media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
+				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^('.\JURI::root(true).'/)?'.$this->route.'(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
 	        if (!isset($this->options['cdn_types'])) {
 
@@ -275,10 +261,37 @@ class PlgSystemGzip extends JPlugin
 				        }
 			        }
 		        }
+			}
+			
+	        foreach ($this->options['cdn'] as $key => $option) {
+
+				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
 	        }
 
 	        \Gzip\GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
 	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
+
+			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true).'/'.$this->route) === 0) {
+
+				require __DIR__.'/responder.php';
+
+				$app->close();
+			}
+
+			// prevent accessing the domain through the cdn address
+			$domain = !empty($this->options['cdn_redirect']) ? preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn_redirect']) : '';
+
+			if ($domain !== '') {
+					
+				foreach ($this->options['cdn'] as $key => $option) {
+
+					if (preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn'][$key]) == $_SERVER['SERVER_NAME']) {
+
+						header('Location: //'.$domain.$_SERVER['REQUEST_URI'], true, 301);
+						$app->close();
+					}
+				}
+			}
 
             $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
@@ -352,7 +365,7 @@ class PlgSystemGzip extends JPlugin
 
                 if(method_exists($document, 'addHeadLink')) {
 
-                    $document->addHeadLink(JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
+                    $document->addHeadLink(\JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
                 }
 
                 if(!empty($this->options['pwa_app_theme_color'])) {
@@ -554,7 +567,6 @@ class PlgSystemGzip extends JPlugin
 		if ($result && (string) $installer->manifest->name == 'plg_system_gzip') {
 
 			$this->cleanCache();
-			$this->updateOptions((array) $this->params->get('gzip'));
 		}
 	}
 
@@ -665,135 +677,8 @@ class PlgSystemGzip extends JPlugin
         })));
         
         file_put_contents($path.'manifest_version', hash_file('sha1', $path.'manifest.json'));
-    }
-
-    protected function updateOptions($options) {
-
-	    $path = JPATH_SITE.'/cache/z/app/';
-
-	    if(!is_dir($path)) {
-
-		    $old_mask = umask();
-
-		    umask(022);
-		    mkdir($path, 0755, true);
-		    umask($old_mask);
-	    }
-
-        $custom_types = [];
-        
-        if (is_object($options)) {
-
-            $options = get_object_vars($options);
-        }
-
-
-	    if (!empty($options['cdntypes_custom'])) {
-
-		    foreach (explode("\n", $options['cdntypes_custom']) as $option) {
-
-			    $option = trim($option);
-
-			    if ($option !== '') {
-
-				    $option = explode(' ', $option, 2);
-
-				    if (count($option) == 2) {
-
-					    $custom_types[$option[0]] = $option[1];
-				    }
-			    }
-		    }
-	    }
-
-	    $hosts = [];
-
-	    if (!empty($options['cdn'])) {
-
-		    $hosts = is_object($options['cdn']) ? array_unique(array_filter(array_values(get_object_vars($options['cdn'])))) : $options['cdn'];
-
-		    foreach ($hosts as $key => $host) {
-
-	    		$hosts[$key] = preg_replace('#([a-zA-Z]+:)?(//)?([^/]+).*$#', '$3', $host);
-		    }
-
-		    $hosts = array_unique($hosts);
-	    }
-
-	    $types = [];
-
-	    if (isset($options['cdn_types'])) {
-
-	    	foreach ($options['cdn_types'] as $type) {
-
-	    		if (isset(\Gzip\GZipHelper::$accepted[$type])) {
-
-	    			$types[$type] = \Gzip\GZipHelper::$accepted[$type];
-			    }
-		    }
-	    }
-
-	    else {
-
-	    	$types = \Gzip\GZipHelper::$accepted;
-	    }
-
-	    if (!empty($options['cdntypes_custom'])) {
-
-		    foreach (explode("\n", $options['cdntypes_custom']) as $option) {
-
-			    $option = trim($option);
-
-			    if ($option !== '') {
-
-				    $option = explode(' ', $option, 2);
-
-				    if (count($option) == 2) {
-
-					    $types[$option[0]] = $option[1];
-				    }
-			    }
-		    }
-	    }
-
-	    $accepted_types = \Gzip\GZipHelper::$accepted;
-
-	    if (!empty($options['mimetypes_custom'])) {
-
-		    foreach (explode("\n", $options['mimetypes_custom']) as $option) {
-
-			    $option = trim($option);
-
-			    if ($option !== '') {
-
-				    $option = explode(' ', $option, 2);
-
-				    if (count($option) == 2) {
-
-					    $accepted_types[$option[0]] = $option[1];
-				    }
-			    }
-		    }
-	    }
-
-	    $data = [
-
-	    	'cors' => !empty($options['cdn_cors']) || $options['checksum'] != 'none',
-		    'custom_types' => $custom_types,
-		    'eTag' => $options['hashfiles'] == 'content',
-		    'hosts' => array_values($hosts),
-		    'valid_mimetypes' => $accepted_types,
-		    'static_mimetypes' => $types
-	    ];
-
-	    file_put_contents($path.'config.php','<?php defined("JPATH_PLATFORM") or die;'.
-		    "\n\nclass GzipHelperConfig {\n\n".implode(";\n", array_map(function ($key, $value) {
-
-		    	return "\tconst ".strtoupper($key)." = ".var_export($value, true);
-
-		    }, array_keys($data), $data)).";\n".'}');
-    }
-    
+	}
+	
     protected function updateServiceWorker($options) {
 
 	    if (empty($options['pwaenabled'])) {

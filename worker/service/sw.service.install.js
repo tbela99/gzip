@@ -16,6 +16,7 @@ self.addEventListener("install", event => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then(async cache => {
 			await cache.addAll("{preloaded_urls}");
+			await SW.resolve("install");
 			return self.skipWaiting();
 		})
 	);
