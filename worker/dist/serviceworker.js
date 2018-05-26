@@ -3,7 +3,6 @@
  *
  * main service worker file
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -13,7 +12,7 @@
  */
 // @ts-check
 /*  */
-// build 9abe434 2018-05-22 20:55:12-04:00
+// build de97b62 2018-05-26 11:11:21-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -55,6 +54,18 @@ const scope = "{scope}";
  * @method {callback} SW.on
  * @method {callback} SW.off
  * @property Expiration
+ */
+/**
+ * @typedef {RouteHandler}
+ * @property {Router} router
+ * @property {RouterOptions} options
+ *
+ */
+/**
+ * @typedef {RouterOptions}
+ * @property {cacheName} string cache name
+ * @property {number} expiration
+ *
  */
 /**
  *
@@ -132,7 +143,7 @@ const DB = function DB(dbName, key = "id") {
         const methods = {
             count: () => _query("count", true, keyToUse),
             getEntry: keyToUse => _query("get", true, keyToUse),
-            getAll: () => _query("getAll", true),
+            getAll: keyToUse => _query("getAll", true, keyToUse),
             put: entryData => _query("put", false, entryData),
             deleteEntry: keyToUse => _query("delete", false, keyToUse),
             flush: () => _query("clear", false)
@@ -153,7 +164,6 @@ const DB = function DB(dbName, key = "id") {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -321,10 +331,10 @@ const DB = function DB(dbName, key = "id") {
         $events: {},
         $pseudo: {},
         // accept (event, handler)
-        // Example: on('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
+        // Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
         // accept object with events as keys and handlers as values
-        // Example on({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-        on: extendArgs(function(name, fn, sticky) {
+        // Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
+        promisify: extendArgs(function(name, fn, sticky) {
             const self = this;
             if (fn == undef) {
                 return;
@@ -515,7 +525,6 @@ SW.strategies = function() {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -551,7 +560,6 @@ SW.strategies.add("nf", async event => {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -583,7 +591,6 @@ SW.strategies.add("cf", async event => {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -617,7 +624,6 @@ SW.strategies.add("cn", async event => {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -634,7 +640,6 @@ SW.strategies.add("no", event => fetch(event.request), "Network Only");
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -664,6 +669,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
 // @ts-check
 /* global SW, scope, undef */
 (function(SW) {
+    const weakmap = new WeakMap();
     function normalize(method) {
         if (method == undef || method == "HEAD") {
             return "GET";
@@ -671,27 +677,28 @@ SW.strategies.add("co", event => caches.match(event.request, {
         return method.toLowerCase();
     }
     /**
-	 * request router class
+	 * request route class
 	 *
-	 * @property {Object.<string, DefaultRouter[]>} routes
+	 * @property {Object.<string,                                      n                []>} routes
 	 * @property {Object.<string, routerHandle>} defaultHandler
 	 * @method {function} on
 	 * @method {function} off
 	 * @method {function} trigger
 	 *
-	 * @class Router
-	 */    class Router {
+	 * @class Route
+	 */    class Route {
         constructor() {
-            this.routes = Object.create(undef);
+            this.routers = Object.create(undef);
             this.defaultHandler = Object.create(undef);
         }
         /**
 		 * get the handler that matches the request event
 		 *
 		 * @param {FetchEvent} event
-		 */        getHandler(event) {
+		 * @return {RouteHandler}
+		 */        getRouter(event) {
             const method = event != undef && event.request.method || "GET";
-            const routes = this.routes[method] || [];
+            const routes = this.routers[method] || [];
             const j = routes.length;
             let route, i = 0;
             for (;i < j; i++) {
@@ -705,35 +712,39 @@ SW.strategies.add("co", event => caches.match(event.request, {
                         path: route.path,
                         route
                     });
-                    return route.handler;
+                    return route;
                 }
             }
             return this.defaultHandler[method];
         }
         /**
-		 * regeister a handler for an http method
+		 * register a handler for an http method
 		 *
-		 * @param {BaseRouter} router router instance
+		 * @param {Router} router router instance
+		 * @param {RouterOptions} options route options
 		 * @param {string} method http method
-		 */        registerRoute(router, method) {
+		 */        registerRoute(router, options, method) {
             method = normalize(method);
-            if (!(method in this.routes)) {
-                this.routes[method] = [];
+            if (!(method in this.routers)) {
+                this.routers[method] = [];
             }
-            this.routes[method].push(router);
+            if (options != undef) {
+                router.setOptions(options);
+            }
+            this.routers[method].push(router);
             return this;
         }
         /**
 		 * unregister a handler for an http method
 		 *
-		 * @param {BaseRouter} router router instance
+		 * @param {Router} router router instance
 		 * @param {string} method http metho
 		 */        unregisterRoute(router, method) {
             method = normalize(method);
-            const route = this.routes[method] || [];
-            const index = route.indexOf(router);
+            const routers = this.routers[method] || [];
+            const index = routers.indexOf(router);
             if (index != -1) {
-                route.splice(index, 1);
+                routers.splice(index, 1);
             }
             return this;
         }
@@ -741,9 +752,13 @@ SW.strategies.add("co", event => caches.match(event.request, {
 		 * set the default request handler
 		 *
 		 * @param {routerHandle} handler router instance
-		 * @param {string} method http metho
-		 */        setDefaultHandler(handler, method) {
-            this.defaultHandler[normalize(method)] = handler;
+		 * @param {RouterOptions} options router options
+		 * @param {string} method http method
+		 */        setDefaultHandler(handler, options, method) {
+            this.defaultHandler[normalize(method)] = {
+                handler,
+                options
+            };
         }
     }
     /**
@@ -751,46 +766,40 @@ SW.strategies.add("co", event => caches.match(event.request, {
 	 * @property {routerPath} path path used to match requests
 	 * @property {routerHandleObject} handler
 	 * @property {object} options
-	 * @method on
-	 * @method off
-	 * @method trigger
+	 * @method {Router} on
+	 * @method {Router} off
+	 * @method {Router} resolve
 	 *
-	 * @class BaseRouter
-	 */    class BaseRouter {
+	 * @class Router
+	 */    class Router {
         /**
 		 *
 		 * @param {routerPath} path
 		 * @param {routerHandle} handler
-		 * @param {object} options
+		 * @param {RouterOptions} options
 		 */
         constructor(path, handler, options) {
             const self = this;
-            let prop, event, cb;
-            self.options = Object.assign(Object.create(undef), {}, options || {});
-            for (prop in self.options) {
-                if (/^on.+/i.test(prop)) {
-                    event = prop.substr(2);
-                    if (Array.isArray(self.options[prop])) {
-                        for (cb of self.options[prop]) {
-                            self.on(event, cb);
-                        }
-                    } else {
-                        self.on(event, self.options[prop]);
-                    }
-                }
-            }
-            SW.Utils.reset(this);
+            SW.Utils.reset(self);
+            self.options = Object.assign(Object.create({
+                plugins: []
+            }), options || {});
             self.path = path;
             self.strategy = handler.name;
             self.handler = {
                 handle: async event => {
                     // before route
-                    let result = await self.resolve("beforeroute", event);
+                    let result;
                     let response, res;
-                    for (response of result) {
-                        if (response != undef && response instanceof Response) {
-                            return response;
+                    try {
+                        result = await self.resolve("beforeroute", event);
+                        for (response of result) {
+                            if (response != undef && response instanceof Response) {
+                                return response;
+                            }
                         }
+                    } catch (e) {
+                        console.error("😭", error);
                     }
                     response = await handler.handle(event);
                     result = await self.resolve("afterroute", event, response);
@@ -802,16 +811,16 @@ SW.strategies.add("co", event => caches.match(event.request, {
                     return response;
                 }
             };
-            /**/        }
+        }
     }
-    SW.Utils.merge(true, BaseRouter.prototype, SW.PromiseEvent);
+    SW.Utils.merge(true, Router.prototype, SW.PromiseEvent);
     /**
 	 *
 	 *
 	 * @class RegExpRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
-	 */    class RegExpRouter extends BaseRouter {
+	 */    class RegExpRouter extends Router {
         /**
 		 *
 		 * @param {FetchEvent} event
@@ -824,9 +833,9 @@ SW.strategies.add("co", event => caches.match(event.request, {
     /**
 	 * @property {URL} url
 	 * @class ExpressRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
-	 */    class ExpressRouter extends BaseRouter {
+	 */    class ExpressRouter extends Router {
         /**
 		 * @inheritdoc
 		 */
@@ -853,9 +862,9 @@ SW.strategies.add("co", event => caches.match(event.request, {
     /**
 	 *
 	 * @class CallbackRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
-	 */    class CallbackRouter extends BaseRouter {
+	 */    class CallbackRouter extends Router {
         /**
 		 *
 		 * @param {FetchEvent} event
@@ -864,12 +873,11 @@ SW.strategies.add("co", event => caches.match(event.request, {
             return this.path(event.request.url, event);
         }
     }
-    const router = new Router();
     Router.RegExpRouter = RegExpRouter;
     Router.ExpressRouter = ExpressRouter;
     Router.CallbackRouter = CallbackRouter;
     SW.Router = Router;
-    SW.router = router;
+    SW.route = new Route();
 })(SW);
 
 /**
@@ -877,7 +885,6 @@ SW.strategies.add("co", event => caches.match(event.request, {
  * main service worker file
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -901,7 +908,7 @@ const strategies = SW.strategies;
 
 const Router = SW.Router;
 
-const router = SW.router;
+const route = SW.route;
 
 let entry;
 
@@ -909,17 +916,17 @@ let defaultStrategy = "{defaultStrategy}";
 
 // excluded urls fallback on network only
 for (entry of "{exclude_urls}") {
-    router.registerRoute(new Router.RegExpRouter(new RegExp(entry), strategies.get("no")));
+    route.registerRoute(new Router.RegExpRouter(new RegExp(entry), strategies.get("no")));
 }
 
 // excluded urls fallback on network only
 for (entry of "{network_strategies}") {
-    router.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0])));
+    route.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0])));
 }
 
 // register strategies routers
 for (entry of strategies) {
-    router.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
+    route.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
 }
 
 if (!strategies.has(defaultStrategy)) {
@@ -927,7 +934,7 @@ if (!strategies.has(defaultStrategy)) {
     defaultStrategy = "no";
 }
 
-router.setDefaultHandler(strategies.get(defaultStrategy));
+route.setDefaultHandler(strategies.get(defaultStrategy));
 
 //let x;
 //for (x of SW.strategies) {
@@ -936,7 +943,6 @@ router.setDefaultHandler(strategies.get(defaultStrategy));
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -957,7 +963,6 @@ self.addEventListener("install", event => {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -986,7 +991,6 @@ self.addEventListener("activate", event => {
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -1000,9 +1004,9 @@ self.addEventListener("activate", event => {
  * @param {FetchEvent} event
  */
 self.addEventListener("fetch", event => {
-    const handler = SW.router.getHandler(event);
-    if (handler != undef) {
-        event.respondWith(handler.handle(event).catch(error => {
+    const router = SW.route.getRouter(event);
+    if (router != undef) {
+        event.respondWith(router.handler.handle(event).catch(error => {
             console.error("😭", error);
             return fetch(event.request);
         }));

@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -30,9 +29,9 @@ SW.strategies.add(
 				SW.strategies.isCacheableRequest(event.request, networkResponse)
 			) {
 				const cloned = networkResponse.clone();
-				caches.open(CACHE_NAME).then(function(cache) {
-					cache.put(event.request, cloned);
-				});
+				caches
+					.open(CACHE_NAME)
+					.then(cache => cache.put(event.request, cloned));
 			}
 
 			return networkResponse;

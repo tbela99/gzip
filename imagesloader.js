@@ -3,7 +3,6 @@
 /**
  * lazy image laoder
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -22,29 +21,33 @@ LIB.ready(function(undef) {
 					oldImage.srcset = oldImage.dataset.srcset;
 				}
 
-			//	const svg = atob(oldImage.src.split('base64,', 2)[1]);
+				//	const svg = atob(oldImage.src.split('base64,', 2)[1]);
 
-                oldImage.insertAdjacentHTML('beforebegin', '<span style="position:relative;display:inline-block"><span style="transition:opacity .2s ease-out;background:#fff;display:block;position:absolute;width:100%;height:100%;left:0;top:0"><span style="display:block;width:100%;height:100%;background:url(\'' + oldImage.src + '\') 0 0 / cover no-repeat">');
+				oldImage.insertAdjacentHTML(
+					"beforebegin",
+					'<span style="position:relative;display:inline-block"><span style="transition:opacity .2s ease-out;background:#fff;display:block;position:absolute;width:100%;height:100%;left:0;top:0"><span style="display:block;width:100%;height:100%;background:url(\'' +
+						oldImage.src +
+						"') 0 0 / cover no-repeat\">"
+				);
 
-
-                const container = oldImage.previousElementSibling;
+				const container = oldImage.previousElementSibling;
 				oldImage.src = img.src;
-			//	img.src = svg;
+				//	img.src = svg;
 
-                container.insertBefore(oldImage, container.firstElementChild);
+				container.insertBefore(oldImage, container.firstElementChild);
 
-                setTimeout(function () {
+				setTimeout(function() {
+					oldImage.nextElementSibling.style.opacity = 0;
 
-                    oldImage.nextElementSibling.style.opacity = 0;
-
-                    setTimeout(function () {
-
-                    	container.parentElement.insertBefore(oldImage, container);
-                    	container.parentElement.removeChild(container);
+					setTimeout(function() {
+						container.parentElement.insertBefore(
+							oldImage,
+							container
+						);
+						container.parentElement.removeChild(container);
 					}, 250);
-
 				}, 500);
-              //  oldImage.nextElementSibling.style = ' ';
+				//  oldImage.nextElementSibling.style = ' ';
 			},
 			complete: function() {
 				observer = null;
@@ -58,7 +61,6 @@ LIB.ready(function(undef) {
 			"IntersectionObserverEntry" in window &&
 			"intersectionRatio" in window.IntersectionObserverEntry.prototype
 		)
-
 	) {
 		const script = document.createElement("script");
 		script.onload = lazyload;
@@ -66,20 +68,19 @@ LIB.ready(function(undef) {
 		script.async = true;
 		script.src = "{script-src}";
 		document.body.appendChild(script);
-	}
+	} else {
+		if (!("isIntersecting" in window.IntersectionObserverEntry.prototype)) {
+			Object.defineProperty(
+				window.IntersectionObserverEntry.prototype,
+				"isIntersecting",
+				{
+					get: function() {
+						return this.intersectionRatio > 0;
+					}
+				}
+			);
+		}
 
-	else {
-
-        if (!("isIntersecting" in window.IntersectionObserverEntry.prototype)) {
-
-            Object.defineProperty(window.IntersectionObserverEntry.prototype,
-                'isIntersecting', {
-                    get: function () {
-                        return this.intersectionRatio > 0;
-                    }
-                });
-        }
-
-        lazyload();
+		lazyload();
 	}
 });

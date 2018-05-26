@@ -27,11 +27,10 @@
 		$events: {},
 		$pseudo: {},
 		// accept (event, handler)
-		// Example: on('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
+		// Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
 		// accept object with events as keys and handlers as values
-		// Example on({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-
-		on: extendArgs(function(name, fn, sticky) {
+		// Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
+		promisify: extendArgs(function(name, fn, sticky) {
 			const self = this;
 
 			if (fn == undef) {

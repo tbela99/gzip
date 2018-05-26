@@ -13,6 +13,8 @@
 /* global SW, scope, undef */
 
 (function(SW) {
+	const weakmap = new WeakMap();
+
 	function normalize(method) {
 		if (method == undef || method == "HEAD") {
 			return "GET";
@@ -22,19 +24,19 @@
 	}
 
 	/**
-	 * request router class
+	 * request route class
 	 *
-	 * @property {Object.<string, DefaultRouter[]>} routes
+	 * @property {Object.<string,                                      n                []>} routes
 	 * @property {Object.<string, routerHandle>} defaultHandler
 	 * @method {function} on
 	 * @method {function} off
 	 * @method {function} trigger
 	 *
-	 * @class Router
+	 * @class Route
 	 */
-	class Router {
+	class Route {
 		constructor() {
-			this.routes = Object.create(undef);
+			this.routers = Object.create(undef);
 			this.defaultHandler = Object.create(undef);
 		}
 
@@ -42,10 +44,11 @@
 		 * get the handler that matches the request event
 		 *
 		 * @param {FetchEvent} event
+		 * @return {RouteHandler}
 		 */
-		getHandler(event) {
+		getRouter(event) {
 			const method = (event != undef && event.request.method) || "GET";
-			const routes = this.routes[method] || [];
+			const routes = this.routers[method] || [];
 			const j = routes.length;
 			let route,
 				i = 0;
@@ -62,7 +65,7 @@
 						path: route.path,
 						route
 					});
-					return route.handler;
+					return route;
 				}
 			}
 
@@ -70,19 +73,24 @@
 		}
 
 		/**
-		 * regeister a handler for an http method
+		 * register a handler for an http method
 		 *
-		 * @param {BaseRouter} router router instance
+		 * @param {Router} router router instance
+		 * @param {RouterOptions} options route options
 		 * @param {string} method http method
 		 */
-		registerRoute(router, method) {
+		registerRoute(router, options, method) {
 			method = normalize(method);
 
-			if (!(method in this.routes)) {
-				this.routes[method] = [];
+			if (!(method in this.routers)) {
+				this.routers[method] = [];
 			}
 
-			this.routes[method].push(router);
+			if (options != undef) {
+				router.setOptions(options);
+			}
+
+			this.routers[method].push(router);
 
 			return this;
 		}
@@ -90,18 +98,18 @@
 		/**
 		 * unregister a handler for an http method
 		 *
-		 * @param {BaseRouter} router router instance
+		 * @param {Router} router router instance
 		 * @param {string} method http metho
 		 */
 		unregisterRoute(router, method) {
 			method = normalize(method);
 
-			const route = this.routes[method] || [];
+			const routers = this.routers[method] || [];
 
-			const index = route.indexOf(router);
+			const index = routers.indexOf(router);
 
 			if (index != -1) {
-				route.splice(index, 1);
+				routers.splice(index, 1);
 			}
 
 			return this;
@@ -111,10 +119,11 @@
 		 * set the default request handler
 		 *
 		 * @param {routerHandle} handler router instance
-		 * @param {string} method http metho
+		 * @param {RouterOptions} options router options
+		 * @param {string} method http method
 		 */
-		setDefaultHandler(handler, method) {
-			this.defaultHandler[normalize(method)] = handler;
+		setDefaultHandler(handler, options, method) {
+			this.defaultHandler[normalize(method)] = {handler, options};
 		}
 	}
 
@@ -123,57 +132,50 @@
 	 * @property {routerPath} path path used to match requests
 	 * @property {routerHandleObject} handler
 	 * @property {object} options
-	 * @method on
-	 * @method off
-	 * @method trigger
+	 * @method {Router} on
+	 * @method {Router} off
+	 * @method {Router} resolve
 	 *
-	 * @class BaseRouter
+	 * @class Router
 	 */
-	class BaseRouter {
+	class Router {
 		/**
 		 *
 		 * @param {routerPath} path
 		 * @param {routerHandle} handler
-		 * @param {object} options
+		 * @param {RouterOptions} options
 		 */
 		constructor(path, handler, options) {
 			const self = this;
-			let prop, event, cb;
+
+			SW.Utils.reset(self);
 
 			self.options = Object.assign(
-				Object.create(undef),
-				{},
+				Object.create({plugins: []}),
 				options || {}
 			);
-
-			for (prop in self.options) {
-				if (/^on.+/i.test(prop)) {
-					event = prop.substr(2);
-
-					if (Array.isArray(self.options[prop])) {
-						for (cb of self.options[prop]) {
-							self.on(event, cb);
-						}
-					} else {
-						self.on(event, self.options[prop]);
-					}
-				}
-			}
-
-			SW.Utils.reset(this);
 
 			self.path = path;
 			self.strategy = handler.name;
 			self.handler = {
 				handle: async event => {
 					// before route
-					let result = await self.resolve("beforeroute", event);
+					let result;
 					let response, res;
 
-					for (response of result) {
-						if (response != undef && response instanceof Response) {
-							return response;
+					try {
+						result = await self.resolve("beforeroute", event);
+
+						for (response of result) {
+							if (
+								response != undef &&
+								response instanceof Response
+							) {
+								return response;
+							}
 						}
+					} catch (e) {
+						console.error("😭", error);
 					}
 
 					response = await handler.handle(event);
@@ -184,25 +186,22 @@
 							return res;
 						}
 					}
-
 					return response;
 				}
 			};
-
-			/**/
 		}
 	}
 
-	SW.Utils.merge(true, BaseRouter.prototype, SW.PromiseEvent);
+	SW.Utils.merge(true, Router.prototype, SW.PromiseEvent);
 
 	/**
 	 *
 	 *
 	 * @class RegExpRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
 	 */
-	class RegExpRouter extends BaseRouter {
+	class RegExpRouter extends Router {
 		/**
 		 *
 		 * @param {FetchEvent} event
@@ -216,10 +215,10 @@
 	/**
 	 * @property {URL} url
 	 * @class ExpressRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
 	 */
-	class ExpressRouter extends BaseRouter {
+	class ExpressRouter extends Router {
 		/**
 		 * @inheritdoc
 		 */
@@ -254,10 +253,10 @@
 	/**
 	 *
 	 * @class CallbackRouter
-	 * @extends BaseRouter
+	 * @extends Router
 	 * @inheritdoc
 	 */
-	class CallbackRouter extends BaseRouter {
+	class CallbackRouter extends Router {
 		/**
 		 *
 		 * @param {FetchEvent} event
@@ -267,12 +266,10 @@
 		}
 	}
 
-	const router = new Router();
-
 	Router.RegExpRouter = RegExpRouter;
 	Router.ExpressRouter = ExpressRouter;
 	Router.CallbackRouter = CallbackRouter;
 
 	SW.Router = Router;
-	SW.router = router;
+	SW.route = new Route();
 })(SW);

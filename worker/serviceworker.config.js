@@ -3,7 +3,6 @@
  * main service worker file
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -29,21 +28,21 @@
 
 const strategies = SW.strategies;
 const Router = SW.Router;
-const router = SW.router;
+const route = SW.route;
 let entry;
 
 let defaultStrategy = "{defaultStrategy}";
 
 // excluded urls fallback on network only
 for (entry of "{exclude_urls}") {
-	router.registerRoute(
+	route.registerRoute(
 		new Router.RegExpRouter(new RegExp(entry), strategies.get("no"))
 	);
 }
 
 // excluded urls fallback on network only
 for (entry of "{network_strategies}") {
-	router.registerRoute(
+	route.registerRoute(
 		new Router.RegExpRouter(
 			new RegExp(entry[1], "i"),
 			strategies.get(entry[0])
@@ -53,7 +52,7 @@ for (entry of "{network_strategies}") {
 
 // register strategies routers
 for (entry of strategies) {
-	router.registerRoute(
+	route.registerRoute(
 		new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1])
 	);
 }
@@ -63,7 +62,7 @@ if (!strategies.has(defaultStrategy)) {
 	defaultStrategy = "no";
 }
 
-router.setDefaultHandler(strategies.get(defaultStrategy));
+route.setDefaultHandler(strategies.get(defaultStrategy));
 
 //let x;
 

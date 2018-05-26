@@ -9,6 +9,7 @@
 1.  Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1.  Clear Joomla cache when settings are updated
 1.  Fetch remote resources periodically (configurable) (css and javascript). This can be usefull for anaytic scripts and and hosted fonts.
+1.  Web push notifications with firebase
 1.  Use blurry image preview as an alternative to SVG
 1.  prerender images using primitive.js svg generation https://github.com/ondras/primitive.js/blob/master/js/app.js
 1.  prerender + [Page Visibility API](http://www.w3.org/TR/page-visibility/): how should prender links be chosen?

@@ -189,13 +189,10 @@ if (!ini_get('zlib.output_compression')) {
 	$dt = new DateTime();
 
 	$now = $dt->getTimestamp();
-	$dt->modify('+2months');
+	$dt->modify('+'.$this->params->get('gzip.maxage', 2).$this->params->get('gzip.maxage_unit', 'months'));
 
 	header('Accept-Ranges: bytes');
 	header('Cache-Control: public, max-age='.($dt->getTimestamp() - $now).', immutable');
-
-	// redundant since we have max-age -> https://www.fastly.com/blog/headers-we-dont-want
-	//	header('Expires: ' . gmdate('D, d M Y H:i:s T', $dt->getTimestamp()));
 
 	if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
 
