@@ -1,0 +1,20 @@
+.pwa-app-install {
+  position: fixed;
+  left: 0;
+  width: 100%;
+}
+.pwa-app-install.pwa-app-install-top {
+  top: 0;
+}
+.pwa-app-install.pwa-app-install-bottom {
+  bottom: 0;
+}
+.pwa-app-install .alert {
+  margin-bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 0;
+  border-radius: 0;
+}
+.pwa-app-install .alert .alert-body {
+  width: auto;
+}
