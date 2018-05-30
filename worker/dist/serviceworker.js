@@ -12,7 +12,7 @@
  */
 // @ts-check
 /*  */
-// build de97b62 2018-05-26 11:11:21-04:00
+// build 8e09251 2018-05-29 23:19:31-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -30,6 +30,8 @@ const undef = null;
  */ const SW = Object.create(undef);
 
 const CACHE_NAME = "{CACHE_NAME}";
+
+const CRY = "😭";
 
 const scope = "{scope}";
 
@@ -79,87 +81,10 @@ const scope = "{scope}";
  * @property {routerHandle} handler.handle
  */
 /**
- * @typedef {RegExp|string} routerPath
+ * @typedef {RegExp|string|URL} routerPath
  */
 // force uglifyjs to include this file content
 if (false) {}
-
-/* LICENSE: MIT LICENSE | https://github.com/msandrini/minimal-indexed-db */
-/* global window */
-/**
- * @typedef DBType
- * @callback count
- * @callback getEntry
- * @callback getAll
- * @callback put
- * @callback deleteEntry
- * @callback flush
- * @callback then
- * @callback catch
- */
-/**
- *
- * @var {DBType}
- * */
-const DB = function DB(dbName, key = "id") {
-    return new Promise((resolve, reject) => {
-        const openDBRequest = window.indexedDB.open(dbName, 1);
-        const storeName = `${dbName}_store`;
-        let db;
-        const _upgrade = () => {
-            db = openDBRequest.result;
-            db.createObjectStore(storeName, {
-                keyPath: key
-            });
-        };
-        const _query = (method, readOnly, param = null) => new Promise((resolveQuery, rejectQuery) => {
-            const permission = readOnly ? "readonly" : "readwrite";
-            if (db.objectStoreNames.contains(storeName)) {
-                const transaction = db.transaction(storeName, permission);
-                const store = transaction.objectStore(storeName);
-                const isMultiplePut = method === "put" && param && typeof param.length !== "undefined";
-                let listener;
-                if (isMultiplePut) {
-                    listener = transaction;
-                    param.forEach(entry => {
-                        store.put(entry);
-                    });
-                } else {
-                    listener = store[method](param);
-                }
-                listener.oncomplete = (event => {
-                    resolveQuery(event.target.result);
-                });
-                listener.onsuccess = (event => {
-                    resolveQuery(event.target.result);
-                });
-                listener.onerror = (event => {
-                    rejectQuery(event);
-                });
-            } else {
-                rejectQuery(new Error("Store not found"));
-            }
-        });
-        const methods = {
-            count: () => _query("count", true, keyToUse),
-            getEntry: keyToUse => _query("get", true, keyToUse),
-            getAll: keyToUse => _query("getAll", true, keyToUse),
-            put: entryData => _query("put", false, entryData),
-            deleteEntry: keyToUse => _query("delete", false, keyToUse),
-            flush: () => _query("clear", false)
-        };
-        const _successOnBuild = () => {
-            db = openDBRequest.result;
-            resolve(methods);
-        };
-        const _errorOnBuild = e => {
-            reject(new Error(e));
-        };
-        openDBRequest.onupgradeneeded = _upgrade.bind(this);
-        openDBRequest.onsuccess = _successOnBuild.bind(this);
-        openDBRequest.onerror = _errorOnBuild.bind(this);
-    });
-};
 
 /**
  *
@@ -334,7 +259,7 @@ const DB = function DB(dbName, key = "id") {
         // Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
         // accept object with events as keys and handlers as values
         // Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-        promisify: extendArgs(function(name, fn, sticky) {
+        on: extendArgs(function(name, fn, sticky) {
             const self = this;
             if (fn == undef) {
                 return;
@@ -545,9 +470,7 @@ SW.strategies.add("nf", async event => {
         }
         if (SW.strategies.isCacheableRequest(event.request, response)) {
             const cloned = response.clone();
-            caches.open(CACHE_NAME).then(function(cache) {
-                cache.put(event.request, cloned);
-            });
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
         }
         return response;
         //	})
@@ -581,9 +504,7 @@ SW.strategies.add("cf", async event => {
     response = await fetch(event.request);
     if (SW.strategies.isCacheableRequest(event.request, response)) {
         const cloned = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, cloned);
-        });
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
     }
     return response;
 }, "Cache fallback to Network");
@@ -611,9 +532,7 @@ SW.strategies.add("cn", async event => {
         // validate response before
         if (SW.strategies.isCacheableRequest(event.request, networkResponse)) {
             const cloned = networkResponse.clone();
-            caches.open(CACHE_NAME).then(function(cache) {
-                cache.put(event.request, cloned);
-            });
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
         }
         return networkResponse;
     });
@@ -670,17 +589,17 @@ SW.strategies.add("co", event => caches.match(event.request, {
 /* global SW, scope, undef */
 (function(SW) {
     const weakmap = new WeakMap();
-    function normalize(method) {
+    function normalize(method = "GET") {
         if (method == undef || method == "HEAD") {
             return "GET";
         }
-        return method.toLowerCase();
+        return method.toUpperCase();
     }
     /**
 	 * request route class
 	 *
-	 * @property {Object.<string,                                      n                []>} routes
-	 * @property {Object.<string, routerHandle>} defaultHandler
+	 * @property {Object.<string, Router[]>} routes
+	 * @property {Object.<string, routerHandle>} defaultRouter
 	 * @method {function} on
 	 * @method {function} off
 	 * @method {function} trigger
@@ -689,7 +608,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
 	 */    class Route {
         constructor() {
             this.routers = Object.create(undef);
-            this.defaultHandler = Object.create(undef);
+            this.defaultRouter = Object.create(undef);
         }
         /**
 		 * get the handler that matches the request event
@@ -715,21 +634,24 @@ SW.strategies.add("co", event => caches.match(event.request, {
                     return route;
                 }
             }
-            return this.defaultHandler[method];
+            return this.defaultRouter[method];
         }
         /**
 		 * register a handler for an http method
 		 *
 		 * @param {Router} router router instance
-		 * @param {RouterOptions} options route options
 		 * @param {string} method http method
-		 */        registerRoute(router, options, method) {
+		 */        registerRoute(router, method = "GET") {
+            console.log({
+                router,
+                normalized: normalize(method)
+            });
             method = normalize(method);
+            console.log({
+                router
+            });
             if (!(method in this.routers)) {
                 this.routers[method] = [];
-            }
-            if (options != undef) {
-                router.setOptions(options);
             }
             this.routers[method].push(router);
             return this;
@@ -738,7 +660,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
 		 * unregister a handler for an http method
 		 *
 		 * @param {Router} router router instance
-		 * @param {string} method http metho
+		 * @param {string} method http method
 		 */        unregisterRoute(router, method) {
             method = normalize(method);
             const routers = this.routers[method] || [];
@@ -751,14 +673,10 @@ SW.strategies.add("co", event => caches.match(event.request, {
         /**
 		 * set the default request handler
 		 *
-		 * @param {routerHandle} handler router instance
-		 * @param {RouterOptions} options router options
+		 * @param {Router} router
 		 * @param {string} method http method
-		 */        setDefaultHandler(handler, options, method) {
-            this.defaultHandler[normalize(method)] = {
-                handler,
-                options
-            };
+		 */        setDefaultRouter(router, method) {
+            this.defaultRouter[normalize(method)] = router;
         }
     }
     /**
@@ -790,21 +708,27 @@ SW.strategies.add("co", event => caches.match(event.request, {
                 handle: async event => {
                     // before route
                     let result;
-                    let response, res;
+                    let response, res, plugin;
                     try {
+                        for (plugin of self.options.plugins) {
+                            plugin.precheck(event);
+                        }
                         result = await self.resolve("beforeroute", event);
                         for (response of result) {
-                            if (response != undef && response instanceof Response) {
+                            if (response instanceof Response) {
                                 return response;
                             }
                         }
                     } catch (e) {
-                        console.error("😭", error);
+                        console.error(CRY, error);
                     }
                     response = await handler.handle(event);
                     result = await self.resolve("afterroute", event, response);
                     for (res of result) {
-                        if (res != undef && res instanceof Response) {
+                        if (res instanceof Response) {
+                            for (plugin of self.options.plugins) {
+                                plugin.postcheck(event, res);
+                            }
                             return res;
                         }
                     }
@@ -841,7 +765,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
 		 */
         /**
 		 * Creates an instance of ExpressRouter.
-		 * @param  {RegExp} path
+		 * @param  {string} path
 		 * @param  {routerHandle} handler
 		 * @param  {object} options
 		 * @memberof ExpressRouter
@@ -880,6 +804,149 @@ SW.strategies.add("co", event => caches.match(event.request, {
     SW.route = new Route();
 })(SW);
 
+/* LICENSE: MIT LICENSE | https://github.com/msandrini/minimal-indexed-db */
+/* global window */
+/**
+ * @typedef DBType
+ * @callback count
+ * @callback getEntry
+ * @callback getAll
+ * @callback put
+ * @callback deleteEntry
+ * @callback flush
+ * @callback then
+ * @callback catch
+ */
+/**
+ *
+ * @var {DBType}
+ * */
+const DB = function DB(dbName, key = "id") {
+    return new Promise((resolve, reject) => {
+        const openDBRequest = indexedDB.open(dbName, 1);
+        const storeName = `${dbName}_store`;
+        let db;
+        const _upgrade = () => {
+            db = openDBRequest.result;
+            db.createObjectStore(storeName, {
+                keyPath: key
+            });
+        };
+        const _query = (method, readOnly, param = null) => new Promise((resolveQuery, rejectQuery) => {
+            const permission = readOnly ? "readonly" : "readwrite";
+            if (db.objectStoreNames.contains(storeName)) {
+                const transaction = db.transaction(storeName, permission);
+                const store = transaction.objectStore(storeName);
+                const isMultiplePut = method === "put" && param && typeof param.length !== "undefined";
+                let listener;
+                if (isMultiplePut) {
+                    listener = transaction;
+                    param.forEach(entry => {
+                        store.put(entry);
+                    });
+                } else {
+                    listener = store[method](param);
+                }
+                listener.oncomplete = (event => {
+                    resolveQuery(event.target.result);
+                });
+                listener.onsuccess = (event => {
+                    resolveQuery(event.target.result);
+                });
+                listener.onerror = (event => {
+                    rejectQuery(event);
+                });
+            } else {
+                rejectQuery(new Error("Store not found"));
+            }
+        });
+        const methods = {
+            count: () => _query("count", true, keyToUse),
+            getEntry: keyToUse => _query("get", true, keyToUse),
+            getAll: keyToUse => _query("getAll", true, keyToUse),
+            put: entryData => _query("put", false, entryData),
+            deleteEntry: keyToUse => _query("delete", false, keyToUse),
+            flush: () => _query("clear", false)
+        };
+        const _successOnBuild = () => {
+            db = openDBRequest.result;
+            resolve(methods);
+        };
+        const _errorOnBuild = e => {
+            reject(new Error(e));
+        };
+        openDBRequest.onupgradeneeded = _upgrade.bind(this);
+        openDBRequest.onsuccess = _successOnBuild.bind(this);
+        openDBRequest.onerror = _errorOnBuild.bind(this);
+    });
+};
+
+/* global SW, CACHE_NAME */
+/**
+ *
+ * @package     GZip Plugin
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+/**
+ * - url
+ * - method
+ * - timestamp ((getHeader(Date) || Date.now()) + maxAge)
+ **/
+/** global undef */
+// @ts-check
+SW.expiration = function() {
+    const expiration = Object.create(undef);
+    /**
+	 * @property {DBType} db
+	 * @class CacheExpiration
+	 */    class CacheExpiration {
+        constructor(options) {
+            //cacheName = "gzip_sw_worker_expiration_cache_private",
+            //	limit = 0,
+            //	maxAge = 0
+            const self = this;
+            this.limit = +options.limit || 0;
+            this.maxAge = +options.maxAge || 0;
+            DB(options.cacheName || "gzip_sw_worker_expiration_cache_private", "url").then(db => self.db = db instanceof Error ? undef : db);
+        }
+        async precheck(event) {
+            try {
+                if (this.db == undef) {
+                    return true;
+                }
+                const entries = await this.db.getAll(event.request.url);
+                const response = await caches.open(CACHE_NAME).then(cache => cache.match(event.request));
+                console.log({
+                    entries,
+                    response
+                });
+            } catch (e) {
+                console.error(CRY, e);
+            }
+            // todo ->delete expired
+            // todo -> delete if count > limit
+                        return true;
+            //	return (
+            //		entries == undef || Date.now() - entry.timestamp < this.maxAge
+            //	);
+                }
+        async postcheck(event) {
+            return this.db.put({
+                url: event.request.url,
+                method: event.request.method,
+                timestamp: Date.now() + this.maxAge
+            });
+        }
+    }
+    expiration.CacheExpiration = CacheExpiration;
+    return expiration;
+}();
+
 /**
  *
  * main service worker file
@@ -894,7 +961,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
  */
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* global SW, scope */
+/* global SW, scope, undef */
 /** @var {string} scope */
 /** @var {SWType} SW */
 "use strict;";
@@ -910,7 +977,11 @@ const Router = SW.Router;
 
 const route = SW.route;
 
+const cacheExpiryStrategy = "{cacheExpiryStrategy}";
+
 let entry;
+
+let option;
 
 let defaultStrategy = "{defaultStrategy}";
 
@@ -921,12 +992,16 @@ for (entry of "{exclude_urls}") {
 
 // excluded urls fallback on network only
 for (entry of "{network_strategies}") {
-    route.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0])));
+    option = entry[2] || cacheExpiryStrategy;
+    //	console.log({option});
+        route.registerRoute(new Router.RegExpRouter(new RegExp(entry[1], "i"), strategies.get(entry[0]), option == undef ? option : {
+        plugins: [ new SW.expiration.CacheExpiration(option) ]
+    }));
 }
 
 // register strategies routers
 for (entry of strategies) {
-    route.registerRoute(new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1]));
+    route.registerRoute(new Router.ExpressRouter(scope + "{ROUTE}/media/z/" + entry[0] + "/", entry[1]));
 }
 
 if (!strategies.has(defaultStrategy)) {
@@ -934,12 +1009,8 @@ if (!strategies.has(defaultStrategy)) {
     defaultStrategy = "no";
 }
 
-route.setDefaultHandler(strategies.get(defaultStrategy));
+route.setDefaultRouter(new Router.ExpressRouter("/", strategies.get(defaultStrategy)));
 
-//let x;
-//for (x of SW.strategies) {
-//	console.log(x);
-//}
 /**
  *
  * @package     GZip Plugin
@@ -999,15 +1070,18 @@ self.addEventListener("activate", event => {
  * @license     MIT License
  */
 // @ts-check
-/* global CACHE_NAME */
+/* global CACHE_NAME, CRY */
 /**
  * @param {FetchEvent} event
  */
 self.addEventListener("fetch", event => {
     const router = SW.route.getRouter(event);
+    console.log({
+        router
+    });
     if (router != undef) {
         event.respondWith(router.handler.handle(event).catch(error => {
-            console.error("😭", error);
+            console.error(CRY, error);
             return fetch(event.request);
         }));
     }

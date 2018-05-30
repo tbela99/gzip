@@ -204,7 +204,7 @@ class PlgSystemGzip extends JPlugin
 
         if($app->isSite()) {
 
-			$this->route = '7BOCz/'; // \Gzip\GZipHelper::shorten(crc32('plugins/system/gzip/r')).'/';
+			$this->route = $this->params->get('gzip.cache_key', '7BOCz').'/'; // \Gzip\GZipHelper::shorten(crc32('plugins/system/gzip/r')).'/';
 
 			\Gzip\GZipHelper::$route = $this->route;
 
@@ -709,18 +709,34 @@ class PlgSystemGzip extends JPlugin
         if(!empty($onesignal['enabled'])) {
 
 			// one signal is blocked by adblockers and this kills the service worker. we need to catch the error here
-            $import_scripts .= 'try {importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")}catch(e){console.error("😭", e)}';
+            $import_scripts .= 'try{importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")}catch(e){console.error("cannot load OneSignalSDK.js 😭",e)}';
 		}
+
 		
+		$cache_duration = !empty($options['pwa_cache_default']) ? $options['pwa_cache_default'] : $this->params->get('gzip.maxage', '2months');
+
+		
+		$cacheExpiryStrategy = [
+
+			'cacheName' => 'gzip_sw_worker_expiration_cache_default_private',
+			'maxAge' => $cache_duration,
+			'limit' => +$this->params->get('gzip.http_cache_limit', '0')
+		];
+
 		// additional routing startegies
 		$strategies = [];
 
 		foreach ($options['pwa_network_strategies'] as $key => $value) {
 
 			// use default settings
-			if (empty($value)) {
+			if (empty($value) && empty($options['pwa_cache'][$key])) {
 
 				continue;
+			}
+
+			if (is_null($value)) {
+
+				$value = $options['pwa_network_strategy'];
 			}
 
 			if ($value == 'un') {
@@ -728,27 +744,57 @@ class PlgSystemGzip extends JPlugin
 				$value = 'no';
 			}
 
+			$strategies[$key]['network'] = [];
+
 			foreach (GZip\GZipHelper::$accepted as $ext => $mime_type) {
 
 				if ($ext == $key || strpos($mime_type, $key) !== false) {
 
-					$strategies[$value][] = $ext;
+					$strategies[$key]['network'][] = $ext;
 				}
 			}
+
+			if (empty($strategies[$key]['network'])) {
+
+				unset($strategies[$key]);
+
+				continue;
+			}
+
+			// fallback to default pwa cache settings if not set
+			$cache_duration = empty($options['pwa_cache'][$key]) ? $options['pwa_cache_default'] : $options['pwa_cache'][$key];
+
+			if (empty($cache_duration)) {
+
+				// fallback to the default http cache settings if none set
+				$cache_duration = $this->params->get('gzip.maxage', '2months');
+			}
+
+			$dt = new DateTime();
+
+			$now = $dt->getTimestamp();
+			$dt->modify($cache_duration);
+
+			$strategies[$key]['value'] = $value;
+			$strategies[$key]['cache'] = $dt->getTimestamp() - $now;
+			$strategies[$key]['key'] = $key;
 		}
 
         $hash = hash('sha1', json_encode($options).file_get_contents(__DIR__.'/worker_version'));
 
-        $search = ['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
+        $search = ['{CACHE_NAME}', '{ROUTE}','"{cacheExpiryStrategy}"', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
         $replace = [
-			'v_'.$hash, empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
+			'v_'.$hash, 
+			$this->params->get('gzip.cache_key', '7BOCz'), 
+			json_encode($cacheExpiryStrategy),
+			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
 			\JUri::root(true), 
 			json_encode($exclude_urls), 
 			json_encode($preloaded_urls), 
 			$import_scripts,
 			json_encode(array_map(function ($key, $values) {
 
-					return [$key, '\.(('.implode(')|(', $values).'))([#?].*)?$'];
+					return [$values['value'], '\.(('.implode(')|(', $values['network']).'))([#?].*)?$', ['cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 'maxAge' => +$values['cache']]];
 				}, 
 				array_keys($strategies), 
 				array_values($strategies)

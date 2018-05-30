@@ -143,12 +143,6 @@ if (!ini_get('zlib.output_compression')) {
 		header('Content-Range: bytes '.$range[0].'-'.$range[1].'/'.$size);
 	}
 
-	// CORS enabled?
-	if (defined('GzipHelperConfig::CORS') && constant(GzipHelperConfig::CORS)) {
-
-		header('Access-Control-Allow-Origin: *');
-	}
-
 	header('X-Content-Type-Options: nosniff');
 
 	if($useEtag) {
@@ -217,3 +211,4 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	readfile($file);
+	exit;

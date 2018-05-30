@@ -10,6 +10,7 @@
     <version>2.3</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
+        <folder>fields</folder>
         <folder>js/lib</folder>
         <folder>js/dist</folder>
         <folder>lib</folder>
@@ -37,7 +38,7 @@
                     </field>
                 </fields>
             </fieldset>
-            <fieldset name="http_cache" label="HTTP">
+            <fieldset name="http_cache" label="HTTP" addfieldpath="/plugins/system/gzip/fields">
                 <field type="spacer" label="Configure HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -60,11 +61,8 @@
                         <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                     </field>
-                    <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" size="3" first="1" last="24" step="1" type="integer" class="form-control" default="2"/>
-                    <field name="maxage_unit" label="PLG_GZIP_FIELD_MAXAGE_UNIT_LABEL" description="PLG_GZIP_FIELD_MAXAGE_UNIT_DESCRIPTION" type="list" default="months">
-                        <option value="hours">JOPTION_MAXAGE_UNIT_HOURS</option>
-                        <option value="months">JOPTION_MAXAGE_UNIT_MONTHS</option>
-                    </field>
+                    <field name="cache_key" label="PLG_GZIP_FIELD_CACHE_KEY_LABEL" description="PLG_GZIP_FIELD_CACHE_KEY_DESCRIPTION" type="text" default="7BOCz" size="5" pattern="[a-zA-Z0-9@_]+" maxlength="5" class="form-control"/>
+                    <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" size="3" first="1" last="24" step="1" type="maxage" class="form-control" default="2months"/>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Misc" />
                     <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
@@ -205,14 +203,15 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                </fields>
-                <field type="spacer" label="Networking settings" />
-                <fields name="gzip">
                     <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                         <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
                     </field>
+                </fields>
+                <field type="spacer" hr="true" />
+                <field type="spacer" label="Networking settings" />
+                <fields name="gzip">
                     <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION" type="list" default="cn">
                         <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
                         <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
@@ -258,6 +257,15 @@
                             <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
                             <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
                         </field>
+                    </fields>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Cache retention settings" />
+                    <field name="pwa_cache_default" label="PLG_GZIP_FIELD_PWA_CACHE_DEFAULT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_DEFAULT_DESCRIPTION" type="maxage" default="2months"/>
+                    <fields name="pwa_cache">
+                        <field name="image" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_IMAGES_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_IMAGES_DESCRIPTION" type="maxage" default="0months"/>
+                        <field name="js" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_JAVASCRIPT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_JAVASCRIPT_DESCRIPTION" type="maxage" default="0months"/>
+                        <field name="css" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_DESCRIPTION" type="maxage" default="0months"/>
+                        <field name="font" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_DESCRIPTION" type="maxage" default="0months"/>
                     </fields>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="App manifest settings" />

@@ -9,7 +9,7 @@
  * @license     MIT License
  */
 // @ts-check
-/* global CACHE_NAME */
+/* global CACHE_NAME, CRY */
 
 /**
  * @param {FetchEvent} event
@@ -17,11 +17,12 @@
 
 self.addEventListener("fetch", (event) => {
 	const router = SW.route.getRouter(event);
+	console.log({router});
 
 	if (router != undef) {
 		event.respondWith(
 			router.handler.handle(event).catch((error) => {
-				console.error("😭", error);
+				console.error(CRY, error);
 				return fetch(event.request);
 			})
 		);

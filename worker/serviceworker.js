@@ -31,6 +31,7 @@ const undef = null; //
  */
 const SW = Object.create(undef);
 const CACHE_NAME = "{CACHE_NAME}";
+const CRY = "😭";
 const scope = "{scope}";
 // const defaultStrategy = "{defaultStrategy}";
 

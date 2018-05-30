@@ -13,7 +13,7 @@
 
 // @ts-check
 /* eslint wrap-iife: 0 */
-/* global SW, scope */
+/* global SW, scope, undef */
 /** @var {string} scope */
 /** @var {SWType} SW */
 
@@ -29,7 +29,9 @@
 const strategies = SW.strategies;
 const Router = SW.Router;
 const route = SW.route;
+const cacheExpiryStrategy = "{cacheExpiryStrategy}";
 let entry;
+let option;
 
 let defaultStrategy = "{defaultStrategy}";
 
@@ -42,10 +44,17 @@ for (entry of "{exclude_urls}") {
 
 // excluded urls fallback on network only
 for (entry of "{network_strategies}") {
+	option = entry[2] || cacheExpiryStrategy;
+
+	//	console.log({option});
+
 	route.registerRoute(
 		new Router.RegExpRouter(
 			new RegExp(entry[1], "i"),
-			strategies.get(entry[0])
+			strategies.get(entry[0]),
+			option == undef
+				? option
+				: {plugins: [new SW.expiration.CacheExpiration(option)]}
 		)
 	);
 }
@@ -53,7 +62,10 @@ for (entry of "{network_strategies}") {
 // register strategies routers
 for (entry of strategies) {
 	route.registerRoute(
-		new Router.ExpressRouter(scope + "/media/z/" + entry[0] + "/", entry[1])
+		new Router.ExpressRouter(
+			scope + "{ROUTE}/media/z/" + entry[0] + "/",
+			entry[1]
+		)
 	);
 }
 
@@ -62,10 +74,6 @@ if (!strategies.has(defaultStrategy)) {
 	defaultStrategy = "no";
 }
 
-route.setDefaultHandler(strategies.get(defaultStrategy));
-
-//let x;
-
-//for (x of SW.strategies) {
-//	console.log(x);
-//}
+route.setDefaultRouter(
+	new Router.ExpressRouter("/", strategies.get(defaultStrategy))
+);

@@ -15,19 +15,19 @@
 (function(SW) {
 	const weakmap = new WeakMap();
 
-	function normalize(method) {
+	function normalize(method = "GET") {
 		if (method == undef || method == "HEAD") {
 			return "GET";
 		}
 
-		return method.toLowerCase();
+		return method.toUpperCase();
 	}
 
 	/**
 	 * request route class
 	 *
-	 * @property {Object.<string,                                      n                []>} routes
-	 * @property {Object.<string, routerHandle>} defaultHandler
+	 * @property {Object.<string, Router[]>} routes
+	 * @property {Object.<string, routerHandle>} defaultRouter
 	 * @method {function} on
 	 * @method {function} off
 	 * @method {function} trigger
@@ -37,7 +37,7 @@
 	class Route {
 		constructor() {
 			this.routers = Object.create(undef);
-			this.defaultHandler = Object.create(undef);
+			this.defaultRouter = Object.create(undef);
 		}
 
 		/**
@@ -69,25 +69,23 @@
 				}
 			}
 
-			return this.defaultHandler[method];
+			return this.defaultRouter[method];
 		}
 
 		/**
 		 * register a handler for an http method
 		 *
 		 * @param {Router} router router instance
-		 * @param {RouterOptions} options route options
 		 * @param {string} method http method
 		 */
-		registerRoute(router, options, method) {
+		registerRoute(router, method = "GET") {
+			console.log({router, normalized: normalize(method)});
 			method = normalize(method);
+
+			console.log({router});
 
 			if (!(method in this.routers)) {
 				this.routers[method] = [];
-			}
-
-			if (options != undef) {
-				router.setOptions(options);
 			}
 
 			this.routers[method].push(router);
@@ -99,7 +97,7 @@
 		 * unregister a handler for an http method
 		 *
 		 * @param {Router} router router instance
-		 * @param {string} method http metho
+		 * @param {string} method http method
 		 */
 		unregisterRoute(router, method) {
 			method = normalize(method);
@@ -118,12 +116,11 @@
 		/**
 		 * set the default request handler
 		 *
-		 * @param {routerHandle} handler router instance
-		 * @param {RouterOptions} options router options
+		 * @param {Router} router
 		 * @param {string} method http method
 		 */
-		setDefaultHandler(handler, options, method) {
-			this.defaultHandler[normalize(method)] = {handler, options};
+		setDefaultRouter(router, method) {
+			this.defaultRouter[normalize(method)] = router;
 		}
 	}
 
@@ -161,28 +158,33 @@
 				handle: async event => {
 					// before route
 					let result;
-					let response, res;
+					let response, res, plugin;
 
 					try {
+						for (plugin of self.options.plugins) {
+							plugin.precheck(event);
+						}
+
 						result = await self.resolve("beforeroute", event);
 
 						for (response of result) {
-							if (
-								response != undef &&
-								response instanceof Response
-							) {
+							if (response instanceof Response) {
 								return response;
 							}
 						}
 					} catch (e) {
-						console.error("😭", error);
+						console.error(CRY, error);
 					}
 
 					response = await handler.handle(event);
 					result = await self.resolve("afterroute", event, response);
 
 					for (res of result) {
-						if (res != undef && res instanceof Response) {
+						if (res instanceof Response) {
+							for (plugin of self.options.plugins) {
+								plugin.postcheck(event, res);
+							}
+
 							return res;
 						}
 					}
@@ -224,7 +226,7 @@
 		 */
 		/**
 		 * Creates an instance of ExpressRouter.
-		 * @param  {RegExp} path
+		 * @param  {string} path
 		 * @param  {routerHandle} handler
 		 * @param  {object} options
 		 * @memberof ExpressRouter
