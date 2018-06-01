@@ -12,7 +12,7 @@
  */
 // @ts-check
 /*  */
-// build 1b77a7b 2018-06-01 00:37:10-04:00
+// build 9f8c274 2018-06-01 00:45:38-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -1012,7 +1012,7 @@ SW.expiration = function() {
             //
             const self = this;
             this.limit = +options.limit || 0;
-            this.maxAge = +options.maxAge || 0;
+            this.maxAge = +options.maxAge * 1e3 || 0;
             DB(options.cacheName || "gzip_sw_worker_expiration_cache_private", "url").then(db => self.db = db).catch(e => console.error(CRY, e));
         }
         async precheck(event) {
@@ -1047,7 +1047,7 @@ SW.expiration = function() {
                 const entry = await this.db.get(event.request.url);
                 const version = SW.Utils.getObjectHash(event.request);
                 if (entry == undef || entry.version != version || entry.timestamp < Date.now()) {
-                    console.info("CacheExpiration [postcheck][update][version=" + version + "][expires=" + (Date.now() + this.maxAge) + "|" + new Date().toUTCString() + "] " + event.request.url, this);
+                    console.info("CacheExpiration [postcheck][update][version=" + version + "][expires=" + (Date.now() + this.maxAge) + "|" + new Date(Date.now() + this.maxAge).toUTCString() + "] " + event.request.url, this);
                     // need to update
                                         return await this.db.put({
                         url: event.request.url,
@@ -1057,11 +1057,7 @@ SW.expiration = function() {
                     });
                     return url;
                 } else {
-                    console.info("CacheExpiration [postcheck][no update][version=" + version + "][expires=" + 
-                    //	entry.timestamp +
-                    "|" + 
-                    //	new Date(entry.timestamp).toUTCString() +
-                    "] " + event.request.url, entry);
+                    console.info("CacheExpiration [postcheck][no update][version=" + version + "][expires=" + entry.timestamp + "|" + new Date(entry.timestamp).toUTCString() + "] " + event.request.url, entry);
                 }
                 return event.request.url;
             } catch (e) {

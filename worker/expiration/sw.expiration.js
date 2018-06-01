@@ -37,7 +37,7 @@ SW.expiration = (function() {
 
 			const self = this;
 			this.limit = +options.limit || 0;
-			this.maxAge = +options.maxAge || 0;
+			this.maxAge = +options.maxAge * 1000 || 0;
 
 			DB(
 				options.cacheName || "gzip_sw_worker_expiration_cache_private",
@@ -109,7 +109,7 @@ SW.expiration = (function() {
 							"][expires=" +
 							(Date.now() + this.maxAge) +
 							"|" +
-							new Date().toUTCString() +
+							new Date(Date.now() + this.maxAge).toUTCString() +
 							"] " +
 							event.request.url,
 						this
@@ -129,9 +129,9 @@ SW.expiration = (function() {
 						"CacheExpiration [postcheck][no update][version=" +
 							version +
 							"][expires=" +
-							//	entry.timestamp +
+							entry.timestamp +
 							"|" +
-							//	new Date(entry.timestamp).toUTCString() +
+							new Date(entry.timestamp).toUTCString() +
 							"] " +
 							event.request.url,
 						entry
