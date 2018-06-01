@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"build": "sh ./build.sh && jsdoc -c jsdoc.json"
+	},
+	"dependencies": {
+		"jsdoc": "^3.5.5",
+		"uglify-es": "^3.3.9",
+		"docdash": "github:clenemt/docdash"
+	}
+}

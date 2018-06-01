@@ -91,7 +91,7 @@ SW.strategies = (function() {
 		 */
 		// https://www.w3.org/TR/SRI/#h-note6
 		isCacheableRequest: (request, response) =>
-			response != undef &&
+			response instanceof Response &&
 			("cors" == response.type ||
 				new URL(request.url, self.origin).origin == self.origin) &&
 			request.method == "GET" &&

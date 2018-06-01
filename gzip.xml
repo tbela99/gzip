@@ -195,7 +195,7 @@
                     </field>
                 </fields>
             </fieldset>
-            <fieldset name="pwa" label="Service Worker">
+            <fieldset name="pwa_app" label="Service Worker::App">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -208,7 +208,39 @@
                         <option value="0">JNo</option>
                         <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
                     </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="App manifest settings" />
+                    <field name="pwa_app_manifest" label="PLG_GZIP_FIELD_PWA_MANIFEST_LABEL" description="PLG_GZIP_FIELD_PWA_MANIFEST_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" maxlength="12" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text"/>
+                    <field name="pwa_app_name" hint="PLG_GZIP_FIELD_PWA_APP_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NAME_DESCRIPTION" type="text"/>
+                    <field name="pwa_app_description" hint="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_HINT" label="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_DESCRIPTION" type="text"/>
+                    <field name="pwa_app_start_url" hint="PLG_GZIP_FIELD_PWA_APP_URL_HINT" class="form-control" label="PLG_GZIP_FIELD_PWA_APP_URL_LABEL" description="PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION" type="textarea"/>
+                    <field name="pwa_app_bg_color" label="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_DESCRIPTION" type="color"/>
+                    <field name="pwa_app_theme_color" label="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_DESCRIPTION" type="color"/>
+                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="browser">
+                        <option value="standalone">JFIELD_OPTION_PWA_APP_DISPLAY_STANDALONE</option>
+                        <option value="fullscreen">JFIELD_OPTION_PWA_APP_DISPLAY_FULLSCREEN</option>
+                        <option value="minimal-ui">JFIELD_OPTION_PWA_APP_DISPLAY_MINIMAL_UI</option>
+                        <option value="browser">JFIELD_OPTION_PWA_APP_DISPLAY_BROWSER</option>
+                    </field>
+                    <field name="pwa_app_cache_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_DESCRIPTION" type="textarea"/>
+                    <field name="pwa_app_cache_exclude_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_DESCRIPTION" type="textarea"/>
+                    <field name="pwa_app_icons_path" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist"/>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Native apps settings" />
+                    <field name="pwa_app_native" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="pwa_app_native_android" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_DESCRIPTION" type="text"/>
+                    <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
                 </fields>
+            </fieldset>
+            <fieldset name="pwa_network" label="Service Worker::Network">
+                <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Networking settings" />
                 <fields name="gzip">
@@ -258,6 +290,11 @@
                             <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
                         </field>
                     </fields>
+                </fields>
+            </fieldset>
+            <fieldset name="pwa_cache" label="Service Worker::Cache">
+                <field type="spacer" label="Configure progressive web application settings" />
+                <fields name="gzip">
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Cache retention settings" />
                     <field name="pwa_cache_default" label="PLG_GZIP_FIELD_PWA_CACHE_DEFAULT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_DEFAULT_DESCRIPTION" type="maxage" default="2months"/>
@@ -267,35 +304,6 @@
                         <field name="css" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_DESCRIPTION" type="maxage" default="0months"/>
                         <field name="font" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_DESCRIPTION" type="maxage" default="0months"/>
                     </fields>
-                    <field type="spacer" hr="true" />
-                    <field type="spacer" label="App manifest settings" />
-                    <field name="pwa_app_manifest" label="PLG_GZIP_FIELD_PWA_MANIFEST_LABEL" description="PLG_GZIP_FIELD_PWA_MANIFEST_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" maxlength="12" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text"/>
-                    <field name="pwa_app_name" hint="PLG_GZIP_FIELD_PWA_APP_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NAME_DESCRIPTION" type="text"/>
-                    <field name="pwa_app_description" hint="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_HINT" label="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_DESCRIPTION" type="text"/>
-                    <field name="pwa_app_start_url" hint="PLG_GZIP_FIELD_PWA_APP_URL_HINT" label="PLG_GZIP_FIELD_PWA_APP_URL_LABEL" description="PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION" type="text"/>
-                    <field name="pwa_app_bg_color" label="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_DESCRIPTION" type="color"/>
-                    <field name="pwa_app_theme_color" label="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_DESCRIPTION" type="color"/>
-                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="browser">
-                        <option value="standalone">JFIELD_OPTION_PWA_APP_DISPLAY_STANDALONE</option>
-                        <option value="fullscreen">JFIELD_OPTION_PWA_APP_DISPLAY_FULLSCREEN</option>
-                        <option value="minimal-ui">JFIELD_OPTION_PWA_APP_DISPLAY_MINIMAL_UI</option>
-                        <option value="browser">JFIELD_OPTION_PWA_APP_DISPLAY_BROWSER</option>
-                    </field>
-                    <field name="pwa_app_cache_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_DESCRIPTION" type="textarea"/>
-                    <field name="pwa_app_cache_exclude_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_DESCRIPTION" type="textarea"/>
-                    <field name="pwa_app_icons_path" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist"/>
-                    <field type="spacer" hr="true" />
-                    <field type="spacer" label="Native apps settings" />
-                    <field name="pwa_app_native" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="pwa_app_native_android" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_DESCRIPTION" type="text"/>
-                    <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
                 </fields>
             </fieldset>
             <fieldset name="webpush" label="Web Push">
@@ -314,7 +322,7 @@
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="critical_path" label="Rendering Optimization">
+            <fieldset name="critical_path" label="Critical Css">
                 <field type="spacer" label="Critical CSS Path" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">

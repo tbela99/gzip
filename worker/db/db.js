@@ -18,7 +18,7 @@
  * @var {DBType}
  * */
 
-const DB = function DB(dbName, key = "id") {
+const DB = async (dbName, key = "id") => {
 	return new Promise((resolve, reject) => {
 		const openDBRequest = indexedDB.open(dbName, 1);
 		const storeName = `${dbName}_store`;
@@ -40,19 +40,19 @@ const DB = function DB(dbName, key = "id") {
 					let listener;
 					if (isMultiplePut) {
 						listener = transaction;
-						param.forEach((entry) => {
+						param.forEach(entry => {
 							store.put(entry);
 						});
 					} else {
 						listener = store[method](param);
 					}
-					listener.oncomplete = (event) => {
+					listener.oncomplete = event => {
 						resolveQuery(event.target.result);
 					};
-					listener.onsuccess = (event) => {
+					listener.onsuccess = event => {
 						resolveQuery(event.target.result);
 					};
-					listener.onerror = (event) => {
+					listener.onerror = event => {
 						rejectQuery(event);
 					};
 				} else {
@@ -61,17 +61,17 @@ const DB = function DB(dbName, key = "id") {
 			});
 		const methods = {
 			count: () => _query("count", true, keyToUse),
-			getEntry: (keyToUse) => _query("get", true, keyToUse),
-			getAll: (keyToUse) => _query("getAll", true, keyToUse),
-			put: (entryData) => _query("put", false, entryData),
-			deleteEntry: (keyToUse) => _query("delete", false, keyToUse),
-			flush: () => _query("clear", false)
+			get: keyToUse => _query("get", true, keyToUse),
+			getAll: keyToUse => _query("getAll", true, keyToUse),
+			put: entryData => _query("put", false, entryData),
+			delete: keyToUse => _query("delete", false, keyToUse),
+			clear: () => _query("clear", false)
 		};
 		const _successOnBuild = () => {
 			db = openDBRequest.result;
 			resolve(methods);
 		};
-		const _errorOnBuild = (e) => {
+		const _errorOnBuild = e => {
 			reject(new Error(e));
 		};
 		openDBRequest.onupgradeneeded = _upgrade.bind(this);

@@ -129,8 +129,158 @@
 			} while ((current = Object.getPrototypeOf(current)));
 
 			return properties;
+		},
+		getOwnPropertyDescriptorNames(object) {
+			let properties = Object.keys(
+				Object.getOwnPropertyDescriptors(object)
+			);
+			let current = Object.getPrototypeOf(object);
+			while (current) {
+				properties = properties.concat(
+					Object.keys(Object.getOwnPropertyDescriptors(current))
+				);
+
+				current = Object.getPrototypeOf(current);
+			}
+
+			return properties;
+		},
+		getObjectHash(object) {
+			return hashCode(getObjectHashString(object)).toString(16);
 		}
 	};
+
+	function getObjectHashString(object) {
+		let toString = "",
+			property,
+			value,
+			key,
+			i = 0,
+			j;
+
+		if (
+			(!object && typeof object == "object") ||
+			typeof object == "string"
+		) {
+			toString =
+				"" + (object == "string" ? JSON.stringify(object) : object);
+		} else {
+			const properties = Utils.getOwnPropertyDescriptorNames(object);
+
+			for (; i < properties.length; i++) {
+				property = properties[i];
+
+				try {
+					value = object[property];
+				} catch (e) {
+					//	console.error(property, object, e);
+					toString += "!Error[" + JSON.stringify(e.message) + "],";
+					continue;
+				}
+
+				toString += property + ":";
+
+				if (Array.isArray(value)) {
+					toString += "[";
+
+					for (j = 0; j < value.length; j++) {
+						toString += getObjectHashString(value[j]) + ",";
+					}
+
+					if (toString[toString.length - 1] == ",") {
+						toString = toString.substr(0, toString.length - 2);
+					}
+
+					toString += "]";
+				} else if (typeof value == "object") {
+					/* eslint max-depth: 0 */
+					if (!value || typeof value == "string") {
+						toString += "" + value;
+					} else if (value[Symbol.iterator] != null) {
+						if (value.constructor && value.constructor.name) {
+							toString += value.constructor.name;
+						}
+
+						if (typeof value.forEach == "function") {
+							toString += "{";
+
+							/* eslint no-loop-func: 0 */
+							value.forEach(
+								(value, key) =>
+									(toString +=
+										key +
+										":" +
+										getObjectHashString(value) +
+										",")
+							);
+
+							if (toString[toString.length - 1] == ",") {
+								toString = toString.substr(
+									0,
+									toString.length - 2
+								);
+							}
+
+							toString += "}";
+						} else {
+							toString += "[";
+
+							for (key of value) {
+								toString += getObjectHashString(key) + ",";
+							}
+
+							if (toString[toString.length - 1] == ",") {
+								toString = toString.substr(
+									0,
+									toString.length - 2
+								);
+							}
+
+							toString += "]";
+						}
+					} else {
+						toString += "{" + getObjectHashString(value) + "}";
+					}
+				} else {
+					toString += JSON.stringify(value);
+				}
+
+				toString += ",";
+			}
+
+			if (toString[toString.length - 1] == ",") {
+				toString = toString.substr(0, toString.length - 2);
+			}
+
+			if (Array.isArray(object)) {
+				toString = "[" + toString + "]";
+			} else if (typeof object == "object") {
+				toString = "{" + toString + "}";
+			}
+		}
+
+		return toString;
+	}
+
+	function hashCode(string) {
+		let hash = 0,
+			char,
+			i;
+
+		if (string.length == 0) {
+			return hash;
+		}
+
+		for (i = 0; i < string.length; i++) {
+			char = string.charCodeAt(i);
+
+			hash = (hash << 5) - hash + char;
+
+			hash = hash & hash; // Convert to 32bit integer
+		}
+
+		return hash;
+	}
 
 	function merge(target) {
 		const args = [].slice.call(arguments, 1);

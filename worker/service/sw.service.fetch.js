@@ -17,7 +17,6 @@
 
 self.addEventListener("fetch", (event) => {
 	const router = SW.route.getRouter(event);
-	console.log({router});
 
 	if (router != undef) {
 		event.respondWith(

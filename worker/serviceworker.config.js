@@ -24,8 +24,6 @@
 //	return request.url.indexOf(scope + "/administrator/") != -1;
 //});
 
-//const excluded = "{exclude_urls}";
-
 const strategies = SW.strategies;
 const Router = SW.Router;
 const route = SW.route;

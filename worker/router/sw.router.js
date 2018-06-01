@@ -10,7 +10,7 @@
  */
 
 // @ts-check
-/* global SW, scope, undef */
+/* global SW, CRY, scope, undef */
 
 (function(SW) {
 	const weakmap = new WeakMap();
@@ -79,10 +79,7 @@
 		 * @param {string} method http method
 		 */
 		registerRoute(router, method = "GET") {
-			console.log({router, normalized: normalize(method)});
 			method = normalize(method);
-
-			console.log({router});
 
 			if (!(method in this.routers)) {
 				this.routers[method] = [];
@@ -162,10 +159,30 @@
 
 					try {
 						for (plugin of self.options.plugins) {
-							plugin.precheck(event);
+							res = await plugin.precheck(event, response);
+
+							if (response == undef && res instanceof Response) {
+								response = res;
+							}
 						}
 
-						result = await self.resolve("beforeroute", event);
+						console.log({
+							precheck: "precheck",
+							match: response instanceof Response,
+							response,
+							router: self,
+							url: event.request.url
+						});
+
+						if (response instanceof Response) {
+							return response;
+						}
+
+						result = await self.resolve(
+							"beforeroute",
+							event,
+							response
+						);
 
 						for (response of result) {
 							if (response instanceof Response) {
@@ -179,15 +196,16 @@
 					response = await handler.handle(event);
 					result = await self.resolve("afterroute", event, response);
 
+					for (plugin of self.options.plugins) {
+						await plugin.postcheck(event, response);
+					}
+
 					for (res of result) {
 						if (res instanceof Response) {
-							for (plugin of self.options.plugins) {
-								plugin.postcheck(event, res);
-							}
-
 							return res;
 						}
 					}
+
 					return response;
 				}
 			};

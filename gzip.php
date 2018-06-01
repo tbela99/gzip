@@ -785,7 +785,7 @@ class PlgSystemGzip extends JPlugin
         $search = ['{CACHE_NAME}', '{ROUTE}','"{cacheExpiryStrategy}"', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
         $replace = [
 			'v_'.$hash, 
-			$this->params->get('gzip.cache_key', '7BOCz'), 
+			'/'.$this->params->get('gzip.cache_key', '7BOCz'), 
 			json_encode($cacheExpiryStrategy),
 			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
 			\JUri::root(true), 
