@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -15,23 +14,31 @@
 /* eslint wrap-iife: 0 */
 // stale while revalidate
 
-SW.strategies.add("cn", async event => {
-	"use strict;";
+SW.strategies.add(
+	"cn",
+	async event => {
+		"use strict;";
 
-	const response = await caches.match(event.request);
+		const response = await caches.match(event.request, {
+			cacheName: CACHE_NAME
+		});
 
-	const fetchPromise = fetch(event.request).then(function(networkResponse) {
-		// validate response before
-		if (SW.strategies.isCacheableRequest(event.request, networkResponse)) {
-			const cloned = networkResponse.clone();
-			caches.open(CACHE_NAME).then(function(cache) {
-				cache.put(event.request, cloned);
-			});
-		}
+		const fetchPromise = fetch(event.request).then(networkResponse => {
+			// validate response before
+			if (
+				SW.strategies.isCacheableRequest(event.request, networkResponse)
+			) {
+				const cloned = networkResponse.clone();
+				caches
+					.open(CACHE_NAME)
+					.then(cache => cache.put(event.request, cloned));
+			}
 
-		return networkResponse;
-	});
+			return networkResponse;
+		});
 
-	return response || fetchPromise;
-	//	});
-});
+		return response || fetchPromise;
+		//	});
+	},
+	"Cache and Network Update"
+);

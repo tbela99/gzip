@@ -1,7 +1,7 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
+ * @subpackage  System.Gzip
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -23,19 +23,18 @@ SW.strategies = (function() {
 	const strategy = {
 		/**
 		 *
-		 * @param {String} name
-		 * @param {function} handle
+		 * @param {string} key
+		 * @param {routerHandle} handle
 		 */
-		add: (name, handle) =>
-			map.set(name, {
-				name,
+		add: (key, handle, name) =>
+			map.set(key, {
+				key,
+				name: name == undef ? key : name,
 				handle: async event => {
-					//	await SW.resolve("prefetch", event.request);
 					const response = await handle(event);
-					//	await SW.resolve("postfetch", event.request, response);
 
 					console.info({
-						strategy: name,
+						strategy: name == undef ? key : name,
 						responseMode: response.type,
 						requestMode: event.request.mode,
 						ok: response.ok,
@@ -54,12 +53,12 @@ SW.strategies = (function() {
 			}),
 		/**
 		 *
-		 * @returns {IterableIterator<any>}
+		 * @returns {IterableIterator<string>}
 		 */
 		keys: () => map.keys(),
 		/**
 		 *
-		 * @returns {IterableIterator<any>}
+		 * @returns {IterableIterator<routerHandleObject>}
 		 */
 		values: () => map.values(),
 		/**
@@ -69,8 +68,8 @@ SW.strategies = (function() {
 		entries: () => map.entries(),
 		/**
 		 *
-		 * @param {String} name
-		 * @returns {any}
+		 * @param {string} name
+		 * @returns {routerHandleObject}
 		 */
 		get: name => map.get(name),
 		/**
@@ -92,12 +91,12 @@ SW.strategies = (function() {
 		 */
 		// https://www.w3.org/TR/SRI/#h-note6
 		isCacheableRequest: (request, response) =>
-			response != undef &&
+			response instanceof Response &&
 			("cors" == response.type ||
 				new URL(request.url, self.origin).origin == self.origin) &&
 			request.method == "GET" &&
 			response.ok &&
-			["default", "cors", "basic"].includes(response.type) &&
+			["default", "cors", "basic", "navigate"].includes(response.type) &&
 			!response.bodyUsed
 	};
 

@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -14,9 +13,13 @@
 
 self.addEventListener("install", event => {
 	event.waitUntil(
-		caches.open(CACHE_NAME).then(async cache => {
-			await cache.addAll("{preloaded_urls}");
+		(async () => {
+			try {
+				await SW.resolve("install", event);
+			} catch (e) {
+				console.error(CRY, e);
+			}
 			return self.skipWaiting();
-		})
+		})()
 	);
 });

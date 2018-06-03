@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -14,23 +13,29 @@
 /* eslint wrap-iife: 0 */
 /* global SW, CACHE_NAME */
 
-SW.strategies.add("cf", async event => {
-	"use strict;";
+SW.strategies.add(
+	"cf",
+	async event => {
+		"use strict;";
 
-	let response = await caches.match(event.request);
-
-	if (response != undef) {
-		return response;
-	}
-
-	response = await fetch(event.request);
-
-	if (SW.strategies.isCacheableRequest(event.request, response)) {
-		const cloned = response.clone();
-		caches.open(CACHE_NAME).then(function(cache) {
-			cache.put(event.request, cloned);
+		let response = await caches.match(event.request, {
+			cacheName: CACHE_NAME
 		});
-	}
 
-	return response;
-});
+		if (response != undef) {
+			return response;
+		}
+
+		response = await fetch(event.request);
+
+		if (SW.strategies.isCacheableRequest(event.request, response)) {
+			const cloned = response.clone();
+			caches
+				.open(CACHE_NAME)
+				.then(cache => cache.put(event.request, cloned));
+		}
+
+		return response;
+	},
+	"Cache fallback to Network"
+);

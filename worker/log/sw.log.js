@@ -1,0 +1,1 @@
+SW.Log = (function() {}());

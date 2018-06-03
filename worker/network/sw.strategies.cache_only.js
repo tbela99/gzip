@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -16,4 +15,6 @@
 
 // If a match isn't found in the cache, the response
 // will look like a connection error);
-SW.strategies.add("co", (event) => caches.match(event.request));
+SW.strategies.add("co", (event) =>
+	caches.match(event.request, {cacheName: CACHE_NAME}, "Cache Only")
+);

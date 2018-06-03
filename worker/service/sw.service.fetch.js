@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -10,20 +9,19 @@
  * @license     MIT License
  */
 // @ts-check
-/* global CACHE_NAME */
-
+/* global CACHE_NAME, CRY */
 
 /**
  * @param {FetchEvent} event
  */
 
 self.addEventListener("fetch", (event) => {
-	const handler = SW.router.getHandler(event.request.url, event);
+	const router = SW.route.getRouter(event);
 
-	if (handler != undef) {
+	if (router != undef) {
 		event.respondWith(
-			handler.handle(event).catch((error) => {
-				console.error("😭", error);
+			router.handler.handle(event).catch((error) => {
+				console.error(CRY, error);
 				return fetch(event.request);
 			})
 		);

@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -11,26 +10,18 @@
  */
 
 // @ts-check
-/* global CACHE_NAME */
+/* global CACHE_NAME, SW */
 
 self.addEventListener("activate", event => {
 	// delete old app owned caches
 	event.waitUntil(
-		self.clients.claim().then(async () => {
-			const keyList = await caches.keys();
-			const tokens = CACHE_NAME.split(/_/, 2);
-			const search = tokens.length == 2 && tokens[0] + "_";
-
-			// delete older instances
-			return Promise.all(
-				keyList.map(
-					key =>
-						search !== false &&
-						key.indexOf(search) == 0 &&
-						key != CACHE_NAME &&
-						caches.delete(key)
-				)
-			);
-		})
+		(async () => {
+			try {
+				await SW.resolve("activate", event);
+			} catch (e) {
+				console.error(CRY, e);
+			}
+			return self.clients.claim();
+		})()
 	);
 });

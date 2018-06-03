@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -15,4 +14,4 @@
 /* global SW */
 
 // or simply don't call event.respondWith, which will result in default browser behaviour
-SW.strategies.add("no", (event) => fetch(event.request));
+SW.strategies.add("no", (event) => fetch(event.request), "Network Only");

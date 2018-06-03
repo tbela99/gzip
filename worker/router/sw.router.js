@@ -1,7 +1,6 @@
 /**
  *
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -11,32 +10,45 @@
  */
 
 // @ts-check
-/* global SW, scope, undef */
+/* global SW, CRY, scope, undef */
 
 (function(SW) {
-	function normalize(method) {
+//	const weakmap = new WeakMap();
+
+	function normalize(method = "GET") {
 		if (method == undef || method == "HEAD") {
 			return "GET";
 		}
 
-		return method.toLowerCase();
+		return method.toUpperCase();
 	}
 
-	class Router {
+	/**
+	 * request route class
+	 *
+	 * @property {Object.<string, Router[]>} routes
+	 * @property {Object.<string, routerHandle>} defaultRouter
+	 * @method {function} on
+	 * @method {function} off
+	 * @method {function} trigger
+	 *
+	 * @class Route
+	 */
+	class Route {
 		constructor() {
-			this.routes = Object.create(undef);
-			this.handlers = [];
-			this.defaultHandler = Object.create(undef);
+			this.routers = Object.create(undef);
+			this.defaultRouter = Object.create(undef);
 		}
 
 		/**
+		 * get the handler that matches the request event
 		 *
-		 * @param {string} url
 		 * @param {FetchEvent} event
+		 * @return {RouteHandler}
 		 */
-		getHandler(url, event) {
+		getRouter(event) {
 			const method = (event != undef && event.request.method) || "GET";
-			const routes = this.routes[method] || [];
+			const routes = this.routers[method] || [];
 			const j = routes.length;
 			let route,
 				i = 0;
@@ -44,79 +56,152 @@
 			for (; i < j; i++) {
 				route = routes[i];
 
-				if (route.match(url, event)) {
-					console.log({
-						match: "match",
+				if (route.match(event)) {
+					console.info({
+						match: true,
 						strategy: route.strategy,
 						name: route.constructor.name,
+						url: event.request.url,
 						path: route.path,
-						url,
 						route
 					});
-					return route.handler;
+					return route;
 				}
 			}
 
-			return this.defaultHandler[method];
+			return this.defaultRouter[method];
 		}
 
-		registerRoute(router, method) {
+		/**
+		 * register a handler for an http method
+		 *
+		 * @param {Router} router router instance
+		 * @param {string} method http method
+		 */
+		registerRoute(router, method = "GET") {
 			method = normalize(method);
 
-			if (!(method in this.routes)) {
-				this.routes[method] = [];
+			if (!(method in this.routers)) {
+				this.routers[method] = [];
 			}
 
-			this.routes[method].push(router);
+			this.routers[method].push(router);
 
 			return this;
 		}
 
+		/**
+		 * unregister a handler for an http method
+		 *
+		 * @param {Router} router router instance
+		 * @param {string} method http method
+		 */
 		unregisterRoute(router, method) {
 			method = normalize(method);
 
-			const route = this.routes[method] || [];
+			const routers = this.routers[method] || [];
 
-			const index = route.indexOf(router);
+			const index = routers.indexOf(router);
 
 			if (index != -1) {
-				route.splice(index, 1);
+				routers.splice(index, 1);
 			}
 
 			return this;
 		}
 
-		setDefaultHandler(handler, method) {
-			this.defaultHandler[normalize(method)] = handler;
+		/**
+		 * set the default request handler
+		 *
+		 * @param {Router} router
+		 * @param {string} method http method
+		 */
+		setDefaultRouter(router, method) {
+			this.defaultRouter[normalize(method)] = router;
 		}
 	}
 
-	class DefaultRouter {
-		constructor(path, handler) {
+	/**
+	 * @property {string} strategy router strategy name
+	 * @property {routerPath} path path used to match requests
+	 * @property {routerHandleObject} handler
+	 * @property {object} options
+	 * @method {Router} on
+	 * @method {Router} off
+	 * @method {Router} resolve
+	 *
+	 * @class Router
+	 */
+	class Router {
+		/**
+		 *
+		 * @param {routerPath} path
+		 * @param {routerHandle} handler
+		 * @param {RouterOptions} options
+		 */
+		constructor(path, handler, options) {
 			const self = this;
 
-			SW.Utils.reset(this);
+			SW.Utils.reset(self);
 
-			//	console.log(self);
+			self.options = Object.assign(
+				Object.create({plugins: []}),
+				options || {}
+			);
 
 			self.path = path;
 			self.strategy = handler.name;
 			self.handler = {
 				handle: async event => {
-					let result = await self.resolve("beforeroute", event);
-					let response, res;
+					// before route
+					let result;
+					let response, res, plugin;
 
-					for (response of result) {
-						if (response != undef && response instanceof Response) {
+					try {
+						for (plugin of self.options.plugins) {
+							res = await plugin.precheck(event, response);
+
+							if (response == undef && res instanceof Response) {
+								response = res;
+							}
+						}
+
+						console.log({
+							precheck: "precheck",
+							match: response instanceof Response,
+							response,
+							router: self,
+							url: event.request.url
+						});
+
+						if (response instanceof Response) {
 							return response;
 						}
+
+						result = await self.resolve(
+							"beforeroute",
+							event,
+							response
+						);
+
+						for (response of result) {
+							if (response instanceof Response) {
+								return response;
+							}
+						}
+					} catch (e) {
+						console.error(CRY, error);
 					}
 
 					response = await handler.handle(event);
 					result = await self.resolve("afterroute", event, response);
 
+					for (plugin of self.options.plugins) {
+						await plugin.postcheck(event, response);
+					}
+
 					for (res of result) {
-						if (res != undef && res instanceof Response) {
+						if (res instanceof Response) {
 							return res;
 						}
 					}
@@ -124,56 +209,57 @@
 					return response;
 				}
 			};
-
-			self.promisify({
-				beforeroute(event) {
-					if (event.request.mode == "navigate") {
-						console.log([
-							"beforeroute",
-							self,
-							[].slice.call(arguments)
-						]);
-					}
-				},
-				afterroute(event, response) {
-					if (event.request.mode == "navigate") {
-						console.log([
-							"afterroute",
-							self,
-							[].slice.call(arguments)
-						]);
-					}
-				}
-			});
-
-			/**/
 		}
 	}
 
-	SW.Utils.merge(true, DefaultRouter.prototype, SW.PromiseEvent);
+	SW.Utils.merge(true, Router.prototype, SW.PromiseEvent);
 
-	class RegExpRouter extends DefaultRouter {
+	/**
+	 *
+	 *
+	 * @class RegExpRouter
+	 * @extends Router
+	 * @inheritdoc
+	 */
+	class RegExpRouter extends Router {
 		/**
 		 *
-		 * @param {string} url
+		 * @param {FetchEvent} event
 		 */
-		match(url) {
-			//	console.log({ url, regexpp: this.path });
+		match(event) {
+			const url = event.request.url;
 			return /^https?:/.test(url) && this.path.test(url);
 		}
 	}
 
-	class ExpressRouter extends DefaultRouter {
-		constructor(path, handler) {
-			super(path, handler);
+	/**
+	 * @property {URL} url
+	 * @class ExpressRouter
+	 * @extends Router
+	 * @inheritdoc
+	 */
+	class ExpressRouter extends Router {
+		/**
+		 * @inheritdoc
+		 */
+		/**
+		 * Creates an instance of ExpressRouter.
+		 * @param  {string} path
+		 * @param  {routerHandle} handler
+		 * @param  {object} options
+		 * @memberof ExpressRouter
+		 */
+		constructor(path, handler, options) {
+			super(path, handler, options);
 			this.url = new URL(path, self.origin);
 		}
 
 		/**
 		 *
-		 * @param {string} url
+		 * @param {FetchEvent} event
 		 */
-		match(url /*, event*/) {
+		match(event) {
+			const url = event.request.url;
 			const u = new URL(url);
 
 			return (
@@ -184,12 +270,26 @@
 		}
 	}
 
-	const router = new Router();
+	/**
+	 *
+	 * @class CallbackRouter
+	 * @extends Router
+	 * @inheritdoc
+	 */
+	class CallbackRouter extends Router {
+		/**
+		 *
+		 * @param {FetchEvent} event
+		 */
+		match(event) {
+			return this.path(event.request.url, event);
+		}
+	}
 
 	Router.RegExpRouter = RegExpRouter;
 	Router.ExpressRouter = ExpressRouter;
-	//	Router.DataRouter = DataRouter;
+	Router.CallbackRouter = CallbackRouter;
 
 	SW.Router = Router;
-	SW.router = router;
+	SW.route = new Route();
 })(SW);

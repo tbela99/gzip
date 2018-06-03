@@ -1,5 +1,13 @@
 <?php
 
+defined('_JEXEC') or die;
+
+if (!ini_get('zlib.output_compression')) {
+
+	ob_end_clean();
+	ob_start('ob_gzhandler');
+}
+
 	/**
 	 * Serve files with cache headers.
 	 *
@@ -16,30 +24,16 @@
 	 * @license     MIT License
 	 */
 
-	const JPATH_PLATFORM = 1;
+	// cookieless domain?
+	if (!empty(\Gzip\GZipHelper::$hosts)) {
 
-	ob_start();
+		foreach (\Gzip\GZipHelper::$hosts as $host) {
 
-	chdir('../..');
-
-	if (is_file('cache/z/app/config.php')) {
-
-		//
-		include 'cache/z/app/config.php';
-
-		if (class_exists('GzipHelperConfig')) {
-
-			// CORS enabled?
-			if (!empty(GzipHelperConfig::CORS)) {
-
-				header('Access-Control-Allow-Origin: *');
-			}
-
-			// cookieless domain?
-			if (!empty(GzipHelperConfig::HOSTS) && in_array($_SERVER['SERVER_NAME'], GzipHelperConfig::HOSTS)) {
+			if (preg_replace('#(https?:)?//([^/]+).*#', '$2', $host) == $_SERVER['SERVER_NAME']) {
 
 				header('Access-Control-Allow-Origin: *');
 
+				// delete cookies
 				if (isset($_SERVER['HTTP_COOKIE'])) {
 
 					$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
@@ -55,13 +49,20 @@
 						setcookie($name, '', $expiry, '/');
 					}
 				}
+
+				break;
 			}
 		}
 	}
 
+	if (!empty($this->options['cdn_cors'])) {
+		
+		header('Access-Control-Allow-Origin: *', true);
+	}
+
 	$uri = $_SERVER['REQUEST_URI'];
 
-	$matches = preg_split('#/media/z/(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
+	$matches = preg_split('#/'.$this->route.'(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
 
 	$uri = end($matches);
 
@@ -85,10 +86,8 @@
 		exit;
 	}
 
-	require 'plugins/system/gzip/helper.php';
-
 	$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-	$accepted = defined('GzipHelperConfig::VALID_MIMETYPES') ? GzipHelperConfig::VALID_MIMETYPES : Gzip\GZipHelper::accepted();
+	$accepted = array_merge(\Gzip\GZipHelper::accepted(), \Gzip\GZipHelper::$static_types);
 
 	if(!isset($accepted[$ext])) {
 
@@ -144,6 +143,8 @@
 		header('Content-Range: bytes '.$range[0].'-'.$range[1].'/'.$size);
 	}
 
+	header('X-Content-Type-Options: nosniff');
+
 	if($useEtag) {
 
 		$etag = Gzip\GZipHelper::shorten(hash_file('crc32b', $file));
@@ -179,16 +180,13 @@
 		header('Content-Type: '.$accepted[$ext]);
 	}
 
-	header('Accept-Ranges: bytes');
-//header('Content-Type: '.$accepted[$ext].';charset=utf-8');
-	header('Cache-Control: public, max-age=31536000, immutable');
-
 	$dt = new DateTime();
 
-	$dt->modify('+2months');
+	$now = $dt->getTimestamp();
+	$dt->modify('+'.$this->params->get('gzip.maxage', 2).$this->params->get('gzip.maxage_unit', 'months'));
 
-
-	header('Expires: ' . gmdate('D, d M Y H:i:s T', $dt->getTimestamp()));
+	header('Accept-Ranges: bytes');
+	header('Cache-Control: public, max-age='.($dt->getTimestamp() - $now).', immutable');
 
 	if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
 
@@ -213,3 +211,4 @@
 	}
 
 	readfile($file);
+	exit;
