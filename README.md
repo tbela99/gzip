@@ -179,9 +179,11 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.4
 
-*   Provide an optional URL for the CORS header Access-Control-Allow-Origin. If not provided, we use '\*'
 *   Customize max-age value for cached resources
 *   remove Expires header in favor of max-age
+*   Service worker cache expiration api
+*   Define cache expiration rule per file type
+*   Add missing files to the git repo
 
 ## V2.3
 

@@ -13,7 +13,7 @@
 /* global SW, CRY, scope, undef */
 
 (function(SW) {
-	const weakmap = new WeakMap();
+//	const weakmap = new WeakMap();
 
 	function normalize(method = "GET") {
 		if (method == undef || method == "HEAD") {

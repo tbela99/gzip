@@ -2,9 +2,6 @@
 
 ## High priority list
 
-1.  Service worker cache expiration api (using localforage or a lightweight indexDb library)
-1.  Define cache expiration rule per file type
-1.  Post messages to the service worker from the client
 1.  Make lazyloaded images indexable. Use either noscript tag or micro data
 1.  Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1.  Clear Joomla cache when settings are updated
