@@ -271,6 +271,20 @@ class PlgSystemGzip extends JPlugin
 	        \Gzip\GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
 	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
 
+            // do not render blank js file when service worker is disabled
+            if(!empty($this->options['pwaenabled'])) {
+
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
+
+                if (!is_file($file)) {
+
+                    $this->updateServiceWorker($this->options);
+                }
+
+                $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+                $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
+            }
+
 			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true).'/'.$this->route) === 0) {
 
 				require __DIR__.'/responder.php';
@@ -281,7 +295,7 @@ class PlgSystemGzip extends JPlugin
 			// prevent accessing the domain through the cdn address
 			$domain = !empty($this->options['cdn_redirect']) ? preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn_redirect']) : '';
 
-			if ($domain !== '') {
+			if ($domain !== '' && strpos($_SERVER['REQUEST_URI'], '/'.$this->route) === 0) {
 					
 				foreach ($this->options['cdn'] as $key => $option) {
 
@@ -298,20 +312,6 @@ class PlgSystemGzip extends JPlugin
             $this->options['parse_url_attr']['src'] = '';
             $this->options['parse_url_attr']['data-src'] = '';
             
-            // do not render blank js file when service worker is disabled
-            if(!empty($this->options['pwaenabled'])) {
-
-                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
-
-                if (!is_file($file)) {
-
-                    $this->updateServiceWorker($this->options);
-                }
-
-                $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
-                $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
-            }
-
             $dirname = dirname($_SERVER['SCRIPT_NAME']);
 
             if($dirname != '/') {
@@ -711,7 +711,6 @@ class PlgSystemGzip extends JPlugin
 			// one signal is blocked by adblockers and this kills the service worker. we need to catch the error here
             $import_scripts .= 'try{importScripts("https://cdn.onesignal.com/sdks/OneSignalSDK.js")}catch(e){console.error("cannot load OneSignalSDK.js 😭",e)}';
 		}
-
 		
 		$cache_duration = !empty($options['pwa_cache_default']) ? $options['pwa_cache_default'] : $this->params->get('gzip.maxage', '2months');
 
@@ -780,12 +779,26 @@ class PlgSystemGzip extends JPlugin
 			$strategies[$key]['key'] = $key;
 		}
 
-        $hash = hash('sha1', json_encode($options).file_get_contents(__DIR__.'/worker_version'));
+		$worker_id = trim(file_get_contents(__DIR__.'/worker_version'));
+		$hash = hash('sha1', json_encode($options).$this->workerworker_id);
+		
+		$hosts = [$_SERVER['SERVER_NAME']];
 
-        $search = ['{CACHE_NAME}', '{ROUTE}','"{cacheExpiryStrategy}"', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
+		if (!empty($options['cnd_enabled'])) {
+
+			foreach ((is_object($options['cdn']) ? get_object_vars($options['cdn']) : $options['cdn']) as $option) {
+
+				$hosts[] = preg_replace('#^([a-zA-z]+:)?//#', '', $option);
+			}
+		}
+
+        $search = ['"{VERSION}"', '"{CDN_HOSTS}"', '"{STORES}"', '{CACHE_NAME}', '{ROUTE}','"{cacheExpiryStrategy}"', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
         $replace = [
+			json_encode($worker_id),
+			json_encode(array_values(array_unique($hosts))),
+			json_encode(array_merge(['gzip_sw_worker_expiration_cache_private'], array_map(function ($key) { return 'gzip_sw_worker_expiration_cache_private_'.$key; }, array_keys($strategies)))),
 			'v_'.$hash, 
-			'/'.$this->params->get('gzip.cache_key', '7BOCz'), 
+			$this->params->get('gzip.cache_key', '7BOCz'), 
 			json_encode($cacheExpiryStrategy),
 			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
 			\JUri::root(true), 

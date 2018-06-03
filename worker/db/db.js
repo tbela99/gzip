@@ -15,19 +15,25 @@
 
 /**
  *
- * @var {DBType}
+ * @var {DBType} DB
  * */
 
-const DB = async (dbName, key = "id") => {
+const DB = async (dbName, key = "id", indexes = []) => {
 	return new Promise((resolve, reject) => {
 		const openDBRequest = indexedDB.open(dbName, 1);
 		const storeName = `${dbName}_store`;
 		let db;
 		const _upgrade = () => {
 			db = openDBRequest.result;
-			db.createObjectStore(storeName, {keyPath: key});
+			const store = db.createObjectStore(storeName, {keyPath: key});
+
+			let index;
+
+			for (index of indexes) {
+				store.createIndex(index.name, index.key, index.options);
+			}
 		};
-		const _query = (method, readOnly, param = null) =>
+		const _query = (method, readOnly, param = null, index = null) =>
 			new Promise((resolveQuery, rejectQuery) => {
 				const permission = readOnly ? "readonly" : "readwrite";
 				if (db.objectStoreNames.contains(storeName)) {
@@ -44,8 +50,13 @@ const DB = async (dbName, key = "id") => {
 							store.put(entry);
 						});
 					} else {
+						if (index) {
+							store.index(index);
+						}
+
 						listener = store[method](param);
 					}
+
 					listener.oncomplete = event => {
 						resolveQuery(event.target.result);
 					};
@@ -59,10 +70,12 @@ const DB = async (dbName, key = "id") => {
 					rejectQuery(new Error("Store not found"));
 				}
 			});
+
 		const methods = {
 			count: () => _query("count", true, keyToUse),
-			get: keyToUse => _query("get", true, keyToUse),
-			getAll: keyToUse => _query("getAll", true, keyToUse),
+			get: (keyToUse, index) => _query("get", true, keyToUse, index),
+			getAll: (keyToUse, index) =>
+				_query("getAll", true, keyToUse, index),
 			put: entryData => _query("put", false, entryData),
 			delete: keyToUse => _query("delete", false, keyToUse),
 			clear: () => _query("clear", false)

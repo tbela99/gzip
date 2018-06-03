@@ -1,6 +1,8 @@
 {
 	"scripts": {
-		"build": "sh ./build.sh && jsdoc -c jsdoc.json"
+		"worker": "sh ./build.sh",
+		"docs": "jsdoc -c jsdoc.json",
+		"build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
 	},
 	"dependencies": {
 		"jsdoc": "^3.5.5",

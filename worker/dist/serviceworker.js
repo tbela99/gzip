@@ -12,7 +12,7 @@
  */
 // @ts-check
 /*  */
-// build 9f8c274 2018-06-01 00:45:38-04:00
+// build 071aa55 2018-06-03 01:29:34-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -34,6 +34,45 @@ const CACHE_NAME = "{CACHE_NAME}";
 const CRY = "😭";
 
 const scope = "{scope}";
+
+Object.defineProperty(SW, "app", {
+    value: Object.create(undef)
+});
+
+Object.defineProperties(SW.app, {
+    name: {
+        value: "gzip",
+        enumerable: true
+    },
+    route: {
+        value: "{ROUTE}",
+        enumerable: true
+    },
+    codeName: {
+        value: "Page Optimizer Plugin",
+        enumerable: true
+    },
+    build: {
+        value: "{VERSION}",
+        enumerable: true
+    },
+    buildid: {
+        value: "071aa55",
+        enumerable: true
+    },
+    builddate: {
+        value: "2018-06-03 01:29:34-04:00",
+        enumerable: true
+    },
+    urls: {
+        value: "{CDN_HOSTS}",
+        enumerable: true
+    },
+    homepage: {
+        value: "https://github.com/tbela99/gzip",
+        enumerable: true
+    }
+});
 
 // const defaultStrategy = "{defaultStrategy}";
 //console.log(self);
@@ -919,20 +958,24 @@ SW.strategies.add("co", event => caches.match(event.request, {
  */
 /**
  *
- * @var {DBType}
+ * @var {DBType} DB
  * */
-const DB = async (dbName, key = "id") => {
+const DB = async (dbName, key = "id", indexes = []) => {
     return new Promise((resolve, reject) => {
         const openDBRequest = indexedDB.open(dbName, 1);
         const storeName = `${dbName}_store`;
         let db;
         const _upgrade = () => {
             db = openDBRequest.result;
-            db.createObjectStore(storeName, {
+            const store = db.createObjectStore(storeName, {
                 keyPath: key
             });
+            let index;
+            for (index of indexes) {
+                store.createIndex(index.name, index.key, index.options);
+            }
         };
-        const _query = (method, readOnly, param = null) => new Promise((resolveQuery, rejectQuery) => {
+        const _query = (method, readOnly, param = null, index = null) => new Promise((resolveQuery, rejectQuery) => {
             const permission = readOnly ? "readonly" : "readwrite";
             if (db.objectStoreNames.contains(storeName)) {
                 const transaction = db.transaction(storeName, permission);
@@ -945,6 +988,9 @@ const DB = async (dbName, key = "id") => {
                         store.put(entry);
                     });
                 } else {
+                    if (index) {
+                        store.index(index);
+                    }
                     listener = store[method](param);
                 }
                 listener.oncomplete = (event => {
@@ -962,8 +1008,8 @@ const DB = async (dbName, key = "id") => {
         });
         const methods = {
             count: () => _query("count", true, keyToUse),
-            get: keyToUse => _query("get", true, keyToUse),
-            getAll: keyToUse => _query("getAll", true, keyToUse),
+            get: (keyToUse, index) => _query("get", true, keyToUse, index),
+            getAll: (keyToUse, index) => _query("getAll", true, keyToUse, index),
             put: entryData => _query("put", false, entryData),
             delete: keyToUse => _query("delete", false, keyToUse),
             clear: () => _query("clear", false)
@@ -1006,14 +1052,35 @@ SW.expiration = function() {
 	 * @class CacheExpiration
 	 */    class CacheExpiration {
         constructor(options) {
+            this.setOptions(options);
+        }
+        getRouteTag(url) {
+            const route = SW.app.route;
+            let h, host;
+            for (host of SW.app.urls) {
+                if (new RegExp("^https?://" + host + "/" + route + "/").test(url)) {
+                    return route;
+                }
+            }
+            return undef;
+        }
+        async setOptions(options) {
             //cacheName = "gzip_sw_worker_expiration_cache_private",
             //	limit = 0,
             //	maxAge = 0
             //
-            const self = this;
             this.limit = +options.limit || 0;
             this.maxAge = +options.maxAge * 1e3 || 0;
-            DB(options.cacheName || "gzip_sw_worker_expiration_cache_private", "url").then(db => self.db = db).catch(e => console.error(CRY, e));
+            this.db = await DB(options.cacheName != undef ? options.cacheName : "gzip_sw_worker_expiration_cache_private", "url", [ {
+                name: "url",
+                key: "url"
+            }, {
+                name: "version",
+                key: "version"
+            }, {
+                name: "route",
+                key: "route"
+            } ]);
         }
         async precheck(event) {
             try {
@@ -1021,8 +1088,8 @@ SW.expiration = function() {
                     return true;
                 }
                 const version = SW.Utils.getObjectHash(event.request);
-                const entry = await this.db.get(event.request.url);
-                const cache = await caches.open(CACHE_NAME).then(cache => cache);
+                const entry = await this.db.get(event.request.url, "url");
+                const cache = await caches.open(CACHE_NAME);
                 if (entry != undef && (entry.version != version || entry.timestamp < Date.now())) {
                     console.info("CacheExpiration [precheck][obsolete][" + version + "] " + event.request.url);
                     caches.delete(event.request);
@@ -1044,22 +1111,23 @@ SW.expiration = function() {
                 return true;
             }
             try {
-                const entry = await this.db.get(event.request.url);
+                const url = event.request.url;
+                const entry = await this.db.get(url, "url");
                 const version = SW.Utils.getObjectHash(event.request);
                 if (entry == undef || entry.version != version || entry.timestamp < Date.now()) {
-                    console.info("CacheExpiration [postcheck][update][version=" + version + "][expires=" + (Date.now() + this.maxAge) + "|" + new Date(Date.now() + this.maxAge).toUTCString() + "] " + event.request.url, this);
+                    console.info("CacheExpiration [postcheck][update][version=" + version + "][expires=" + (Date.now() + this.maxAge) + "|" + new Date(Date.now() + this.maxAge).toUTCString() + "] " + url, this);
                     // need to update
                                         return await this.db.put({
-                        url: event.request.url,
+                        url,
                         method: event.request.method,
                         timestamp: Date.now() + this.maxAge,
+                        route: this.getRouteTag(url),
                         version
                     });
-                    return url;
                 } else {
-                    console.info("CacheExpiration [postcheck][no update][version=" + version + "][expires=" + entry.timestamp + "|" + new Date(entry.timestamp).toUTCString() + "] " + event.request.url, entry);
+                    console.info("CacheExpiration [postcheck][no update][version=" + version + "][expires=" + entry.timestamp + "|" + new Date(entry.timestamp).toUTCString() + "] " + url, entry);
                 }
-                return event.request.url;
+                return url;
             } catch (e) {
                 console.error(CRY, e);
             }
@@ -1123,7 +1191,7 @@ for (entry of "{network_strategies}") {
 
 // register strategies routers
 for (entry of strategies) {
-    route.registerRoute(new Router.ExpressRouter(scope + "{ROUTE}/media/z/" + entry[0] + "/", entry[1]));
+    route.registerRoute(new Router.ExpressRouter(scope + "/{ROUTE}/media/z/" + entry[0] + "/", entry[1]));
 }
 
 if (!strategies.has(defaultStrategy)) {
@@ -1133,24 +1201,55 @@ if (!strategies.has(defaultStrategy)) {
 
 route.setDefaultRouter(new Router.ExpressRouter("/", strategies.get(defaultStrategy)));
 
-/**
- *
- * @package     GZip Plugin
- * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
- *
- * dual licensed
- *
- * @license     LGPL v3
- * @license     MIT License
- */
-// @ts-check
-/* global CACHE_NAME */
-self.addEventListener("install", event => {
-    event.waitUntil(caches.open(CACHE_NAME).then(async cache => {
-        await cache.addAll("{preloaded_urls}");
-        await SW.resolve("install");
-        return self.skipWaiting();
-    }));
+// service worker activation
+SW.on({
+    async install() {
+        console.info("🛠️ service worker install event");
+        await caches.open(CACHE_NAME).then(async cache => {
+            await cache.addAll("{preloaded_urls}");
+        });
+    },
+    async activate() {
+        console.info("🚁 service worker activate event");
+        const db = await DB("gzip_sw_worker_config_cache_private", "name");
+        //	console.log("{STORES}");
+                const settings = await db.get("gzip");
+        if (settings != undef) {
+            if (settings.route != "{ROUTE}") {
+                // the url cache prefix has changed! delete private cache expiration data
+                let storeName, store;
+                for (storeName of "{STORES}") {
+                    console.info({
+                        storeName
+                    });
+                    store = await DB(storeName, "url", [ {
+                        name: "url",
+                        key: "url"
+                    }, {
+                        name: "version",
+                        key: "version"
+                    }, {
+                        name: "route",
+                        key: "route"
+                    } ]);
+                    if (store != undef) {
+                        store.clear();
+                    }
+                }
+            }
+        }
+        await db.put(SW.app);
+        // delete obsolet caches
+                const keyList = await caches.keys();
+        const tokens = CACHE_NAME.split(/_/, 2);
+        /**
+		 * @var {boolean|string}
+		 */        const search = tokens.length == 2 && tokens[0] + "_";
+        // delete older app caches
+                if (search != false) {
+            await Promise.all(keyList.map(key => key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+        }
+    }
 });
 
 /**
@@ -1165,20 +1264,39 @@ self.addEventListener("install", event => {
  */
 // @ts-check
 /* global CACHE_NAME */
+self.addEventListener("install", event => {
+    event.waitUntil((async () => {
+        try {
+            await SW.resolve("install", event);
+        } catch (e) {
+            console.error(CRY, e);
+        }
+        return self.skipWaiting();
+    })());
+});
+
+/**
+ *
+ * @package     GZip Plugin
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+// @ts-check
+/* global CACHE_NAME, SW */
 self.addEventListener("activate", event => {
     // delete old app owned caches
-    event.waitUntil(self.clients.claim().then(async () => {
-        const keyList = await caches.keys();
-        const tokens = CACHE_NAME.split(/_/, 2);
-        /**
-			 * @var {boolean|string}
-			 */        const search = tokens.length == 2 && tokens[0] + "_";
-        // delete older instances
-                if (search != false) {
-            await Promise.all(keyList.map(key => key.indexOf(search) == 0 && key != CACHE_NAME && caches.delete(key)));
+    event.waitUntil((async () => {
+        try {
+            await SW.resolve("activate", event);
+        } catch (e) {
+            console.error(CRY, e);
         }
-        return SW.resolve("activate");
-    }));
+        return self.clients.claim();
+    })());
 });
 
 /**

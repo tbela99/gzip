@@ -61,7 +61,7 @@ for (entry of "{network_strategies}") {
 for (entry of strategies) {
 	route.registerRoute(
 		new Router.ExpressRouter(
-			scope + "{ROUTE}/media/z/" + entry[0] + "/",
+			scope + "/{ROUTE}/media/z/" + entry[0] + "/",
 			entry[1]
 		)
 	);
@@ -75,3 +75,66 @@ if (!strategies.has(defaultStrategy)) {
 route.setDefaultRouter(
 	new Router.ExpressRouter("/", strategies.get(defaultStrategy))
 );
+
+// service worker activation
+SW.on({
+	async install() {
+		console.info("🛠️ service worker install event");
+
+		await caches.open(CACHE_NAME).then(async cache => {
+			await cache.addAll("{preloaded_urls}");
+		});
+	},
+	async activate() {
+		console.info("🚁 service worker activate event");
+
+		const db = await DB("gzip_sw_worker_config_cache_private", "name");
+
+		//	console.log("{STORES}");
+
+		const settings = await db.get("gzip");
+
+		if (settings != undef) {
+			if (settings.route != "{ROUTE}") {
+				// the url cache prefix has changed! delete private cache expiration data
+				let storeName, store;
+
+				for (storeName of "{STORES}") {
+					console.info({storeName});
+
+					store = await DB(storeName, "url", [
+						{name: "url", key: "url"},
+						{name: "version", key: "version"},
+						{name: "route", key: "route"}
+					]);
+
+					if (store != undef) {
+						store.clear();
+					}
+				}
+			}
+		}
+
+		await db.put(SW.app);
+
+		// delete obsolet caches
+		const keyList = await caches.keys();
+		const tokens = CACHE_NAME.split(/_/, 2);
+		/**
+		 * @var {boolean|string}
+		 */
+		const search = tokens.length == 2 && tokens[0] + "_";
+
+		// delete older app caches
+		if (search != false) {
+			await Promise.all(
+				keyList.map(
+					key =>
+						key.indexOf(search) == 0 &&
+						key != CACHE_NAME &&
+						caches.delete(key)
+				)
+			);
+		}
+	}
+});

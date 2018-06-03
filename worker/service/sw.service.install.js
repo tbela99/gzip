@@ -13,10 +13,13 @@
 
 self.addEventListener("install", event => {
 	event.waitUntil(
-		caches.open(CACHE_NAME).then(async cache => {
-			await cache.addAll("{preloaded_urls}");
-			await SW.resolve("install");
+		(async () => {
+			try {
+				await SW.resolve("install", event);
+			} catch (e) {
+				console.error(CRY, e);
+			}
 			return self.skipWaiting();
-		})
+		})()
 	);
 });

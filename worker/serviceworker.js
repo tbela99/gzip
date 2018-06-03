@@ -33,6 +33,19 @@ const SW = Object.create(undef);
 const CACHE_NAME = "{CACHE_NAME}";
 const CRY = "😭";
 const scope = "{scope}";
+
+Object.defineProperty(SW, "app", {value: Object.create(undef)});
+
+Object.defineProperties(SW.app, {
+	name: {value: "gzip", enumerable: true},
+	route: {value: "{ROUTE}", enumerable: true},
+	codeName: {value: "Page Optimizer Plugin", enumerable: true},
+	build: {value: "{VERSION}", enumerable: true},
+	buildid: {value: "build-id", enumerable: true},
+	builddate: {value: "build-date", enumerable: true},
+	urls: {value: "{CDN_HOSTS}", enumerable: true},
+	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
+});
 // const defaultStrategy = "{defaultStrategy}";
 
 //console.log(self);

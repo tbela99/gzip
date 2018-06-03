@@ -30,21 +30,45 @@ SW.expiration = (function() {
 
 	class CacheExpiration {
 		constructor(options) {
+			this.setOptions(options);
+		}
+
+		getRouteTag(url) {
+			const route = SW.app.route;
+			let h, host;
+
+			for (host of SW.app.urls) {
+				if (
+					new RegExp("^https?://" + host + "/" + route + "/").test(
+						url
+					)
+				) {
+					return route;
+				}
+			}
+
+			return undef;
+		}
+
+		async setOptions(options) {
 			//cacheName = "gzip_sw_worker_expiration_cache_private",
 			//	limit = 0,
 			//	maxAge = 0
 			//
-
-			const self = this;
 			this.limit = +options.limit || 0;
 			this.maxAge = +options.maxAge * 1000 || 0;
 
-			DB(
-				options.cacheName || "gzip_sw_worker_expiration_cache_private",
-				"url"
-			)
-				.then(db => (self.db = db))
-				.catch(e => console.error(CRY, e));
+			this.db = await DB(
+				options.cacheName != undef
+					? options.cacheName
+					: "gzip_sw_worker_expiration_cache_private",
+				"url",
+				[
+					{name: "url", key: "url"},
+					{name: "version", key: "version"},
+					{name: "route", key: "route"}
+				]
+			);
 		}
 
 		async precheck(event) {
@@ -54,10 +78,8 @@ SW.expiration = (function() {
 				}
 
 				const version = SW.Utils.getObjectHash(event.request);
-				const entry = await this.db.get(event.request.url);
-				const cache = await caches
-					.open(CACHE_NAME)
-					.then(cache => cache);
+				const entry = await this.db.get(event.request.url, "url");
+				const cache = await caches.open(CACHE_NAME);
 
 				if (
 					entry != undef &&
@@ -95,7 +117,8 @@ SW.expiration = (function() {
 			}
 
 			try {
-				const entry = await this.db.get(event.request.url);
+				const url = event.request.url;
+				const entry = await this.db.get(url, "url");
 				const version = SW.Utils.getObjectHash(event.request);
 
 				if (
@@ -111,19 +134,18 @@ SW.expiration = (function() {
 							"|" +
 							new Date(Date.now() + this.maxAge).toUTCString() +
 							"] " +
-							event.request.url,
+							url,
 						this
 					);
 
 					// need to update
 					return await this.db.put({
-						url: event.request.url,
+						url,
 						method: event.request.method,
 						timestamp: Date.now() + this.maxAge,
+						route: this.getRouteTag(url),
 						version
 					});
-
-					return url;
 				} else {
 					console.info(
 						"CacheExpiration [postcheck][no update][version=" +
@@ -133,12 +155,12 @@ SW.expiration = (function() {
 							"|" +
 							new Date(entry.timestamp).toUTCString() +
 							"] " +
-							event.request.url,
+							url,
 						entry
 					);
 				}
 
-				return event.request.url;
+				return url;
 			} catch (e) {
 				console.error(CRY, e);
 			}
