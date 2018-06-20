@@ -37,6 +37,10 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
 uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.js > ./dist/browser.min.js
 #
 #
+uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/browser.administrator.js -- ./browser.administrator.js
+uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.administrator.js > ./dist/browser.administrator.min.js
+#
+#
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --output ./dist/browser.uninstall.js -- ./browser.uninstall.js
 uglifyjs --compress unsafe=true,passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true --warn --mangle toplevel=true -- ./dist/browser.uninstall.js > ./dist/browser.uninstall.min.js
 #
@@ -56,6 +60,13 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
 #
 uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle toplevel=true -- ./dist/serviceworker.js > ./dist/serviceworker.min.js
+#
+#
+uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
+ -- ./service/sw.administrator.fetch.js  ./service/sw.administrator.install.js ./service/sw.administrator.activate.js  | sed "s/build-date/$(date '+%F %H:%M:%S%:z')/g" | sed "s/build-id/$(git rev-parse --short HEAD)/g"  > ./dist/serviceworker.administrator.js
+#
+uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
+  --warn --mangle toplevel=true -- ./dist/serviceworker.administrator.js > ./dist/serviceworker.administrator.min.js
 #  ./filter/sw.filter.js --mangle-props
 #
 cd ..

@@ -12,7 +12,7 @@
  */
 // @ts-check
 /*  */
-// build 071aa55 2018-06-03 01:29:34-04:00
+// build f2cef53 2018-06-20 16:03:10-04:00
 /* eslint wrap-iife: 0 */
 /* global */
 // validator https://www.pwabuilder.com/
@@ -57,11 +57,11 @@ Object.defineProperties(SW.app, {
         enumerable: true
     },
     buildid: {
-        value: "071aa55",
+        value: "f2cef53",
         enumerable: true
     },
     builddate: {
-        value: "2018-06-03 01:29:34-04:00",
+        value: "2018-06-20 16:03:10-04:00",
         enumerable: true
     },
     urls: {
@@ -721,7 +721,7 @@ SW.strategies.add("co", event => caches.match(event.request, {
 // @ts-check
 /* global SW, CRY, scope, undef */
 (function(SW) {
-    const weakmap = new WeakMap();
+    //	const weakmap = new WeakMap();
     function normalize(method = "GET") {
         if (method == undef || method == "HEAD") {
             return "GET";

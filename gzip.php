@@ -15,6 +15,8 @@ defined('_JEXEC') or die;
 
 require __DIR__.'/autoload.php';
 
+use \Joomla\CMS\Factory as JFactory;
+
 class PlgSystemGzip extends JPlugin
 {
     protected $options = [];
@@ -122,11 +124,25 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterRoute() {
 
-        if(JFactory::getApplication()->isSite()) {
+    	$app = JFactory::$application;
 
-	        $document = JFactory::getDocument();
+	    $document = JFactory::getDocument();
+	    $docType = $document->getType();
 
-            if($document->getType() == 'html') {
+
+    	if ($app->isClient('administrator')) {
+
+    		if($docType == 'html') {
+
+			    $debug = empty($this->options['debug_pwa']) ? '.min' : '';
+			    $script = str_replace(['{scope}', '{debug}'], [\JUri::base(true) . '/', $this->worker_id.$debug], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
+			    $document->addScriptDeclaration($script);
+		    }
+    	}
+
+        if($app->isClient('site')) {
+
+            if($docType == 'html') {
 
 				if (!empty($this->options['imagesvgplaceholder'])) {
 
@@ -139,7 +155,7 @@ class PlgSystemGzip extends JPlugin
 
 					if ($this->options['pwaenabled'] == 1) {
 
-						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}', '{custom_routes}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : ''), json_encode($strategies)], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
+						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
 
 						$onesignal = (array) $this->options['onesignal'];
 						if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
@@ -200,20 +216,46 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterInitialise() {
 
-        $app = JFactory::getApplication();
+        $app = JFactory::$application;
 
-        if($app->isSite()) {
+	    $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
 
-			$this->route = $this->params->get('gzip.cache_key', '7BOCz').'/'; // \Gzip\GZipHelper::shorten(crc32('plugins/system/gzip/r')).'/';
+	    $options = (array) $this->params->get('gzip');
+
+	    if(!empty($options)) {
+
+		    $this->options = (array) $options;
+	    }
+
+	    if (!is_file($file)) {
+
+		    $this->updateServiceWorker($this->options);
+	    }
+
+	    $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+
+        $dirname = JURI::base(true).'/';
+
+        // fetch worker.js
+        if(preg_match('#^'.$dirname.'administrator/worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
+
+	        $debug = $this->params->get('gzip.debug_pwa') ? '' : '.min';
+
+	        $file = __DIR__.'/worker/dist/serviceworker.administrator'.$debug.'.js';
+
+	        header('Cache-Control: max-age=86400');
+	        header('Content-Type: text/javascript;charset=utf-8');
+	        header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+	        readfile($file);
+	        exit;
+        }
+
+        if($app->isClient('site')) {
+
+			$this->route = $this->params->get('gzip.cache_key', '@').'/';
 
 			\Gzip\GZipHelper::$route = $this->route;
-
-            $options = (array) $this->params->get('gzip');
-
-	        if(!empty($options)) {
-
-                $this->options = (array) $options;
-			}
 
             if (!empty($this->options['cdn'])) {
 
@@ -281,7 +323,6 @@ class PlgSystemGzip extends JPlugin
                     $this->updateServiceWorker($this->options);
                 }
 
-                $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
                 $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
             }
 
@@ -374,27 +415,6 @@ class PlgSystemGzip extends JPlugin
                     $document->setMetaData('theme-color', $this->options['pwa_app_theme_color']);
                 }
             }
-            /*
-            <meta property=al:android:package content=com.hostedcloudvideo.android>
-<meta property=al:android:app_name content="Hosted Cloud Video">
-<meta property=al:android:url content=intent://secure-login#Intent;package=com.hostedcloudvideo.android;scheme=hosted-cloud-video;end;>
-<link rel=external data-app=android href=//play.google.com/store/apps/details?id=com.hostedcloudvideo.android>
-<meta property=al:ios:app_store_id content=1087088968><meta property=al:ios:app_name content="Hosted Cloud Video">
-<meta property=al:ios:url content=hosted-cloud-video://secure-login><meta name=apple-itunes-app content="app-id=1087088968, app-argument=/secure-login">
-<link rel=external data-app=ios href=//itunes.apple.com/us/app/hosted-cloud-video/id1087088968?mt=8>
-
-                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
-            ];
-        }
-
-        if(!empty($options['pwa_app_native_ios'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'itunes',
-                'url' => $options['pwa_app_native_ios'],
-                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
-            */
 
             if(method_exists($document, 'addHeadLink')) {
 
@@ -475,9 +495,11 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterRender() {
 
-        $app = JFactory::getApplication();
+    	$app = JFactory::$application;
 
-        if(!$app->isSite() || JFactory::getDocument()->getType() != 'html') {
+    //    $app = JFactory::getApplication();
+
+        if(!$app->isClient('site') || JFactory::getDocument()->getType() != 'html') {
 
             return;
         }
