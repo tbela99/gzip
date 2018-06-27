@@ -177,6 +177,13 @@ class GZipHelper {
         return false;
     }
 
+	/**
+	 * @param array $options
+	 *
+	 * @return \Closure
+	 *
+	 * @since 1.0
+	 */
     public static function getHashMethod($options = []) {
 
         $scheme = \JUri::getInstance()->getScheme();
@@ -186,6 +193,7 @@ class GZipHelper {
         if (is_null($hash)) {
 
 			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+			$salt.= static::$route;
 
             $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
@@ -195,6 +203,7 @@ class GZipHelper {
                 }
 
                 return static::shorten(crc32($scheme. $salt. filemtime($file)));
+
             } : function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
@@ -2473,7 +2482,7 @@ class GZipHelper {
                     }
 
                     $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-                    $const = constant('\Image\Image::'.$method);
+                //    $const = constant('\Image\Image::'.$method);
                     $hash = sha1($file);
                     $short_name = strtolower(str_replace('CROP_', '', $method));
                     $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
@@ -2565,12 +2574,26 @@ class GZipHelper {
                     $attributes['alt'] = '';
                 }
 
-                return '<img '.implode(' ', array_map(function ($value, $key) {
+                $noscript = $attributes;
 
-                    return $key .= '="'.$value.'"';
+                if (!empty($noscript['data-src'])) {
 
-                }, 
-                $attributes, array_keys($attributes))).'>';
+	                $noscript['src'] = $noscript['data-src'];
+	                unset($noscript['data-src']);
+                }
+
+                return '<noscript>'.'<img '.implode(' ', array_map(function ($value, $key) {
+
+		                return $key . '="'.$value.'"';
+
+	                },
+	                $noscript, array_keys($noscript))).'></noscript>'.
+	                '<img '.implode(' ', array_map(function ($value, $key) {
+
+		                return $key . '="'.$value.'"';
+
+	                },
+		                $attributes, array_keys($attributes))).'>';
             }
 
             return $matches[0];

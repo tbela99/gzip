@@ -1,12 +1,21 @@
 {
-	"scripts": {
-		"worker": "sh ./build.sh",
-		"docs": "jsdoc -c jsdoc.json",
-		"build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
-	},
-	"dependencies": {
-		"jsdoc": "^3.5.5",
-		"uglify-es": "^3.3.9",
-		"docdash": "github:clenemt/docdash"
-	}
+  "scripts": {
+    "build": "sh ./build.sh",
+    "docs": "jsdoc -c jsdoc.json",
+    "build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
+  },
+  "devDependencies": {
+    "@babel/polyfill": "^7.0.0-beta.51",
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-minify": "^0.4.3",
+    "docdash": "github:clenemt/docdash",
+    "jsdoc": "^3.5.5",
+    "regenerator": "^0.13.2",
+    "uglify-es": "^3.3.9",
+    "webpack": "^4.12.1",
+    "webpack-cli": "^3.0.8"
+  }
 }
