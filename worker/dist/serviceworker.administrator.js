@@ -21,8 +21,8 @@ Object.defineProperties(SW.app, {
 	route: {value: "{ROUTE}", enumerable: true},
 	codeName: {value: "Page Optimizer Plugin", enumerable: true},
 	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "f2cef53", enumerable: true},
-	builddate: {value: "2018-06-20 16:03:12-04:00", enumerable: true},
+	buildid: {value: "1be2ae0", enumerable: true},
+	builddate: {value: "2018-06-27 11:07:01-04:00", enumerable: true},
 	urls: {value: "{CDN_HOSTS}", enumerable: true},
 	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
 });
@@ -47,6 +47,7 @@ self.addEventListener("fetch", event => {
  */
 // @ts-check
 self.addEventListener("install", event => {
+    console.info("🛠️ service worker install event");
     event.waitUntil(self.skipWaiting());
 });
 
@@ -63,6 +64,6 @@ self.addEventListener("install", event => {
 // @ts-check
 /* global CACHE_NAME, SW */
 self.addEventListener("activate", event => {
-    // delete old app owned caches
+    console.info("🚁 service worker activate event");
     event.waitUntil(self.clients.claim());
 });

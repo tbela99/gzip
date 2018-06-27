@@ -39,7 +39,6 @@ class PlgSystemGzip extends JPlugin
                 $document->addScript(JURI::root(true).'/plugins/system/gzip/push/js/form.js');
 
                 JFactory::getLanguage()->load('plg_system_gzip', __DIR__);
-
                 JFormHelper::addFieldPath(__DIR__.'/push/fields');
 
                 $root = dom_import_simplexml($form->getXml());
@@ -253,8 +252,8 @@ class PlgSystemGzip extends JPlugin
 
         if($app->isClient('site')) {
 
-			$this->route = $this->params->get('gzip.cache_key', '@').'/';
-
+			$this->route = $this->params->get('gzip.cache_key', '7BOCz').'/';
+			
 			\Gzip\GZipHelper::$route = $this->route;
 
             if (!empty($this->options['cdn'])) {

@@ -1,4 +1,4 @@
-https://extensions.joomla.org//extensions/extension/core-enhancements/performance/gzip/
+https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/
 
 ## Page Optimizer Plugin
 
@@ -182,7 +182,7 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.4.1
 
--   Add a service worker for administrator with no caching because admin requests were cached by the web page service worker
+-   Add a service worker for administrator with no caching because admin requests were still cached by the website service worker
 
 ## V2.4
 
