@@ -50,8 +50,18 @@ class Image {
 			$this->load($abspath);
         }
 	}
-    
-    /**
+
+	public function getExtension() {
+
+    	return image_type_to_extension ($this->_image_type, false);
+	}
+
+	public function getMimetype() {
+
+		return image_type_to_mime_type  ($this->_image_type);
+	}
+
+	/**
      * Load image
      *
      * @param string $file
@@ -146,6 +156,7 @@ class Image {
     public function save($abspath = null, $compression=75) {
    
 		$type = $this->_image_type;
+	    $extension = null;
 		
 		if (!is_null($abspath)) {
         
@@ -173,10 +184,6 @@ class Image {
                     
 					    break;
                     }
-
-                default:
-
-                    throw new \InvalidArgumentException('Unsupported file type '.$extension, 400);
 			}
 		}
 
@@ -191,6 +198,11 @@ class Image {
         }
         elseif($type == IMAGETYPE_WEBP) {
             imagewebp($this->_image, $abspath, $compression);
+        }
+
+        else {
+
+	        throw new \InvalidArgumentException('Unsupported file type '.$extension, 400);
         }
 
         return $this;

@@ -15,29 +15,31 @@ LIB.ready(function(undef) {
 	// intersection-observer.min.js
 
 	function lazyload() {
-		let observer = LIB.images.lazy(".image-placeholder").on({
+
+		LIB.images.lazy(".image-placeholder").on({
 			load: function(img, oldImage) {
+
 				if (oldImage.dataset.srcset != null) {
 					oldImage.srcset = oldImage.dataset.srcset;
+                    oldImage.removeAttribute('data-srcset');
 				}
 
-				//	const svg = atob(oldImage.src.split('base64,', 2)[1]);
+                oldImage.removeAttribute('data-src');
 
 				oldImage.insertAdjacentHTML(
 					"beforebegin",
-					'<span style="position:relative;display:inline-block"><span style="transition:opacity .2s ease-out;background:#fff;display:block;position:absolute;width:100%;height:100%;left:0;top:0"><span style="display:block;width:100%;height:100%;background:url(\'' +
-						oldImage.src +
-						"') 0 0 / cover no-repeat\">"
+					'<span class="image-placeholder-wrapper"><span class="image-placeholder-opacity"><span class="image-placeholder-element" style="background-image:url(\'' +
+					(oldImage.currentSrc || oldImage.src) +
+						"')\">"
 				);
 
 				const container = oldImage.previousElementSibling;
-				oldImage.src = img.src;
-				//	img.src = svg;
 
+				oldImage.classList.remove('image-placeholder-lqip', 'image-placeholder-svg', 'image-placeholder');
 				container.insertBefore(oldImage, container.firstElementChild);
 
 				setTimeout(function() {
-					oldImage.nextElementSibling.style.opacity = 0;
+					container.classList.add('image-placeholder-complete');
 
 					setTimeout(function() {
 						container.parentElement.insertBefore(
@@ -47,12 +49,9 @@ LIB.ready(function(undef) {
 						container.parentElement.removeChild(container);
 					}, 250);
 				}, 500);
-				//  oldImage.nextElementSibling.style = ' ';
-			},
-			complete: function() {
-				observer = null;
 			}
 		});
+
 	}
 
 	if (
@@ -63,11 +62,12 @@ LIB.ready(function(undef) {
 		)
 	) {
 		const script = document.createElement("script");
-		script.onload = lazyload;
+        /*script.onreadystatechange =*/ script.onload = lazyload;
 		script.defer = true;
 		script.async = true;
 		script.src = "{script-src}";
 		document.body.appendChild(script);
+
 	} else {
 		if (!("isIntersecting" in window.IntersectionObserverEntry.prototype)) {
 			Object.defineProperty(
@@ -81,6 +81,6 @@ LIB.ready(function(undef) {
 			);
 		}
 
-		lazyload();
+        lazyload();
 	}
 });

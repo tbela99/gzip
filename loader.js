@@ -31,7 +31,6 @@ function il(position) {
 						parent.removeChild(oldScript);
 					} catch (e) {
 						console.error(e);
-						console.log(script.text);
 					}
 				};
 			}(scripts[i], document.createElement("script"))),

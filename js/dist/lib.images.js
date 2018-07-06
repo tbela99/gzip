@@ -14,13 +14,49 @@
 !function(LIB, undef) {
     "use strict";
     const merge = LIB.Utils.merge;
+    function rspimages(image) {
+        let mq;
+        console.log(image);
+        const mqs = image.getAttribute("sizes").replace(/\)\s[^,$]+/g, ")").split(",");
+        const images = image.dataset.srcset.split(",").map(function(src) {
+            return src.split(" ")[0];
+        });
+        function update() {
+            let i = 0;
+            let j = mqs.length;
+            for (;i < j; i++) {
+                if (matchMedia(mqs[i]).matches) {
+                    if (mqs[i] != mq) {
+                        mq = mqs[i];
+                        image.src = images[i];
+                    }
+                    break;
+                }
+            }
+        }
+        window.addEventListener("resize", update, false);
+        update();
+        return update;
+    }
     function load(oldImage, observer) {
         const img = new Image();
-        if (oldImage.dataset.srcset != undef) {
-            img.srcset = oldImage.dataset.srcset;
+        if (oldImage.dataset.srcset == undef && oldImage.dataset.src != undef) {
+            img.src = oldImage.dataset.src;
+        }
+        if (oldImage.dataset.srcset != undef && window.matchMedia) {
+            if (!("srcset" in img)) {
+                img.dataset.srcset = oldImage.dataset.srcset;
+                img.setAttribute("sizes", oldImage.getAttribute("sizes"));
+                const update = rspimages(img);
+                img.addEventListener("load", function() {
+                    window.removeEventListener("resize", update, false);
+                    rspimages(oldImage);
+                }, false);
+            } else {
+                img.srcset = oldImage.dataset.srcset;
+            }
         }
         if (img.decode != undef) {
-            img.src = oldImage.dataset.src;
             img.decode().then(function() {
                 observer.trigger("load", img, oldImage);
             }).catch(function() {
@@ -33,7 +69,6 @@
             img.onerror = function() {
                 observer.trigger("error", img, oldImage);
             };
-            img.src = oldImage.dataset.src;
             if (img.height > 0 && img.width > 0) {
                 observer.trigger("load", img, oldImage);
             }

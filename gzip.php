@@ -2,7 +2,7 @@
 
 /**
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
+ * @subpackage  System.Gzip
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed
@@ -128,12 +128,12 @@ class PlgSystemGzip extends JPlugin
 	    $document = JFactory::getDocument();
 	    $docType = $document->getType();
 
+	    $debug = empty($this->options['debug']) ? '.min' : '';
 
     	if ($app->isClient('administrator')) {
 
     		if($docType == 'html') {
 
-			    $debug = empty($this->options['debug_pwa']) ? '.min' : '';
 			    $script = str_replace(['{scope}', '{debug}'], [\JUri::base(true) . '/', $this->worker_id.$debug], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
 			    $document->addScriptDeclaration($script);
 		    }
@@ -145,9 +145,13 @@ class PlgSystemGzip extends JPlugin
 
 				if (!empty($this->options['imagesvgplaceholder'])) {
 
-					$document->addScript('plugins/system/gzip/js/dist/lib.min.js');
-					$document->addScript('plugins/system/gzip/js/dist/lib.images.min.js');
-					$document->addScriptDeclaration(str_replace('{script-src}', \Gzip\GZipHelper::url(JURI::root(true).'/plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader.min.js')));
+					$debug = empty($this->options['debug']) ? '.min' : '';
+
+					$document->addCustomTag('<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>');
+
+					$document->addScript('plugins/system/gzip/js/dist/lib'.$debug.'.js');
+					$document->addScript('plugins/system/gzip/js/dist/lib.images'.$debug.'.js');
+					$document->addScriptDeclaration(str_replace('{script-src}', \Gzip\GZipHelper::url('plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader'.$debug.'.js')));
 				}
 
                 if(!empty($this->options['pwaenabled'])) {
@@ -174,7 +178,7 @@ class PlgSystemGzip extends JPlugin
 
                 if (!empty($script)) {
 
-	                $document->addScriptDeclaration( $script);
+	                $document->addScriptDeclaration($script);
                 }
             }
         }

@@ -185,6 +185,7 @@ You can specify which resource are not managed by the service worker by specifyi
 -   Add a service worker for administrator with no caching because admin requests were still cached by the website service worker
 -   Make lazyloaded images indexabl using noscript tag
 -   force file name generation whenever the settings are changed
+-   Add new breakpoint 1920px for responsive images and css background images
 
 ## V2.4
 

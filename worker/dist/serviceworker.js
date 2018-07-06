@@ -126,7 +126,7 @@ __webpack_require__.r(__webpack_exports__);
 // @ts-check
 /* eslint wrap-iife: 0 */
 
-// build 0e484da 2018-06-30 08:42:18-04:00
+// build f51acdb 2018-07-05 21:23:29-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -632,7 +632,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /*  */
 
-// build 0e484da 2018-06-30 08:42:18-04:00
+// build f51acdb 2018-07-05 21:23:29-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -664,8 +664,8 @@ Object.defineProperties(SW.app, {
 	cacheName: {value: "{CACHE_NAME}", enumerable: true},
 	codeName: {value: "Page Optimizer Plugin", enumerable: true},
 	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "0e484da", enumerable: true},
-	builddate: {value: "2018-06-30 08:42:18-04:00", enumerable: true},
+	buildid: {value: "f51acdb", enumerable: true},
+	builddate: {value: "2018-07-05 21:23:29-04:00", enumerable: true},
 	urls: {value: "{CDN_HOSTS}", enumerable: true},
 	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
 });
@@ -1759,7 +1759,7 @@ async function cacheNetwork(event) {
 		}
 
 		return networkResponse;
-	});
+	}).catch(error => console.error("😭", error));
 
 	return response || fetchPromise;
 	//	});
@@ -1843,7 +1843,9 @@ async function networkFirst(event) {
 
 		return response;
 		//	})
-	} catch (e) {}
+	} catch (error) {
+		console.error("😭", error);
+	}
 
 	return caches.match(event.request, {cacheName: _serviceworker_js__WEBPACK_IMPORTED_MODULE_1__["cacheName"]});
 }

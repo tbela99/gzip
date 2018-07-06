@@ -33,7 +33,7 @@ export async function cacheNetwork(event) {
 		}
 
 		return networkResponse;
-	});
+	}).catch(error => console.error("😭", error));
 
 	return response || fetchPromise;
 	//	});

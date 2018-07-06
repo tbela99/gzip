@@ -21,8 +21,8 @@ Object.defineProperties(SW.app, {
 	route: {value: "{ROUTE}", enumerable: true},
 	codeName: {value: "Page Optimizer Plugin", enumerable: true},
 	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "0e484da", enumerable: true},
-	builddate: {value: "2018-06-30 08:42:20-04:00", enumerable: true},
+	buildid: {value: "f51acdb", enumerable: true},
+	builddate: {value: "2018-07-05 21:23:31-04:00", enumerable: true},
 	urls: {value: "{CDN_HOSTS}", enumerable: true},
 	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
 });

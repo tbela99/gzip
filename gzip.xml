@@ -10,6 +10,7 @@
     <version>2.4</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
+        <folder>css</folder>
         <folder>fields</folder>
         <folder>js/lib</folder>
         <folder>js/dist</folder>
@@ -22,8 +23,11 @@
         <filename>responder.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
+        <filename>loader.js</filename>
         <filename>loader.min.js</filename>
+        <filename>cssloader.js</filename>
         <filename>cssloader.min.js</filename>
+        <filename>imagesloader.js</filename>
         <filename>imagesloader.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
@@ -169,9 +173,10 @@
                         <option value="CROP_FACE">JOPTION_IMAGE_RESIZE_CROP_FACE</option>
                     </field>
                     <field type="spacer" hr="true" />
-                    <field name="imagesvgplaceholder" label="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_LABEL" description="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
+                    <field name="imagesvgplaceholder" label="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_LABEL" description="PLG_GZIP_FIELD_IMAGE_SVG_PLACE_HOLDER_DESCRIPTION" type="list" default="0">
+                        <option value="">JNONE</option>
+                        <option value="svg">JOPTION_IMAGESVGPLACEHOLDER_SVG</option>
+                        <option value="lqip">JOPTION_IMAGESVGPLACEHOLDER_LQIP</option>
                     </field>
                     <field type="spacer" hr="true" />
                     <field name="imageresize" label="PLG_GZIP_FIELD_IMAGE_RESIZE_LABEL" description="PLG_GZIP_FIELD_IMAGE_RESIZE_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -179,6 +184,7 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="sizes" label="PLG_GZIP_FIELD_IMAGE_SIZES_LABEL" multiple="multiple" description="PLG_GZIP_FIELD_IMAGE_SIZES_DESCRIPTION" type="list" default="">
+                        <option value="1920">1920px</option>
                         <option value="1024">1024px</option>
                         <option value="768">768px</option>
                         <option value="320">320px</option>
@@ -189,6 +195,7 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="css_sizes" label="PLG_GZIP_FIELD_IMAGE_CSS_SIZES_LABEL" multiple="multiple" description="PLG_GZIP_FIELD_IMAGE_CSS_SIZES_DESCRIPTION" type="list" default="">
+                        <option value="1920">1920px</option>
                         <option value="1024">1024px</option>
                         <option value="768">768px</option>
                         <option value="320">320px</option>
