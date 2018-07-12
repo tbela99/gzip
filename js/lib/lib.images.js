@@ -16,77 +16,109 @@
 
 	const merge = LIB.Utils.merge;
 
-	function rspimages (image) {
+    /**
+	 * legacy srcset support
+     * @param {HTMLImageElement} image
+     * @returns {Function} update
+     */
+	function rspimages(image) {
 
-        let mq;
+		let mq;
 
-        console.log(image);
+		const mqs = image.
+			getAttribute("sizes").
+			replace(/\)\s[^,$]+/g, ")").
+			split(",");
+		const images = image.dataset.srcset.split(",").map(function(src) {
+			return src.split(" ")[0];
+		});
 
-        const mqs = image.getAttribute('sizes').replace(/\)\s[^,$]+/g, ')').split(',');
-        const images = image.dataset.srcset.split(',').map(function (src) {
 
-            return src.split(' ')[0];
-        });
+        if ( typeof window.CustomEvent != "function" ) {
 
-        function update () {
-
-            let i = 0;
-            let j = mqs.length;
-
-            for (; i < j; i++) {
-
-                if (matchMedia(mqs[i]).matches) {
-
-                    if (mqs[i] != mq) {
-
-                        mq = mqs[i];
-                        image.src = images[i];
-                    }
-
-                    break;
-                }
+            function CustomEvent ( event, params ) {
+                params = params || { bubbles: false, cancelable: false, detail: undefined };
+                const evt = document.createEvent( 'CustomEvent' );
+                evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+                return evt;
             }
+
+            CustomEvent.prototype = window.Event.prototype;
         }
 
-        window.addEventListener('resize', update, false);
-        update ();
+        function createEvent (name, params) {
 
-        return update;
+        	try {
+
+        		return new CustomEvent(name, params);
+			}
+
+			catch (e) {
+
+			}
+
+            const evt = document.createEvent('CustomEvent');
+            evt.initEvent(name, params && params.bubbles, params == undef || params && params.cancelable, params && params.details);
+
+            return evt;
+		}
+
+		function update() {
+			let i = 0;
+			const j = mqs.length;
+
+			for (; i < j; i++) {
+				if (matchMedia(mqs[i]).matches) {
+					if (mqs[i] != mq) {
+						mq = mqs[i];
+						image.src = images[i];
+						image.dispatchEvent(createEvent('sourcechange'));
+					}
+
+					break;
+				}
+			}
+		}
+
+		window.addEventListener("resize", update, false);
+		update();
+
+		return update;
 	}
 
 	function load(oldImage, observer) {
 		const img = new Image();
 
-        if (oldImage.dataset.srcset == undef && oldImage.dataset.src != undef) {
+	//	if (oldImage.dataset.src != undef) {
+			img.src = oldImage.dataset.src != undef ? oldImage.dataset.src : oldImage.src;
 
-            img.src = oldImage.dataset.src;
-        }
+	//	}
 
 		if (oldImage.dataset.srcset != undef && window.matchMedia) {
-
-			if (!('srcset' in img)) {
-
+			if (!("srcset" in img)) {
 				img.dataset.srcset = oldImage.dataset.srcset;
-                img.setAttribute('sizes', oldImage.getAttribute('sizes'));
+				img.setAttribute("sizes", oldImage.getAttribute("sizes"));
 
 				const update = rspimages(img);
 
-				img.addEventListener('load', function () {
+				img.addEventListener(
+					"load",
+					function() {
+						window.removeEventListener("resize", update, false);
+						rspimages(oldImage);
+					},
+					false
+				);
 
-					window.removeEventListener('resize', update, false);
-					rspimages(oldImage);
-				}, false);
-            }
-            else {
-
-                img.srcset = oldImage.dataset.srcset;
-            }
+            } else {
+				img.srcset = oldImage.dataset.srcset;
+			}
 		}
 
-		if (img.decode != undef) {
+		observer.trigger("preload", img, oldImage);
 
-			img.
-				decode().
+		if (img.decode != undef) {
+			img.decode().
 				then(function() {
 					observer.trigger("load", img, oldImage);
 				}).
@@ -94,9 +126,6 @@
 					observer.trigger("error", img);
 				});
 		} else {
-			img.onload = function() {
-				observer.trigger("load", img, oldImage);
-			};
 
 			img.onerror = function() {
 				observer.trigger("error", img, oldImage);
@@ -105,6 +134,14 @@
 			if (img.height > 0 && img.width > 0) {
 				observer.trigger("load", img, oldImage);
 			}
+
+			else {
+
+                img.onload = function() {
+                    observer.trigger("load", img, oldImage);
+                };
+			}
+
 		}
 	}
 
@@ -112,16 +149,18 @@
 		this.trigger("complete");
 	}
 
-	// return a promise
 	LIB.images = merge(Object.create(null), {
-        /**
+		/**
 		 *
-         * @param string selector
-         * @param object options
-         */
+		 * @param string selector
+		 * @param object options
+		 */
 		lazy: function(selector, options) {
-
-			const images = [].slice.apply((options && options.container || document).querySelectorAll(selector));
+			const images = [].slice.apply(
+				((options && options.container) || document).querySelectorAll(
+					selector
+				)
+			);
 			const observer = merge(true, Object.create(null), LIB.Event);
 			const io = new IntersectionObserver(function(entries) {
 				let i = entries.length,
@@ -132,7 +171,6 @@
 					entry = entries[i];
 
 					if (entry.isIntersecting) {
-
 						io.unobserve(entry.target);
 
 						index = images.indexOf(entry.target);

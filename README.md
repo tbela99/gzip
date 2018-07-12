@@ -182,8 +182,9 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.4.1
 
+-   Load images using LQIP technique
 -   Add a service worker for administrator with no caching because admin requests were still cached by the website service worker
--   Make lazyloaded images indexabl using noscript tag
+-   Make lazyloaded images indexable using noscript tag
 -   force file name generation whenever the settings are changed
 -   Add new breakpoint 1920px for responsive images and css background images
 

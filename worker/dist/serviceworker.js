@@ -126,7 +126,7 @@ __webpack_require__.r(__webpack_exports__);
 // @ts-check
 /* eslint wrap-iife: 0 */
 
-// build f51acdb 2018-07-05 21:23:29-04:00
+// build 7688586 2018-07-12 15:06:15-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -632,7 +632,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /*  */
 
-// build f51acdb 2018-07-05 21:23:29-04:00
+// build 7688586 2018-07-12 15:06:15-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -664,8 +664,8 @@ Object.defineProperties(SW.app, {
 	cacheName: {value: "{CACHE_NAME}", enumerable: true},
 	codeName: {value: "Page Optimizer Plugin", enumerable: true},
 	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "f51acdb", enumerable: true},
-	builddate: {value: "2018-07-05 21:23:29-04:00", enumerable: true},
+	buildid: {value: "7688586", enumerable: true},
+	builddate: {value: "2018-07-12 15:06:15-04:00", enumerable: true},
 	urls: {value: "{CDN_HOSTS}", enumerable: true},
 	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
 });

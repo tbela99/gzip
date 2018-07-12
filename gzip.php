@@ -148,6 +148,7 @@ class PlgSystemGzip extends JPlugin
 					$debug = empty($this->options['debug']) ? '.min' : '';
 
 					$document->addCustomTag('<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>');
+					$document->addCustomTag('<script data-position="head" data-ignore="true">'.file_get_contents(__DIR__.'/imagesnojs'.($debug || !empty($this->options['minifyjs']) ? '.min' : '').'.js').'</script>');
 
 					$document->addScript('plugins/system/gzip/js/dist/lib'.$debug.'.js');
 					$document->addScript('plugins/system/gzip/js/dist/lib.images'.$debug.'.js');

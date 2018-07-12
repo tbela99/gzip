@@ -2559,7 +2559,7 @@ class GZipHelper {
                     if ($src !== '') {
 
 	                    $class = !empty($attributes['class']) ? $attributes['class'].' ' : '';
-	                    $attributes['class'] = $class.'image-placeholder image-placeholder-'.strtolower($options['imagesvgplaceholder']);
+	                    $attributes['class'] = $class.'image-placeholder image-placeholder-no-js image-placeholder-'.strtolower($options['imagesvgplaceholder']);
 
 	                    $attributes['src'] = $src;
 						$attributes['data-src'] = $file;
@@ -2657,7 +2657,7 @@ class GZipHelper {
 
 	            if (isset($noscript['class'])) {
 
-	            	$noscript['class'] = trim(str_replace(['image-placeholder-lqip', 'image-placeholder-svg', 'image-placeholder'], '', $noscript['class']));
+	            	$noscript['class'] = trim(str_replace(['image-placeholder-lqip', 'image-placeholder-svg', 'image-placeholder', 'image-placeholder-no-js'], '', $noscript['class']));
 
 	            	if (empty($noscript['class'])) {
 
