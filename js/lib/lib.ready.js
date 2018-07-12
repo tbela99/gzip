@@ -20,7 +20,7 @@ LIB.ready = function () {
 	let fired = document.readyState != 'loading';
 
 	function readystatechange() {
-		
+
 		switch (document.readyState) {
 			
 			case 'loading':				
@@ -44,7 +44,7 @@ LIB.ready = function () {
 	document.addEventListener('readystatechange', readystatechange);
 	
 	return function (cb) {
-		
+
 		if (fired) {
 
 			while(queue.length > 0) {

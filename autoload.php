@@ -2,7 +2,7 @@
 
 /**
  * @package     GZip Plugin
- * @subpackage  System.Gzip *
+ * @subpackage  System.Gzip
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
  * dual licensed

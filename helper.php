@@ -15,12 +15,18 @@ namespace Gzip;
 
 defined('JPATH_PLATFORM') or die;
 
+use function array_unshift;
+use function base64_encode;
+use function file_get_contents;
+use function getimagesize;
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
 use Sabberworm\CSS\Rule\Rule;
 use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
+use function str_replace;
+use function strtolower;
 
 define('WEBP', function_exists('imagewebp') && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
@@ -177,6 +183,13 @@ class GZipHelper {
         return false;
     }
 
+	/**
+	 * @param array $options
+	 *
+	 * @return \Closure
+	 *
+	 * @since 1.0
+	 */
     public static function getHashMethod($options = []) {
 
         $scheme = \JUri::getInstance()->getScheme();
@@ -186,6 +199,7 @@ class GZipHelper {
         if (is_null($hash)) {
 
 			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+			$salt.= static::$route;
 
             $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
@@ -195,6 +209,7 @@ class GZipHelper {
                 }
 
                 return static::shorten(crc32($scheme. $salt. filemtime($file)));
+
             } : function ($file) use($scheme, $salt) {
 
                 if (!static::isFile($file)) {
@@ -1277,7 +1292,7 @@ class GZipHelper {
 
         if ($async) {
 
-            $head_string .= '<script data-ignore="true">'.file_get_contents(__DIR__.'/cssloader.min.js').'</script>';
+            $head_string .= '<script data-ignore="true">'.file_get_contents(__DIR__.'/cssloader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>';
         }
 
         if (isset($links['head']['webfonts'])) {
@@ -2075,8 +2090,6 @@ class GZipHelper {
             'body' => ''
         ];
 
-    //    $profiler->mark('replace <script>');
-
         $async = false;
 
         if (!empty($sources['ignored'])) {
@@ -2162,7 +2175,7 @@ class GZipHelper {
                 $script['head'] = '';
             }
 
-            $script['head'] = '<script>'.file_get_contents(__DIR__.'/loader.min.js').'</script>'.$script['head'];
+            $script['head'] = '<script>'.file_get_contents(__DIR__.'/loader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>'.$script['head'];
         }
 
         foreach ($script as $position => $content) {
@@ -2182,15 +2195,10 @@ class GZipHelper {
             $body = str_replace($strings, $replace, $body);
         }
 
-    //    $profiler->mark('done replace <script>');
-
         if (!empty($comments)) {
 
             $body = str_replace(array_keys($comments), array_values($comments), $body);
         }
-
-    //    static::$pwacache = array_merge(static::$pwacache, $files);
-    //    static::$marks = array_merge(static::$marks, $profiler->getMarks());
 
         return $body;
     }
@@ -2328,32 +2336,80 @@ class GZipHelper {
        return str_replace(array_keys($cdata), array_values($cdata), $svg);
     }
 
-    public static function generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, array $options, $path, $hash, $method, $short_name) {
+	/**
+	 * @param \Image\Image $image
+	 * @param string $file
+	 * @param array $options
+	 * @param string  $path
+	 * @param string $hash
+	 * @param string $method
+	 *
+	 * @return bool|string
+	 *
+	 * @since 2.4.1
+	 */
+    public static function generateLQIP($image, $file, array $options, $path, $hash, $method) {
 
         if (!empty($options['imagesvgplaceholder'])) {
 
+        	if ($image->getWidth() <= 80) {
+
+        		return '';
+	        }
+
             $short_name = strtolower(str_replace('CROP_', '', $method));
 
-            $svg = $path.$hash.'-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.svg';
+        	$extension = WEBP ? 'webp' : $image->getExtension();
+            $img = $path.$hash.'-lqip-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.'.$extension;
 
-            if (!is_file($svg)) {
-                
-            //    if (!empty($images)) {
-                    
-                    $clone = clone $image;
-                    file_put_contents($svg, 'data:image/svg+xml;base64,'.base64_encode(static::minifySVG($clone->load($file)->resizeAndCrop(min($clone->getWidth(), 1024), null, $method)->setSize(200)->toSvg())));
-            //    }
+            if (!is_file($img)) {
+
+                clone $image->setSize(80)->save($img, 1);
             }
 
-            if (is_file($svg)) {
+            if (is_file($img)) {
                 
-            //    $style = !empty($attributes['style']) ? $attributes['style'].';' : '';
-                return file_get_contents($svg);
+                return 'data:image/'.$extension.';base64,'.base64_encode(file_get_contents($img));
             }
         }
 
         return '';
     }
+
+	/**
+	 * @param \Image\Image $image
+	 * @param string $file
+	 * @param array $options
+	 * @param string  $path
+	 * @param string $hash
+	 * @param string $method
+	 *
+	 * @return bool|string
+	 *
+	 * @since 2.4.0
+	 */
+	public static function generateSVGPlaceHolder($image, $file, array $options, $path, $hash, $method) {
+
+		if (!empty($options['imagesvgplaceholder'])) {
+
+			$short_name = strtolower(str_replace('CROP_', '', $method));
+
+			$svg = $path.$hash.'-svg-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.svg';
+
+			if (!is_file($svg)) {
+
+				$clone = clone $image;
+				file_put_contents($svg, 'data:image/svg+xml;base64,'.base64_encode(static::minifySVG($clone->load($file)->resizeAndCrop(min($clone->getWidth(), 1024), null, $method)->setSize(200)->toSvg())));
+			}
+
+			if (is_file($svg)) {
+
+				return file_get_contents($svg);
+			}
+		}
+
+		return '';
+	}
 
     public static function parseImages($body, array $options = []) {
 
@@ -2435,7 +2491,7 @@ class GZipHelper {
                         }
                     }
 
-                    if (!empty($options['imageconvert']) &&  WEBP && $pathinfo != 'webp') {
+                    if (!empty($options['imageconvert']) && WEBP && $pathinfo != 'webp') {
                         
                         $newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
 
@@ -2473,35 +2529,49 @@ class GZipHelper {
                     }
 
                     $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-                    $const = constant('\Image\Image::'.$method);
+                //    $const = constant('\Image\Image::'.$method);
                     $hash = sha1($file);
                     $short_name = strtolower(str_replace('CROP_', '', $method));
-                    $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
+                 //   $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
-                    $image = new \Image\Image();
+                    $image = new \Image\Image($file);
+
+                    $src = '';
 
 					// generate svg placeholder for faster image preview
 					if (!empty($options['imagesvgplaceholder'])) {
-							
-						$class = !empty($attributes['class']) ? $attributes['class'].' ' : '';
-						$attributes['class'] = $class.'image-placeholder';
+
+						switch ($options['imagesvgplaceholder']) {
+
+							case 'lqip':
+
+								$src = static::generateLQIP(clone $image, $file, $options, $path, $hash, $method);
+								break;
+
+							case 'svg':
+							default:
+
+								$src = static::generateSVGPlaceHolder(clone $image, $file, $options, $path, $hash, $method);
+								break;
+						}
 					}
 
-                    $src = static::generateSVGPlaceHolder($image, $file, $sizes, $maxwidth, $options, $path, $hash, $method, $short_name);
-
                     if ($src !== '') {
-                            
-						$attributes['src'] = $src;
+
+	                    $class = !empty($attributes['class']) ? $attributes['class'].' ' : '';
+	                    $attributes['class'] = $class.'image-placeholder image-placeholder-no-js image-placeholder-'.strtolower($options['imagesvgplaceholder']);
+
+	                    $attributes['src'] = $src;
 						$attributes['data-src'] = $file;
                     }
 
-                    // responsive images?
+	                // responsive images?
                     if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
 
                         // build mq based on actual image size
                         $mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
 
-                            return $size < $maxwidth;								
+                            return $size <= $maxwidth;
                         });
 
                         if (!empty($mq)) {
@@ -2517,42 +2587,48 @@ class GZipHelper {
 
                             $srcset = [];
 
-                            foreach ($images as $k => $img) {
+	                        if ($maxwidth > 1200) {
+
+		                        $image->setSize(1200);
+	                        }
+
+	                        foreach ($images as $k => $img) {
 
                                 if (!\is_file($img)) {
 
-                                        if (!\is_file($crop)) {
-
-											if (\is_null($image->getResource())) {
-
-												$image->load($file);
-																	
-											    if ($maxwidth > 1200) {
-
-											        $image->setSize(1200);
-											    }												
-											}
-                                                
-                                            $clone = clone $image;                                                                                     
-
-                                            // resize image to use less memory
-                                            $clone->resizeAndCrop($mq[$k], null, $method)->save($crop);
-                                        //    }
-                                        }
+	                                (clone $image)->resizeAndCrop($mq[$k], null, $method)->save($img);
                                 }
+                             //   if (à)
 
                                 $srcset[] = $img.' '.$mq[$k].'w';
                             }
 
-                            $srcset[] = $file.' '.$sizes[0].'w';
-                            $maxwidth = end($mq) + 1;
+                            if (!empty($images)) {
 
-                            $mq = array_map(function ($size) {
+                            	$attributes['data-src'] = end($images);
+                            }
 
-                                return '(max-width: '.$size.'px)';
-                            });
+							if ($sizes[0] > $mq[0]) {
 
-                            $mq[] = '(min-width: '.$maxwidth.'px)';
+								array_unshift($srcset, $file.' '.$sizes[0].'w');
+								array_unshift($mq, $sizes[0]);
+							}
+
+	                        //    $mq[] = '(min-width: '.$maxwidth.'px)';
+
+                            $j = count($mq);
+
+	                        for ($i = 0; $i < $j; $i++) {
+
+	                        	if ($i < $j - 1) {
+
+	                        		$mq[$i] = '(min-width: '.($mq[$i + 1] + 1).'px) '.$mq[$i].'px';
+		                        }
+		                        else {
+
+			                        $mq[$i] = '(min-width: 0) '.$mq[$i].'px';
+		                        }
+	                        }
 
                             $attributes['data-srcset'] = implode(',', $srcset);
                             $attributes['sizes'] = implode(',', $mq);
@@ -2565,12 +2641,42 @@ class GZipHelper {
                     $attributes['alt'] = '';
                 }
 
-                return '<img '.implode(' ', array_map(function ($value, $key) {
+                $noscript = $attributes;
 
-                    return $key .= '="'.$value.'"';
+                if (!empty($noscript['data-src'])) {
 
-                }, 
-                $attributes, array_keys($attributes))).'>';
+	                $noscript['src'] = $noscript['data-src'];
+	                unset($noscript['data-src']);
+                }
+
+	            if (!empty($noscript['data-srcset'])) {
+
+		            $noscript['srcset'] = $noscript['data-srcset'];
+		            unset($noscript['data-srcset']);
+	            }
+
+	            if (isset($noscript['class'])) {
+
+	            	$noscript['class'] = trim(str_replace(['image-placeholder-lqip', 'image-placeholder-svg', 'image-placeholder', 'image-placeholder-no-js'], '', $noscript['class']));
+
+	            	if (empty($noscript['class'])) {
+
+	            		unset($noscript['class']);
+		            }
+	            }
+
+                return '<noscript>'.'<img '.implode(' ', array_map(function ($value, $key) {
+
+		                return $key . '="'.$value.'"';
+
+	                },
+	                $noscript, array_keys($noscript))).'></noscript>'.
+	                '<img '.implode(' ', array_map(function ($value, $key) {
+
+		                return $key . '="'.$value.'"';
+
+	                },
+		                $attributes, array_keys($attributes))).'>';
             }
 
             return $matches[0];
