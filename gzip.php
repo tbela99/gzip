@@ -320,11 +320,18 @@ class PlgSystemGzip extends JPlugin
             // do not render blank js file when service worker is disabled
             if(!empty($this->options['pwaenabled'])) {
 
-                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version';
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version';
 
                 if (!is_file($file)) {
 
                     $this->updateServiceWorker($this->options);
+                }
+
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version';
+
+                if (!is_file($file)) {
+
+                    $this->updateManifest($this->options);
                 }
 
                 $this->manifest_id = file_get_contents($file);
