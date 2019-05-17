@@ -1,8 +1,7 @@
 # Roadmap
 
 ## High priority list
-
-1.  Use blurry image for imagespreview as an alternative to SVG
+1.  Implement Web Share Target level 1
 1.  Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1.  Clear Joomla cache when settings are updated
 1.  Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for anaytic scripts and and hosted fonts.

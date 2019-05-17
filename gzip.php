@@ -632,7 +632,50 @@ class PlgSystemGzip extends JPlugin
             'background_color' => $options['pwa_app_bg_color'],
             'theme_color' => $options['pwa_app_theme_color'],
             'display' => $options['pwa_app_display']
-        ];
+		];
+		
+		/*
+"share_target": {
+  "action": "/share-target/",
+  "method": "GET",
+  "enctype": "application/x-www-form-urlencoded",
+  "params": {
+    "title": "title",
+    "text": "text",
+    "url": "url"
+  }
+
+		*/
+
+		if (!empty($options['pwa_share_target_enabled'])) {
+
+			$manifest['share_target'] = [
+
+				'action' => $options['pwa_share_target_action'],
+				'method' => $options['pwa_share_target_method'],
+				'enctype' => $options['pwa_share_target_enctype']
+			];
+
+			if (!empty($options['title_supported'])) {
+
+				$manifest['share_target']['params']['title'] = !empty($options['pwa_share_target_params']['title']) ? $options['pwa_share_target_params']['title'] : 'title';
+			}
+
+			if (!empty($options['text_supported'])) {
+
+				$manifest['share_target']['params']['text'] = !empty($options['pwa_share_target_params']['text']) ? $options['pwa_share_target_params']['text'] : 'text';
+			}
+
+			if (!empty($options['url_supported'])) {
+
+				$manifest['share_target']['params']['url'] = !empty($options['pwa_share_target_params']['url']) ? $options['pwa_share_target_params']['url'] : 'url';
+			}
+
+		//	if (!empty($options['files_supported'])) {
+
+		//		$manifest['share_target']['params']['files'] = isset($options['pwa_share_target_params']['title']) ? $options['pwa_share_target_params']['title'] : 'title';
+		//	}
+		}
 
         if(!empty($options['onesignal'])) {
 

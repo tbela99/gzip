@@ -204,7 +204,7 @@
                     </field>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_app" label="Service Worker::App">
+            <fieldset name="pwa_app" label="PWA::App">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -248,7 +248,79 @@
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_network" label="Service Worker::Network">
+            
+            <fieldset name="pwa_web_share_target" label="PWA::Web Share Target">
+                <field type="spacer" label="Configure share target from Andriod/IOS" />
+                <field type="spacer" hr="true" />
+                <field type="spacer" label="Share target settings" />
+                <fields name="gzip">
+                    <field name="pwa_share_target_enabled" 
+                        label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENABLED_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENABLED_DESCRIPTION" 
+                         type="radio" class="btn-group" default="0">
+                        <option value="0">JNO</option>
+                        <option value="1">JYES</option>
+                    </field>
+                    <field name="pwa_share_target_action" 
+                        label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ACTION_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ACTION_DESCRIPTION" 
+                         type="text"/>
+                    <field name="pwa_share_target_method" 
+                        label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_METHOD_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_METHOD_DESCRIPTION" 
+                         class="btn-group" type="radio" default="GET">
+                            <option value="GET">PLG_GZIP_FIELD_PWA_SHARE_TARGET_METHOD_OPTION_GET</option>
+                            <option value="POST">PLG_GZIP_FIELD_PWA_SHARE_TARGET_METHOD_OPTION_POST</option>
+                    </field>
+                    <field name="pwa_share_target_enctype" 
+                        label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENCTYPE_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENCTYPE_DESCRIPTION" 
+                         type="list">
+                            <option value="application/x-www-form-urlencoded">PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENCTYPE_OPTION_MULTIPART_FORM_URL_ENCODED</option>
+                            <option value="multipart/form-data">PLG_GZIP_FIELD_PWA_SHARE_TARGET_ENCTYPE_OPTION_MULTIPART_FORM_DATA</option>
+                    </field>  
+                    <field type="spacer" hr="true" />           
+                    <field type="spacer" label="Rename shared data fields name" />
+                    <field name="title_supported" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_SUPPORTED_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_SUPPORTED_DESCRIPTION" 
+                        class="btn-group" type="radio" default="1">
+                            <option value="0">JNO</option>
+                            <option value="1">JYES</option>
+                    </field>
+                    <field name="text_supported" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_SUPPORTED_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_SUPPORTED_DESCRIPTION" 
+                        class="btn-group" type="radio" default="1">
+                            <option value="0">JNO</option>
+                            <option value="1">JYES</option>
+                    </field>
+                    <field name="url_supported" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_SUPPORTED_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_SUPPORTED_DESCRIPTION" 
+                        class="btn-group" type="radio" default="1">
+                            <option value="0">JNO</option>
+                            <option value="1">JYES</option>
+                    </field>
+                    <!--
+                    <field name="files_supported" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_SUPPORTED_LABEL" 
+                        description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_SUPPORTED_DESCRIPTION" 
+                        class="btn-group" type="radio" default="0">
+                            <option value="0">JNO</option>
+                            <option value="1">JYES</option>
+                    </field>
+                    -->
+                    <fields name="pwa_share_target_params">
+                        <field name="title" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_LABEL" 
+                                description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_DESCRIPTION" 
+                                type="text" default="" hint="title"/>
+                        <field name="text" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_LABEL" 
+                                description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_DESCRIPTION" 
+                                type="text" default="" hint="text"/>
+                        <field name="url" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_LABEL" 
+                                description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_DESCRIPTION" 
+                                type="text" default="" hint="url"/>
+                    </fields>                    
+                </fields>
+            </fieldset>
+            <fieldset name="pwa_network" label="PWA::Network">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Networking settings" />
@@ -301,7 +373,7 @@
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_cache" label="Service Worker::Cache">
+            <fieldset name="pwa_cache" label="PWA::Cache">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
