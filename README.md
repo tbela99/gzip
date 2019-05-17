@@ -183,7 +183,7 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.4.2
 
-Fix file nt found error
+Fix file not found error
 
 ## V2.4.1
 
