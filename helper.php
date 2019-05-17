@@ -798,9 +798,9 @@ class GZipHelper {
         $remote_service = !empty($options['minifycssservice']);
 
         $links = [];
-        $ignore = isset($options['cssignore']) ? $options['cssignore'] : [];
-        $remove = isset($options['cssremove']) ? $options['cssremove'] : [];
-
+        $ignore = !empty($options['cssignore']) ? $options['cssignore'] : [];
+		$remove = !empty($options['cssremove']) ? $options['cssremove'] : [];
+		
         $async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
         $body = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
@@ -1429,7 +1429,7 @@ class GZipHelper {
 
     public static function getName($name) {
 
-        return preg_replace(static::$regReduce, '', $name);
+        return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
     }
 
     public static function shorten($id, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
@@ -1454,8 +1454,6 @@ class GZipHelper {
 
             return false;
         }
-
-    //    $name = preg_replace('~(#|\?).*$~', '', $name);
 
         return is_file($name) || is_file(utf8_decode($name));
     }
@@ -1827,8 +1825,8 @@ class GZipHelper {
         $scripts = [];
     //    $js = [];
     //    $ignored = [];
-        $ignore = isset($options['jsignore']) ? $options['jsignore'] : [];
-        $remove = isset($options['jsremove']) ? $options['jsremove'] : [];
+        $ignore = !empty($options['jsignore']) ? $options['jsignore'] : [];
+        $remove = !empty($options['jsremove']) ? $options['jsremove'] : [];
 
         // scripts
         // files
