@@ -38,20 +38,21 @@ There are additional plugins that help optimizing and profiling your page or ser
 - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
 - [7. Misc](#7-misc)
 - [8. Change History](#8-change-history)
-  - [8.1. V2.5.0](#81-v250)
-  - [8.2. V2.4.1](#82-v241)
-  - [8.3. V2.4](#83-v24)
-  - [8.4. V2.3](#84-v23)
-  - [8.5. V2.2](#85-v22)
-  - [8.6. V2.1](#86-v21)
-  - [8.7. V2.0](#87-v20)
-    - [8.7.1. PWA: implemented network strategies:](#871-pwa-implemented-network-strategies)
-  - [8.8. V1.1](#88-v11)
-  - [8.9. V1.0](#89-v10)
-    - [8.9.1. SRI (Sub resources integrity)](#891-sri-sub-resources-integrity)
-    - [8.9.2. Critical CSS Path](#892-critical-css-path)
-    - [8.9.3. Javascript](#893-javascript)
-    - [8.9.4. CSS](#894-css)
+  - [V2.5.0](#v250)
+  - [V2.4.2](#v242)
+  - [V2.4.1](#v241)
+  - [V2.4](#v24)
+  - [V2.3](#v23)
+  - [V2.2](#v22)
+  - [V2.1](#v21)
+  - [V2.0](#v20)
+    - [PWA: implemented network strategies:](#pwa-implemented-network-strategies)
+  - [V1.1](#v11)
+  - [V1.0](#v10)
+    - [SRI (Sub resources integrity)](#sri-sub-resources-integrity)
+    - [Critical CSS Path](#critical-css-path)
+    - [Javascript](#javascript)
+    - [CSS](#css)
 
 # 1. General improvements
 
@@ -184,11 +185,15 @@ You can specify which resource are not managed by the service worker by specifyi
 
 # 8. Change History
 
-## 8.1. V2.5.0
+## V2.5.0
 
 - Implement Web Share Target api level 1
 
-## 8.2. V2.4.1
+## V2.4.2
+
+Fix file not found error
+
+## V2.4.1
 
 -   Load images using LQIP technique
 -   Add a service worker for administrator with no caching because admin requests were still cached by the website service worker
@@ -196,7 +201,7 @@ You can specify which resource are not managed by the service worker by specifyi
 -   force file name generation whenever the settings are changed
 -   Add new breakpoint 1920px for responsive images and css background images
 
-## 8.3. V2.4
+## V2.4
 
 -   Customize max-age value for cached resources
 -   remove Expires header in favor of max-age
@@ -204,7 +209,7 @@ You can specify which resource are not managed by the service worker by specifyi
 -   Define cache expiration rule per file type
 -   Add missing files to the git repo
 
-## 8.4. V2.3
+## V2.3
 
 -   Web fonts preloading: Choose how the text is rendered while web fonts are loading by customizing font-display
 -   Enable CDN / cookieless domain support
@@ -217,7 +222,7 @@ You can specify which resource are not managed by the service worker by specifyi
 -   Configure service worker route strategy per resource type from the Joomla administrator
 -   Implement the beforeinstallprompt event. see [here](https://w3c.github.io/manifest/#beforeinstallpromptevent-interface)
 
-## 8.5. V2.2
+## V2.2
 
 -   optimized image lazyloader
 -   generate svg placeholder from images for quick preview
@@ -231,7 +236,7 @@ You can specify which resource are not managed by the service worker by specifyi
 -   automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
 -   Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
 
-## 8.6. V2.1
+## V2.1
 
 -   Added push notifications using onesignal
 -   Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android é windows 10 / firefox android)
@@ -242,9 +247,9 @@ You can specify which resource are not managed by the service worker by specifyi
 -   Add a secret token to prevent administrator access
 -   Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
 
-## 8.7. V2.0
+## V2.0
 
-### 8.7.1. PWA: implemented network strategies:
+### PWA: implemented network strategies:
 
 -   Cache only
 -   Network only
@@ -252,23 +257,23 @@ You can specify which resource are not managed by the service worker by specifyi
 -   Network first, falling back to cache
 -   Cache, with network update
 
-## 8.8. V1.1
+## V1.1
 
 CSS: preload web fonts
 
-## 8.9. V1.0
+## V1.0
 
 this release implements to to bottom page loading optimization
 
-### 8.9.1. SRI (Sub resources integrity)
+### SRI (Sub resources integrity)
 
 generate SRI for javascript and css files
 
-### 8.9.2. Critical CSS Path
+### Critical CSS Path
 
 generate critical css path based on the list of selectors you provide.
 
-### 8.9.3. Javascript
+### Javascript
 
 -   fetch files hosted on remote servers
 -   minify javascript files
@@ -279,7 +284,7 @@ generate critical css path based on the list of selectors you provide.
 -   remove duplicates
 -   move javascript at the bottom of the page
 
-### 8.9.4. CSS
+### CSS
 
 -   fetch files hosted on remote servers
 -   minify css files

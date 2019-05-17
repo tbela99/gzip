@@ -327,7 +327,14 @@ class PlgSystemGzip extends JPlugin
                     $this->updateServiceWorker($this->options);
                 }
 
-                $this->manifest_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version');
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest_version';
+
+                if (!is_file($file)) {
+
+                    $this->updateManifest($this->options);
+                }
+
+                $this->manifest_id = file_get_contents($file);
             }
 
 			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true).'/'.$this->route) === 0) {
@@ -532,17 +539,32 @@ class PlgSystemGzip extends JPlugin
         if(!empty($options['jsremove'])) {
 
             $options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
-        }
+		}
+		
+		if (empty($options['jsremove'])) {
+
+			$options['jsremove'] = [];
+		}
 
         if(!empty($options['cssignore'])) {
 
             $options['cssignore'] = preg_split('#\s+#s', $options['cssignore'], -1, PREG_SPLIT_NO_EMPTY);
-        }
+		}
+		
+		if (empty($options['cssignore'])) {
+
+			$options['cssignore'] = [];
+		}
 
         if(!empty($options['cssremove'])) {
 
             $options['cssremove'] = preg_split('#\s+#s', $options['cssremove'], -1, PREG_SPLIT_NO_EMPTY);
         }
+
+		if (empty($options['cssremove'])) {
+
+			$options['cssremove'] = [];
+		}
 
         foreach (['js', 'css', 'img', 'ch'] as $key) {
 
@@ -849,7 +871,7 @@ class PlgSystemGzip extends JPlugin
 		}
 
 		$worker_id = trim(file_get_contents(__DIR__.'/worker_version'));
-		$hash = hash('sha1', json_encode($options).$this->workerworker_id);
+		$hash = hash('sha1', json_encode($options).$worker_id);
 		
 		$hosts = [$_SERVER['SERVER_NAME']];
 
