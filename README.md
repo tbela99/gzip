@@ -21,38 +21,39 @@ There are additional plugins that help optimizing and profiling your page or ser
 
     - [Page Optimizer Plugin](#page-optimizer-plugin)
 
--   [General improvements](#general-improvements)
--   [Moving script and css position in the page](#moving-script-and-css-position-in-the-page)
--   [Caching](#caching)
--   [Sub Resource Integrity (SRI)](#sub-resource-integrity-sri)
--   [Critical CSS Path](#critical-css-path)
--   [Images](#images)
-    -   [Responsive images](#responsive-images)
--   [Javascript Improvements](#javascript-improvements)
--   [CSS Improvements](#css-improvements)
--   [Progressive Web App](#progressive-web-app)
-    -   [Network cache strategies](#network-cache-strategies)
-    -   [PWA preloaded resources](#pwa-preloaded-resources)
-    -   [Installable web app](#installable-web-app)
-    -   [Web Push](#web-push)
-    -   [Service worker router api](#service-worker-router-api)
-    -   [Exclude resources from the service worker management](#exclude-resources-from-the-service-worker-management)
--   [CDN and Cookieless Domains](#cdn-and-cookieless-domains)
--   [Misc](#misc)
--   [Change History](#change-history)
-    -   [V2.4.1](#v241)
-    -   [V2.4](#v24)
-    -   [V2.3](#v23)
-    -   [V2.2](#v22)
-    -   [V2.1](#v21)
-    -   [V2.0](#v20)
-        -   [PWA: implemented network strategies:](#pwa-implemented-network-strategies)
-    -   [V1.1](#v11)
-    -   [V1.0](#v10)
-        -   [SRI (Sub resources integrity)](#sri-sub-resources-integrity)
-        -   [Critical CSS Path](#critical-css-path-1)
-        -   [Javascript](#javascript)
-        -   [CSS](#css)
+- [General improvements](#general-improvements)
+- [Moving script and css position in the page](#moving-script-and-css-position-in-the-page)
+- [Caching](#caching)
+- [Sub Resource Integrity (SRI)](#sub-resource-integrity-sri)
+- [Critical CSS Path](#critical-css-path)
+- [Images](#images)
+  - [Responsive images](#responsive-images)
+- [Javascript Improvements](#javascript-improvements)
+- [CSS Improvements](#css-improvements)
+- [Progressive Web App](#progressive-web-app)
+  - [Network cache strategies](#network-cache-strategies)
+  - [PWA preloaded resources](#pwa-preloaded-resources)
+  - [Installable web app](#installable-web-app)
+  - [Web Push](#web-push)
+  - [Service worker router api](#service-worker-router-api)
+  - [Exclude resources from the service worker management](#exclude-resources-from-the-service-worker-management)
+- [CDN and Cookieless Domains](#cdn-and-cookieless-domains)
+- [Misc](#misc)
+- [Change History](#change-history)
+  - [V2.4.2](#v242)
+  - [V2.4.1](#v241)
+  - [V2.4](#v24)
+  - [V2.3](#v23)
+  - [V2.2](#v22)
+  - [V2.1](#v21)
+  - [V2.0](#v20)
+    - [PWA: implemented network strategies:](#pwa-implemented-network-strategies)
+  - [V1.1](#v11)
+  - [V1.0](#v10)
+    - [SRI (Sub resources integrity)](#sri-sub-resources-integrity)
+    - [Critical CSS Path](#critical-css-path-1)
+    - [Javascript](#javascript)
+    - [CSS](#css)
 
 <!-- /TOC -->
 
@@ -179,6 +180,10 @@ You can specify which resource are not managed by the service worker by specifyi
 -   You can secure your Joomla administrator access by defining a secret access token.
 
 # Change History
+
+## V2.4.2
+
+Fix file nt found error
 
 ## V2.4.1
 
