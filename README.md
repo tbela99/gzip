@@ -26,15 +26,15 @@ There are additional plugins that help optimizing and profiling your page or ser
   - [2.1. Responsive images](#21-responsive-images)
 - [3. Javascript Improvements](#3-javascript-improvements)
 - [4. CSS Improvements](#4-css-improvements)
-- [4.1. Network cache strategies](#41-network-cache-strategies)
 - [5. Progressive Web App](#5-progressive-web-app)
   - [5.1. Installable web app](#51-installable-web-app)
   - [5.2. Web Share Target](#52-web-share-target)
   - [5.3. Offline mode](#53-offline-mode)
   - [5.4. Preloaded resources](#54-preloaded-resources)
-  - [5.5. Web Push](#55-web-push)
-  - [5.6. Service worker router api](#56-service-worker-router-api)
-  - [5.7. Exclude resources from the service worker management](#57-exclude-resources-from-the-service-worker-management)
+  - [5.5. Network cache strategies](#55-network-cache-strategies)
+  - [5.6. Web Push](#56-web-push)
+  - [5.7. Service worker router api](#57-service-worker-router-api)
+  - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
 - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
 - [7. Misc](#7-misc)
 - [8. Change History](#8-change-history)
@@ -130,14 +130,6 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   Ignore css files that match a pattern
 -   Load css files in a non blocking way
 
-# 4.1. Network cache strategies
-
--   Cache only
--   Network only
--   Cache first, falling back to network
--   Network first, falling back to cache
--   Cache, with network update - stale while revalidate <- this is the default
-
 # 5. Progressive Web App
 
 ## 5.1. Installable web app
@@ -148,8 +140,9 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 
 ## 5.2. Web Share Target
 
-You can configure your pwa to become a share target on android and IOS using the web target api level 1.
+Web Share Target allows your pwa app to receive data shared by other applications on your mobile device. You can configure your pwa to become a share target on android and IOS using the web target api level 2.
 You can also configure which data you want to be sent to your app.
+[web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
 
 ## 5.3. Offline mode
 
@@ -159,16 +152,25 @@ Offline mode capabilities can be set to one of these network strategies
 
 You can provide the list of urls to load when the service worker is installed like icons, logo, css files, web pages, etc ...
 
-## 5.5. Web Push
+## 5.5. Network cache strategies
+
+You can choose how your web assests will be cached. You can customize settings per resource type:
+-   Cache only
+-   Network only
+-   Cache first, falling back to network
+-   Network first, falling back to cache
+-   Cache, with network update - stale while revalidate <- this is the default
+
+## 5.6. Web Push
 
 -   Manage Web Push subscription using OneSignal
 -   Added basic push notification settings for Joomla articles
 
-## 5.6. Service worker router api
+## 5.7. Service worker router api
 
 Add routes to customize fetch event networking strategy by using either a static route or a regexp
 
-## 5.7. Exclude resources from the service worker management
+## 5.8. Exclude resources from the service worker management
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 

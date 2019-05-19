@@ -1,7 +1,7 @@
 # Roadmap
 
 ## High priority list
-1.  Implement Web Share Target level 1
+1.  Implement Web Share Target level 2
 1.  Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 1.  Clear Joomla cache when settings are updated
 1.  Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for anaytic scripts and and hosted fonts.

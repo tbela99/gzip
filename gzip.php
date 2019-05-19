@@ -208,6 +208,19 @@ class PlgSystemGzip extends JPlugin
 
         if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
+			if(
+				!empty($data['params']['gzip']['pwa_share_target_enabled']) &&
+				!empty($data['params']['gzip']['files_supported'])
+			) {
+				
+				// enforce parameters when file sharing is ON
+				$data['params']['gzip']['pwa_share_target_method'] = 'POST';
+				$data['params']['gzip']['pwa_share_target_enctype'] = 'multipart/form-data';
+				
+				$table->set('params', json_encode($data['params']));
+				$table->store();
+			}
+			
             $options = $data['params']['gzip'];
 
             $this->cleanCache();
@@ -656,19 +669,6 @@ class PlgSystemGzip extends JPlugin
             'display' => $options['pwa_app_display']
 		];
 		
-		/*
-"share_target": {
-  "action": "/share-target/",
-  "method": "GET",
-  "enctype": "application/x-www-form-urlencoded",
-  "params": {
-    "title": "title",
-    "text": "text",
-    "url": "url"
-  }
-
-		*/
-
 		if (!empty($options['pwa_share_target_enabled'])) {
 
 			$manifest['share_target'] = [
@@ -677,6 +677,11 @@ class PlgSystemGzip extends JPlugin
 				'method' => $options['pwa_share_target_method'],
 				'enctype' => $options['pwa_share_target_enctype']
 			];
+
+			if (is_object($options['pwa_share_target_params'])) {
+			
+				$options['pwa_share_target_params'] = get_object_vars($options['pwa_share_target_params']);
+			}
 
 			if (!empty($options['title_supported'])) {
 
@@ -693,10 +698,10 @@ class PlgSystemGzip extends JPlugin
 				$manifest['share_target']['params']['url'] = !empty($options['pwa_share_target_params']['url']) ? $options['pwa_share_target_params']['url'] : 'url';
 			}
 
-		//	if (!empty($options['files_supported'])) {
+			if (!empty($options['files_supported'])) {
 
-		//		$manifest['share_target']['params']['files'] = isset($options['pwa_share_target_params']['title']) ? $options['pwa_share_target_params']['title'] : 'title';
-		//	}
+				$manifest['share_target']['params']['files'] = !empty($options['pwa_share_target_params']['files']) ? json_decode($options['pwa_share_target_params']['files'], true) : [];
+			}
 		}
 
         if(!empty($options['onesignal'])) {
