@@ -139,10 +139,10 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   Alternative links to native mobile apps can be provided and the preference can be configured
 
 ## 5.2. Web Share Target
-
+![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
 Web Share Target allows your pwa app to receive data shared by other applications on your mobile device. You can configure your pwa to become a share target on android and IOS using the web target api level 2.
 You can also configure which data you want to be sent to your app.
-[web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
+![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
 
 ## 5.3. Offline mode
 
