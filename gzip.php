@@ -536,6 +536,11 @@ class PlgSystemGzip extends JPlugin
             $options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
         }
 
+        if(!empty($options['imageignore'])) {
+
+            $options['imageignore'] = preg_split('#\s+#s', $options['imageignore'], -1, PREG_SPLIT_NO_EMPTY);
+        }
+
         if(!empty($options['jsremove'])) {
 
             $options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
