@@ -2416,10 +2416,11 @@ class GZipHelper {
             return $body;
         }
 
-        $path = $options['img_path'];
+		$path = $options['img_path'];
+		$ignored_image = !empty($options['imageignore']) ? $options['imageignore'] : [];
 
         // parse scripts
-        $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options) {
+        $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options, $ignored_image) {
 
             $attributes = [];
             
@@ -2438,7 +2439,18 @@ class GZipHelper {
             if (isset($attributes['src'])) {
 
                 $name = static::getName($attributes['src']);
-                $file = preg_replace('/(#|\?).*$/', '', $name);
+				$file = preg_replace('/(#|\?).*$/', '', $name);
+				
+				if (!empty($ignored_image)) {
+
+					foreach($ignored_image as $pattern) {
+
+						if (strpos($name, $pattern) !== false) {
+
+							return $matches[0];
+						}
+					}
+				}
 
                 $basename = preg_replace('/(#|\?).*$/', '', basename($name));
                 $pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
