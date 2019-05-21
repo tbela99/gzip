@@ -28,7 +28,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 - [4. CSS Improvements](#4-css-improvements)
 - [5. Progressive Web App](#5-progressive-web-app)
   - [5.1. Installable web app](#51-installable-web-app)
-  - [5.2. Web Share Target](#52-web-share-target)
+  - [5.2. Web Share Target Level 2](#52-web-share-target-level-2)
   - [5.3. Offline mode](#53-offline-mode)
   - [5.4. Preloaded resources](#54-preloaded-resources)
   - [5.5. Network cache strategies](#55-network-cache-strategies)
@@ -138,11 +138,10 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   The app can be installed as a standalone desktop application (tested on windows 10) with google chrome as long as you provide a 512x512 icon.
 -   Alternative links to native mobile apps can be provided and the preference can be configured
 
-## 5.2. Web Share Target
+## 5.2. Web Share Target Level 2
 ![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
-Web Share Target allows your pwa app to receive data shared by other applications on your mobile device. You can configure your pwa to become a share target on android and IOS using the web target api level 2.
+Web Share Target allows your pwa app to receive data (text and files) shared by other applications on your mobile device. You can configure your pwa to become a receiver on android and IOS using the web target api level 2.
 You can also configure which data you want to be sent to your app.
-![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
 
 ## 5.3. Offline mode
 
@@ -189,11 +188,12 @@ You can specify which resource are not managed by the service worker by specifyi
 
 ## V2.5.0
 
-- Implement Web Share Target api level 1
+- Implement Web Share Target api level 2
 
 ## V2.4.2
 
-Fix file not found error
+- Fix file not found error
+- Add the possibility to ignore images based on a pattern
 
 ## V2.4.1
 

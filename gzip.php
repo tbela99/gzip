@@ -249,7 +249,7 @@ class PlgSystemGzip extends JPlugin
 		    $this->updateServiceWorker($this->options);
 	    }
 
-	    $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+	    $this->worker_id = file_get_contents($file);
 
         $dirname = JURI::base(true).'/';
 
