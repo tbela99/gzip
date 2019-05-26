@@ -1441,9 +1441,11 @@ class GZipHelper {
         while ($id) {
             $id = ($id - ($r = $id % $base)) / $base;
             $short = $alphabet{$r} . $short;
-        }
+		}
+		
+		$response = ltrim($short, '0');
 
-        return $short;
+        return $response === '' ? $short : $response;
     }
 
     public static function isFile($name) {
