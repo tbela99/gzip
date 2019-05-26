@@ -1443,7 +1443,7 @@ class GZipHelper {
             $short = $alphabet{$r} . $short;
         }
 
-        return $short;
+        return ltrim($short, '0');
     }
 
     public static function isFile($name) {
