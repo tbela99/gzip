@@ -191,7 +191,6 @@ You can specify which resource are not managed by the service worker by specifyi
 ## V2.5.0
 
 - Implement Web Share Target api level 2
-- Implement Background Sync api
 
 ## V2.4.2
 
