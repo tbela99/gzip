@@ -1453,7 +1453,6 @@ class GZipHelper {
         return $response;
     }
 
-
     public static function isFile($name) {
 
         $name = static::getName($name);
