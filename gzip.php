@@ -267,13 +267,18 @@ class PlgSystemGzip extends JPlugin
             if (!empty($this->options['cdn'])) {
 
 				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
-            }
-
+			}
+			
 			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
 			
 			if (is_object($this->options['cdn'])) {
 
-				$this->options['cdn'] = array_values(get_object_vars($this->options['cdn']));
+				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
+			}
+
+			if (empty($this->options['cdn'])) {
+
+				$this->options['cdn'] = [];
 			}
 
 	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
