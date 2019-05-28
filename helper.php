@@ -1432,18 +1432,25 @@ class GZipHelper {
         return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
     }
 
-    public static function shorten($id, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
+    public static function shorten($value, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
 
         $base = strlen($alphabet);
         $short = '';
-        $id = sprintf('%u', $id);
-
-        while ($id) {
+		$id = sprintf('%u', $value);
+		
+        while ($id != 0) {
             $id = ($id - ($r = $id % $base)) / $base;
             $short = $alphabet{$r} . $short;
-        }
+		}
+		
+		$response = ltrim($short, '0');
 
-        return $short;
+		if ($response === '' && $value !== '') {
+
+			return '0';
+		}
+
+        return $response;
     }
 
     public static function isFile($name) {
