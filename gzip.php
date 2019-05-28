@@ -236,7 +236,10 @@ class PlgSystemGzip extends JPlugin
 		    $this->updateServiceWorker($this->options);
 	    }
 
-	    $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+	    if (is_file($file)) {
+
+		    $this->worker_id = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/worker_version');
+	    }
 
         $dirname = JURI::base(true).'/';
 
@@ -334,7 +337,10 @@ class PlgSystemGzip extends JPlugin
                     $this->updateManifest($this->options);
                 }
 
-                $this->manifest_id = file_get_contents($file);
+                if (is_file($file)) {
+
+                    $this->manifest_id = file_get_contents($file);
+                }
             }
 
 			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true).'/'.$this->route) === 0) {
