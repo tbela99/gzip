@@ -140,7 +140,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 
 ## 5.2. Web Share Target Level 2
 
-![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/master/web-share-target.jpg)
+![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
 
 Web Share Target allows your pwa app to receive data (text and files) shared by other applications on your mobile device. You can configure your pwa to become a receiver on android and IOS using the web target api level 2.
 You can also configure which data you want to be sent to your app.
