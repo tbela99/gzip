@@ -277,6 +277,7 @@
                     <field name="pwa_share_target_action" 
                         label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ACTION_LABEL" 
                         description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ACTION_DESCRIPTION" 
+                        hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_ACTION_HINT" 
                          type="text"/>
                     <field name="pwa_share_target_method" 
                         label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_METHOD_LABEL" 
