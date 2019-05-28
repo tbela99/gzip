@@ -200,3 +200,4 @@ SW.on({
 import "./service/sw.service.activate.js";
 import "./service/sw.service.fetch.js";
 import "./service/sw.service.install.js";
+import "./sync/sw.service.sync.js";

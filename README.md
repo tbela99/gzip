@@ -38,6 +38,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
 - [7. Misc](#7-misc)
 - [8. Change History](#8-change-history)
+  - [V2.5.1](#v251)
   - [V2.5.0](#v250)
   - [V2.4.2](#v242)
   - [V2.4.1](#v241)
@@ -187,6 +188,11 @@ You can specify which resource are not managed by the service worker by specifyi
 -   You can secure your Joomla administrator access by defining a secret access token.
 
 # 8. Change History
+
+## V2.5.1
+
+- Implement bacground sync with no fallback
+- Allow dns prefetch configuration
 
 ## V2.5.0
 

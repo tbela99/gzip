@@ -110,6 +110,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _service_sw_service_activate_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(15);
 /* harmony import */ var _service_sw_service_fetch_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(16);
 /* harmony import */ var _service_sw_service_install_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(17);
+/* harmony import */ var _sync_sw_service_sync_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(18);
+/* harmony import */ var _sync_sw_service_sync_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(_sync_sw_service_sync_js__WEBPACK_IMPORTED_MODULE_10__);
 /**
  *
  * main service worker file
@@ -126,7 +128,7 @@ __webpack_require__.r(__webpack_exports__);
 // @ts-check
 /* eslint wrap-iife: 0 */
 
-// build 7688586 2018-07-12 15:06:15-04:00
+// build 929f400 2019-05-26 20:47:15-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -308,6 +310,7 @@ _serviceworker_js__WEBPACK_IMPORTED_MODULE_5__["SW"].on({
 		}
 	}
 });
+
 
 
 
@@ -632,7 +635,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /*  */
 
-// build 7688586 2018-07-12 15:06:15-04:00
+// build 929f400 2019-05-26 20:47:15-04:00
 /* eslint wrap-iife: 0 */
 // validator https://www.pwabuilder.com/
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
@@ -664,8 +667,8 @@ Object.defineProperties(SW.app, {
 	cacheName: {value: "{CACHE_NAME}", enumerable: true},
 	codeName: {value: "Page Optimizer Plugin", enumerable: true},
 	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "7688586", enumerable: true},
-	builddate: {value: "2018-07-12 15:06:15-04:00", enumerable: true},
+	buildid: {value: "929f400", enumerable: true},
+	builddate: {value: "2019-05-26 20:47:15-04:00", enumerable: true},
 	urls: {value: "{CDN_HOSTS}", enumerable: true},
 	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
 });
@@ -1991,6 +1994,33 @@ self.addEventListener("install", event => {
 			return self.skipWaiting();
 		})()
 	);
+});
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+/**
+ *
+ * @package     GZip Plugin
+ * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+ *
+ * dual licensed
+ *
+ * @license     LGPL v3
+ * @license     MIT License
+ */
+// @ts-check
+// import {SW} from "../serviceworker.js";
+
+self.addEventListener("sync", event => {
+
+    // event.tag
+    console.info('sync event supported 😭');
+//	event.waitUntil(
+		
+//	);
 });
 
 
