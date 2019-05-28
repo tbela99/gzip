@@ -268,6 +268,9 @@ class PlgSystemGzip extends JPlugin
 
 				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
 			}
+
+			else 
+				$this->options['cdn'] = [];
 			
 			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
 			
