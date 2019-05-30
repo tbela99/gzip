@@ -1,6 +1,6 @@
 https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/
 
-## Page Optimizer Plugin
+## 0.1. Page Optimizer Plugin
 
 Do you want to improve your website by
 
@@ -17,29 +17,28 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-<!-- TOC -->
-
-    - [Page Optimizer Plugin](#page-optimizer-plugin)
-
-- [General improvements](#general-improvements)
-- [Moving script and css position in the page](#moving-script-and-css-position-in-the-page)
-- [Caching](#caching)
-- [Sub Resource Integrity (SRI)](#sub-resource-integrity-sri)
-- [Critical CSS Path](#critical-css-path)
-- [Images](#images)
-  - [Responsive images](#responsive-images)
-- [Javascript Improvements](#javascript-improvements)
-- [CSS Improvements](#css-improvements)
-- [Progressive Web App](#progressive-web-app)
-  - [Network cache strategies](#network-cache-strategies)
-  - [PWA preloaded resources](#pwa-preloaded-resources)
-  - [Installable web app](#installable-web-app)
-  - [Web Push](#web-push)
-  - [Service worker router api](#service-worker-router-api)
-  - [Exclude resources from the service worker management](#exclude-resources-from-the-service-worker-management)
-- [CDN and Cookieless Domains](#cdn-and-cookieless-domains)
-- [Misc](#misc)
-- [Change History](#change-history)
+- [1. General improvements](#1-general-improvements)
+  - [1.1 Moving script and css position in the page](#11-moving-script-and-css-position-in-the-page)
+  - [1.2 Caching](#12-caching)
+  - [1.3 Sub Resource Integrity (SRI)](#13-sub-resource-integrity-sri)
+  - [1.4 Critical CSS Path](#14-critical-css-path)
+- [2. Images](#2-images)
+  - [2.1. Responsive images](#21-responsive-images)
+- [3. Javascript Improvements](#3-javascript-improvements)
+- [4. CSS Improvements](#4-css-improvements)
+- [5. Progressive Web App](#5-progressive-web-app)
+  - [5.1. Installable web app](#51-installable-web-app)
+  - [5.2. Web Share Target Level 2](#52-web-share-target-level-2)
+  - [5.3. Offline mode](#53-offline-mode)
+  - [5.4. Preloaded resources](#54-preloaded-resources)
+  - [5.5. Network cache strategies](#55-network-cache-strategies)
+  - [5.6. Web Push](#56-web-push)
+  - [5.7. Service worker router api](#57-service-worker-router-api)
+  - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
+- [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
+- [7. Misc](#7-misc)
+- [8. Change History](#8-change-history)
+  - [V2.5.0](#v250)
   - [V2.4.2](#v242)
   - [V2.4.1](#v241)
   - [V2.4](#v24)
@@ -51,13 +50,11 @@ There are additional plugins that help optimizing and profiling your page or ser
   - [V1.1](#v11)
   - [V1.0](#v10)
     - [SRI (Sub resources integrity)](#sri-sub-resources-integrity)
-    - [Critical CSS Path](#critical-css-path-1)
+    - [Critical CSS Path](#critical-css-path)
     - [Javascript](#javascript)
     - [CSS](#css)
 
-<!-- /TOC -->
-
-# General improvements
+# 1. General improvements
 
 -   advanced page optimizations which drastically improve the page performance score over various tools.
 -   turn the website into an installable Progressive Web Application
@@ -67,7 +64,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 -   force script and css to be ignored by the optimizer by setting 'data-ignore="true"' attribute
 -   connect to domains faster: automatically detect domains and add < link rel=preconnect > header
 
-# Moving script and css position in the page
+## 1.1 Moving script and css position in the page
 
 script and css position can be controlled by add 'data-position' attribute to the tag. possible values are
 
@@ -75,18 +72,18 @@ script and css position can be controlled by add 'data-position' attribute to th
 -   ignore: ignore the file
 -   missing tag or other values means move to the footer of the page.
 
-# Caching
+## 1.2 Caching
 
 -   Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
 -   Range requests are supported for cached resources (you can cache audio & video content)
 
-# Sub Resource Integrity (SRI)
+## 1.3 Sub Resource Integrity (SRI)
 
 -   compute SRI for css and javascript files
 
 If you use a cdn, you will need to disable cdn optimizations for css and javascript. They must not alter css and javascript
 
-# Critical CSS Path
+## 1.4 Critical CSS Path
 
 -   Eliminate **FOUC** by providing critical css path selectors. See [here](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) for more info.
 -   The critical path enable instant page rendering by providing a minimal set of selectors and classes used to render the visible part of the page before the stylesheets are loaded.
@@ -97,7 +94,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 *   A list of selectors to extract from the page css
 *   The web fonts are extracted automatically and preloaded
 
-# Images
+# 2. Images
 
 -   deliver images in webp format when the browser signals it supports it
 -   generate svg placeholder from images for quick image preview
@@ -105,7 +102,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   generate svg placeholder for images for faster page load
 -   lazyload images that are using svg placeholder
 
-## Responsive images
+## 2.1. Responsive images
 
 -   automatically add srcset and sizes for images. Only necessary images are generated. Images smaller that the breakpoint are ignored.
 -   resize and crop images using a one of these methods (face detection, entropy, center or default).
@@ -113,7 +110,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   scrset urls are automatically rewritten when http cache is enabled
 -   automatically resize css background images. You can configure breakpoints for this feature.
 
-# Javascript Improvements
+# 3. Javascript Improvements
 
 -   Fetch remote javascript files locally
 -   Merge javascript files
@@ -123,7 +120,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   Move javascript at the bottom of the page
 -   load javascript in a non blocking way if there is only one javascript file in the page.
 
-# CSS Improvements
+# 4. CSS Improvements
 
 -   Fetch remote css files, images and fonts and store them locally
 -   Merge css files (this process @import directive)
@@ -133,57 +130,72 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 -   Ignore css files that match a pattern
 -   Load css files in a non blocking way
 
-# Progressive Web App
+# 5. Progressive Web App
+
+## 5.1. Installable web app
+
+-   The app can be installed as a standalone web app with google chrome / firefox on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
+-   The app can be installed as a standalone desktop application (tested on windows 10) with google chrome as long as you provide a 512x512 icon.
+-   Alternative links to native mobile apps can be provided and the preference can be configured
+
+## 5.2. Web Share Target Level 2
+
+![web-share-target.jpg](https://raw.githubusercontent.com/tbela99/gzip/web_share_target/web-share-target.jpg)
+
+Web Share Target allows your pwa app to receive data (text and files) shared by other applications on your mobile device. You can configure your pwa to become a receiver on android and IOS using the web target api level 2.
+You can also configure which data you want to be sent to your app.
+
+## 5.3. Offline mode
 
 Offline mode capabilities can be set to one of these network strategies
 
-## Network cache strategies
+## 5.4. Preloaded resources
 
+You can provide the list of urls to load when the service worker is installed like icons, logo, css files, web pages, etc ...
+
+## 5.5. Network cache strategies
+
+You can choose how your web assests will be cached. You can customize settings per resource type:
 -   Cache only
 -   Network only
 -   Cache first, falling back to network
 -   Network first, falling back to cache
 -   Cache, with network update - stale while revalidate <- this is the default
 
-## PWA preloaded resources
-
-You can provide the list of urls to load when the service worker is installed like icons, logo, css files, web pages, etc ...
-
-## Installable web app
-
--   The app can be installed as a standalone web app with google chrome / firefox on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
--   The app can be installed as a standalone desktop application (tested on windows 10) with google chrome as long as you provide a 512x512 icon.
--   Alternative links to native mobile apps can be provided and the preference can be configured
-
-## Web Push
+## 5.6. Web Push
 
 -   Manage Web Push subscription using OneSignal
 -   Added basic push notification settings for Joomla articles
 
-## Service worker router api
+## 5.7. Service worker router api
 
 Add routes to customize fetch event networking strategy by using either a static route or a regexp
 
-## Exclude resources from the service worker management
+## 5.8. Exclude resources from the service worker management
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
-# CDN and Cookieless Domains
+# 6. CDN and Cookieless Domains
 
 -   Configure up to 3 domains from which resources will be loaded.
 -   You can also configure which kind of resource are loaded from these domains.
 -   CORS headers are automatically added for responses sent from these domains.
 
-# Misc
+# 7. Misc
 
 -   Joomla administrator is excluded from the service worker cached resources
 -   You can secure your Joomla administrator access by defining a secret access token.
 
-# Change History
+# 8. Change History
+
+## V2.5.0
+
+- Implement Web Share Target api level 2
 
 ## V2.4.2
 
-Fix file not found error
+- Fix file not found error
+- Add the possibility to ignore images based on a pattern
 
 ## V2.4.1
 

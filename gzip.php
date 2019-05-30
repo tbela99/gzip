@@ -208,6 +208,19 @@ class PlgSystemGzip extends JPlugin
 
         if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
+			if(
+				!empty($data['params']['gzip']['pwa_share_target_enabled']) &&
+				!empty($data['params']['gzip']['files_supported'])
+			) {
+				
+				// enforce parameters when file sharing is ON
+				$data['params']['gzip']['pwa_share_target_method'] = 'POST';
+				$data['params']['gzip']['pwa_share_target_enctype'] = 'multipart/form-data';
+				
+				$table->set('params', json_encode($data['params']));
+				$table->store();
+			}
+			
             $options = $data['params']['gzip'];
 
             $this->cleanCache();
@@ -673,7 +686,42 @@ class PlgSystemGzip extends JPlugin
             'background_color' => $options['pwa_app_bg_color'],
             'theme_color' => $options['pwa_app_theme_color'],
             'display' => $options['pwa_app_display']
-        ];
+		];
+		
+		if (!empty($options['pwa_share_target_enabled'])) {
+
+			$manifest['share_target'] = [
+
+				'action' => $options['pwa_share_target_action'],
+				'method' => $options['pwa_share_target_method'],
+				'enctype' => $options['pwa_share_target_enctype']
+			];
+
+			if (is_object($options['pwa_share_target_params'])) {
+			
+				$options['pwa_share_target_params'] = get_object_vars($options['pwa_share_target_params']);
+			}
+
+			if (!empty($options['title_supported'])) {
+
+				$manifest['share_target']['params']['title'] = !empty($options['pwa_share_target_params']['title']) ? $options['pwa_share_target_params']['title'] : 'title';
+			}
+
+			if (!empty($options['text_supported'])) {
+
+				$manifest['share_target']['params']['text'] = !empty($options['pwa_share_target_params']['text']) ? $options['pwa_share_target_params']['text'] : 'text';
+			}
+
+			if (!empty($options['url_supported'])) {
+
+				$manifest['share_target']['params']['url'] = !empty($options['pwa_share_target_params']['url']) ? $options['pwa_share_target_params']['url'] : 'url';
+			}
+
+			if (!empty($options['files_supported'])) {
+
+				$manifest['share_target']['params']['files'] = !empty($options['pwa_share_target_params']['files']) ? json_decode($options['pwa_share_target_params']['files'], true) : [];
+			}
+		}
 
         if(!empty($options['onesignal'])) {
 
