@@ -15,7 +15,9 @@ defined('_JEXEC') or die;
 
 require __DIR__.'/autoload.php';
 
+use \Gzip\GZipHelper as GZipHelper;
 use \Joomla\CMS\Factory as JFactory;
+use \Joomla\Registry\Registry as Registry;
 
 class PlgSystemGzip extends JPlugin
 {
@@ -82,24 +84,20 @@ class PlgSystemGzip extends JPlugin
 
                 if (is_array($data)) {
 
-                    $object = new \Joomla\Registry\Registry($data);
+                    $object = new Registry($data);
                 }
 
                 if (is_callable([$data, 'getProperties'])) {
 
-                    $object = new \Joomla\Registry\Registry($data->getProperties());
+                    $object = new Registry($data->getProperties());
                 }
                 
                 if ($object->get('type') == 'plugin' && $object->get('element') == 'gzip' && $object->get('folder') == 'system') {
 
                 	$xml = $form->getXml();
-                	$keys = array_keys(\Gzip\GZipHelper::$accepted);
+                	$keys = array_keys(GZipHelper::$accepted);
 
                 	foreach ($xml->xpath('//fieldset[@name="cdn"]/fields[@name="gzip"]/field[@name="cdn_types"]') as $field) {
-
-						//$field['checked'] = 'js,css';
-						// check all types
-						// $field['checked'] = implode(',', $keys);
 
 		                foreach ($keys as $key) {
 
@@ -112,7 +110,7 @@ class PlgSystemGzip extends JPlugin
                 
                     foreach ($xml->xpath('//field[@name="admin_secret"]') as $field) {
 
-                        $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', \JURI::root());
+                        $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', JURI::root());
                         break;
                     }
                 }
@@ -132,9 +130,23 @@ class PlgSystemGzip extends JPlugin
 
     	if ($app->isClient('administrator')) {
 
+    		$input = $app->input;
+
+    		if ($input->get('option') == 'com_plugins' &&
+				$input->get('view') == 'plugin' &&
+				$input->post->get('manifest_preview') == 1) {
+
+    			header('Cache-Control: max-age=0');
+
+    			$data = $app->input->post->get('jform', [], 'array');
+    			echo $this->buildManifest(isset($data['params']['gzip']) ? $data['params']['gzip'] : []);
+
+    			$app->close();
+			}
+
     		if($docType == 'html') {
 
-			    $script = str_replace(['{scope}', '{debug}'], [\JUri::base(true) . '/', $this->worker_id.$debug], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
+			    $script = str_replace(['{scope}', '{debug}'], [JUri::base(true) . '/', $this->worker_id.$debug], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
 			    $document->addScriptDeclaration($script);
 		    }
     	}
@@ -152,7 +164,7 @@ class PlgSystemGzip extends JPlugin
 
 					$document->addScript('plugins/system/gzip/js/dist/lib'.$debug.'.js');
 					$document->addScript('plugins/system/gzip/js/dist/lib.images'.$debug.'.js');
-					$document->addScriptDeclaration(str_replace('{script-src}', \Gzip\GZipHelper::url('plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader'.$debug.'.js')));
+					$document->addScriptDeclaration(str_replace('{script-src}', GZipHelper::url('plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader'.$debug.'.js')));
 				}
 
                 if(!empty($this->options['pwaenabled'])) {
@@ -196,7 +208,7 @@ class PlgSystemGzip extends JPlugin
 				
 				if (!preg_match('#^([a-zA-Z0-9_-]*)$#', $options['admin_secret'])) {
 					
-					throw new \Exception('Invalid admin secret. You can only use numbers, letters, "_" and "-"', 400);
+					throw new Exception('Invalid admin secret. You can only use numbers, letters, "_" and "-"', 400);
 				}
 			}
         }
@@ -275,7 +287,7 @@ class PlgSystemGzip extends JPlugin
 
 			$this->route = $this->params->get('gzip.cache_key', '7BOCz').'/';
 			
-			\Gzip\GZipHelper::$route = $this->route;
+			GZipHelper::$route = $this->route;
 
             if (!empty($this->options['cdn'])) {
 
@@ -297,21 +309,21 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'] = [];
 			}
 
-	        \Gzip\GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
+	        GZipHelper::$regReduce = ['#^(('.implode(')|(', array_filter(array_merge(array_map(function ($host) { return $host.'/'; }, $this->options['cdn']),
 				        [\JUri::root(), \JURI::root(true).'/']))). '))#', '#^('.\JURI::root(true).'/)?'.$this->route.'(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
 	        if (!isset($this->options['cdn_types'])) {
 
-		        $this->options['cdn_types'] = array_keys(\Gzip\GZipHelper::$accepted);
+		        $this->options['cdn_types'] = array_keys(GZipHelper::$accepted);
 	        }
 
 	        $this->options['static_types'] = [];
 
 	        foreach ($this->options['cdn_types'] as $type) {
 
-	        	if (isset(\Gzip\GZipHelper::$accepted[$type])) {
+	        	if (isset(GZipHelper::$accepted[$type])) {
 
-			        $this->options['static_types'][$type] = \Gzip\GZipHelper::$accepted[$type];
+			        $this->options['static_types'][$type] = GZipHelper::$accepted[$type];
 		        }
 	        }
 
@@ -338,8 +350,8 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
 	        }
 
-	        \Gzip\GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
-	        \Gzip\GZipHelper::$static_types = $this->options['static_types'];
+	        GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
+	        GZipHelper::$static_types = $this->options['static_types'];
 
             // do not render blank js file when service worker is disabled
             if(!empty($this->options['pwaenabled'])) {
@@ -444,7 +456,7 @@ class PlgSystemGzip extends JPlugin
 
                 if(method_exists($document, 'addHeadLink')) {
 
-                    $document->addHeadLink(\JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
+                    $document->addHeadLink(JURI::root(true).'/manifest'.$this->manifest_id.'.json', 'manifest');
                 }
 
                 if(!empty($this->options['pwa_app_theme_color'])) {
@@ -555,7 +567,7 @@ class PlgSystemGzip extends JPlugin
             }
 
             $prefix .= $options['pwa_network_strategy'].'/';
-            Gzip\GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'].'/';
+            GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'].'/';
         }
 
         if(!empty($options['jsignore'])) {
@@ -623,20 +635,20 @@ class PlgSystemGzip extends JPlugin
 
         $profiler = JProfiler::getInstance('Application');
 
-        Gzip\GZipHelper::$options = $options;
+        GZipHelper::$options = $options;
 
     //    $profiler->mark('beforeParseImages');
-        $body = Gzip\GZipHelper::parseImages($body, $options);
+        $body = GZipHelper::parseImages($body, $options);
 
         $profiler->mark('afterParseImages');
-        $body = Gzip\GZipHelper::parseCss($body, $options);
+        $body = GZipHelper::parseCss($body, $options);
 
         $profiler->mark('afterParseCss');
-		$body = Gzip\GZipHelper::parseScripts($body, $options);
+		$body = GZipHelper::parseScripts($body, $options);
 		
         
         $profiler->mark('afterParseScripts');
-        $body = Gzip\GZipHelper::parseURLs($body, $options);
+        $body = GZipHelper::parseURLs($body, $options);
 
         $profiler->mark('afterParseURLs');
         $app->setBody($body);
@@ -650,44 +662,28 @@ class PlgSystemGzip extends JPlugin
 		}
 	}
 
-    protected function updateManifest($options) {
+	protected function buildManifest($options) {
 
-	    if(empty($options['pwa_app_manifest'])) {
+		$config = JFactory::getConfig();
 
-	    	return;
-	    }
+		$short_name = $options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $options['pwa_app_short_name'];
+		$name = $options['pwa_app_name'] === '' ? $config->get('sitename') : $options['pwa_app_name'];
+		$description = $options['pwa_app_description'] === '' ? $config->get('MetaDesc') : $options['pwa_app_description'];
+		$start_url = $options['pwa_app_start_url'] === '' ? JURI::root(true).'/' : $options['pwa_app_start_url'];
 
-	    $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
+		$start_url .= (strpos($start_url, '?') === false ? '?' : '&'). 'utm_source=web_app_manifest';
 
-        if(!is_dir($path)) {
-
-            $old_mask = umask();
-
-            umask(022);
-            mkdir($path, 0755, true);
-            umask($old_mask);            
-        }
-
-        $config = JFactory::getConfig();
-
-        $short_name = $options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $options['pwa_app_short_name'];
-        $name = $options['pwa_app_name'] === '' ? $config->get('sitename') : $options['pwa_app_name'];
-        $description = $options['pwa_app_description'] === '' ? $config->get('MetaDesc') : $options['pwa_app_description'];
-        $start_url = $options['pwa_app_start_url'] === '' ? JURI::root(true).'/' : $options['pwa_app_start_url'];
-
-        $start_url .= (strpos($start_url, '?') === false ? '?' : '&'). 'utm_source=web_app_manifest';
-
-        $manifest = [
-            'scope' => JURI::root(true).'/',
-            'short_name' => substr($short_name, 0, 12),
-            'name' => $name,
-            'description' => $description,
-            'start_url' => $start_url,
-            'background_color' => $options['pwa_app_bg_color'],
-            'theme_color' => $options['pwa_app_theme_color'],
-            'display' => $options['pwa_app_display']
+		$manifest = [
+			'scope' => JURI::root(true).'/',
+			'short_name' => substr($short_name, 0, 12),
+			'name' => $name,
+			'description' => $description,
+			'start_url' => $start_url,
+			'background_color' => $options['pwa_app_bg_color'],
+			'theme_color' => $options['pwa_app_theme_color'],
+			'display' => $options['pwa_app_display']
 		];
-		
+
 		if (!empty($options['pwa_share_target_enabled'])) {
 
 			$manifest['share_target'] = [
@@ -698,7 +694,7 @@ class PlgSystemGzip extends JPlugin
 			];
 
 			if (is_object($options['pwa_share_target_params'])) {
-			
+
 				$options['pwa_share_target_params'] = get_object_vars($options['pwa_share_target_params']);
 			}
 
@@ -723,74 +719,95 @@ class PlgSystemGzip extends JPlugin
 			}
 		}
 
-        if(!empty($options['onesignal'])) {
+		if(!empty($options['onesignal'])) {
 
-            $manifest['gcm_sender_id'] = '482941778795';
+			$manifest['gcm_sender_id'] = '482941778795';
+		}
+
+		$native_apps = [];
+
+		if(!empty($options['pwa_app_native_android'])) {
+
+			$native_apps[] = [
+
+				'platform' => 'play',
+				'url' => $options['pwa_app_native_android'],
+				'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
+			];
+		}
+
+		if(!empty($options['pwa_app_native_ios'])) {
+
+			$native_apps[] = [
+
+				'platform' => 'itunes',
+				'url' => $options['pwa_app_native_ios'],
+				'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
+			];
+		}
+
+		if(!empty($native_apps)) {
+
+			$manifest['prefer_related_applications'] = (bool) $options['pwa_app_native'];
+			$manifest['related_applications'] = $native_apps;
+		}
+
+		if(!empty($options['pwa_app_icons_path'])) {
+
+			$dir = JPATH_SITE.'/images/'.$options['pwa_app_icons_path'];
+
+			if(is_dir($dir)) {
+
+				foreach(new DirectoryIterator($dir) as $file) {
+
+					if($file->isFile() && preg_match('#\.((jpg)|(png)|(webp))$#i', $file, $match)) {
+
+						$size = getimagesize($file->getPathName());
+
+						//$max = max($size[0], $size[1]);
+
+						$manifest['icons'][] = [
+
+							'src' => JUri::root(true).'/images/'.$options['pwa_app_icons_path'].'/'.$file,
+							'sizes' => $size[0].'x'.$size[1],
+							'type' => image_type_to_mime_type($size[2])
+						];
+					}
+				}
+			}
+		}
+
+		return json_encode(array_filter($manifest, function ($value) {
+
+			if(is_array($value)) {
+
+				$value = array_filter($value, function ($v) { return $v !== ''; });
+			}
+
+			return $value !== '' && !is_null($value) && count($value) != 0;
+			
+		}), JSON_FORCE_OBJECT);
+	}
+
+    protected function updateManifest($options) {
+
+	    if(empty($options['pwa_app_manifest'])) {
+
+	    	return;
+	    }
+
+	    $path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/';
+
+        if(!is_dir($path)) {
+
+            $old_mask = umask();
+
+            umask(022);
+            mkdir($path, 0755, true);
+            umask($old_mask);            
         }
 
-        $native_apps = [];
-
-        if(!empty($options['pwa_app_native_android'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'play',
-                'url' => $options['pwa_app_native_android'],
-                'id' => preg_replace('#.*?(com\.[a-z0-9.]+).*#', '$1', $options['pwa_app_native_android'])
-            ];
-        }
-
-        if(!empty($options['pwa_app_native_ios'])) {
-
-            $native_apps[] = [
-
-                'platform' => 'itunes',
-                'url' => $options['pwa_app_native_ios'],
-                'id' => preg_replace('#.*?/id(\d+).*#', '$1', $options['pwa_app_native_ios'])
-            ];
-        }
-
-        if(!empty($native_apps)) {
-
-            $manifest['prefer_related_applications'] = (bool) $options['pwa_app_native'];
-            $manifest['related_applications'] = $native_apps;
-        }
-
-        if(!empty($options['pwa_app_icons_path'])) {
-
-            $dir = JPATH_SITE.'/images/'.$options['pwa_app_icons_path'];
-
-            if(is_dir($dir)) {
-
-                foreach(new DirectoryIterator($dir) as $file) {
-
-                    if($file->isFile() && preg_match('#\.((jpg)|(png)|(webp))$#i', $file, $match)) {
-
-                        $size = getimagesize($file->getPathName());
-
-                        $max = max($size[0], $size[1]);
-
-                        $manifest['icons'][] = [
-
-                            'src' => JUri::root(true).'/images/'.$options['pwa_app_icons_path'].'/'.$file,
-                            'sizes' => $size[0].'x'.$size[1],
-                            'type' => image_type_to_mime_type($size[2])
-                        ];
-                    }
-                }
-            }
-        }
-
-        file_put_contents($path.'manifest.json', json_encode(array_filter($manifest, function ($value) {
-
-            if(is_array($value)) {
-
-                $value = array_filter($value, function ($v) { return $v !== ''; });
-            }
-
-            return $value !== '' && !is_null($value) && count($value) != 0;
-        })));
-        
+        file_put_contents($path.'manifest.json', $this->buildManifest($options));
         file_put_contents($path.'manifest_version', hash_file('sha1', $path.'manifest.json'));
 	}
 	
@@ -829,7 +846,6 @@ class PlgSystemGzip extends JPlugin
 		
 		$cache_duration = !empty($options['pwa_cache_default']) ? $options['pwa_cache_default'] : $this->params->get('gzip.maxage', '2months');
 
-		
 		$cacheExpiryStrategy = [
 
 			'cacheName' => 'gzip_sw_worker_expiration_cache_default_private',
@@ -860,7 +876,7 @@ class PlgSystemGzip extends JPlugin
 
 			$strategies[$key]['network'] = [];
 
-			foreach (GZip\GZipHelper::$accepted as $ext => $mime_type) {
+			foreach (GZipHelper::$accepted as $ext => $mime_type) {
 
 				if ($ext == $key || strpos($mime_type, $key) !== false) {
 
@@ -871,7 +887,6 @@ class PlgSystemGzip extends JPlugin
 			if (empty($strategies[$key]['network'])) {
 
 				unset($strategies[$key]);
-
 				continue;
 			}
 
@@ -916,7 +931,7 @@ class PlgSystemGzip extends JPlugin
 			$this->params->get('gzip.cache_key', '7BOCz'), 
 			json_encode($cacheExpiryStrategy),
 			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
-			\JUri::root(true), 
+			JUri::root(true),
 			json_encode($exclude_urls), 
 			json_encode($preloaded_urls), 
 			$import_scripts,
@@ -944,37 +959,28 @@ class PlgSystemGzip extends JPlugin
 
         if (is_dir($path)) {
 
-        //    $paths = [];
+			foreach(new DirectoryIterator($path) as $file) {
 
-        //    while(count($paths) > 0) {
+				if ($file->isDir() && !$file->isDot()) {
 
-            //    $dir = array_shift($paths);
+					foreach(
+						[
+							"manifest.json",
+							"manifest_version",
+							"serviceworker.js",
+							"serviceworker.min.js",
+							"worker_version"
+						] as $f) {
 
-                foreach(new DirectoryIterator($path) as $file) {
+						$f = $file->getPathName().'/'.$f;
 
-                    if ($file->isDir() && !$file->isDot()) {
+						if(is_file($f)) {
 
-	                //    $paths[] = $file;
-
-                        foreach(
-                            [
-                                "manifest.json", 
-                                "manifest_version",
-                                "serviceworker.js", 
-                                "serviceworker.min.js", 
-                                "worker_version" 
-                            ] as $f) {
-
-                            $f = $file->getPathName().'/'.$f;
-
-                            if(is_file($f)) {
-
-                                unlink($f);
-                            }
-                        }
-                    }
-                }
-        //    }
+							unlink($f);
+						}
+					}
+				}
+			}
         }        
     }
 }
