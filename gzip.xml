@@ -75,6 +75,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION"/>
                 </fields>
@@ -94,63 +95,6 @@
                     </fields>
                     <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="cdn_types" type="checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
-                </fields>
-            </fieldset>
-            <fieldset name="javascript" label="Javascript">
-                <field type="spacer" label="Configure Javascript settings" />
-                <field type="spacer" hr="true" />
-                <fields name="gzip">
-                    <field name="fetchjs" label="PLG_GZIP_FIELD_FETCHJS_LABEL" description="PLG_GZIP_FIELD_FETCHJS_DESCRIPTION" type="radio" class="btn-group" default="1">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" 
-                        description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION"  
-                        hint="PLG_GZIP_FIELD_JSIGNORE_HINT" 
-                        type="textarea" rows="15" cols="45" />
-                    <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
-                </fields>
-            </fieldset>
-            <fieldset name="css" label="CSS">
-                <field type="spacer" label="Configure Css settings" />
-                <field type="spacer" hr="true" />
-                <fields name="gzip">
-                    <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
-                        <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
-                        <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
-                        <option value="optional">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_OPTIONAL</option>
-                        <option value="block">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_BLOCK</option>
-                        <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
-                    </field>
-                    <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION" type="radio" class="btn-group" default="1">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="asynccss" label="PLG_GZIP_FIELD_ASYNCCSS_LABEL" description="PLG_GZIP_FIELD_ASYNCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" 
-                    description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION"  
-                    hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" 
-                    type="textarea" rows="15" cols="45" />
-                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
@@ -217,6 +161,75 @@
                     </field>
                 </fields>
             </fieldset>
+            <fieldset name="javascript" label="Javascript">
+                <field type="spacer" label="Configure Javascript settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="fetchjs" label="PLG_GZIP_FIELD_FETCHJS_LABEL" description="PLG_GZIP_FIELD_FETCHJS_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" 
+                        description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION"  
+                        hint="PLG_GZIP_FIELD_JSIGNORE_HINT" 
+                        type="textarea" rows="15" cols="45" />
+                    <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                </fields>
+            </fieldset>
+            <fieldset name="css" label="CSS">
+                <field type="spacer" label="Configure Css settings" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
+                        <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
+                        <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
+                        <option value="optional">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_OPTIONAL</option>
+                        <option value="block">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_BLOCK</option>
+                        <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
+                    </field>
+                    <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="asynccss" label="PLG_GZIP_FIELD_ASYNCCSS_LABEL" description="PLG_GZIP_FIELD_ASYNCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" 
+                    description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION"  
+                    hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" 
+                    type="textarea" rows="15" cols="45" />
+                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                </fields>
+            </fieldset>
+            <fieldset name="critical_path" label="Critical Css">
+                <field type="spacer" label="Critical CSS Path" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
+                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
+                </fields>
+            </fieldset>
             <fieldset name="pwa_app" label="PWA::App">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
@@ -259,9 +272,18 @@
                     </field>
                     <field name="pwa_app_native_android" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_ANDROID_DESCRIPTION" type="text"/>
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text"/>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Preview the changes to the manifest file" />
+                    <field name="webmanifestpreview" 
+                        label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL"
+                        description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION"
+                        readonly="readonly"
+                        hiddenLabel="true"
+                        class="input-block2" row="15"
+                        type="webmanifestpreview" default=""
+                    />
                 </fields>
             </fieldset>
-            
             <fieldset name="pwa_web_share_target" label="PWA::Web Share Target">
                 <field type="spacer" label="Configure share target from mobile device" />
                 <field type="spacer" hr="true" />
@@ -406,7 +428,7 @@
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="webpush" label="Web Push">
+            <fieldset name="webpush" label="PWA::Web Push">
                 <field type="spacer" label="Configure Web Push" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="OneSignal app settings" />
@@ -420,18 +442,6 @@
                         <field name="web_push_api_key" label="PLG_GZIP_FIELD_ONESIGNAL_API_KEY_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_API_KEY_DESCRIPTION" type="text"/>
                         <field name="web_push_test_user" label="PLG_GZIP_FIELD_ONESIGNAL_TEST_USER_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_TEST_USER_DESCRIPTION" type="text"/>
                     </fields>
-                </fields>
-            </fieldset>
-            <fieldset name="critical_path" label="Critical Css">
-                <field type="spacer" label="Critical CSS Path" />
-                <field type="spacer" hr="true" />
-                <fields name="gzip">
-                    <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
-                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default=""/>
                 </fields>
             </fieldset>
             <fieldset name="security" label="Security">
@@ -451,12 +461,6 @@
                     <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset>
-            <!--
-            <fieldset name="advanced">
-                <field type="spacer" label="Advanced settings" />
-                <field type="spacer" hr="true" />
-            </fieldset>
-            -->
         </fields>
     </config>
     <updateservers>
