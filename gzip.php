@@ -777,7 +777,7 @@ class PlgSystemGzip extends JPlugin
 			}
 		}
 
-		return json_encode(array_filter($manifest, function ($value) {
+		$manifest = array_filter($manifest, function ($value) {
 
 			if(is_array($value)) {
 
@@ -786,7 +786,14 @@ class PlgSystemGzip extends JPlugin
 
 			return $value !== '' && !is_null($value) && count($value) != 0;
 			
-		}), JSON_FORCE_OBJECT);
+		});
+
+		if (empty ($manifest)) {
+
+			$manifest = [];
+		}
+
+		return json_encode($manifest);
 	}
 
     protected function updateManifest($options) {
