@@ -444,22 +444,6 @@
                     </fields>
                 </fields>
             </fieldset>
-            <!--
-            <fieldset name="webmanifest" label="PWA::Manifest">
-                <field type="spacer" label="PWA manifest preview" />
-                <fields name="gzip">
-                    <fields name="webmanifest">
-                        <field name="webmanifestpreview" 
-                            label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL"
-                            description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION"
-                            readonly="readonly"
-                            hiddenLabel="true"
-                            class="input-block2" row="15"
-                            type="webmanifestpreview" default=""
-                        />
-                    </fields>
-                </fields>
-            </fieldset> -->
             <fieldset name="security" label="Security">
                 <field type="spacer" label="Configure Security" />
                 <field type="spacer" hr="true" />
@@ -477,12 +461,6 @@
                     <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default=""/>
                 </fields>
             </fieldset>
-            <!--
-            <fieldset name="advanced">
-                <field type="spacer" label="Advanced settings" />
-                <field type="spacer" hr="true" />
-            </fieldset>
-            -->
         </fields>
     </config>
     <updateservers>

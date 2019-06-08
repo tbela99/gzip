@@ -784,8 +784,7 @@ class PlgSystemGzip extends JPlugin
 				$value = array_filter($value, function ($v) { return $v !== ''; });
 			}
 
-			return $value !== '' && !is_null($value) && count($value) != 0;
-			
+			return $value !== '' && !is_null($value) && count($value) != 0;			
 		});
 
 		if (empty ($manifest)) {
