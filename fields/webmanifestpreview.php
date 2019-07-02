@@ -2,8 +2,6 @@
 
 defined('JPATH_PLATFORM') or die;
 
-JFormHelper::loadFieldClass('list');
-
 /**
  * @package     GZip Plugin
  * @subpackage  System.Gzip *

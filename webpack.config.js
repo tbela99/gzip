@@ -14,7 +14,10 @@ module.exports = {
 		//	publicPath: "/assets/", // string    // the url to the output directory resolved relative to the HTML page
 		//	library: "SW", // string,
 		// the name of the exported library
-		libraryTarget: "umd" // universal module definition    // the type of the exported library
+		libraryTarget: "umd"// "umd" "iife" // universal module definition   
+		//   "var" | "assign" | "this" | "window" | "self" | "global" | "commonjs" | "commonjs2" | "commonjs-module" | "amd" | "amd-require" | "umd"
+		//| "umd2" | "jsonp" | "system
+		// the type of the exported library
 		/* Advanced output configuration (click to show) */
 	},
 	module: {
@@ -115,7 +118,7 @@ module.exports = {
 	watchOptions: {
 		aggregateTimeout: 1000, // in ms
 		// aggregates multiple changes to a single rebuild
-		poll: true,
+	//	poll: true,
 		poll: 500 // intervall in ms
 		// enables polling mode for watching
 		// must be used on filesystems that doesn't notify on change

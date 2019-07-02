@@ -20,7 +20,9 @@
 const map = new Map();
 const undef = null;
 
-const strategies = {
+import {isCacheableRequest} from "./sw.iscacheable.js";
+
+export const strategies = {
 	/**
 	 *
 	 * @param {string} key
@@ -33,21 +35,26 @@ const strategies = {
 			handle: async event => {
 				const response = await handle(event);
 
-				console.info({
-					clientId: event.clientId,
-					strategy: name == undef ? key : name,
-					responseMode: response.type,
-					requestMode: event.request.mode,
-					ok: response.ok,
-					bodyUsed: response.bodyUsed,
-					responseType: response && response.type,
-					isCacheableRequest: strategies.isCacheableRequest(
-						event.request,
-						response
-					),
-					request: event.request.url,
-					response: response && response.url
-				});
+				if (response != undef) {
+
+					/*
+					console.info({
+						clientId: event.clientId,
+						strategy: name == undef ? key : name,
+						responseMode: response.type,
+						requestMode: event.request.mode,
+						ok: response.ok,
+						bodyUsed: response.bodyUsed,
+						responseType: response && response.type,
+						isCacheableRequest: strategies.isCacheableRequest(
+							event.request,
+							response
+						),
+						request: event.request.url,
+						response: response && response.url
+					});
+					*/
+				}
 
 				return response;
 			}
@@ -64,7 +71,7 @@ const strategies = {
 	values: () => map.values(),
 	/**
 	 *
-	 * @returns {IterableIterator<[any]>}
+	 * @returns {IterableIterator<[function]>}
 	 */
 	entries: () => map.entries(),
 	/**
@@ -91,14 +98,7 @@ const strategies = {
 	 * @param {Response} response
 	 */
 	// https://www.w3.org/TR/SRI/#h-note6
-	isCacheableRequest: (request, response) =>
-		response instanceof Response &&
-		("cors" == response.type ||
-			new URL(request.url, self.origin).origin == self.origin) &&
-		request.method == "GET" &&
-		response.ok &&
-		["default", "cors", "basic", "navigate"].includes(response.type) &&
-		!response.bodyUsed
+	isCacheableRequest
 };
 
 // if opaque response <- crossorigin? you should use cache.addAll instead of cache.put dude <- stop it!
@@ -106,7 +106,6 @@ const strategies = {
 // if auth != basic <- are you private? <- stop it!
 
 strategies[Symbol.iterator] = () => map[Symbol.iterator]();
-Object.defineProperty(strategies, "size", {get: () => map.size});
-
-export {strategies};
-//})();
+Object.defineProperty(strategies, "size", {
+	get: () => map.size
+});

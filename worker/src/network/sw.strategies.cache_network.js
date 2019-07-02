@@ -13,8 +13,12 @@
 /* eslint wrap-iife: 0 */
 // stale while revalidate
 
-import {strategies} from "./sw.strategies.js";
-import {cacheName} from "../serviceworker.js";
+import {
+	strategies
+} from "./sw.strategies.js";
+import {
+	cacheName
+} from "../serviceworker.js";
 
 export async function cacheNetwork(event) {
 	"use strict;";
@@ -33,7 +37,11 @@ export async function cacheNetwork(event) {
 		}
 
 		return networkResponse;
-	}).catch(error => console.error("😭", error));
+	}).catch(error => {
+
+		// cache update failed
+		/* console.error("😭", error) */
+	});
 
 	return response || fetchPromise;
 	//	});

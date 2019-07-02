@@ -146,7 +146,14 @@ class PlgSystemGzip extends JPlugin
 
     		if($docType == 'html') {
 
-			    $script = str_replace(['{scope}', '{debug}'], [JUri::base(true) . '/', $this->worker_id.$debug], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
+			    $script = str_replace(
+					[
+						'{scope}', 
+						'{debug}'
+					], [
+						JUri::base(true) . '/', 
+						$this->worker_id.$debug
+					], file_get_contents(__DIR__.'/worker/dist/browser.administrator'.$debug.'.js'));
 			    $document->addScriptDeclaration($script);
 		    }
     	}
@@ -171,7 +178,41 @@ class PlgSystemGzip extends JPlugin
 
 					if ($this->options['pwaenabled'] == 1) {
 
-						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.min.js'));
+						$debug = empty($this->options['debug']) ? '.min' : '';
+						$debug_pwa = (empty($this->options['debug_pwa']) ? '.min' : '');
+
+						$data = file_get_contents(__DIR__.'/worker/dist/browser'.$debug_pwa.'.js');
+
+						if ($this->params->get('gzip.pwa_sync_enabled', 'disabled') != 'disabled') {
+							
+							$data .= "\n".file_get_contents(__DIR__.'/worker/dist/browser.sync'.$debug_pwa.'.js');
+						}
+
+						if (empty($debug)) {
+
+							// remove those multiline comments
+							$data = preg_replace('#\/\*.*?\*\/#s', '', $data);
+						}
+
+						$script = str_replace(
+							[
+								'"{SYNC_API_TAG}"',
+							//	'"{SYNC_FALLBACK_PATH}"',
+								'{CACHE_NAME}', 
+								'{defaultStrategy}', 
+								'{scope}', 
+								'{debug}'
+							], 
+							[ 
+								'"gzip_sync_queue"',
+							//	GZipHelper::url('plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
+								'v_'.$this->worker_id, 
+								empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], 
+								\JUri::root(true) . '/', 
+								$this->worker_id.$debug_pwa
+							], 
+								$data
+							);
 
 						$onesignal = (array) $this->options['onesignal'];
 						if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
@@ -185,7 +226,22 @@ class PlgSystemGzip extends JPlugin
 					// force service worker uninstall
 					else if ($this->options['pwaenabled'] == -1) {
 
-						$script = str_replace(['{CACHE_NAME}', '{defaultStrategy}', '{scope}', '{debug}'], ['v_'.$this->worker_id, empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], \JUri::root(true) . '/', $this->worker_id.(empty($this->options['debug_pwa']) ? '.min' : '')], file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js'));
+						$debug_pwa = empty($this->options['debug_pwa']) ? '.min' : '';
+
+						$script = str_replace(
+							[
+								'{CACHE_NAME}', 
+								'{defaultStrategy}', 
+								'{scope}', 
+								'{debug}'
+							], 
+							[
+								'v_'.$this->worker_id, 
+								empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], 
+								\JUri::root(true) . '/', 
+								$this->worker_id.$debug_pwa
+							], 
+								file_get_contents(__DIR__.'/worker/dist/browser.uninstall'.$debug_pwa.'.js'));
 					}
                 }
 
@@ -216,32 +272,43 @@ class PlgSystemGzip extends JPlugin
         return true;
     }
 
-    public function onExtensionAfterSave($context, $table, $isNew, $data = []) {
+	public function onExtensionAfterSave($context, $table, $isNew, $data = []) {
 
-        if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
+		if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
+
+			$shouldUpdate = false;
+
+			if (empty($data['params']['gzip']['cache_key'])) {
+
+				$shouldUpdate = true;
+				$data['params']['gzip']['cache_key'] = GZipHelper::shorten(filemtime(__FILE__));
+			}
 
 			if(
 				!empty($data['params']['gzip']['pwa_share_target_enabled']) &&
 				!empty($data['params']['gzip']['files_supported'])
 			) {
-				
+
 				// enforce parameters when file sharing is ON
 				$data['params']['gzip']['pwa_share_target_method'] = 'POST';
 				$data['params']['gzip']['pwa_share_target_enctype'] = 'multipart/form-data';
-				
+			}
+
+			if ($shouldUpdate) {
+
 				$table->set('params', json_encode($data['params']));
 				$table->store();
 			}
-			
-            $options = $data['params']['gzip'];
 
-            $this->cleanCache();
-            $this->updateManifest($options);
-            $this->updateServiceWorker($options);
-        }
+			$options = $data['params']['gzip'];
 
-        return true;
-    }
+			$this->cleanCache();
+			$this->updateManifest($options);
+			$this->updateServiceWorker($options);
+		}
+
+		return true;
+	}
 
     public function onAfterInitialise() {
 
@@ -280,13 +347,13 @@ class PlgSystemGzip extends JPlugin
 	        header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
 
 	        readfile($file);
-	        exit;
+	        $app->close();
         }
 
         if($app->isClient('site')) {
 
-			$this->route = $this->params->get('gzip.cache_key', '7BOCz').'/';
-			
+			$this->route = $this->params->get('gzip.cache_key').'/';
+
 			GZipHelper::$route = $this->route;
 
             if (!empty($this->options['cdn'])) {
@@ -294,11 +361,11 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
 			}
 
-			else 
+			else
 				$this->options['cdn'] = [];
-			
+
 			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
-			
+
 			if (is_object($this->options['cdn'])) {
 
 				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
@@ -344,7 +411,7 @@ class PlgSystemGzip extends JPlugin
 			        }
 		        }
 			}
-			
+
 	        foreach ($this->options['cdn'] as $key => $option) {
 
 				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option)?: $this->options['scheme'].'://').$option;
@@ -427,13 +494,34 @@ class PlgSystemGzip extends JPlugin
                 header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
 
                 readfile($file);
-                exit;
+                $app->close();
             }
-            
-            $document = JFactory::getDocument();
+
+			// fetch sync.fallback.js
+			// plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js
+            if(preg_match('#^'.$dirname.'sync-fallback([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
+
+                $debug = $this->params->get('gzip.debug_pwa') ? '' : '.min';
+
+                $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/sync.fallback'.$debug.'.js';
+
+                if (!is_file($file)) {
+
+                    $this->updateServiceWorker($this->options);
+				}
+				
+                header('Cache-Control: max-age=86400');
+                header('Content-Type: text/javascript; charset=utf-8');
+                header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+
+                readfile($file);
+                $app->close();
+            }
+
+			$document = JFactory::getDocument();
 
             // fetch worker.js
-            if(!empty($this->options['pwa_app_manifest'])) {
+            if(!empty($this->options['pwa_app_manifest']) && $this->options['pwaenabled'] == 1) {
             
                 $file = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/manifest.json';
 
@@ -443,8 +531,6 @@ class PlgSystemGzip extends JPlugin
                 }
 
                 if(preg_match('#^'.$dirname.'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
-
-                //    $debug = '';
 
                     header('Cache-Control: max-age=86400');
                     header('Content-Type: application/manifest+json;charset=utf-8');
@@ -491,9 +577,9 @@ class PlgSystemGzip extends JPlugin
             // manifeste url
         }
 
-        else if ($app->isAdmin()) {
+        else if ($app->isClient('admin')) {
 
-            $secret = $this->params->get('gzip.admin_secret');
+			$secret = $this->params->get('gzip.admin_secret');
 
             if (!is_null($secret) && $_SERVER['REQUEST_METHOD'] == 'GET' && JFactory::getUser()->get('id') == 0 && !array_key_exists($secret, $_GET)) {
 
@@ -928,19 +1014,61 @@ class PlgSystemGzip extends JPlugin
 			}
 		}
 
-        $search = ['"{VERSION}"', '"{CDN_HOSTS}"', '"{STORES}"', '{CACHE_NAME}', '{ROUTE}','"{cacheExpiryStrategy}"', '{defaultStrategy}', '{scope}', '"{exclude_urls}"', '"{preloaded_urls}"', '"{IMPORT_SCRIPTS}"', '"{network_strategies}"'];
-        $replace = [
+		$search = 
+			[
+			//	'"{DEBUG}"',
+		//	'"{SYNC_FALLBACK_PATH}"',
+				'"{SYNC_API_TAG}"',
+				'"{VERSION}"', 
+				'"{BACKGROUND_SYNC}"',
+				'"{CDN_HOSTS}"', 
+				'"{STORES}"', 
+				'{CACHE_NAME}', 
+				'{ROUTE}',
+				'"{cacheExpiryStrategy}"', 
+				'{defaultStrategy}', 
+				'{scope}', 
+				'"{exclude_urls}"',
+				'"{preloaded_urls}"',
+			//	'"{IMPORT_SCRIPTS}"',
+				'"{network_strategies}"'];
+
+				/*
+				echo str_replace(
+					[
+						'"{SYNC_API_TAG}"',
+						"{CACHE_NAME}"], 
+					[
+						'"gzip_sync_tag"',
+						'v_'.$this->worker_id
+					], 
+					file_get_contents($file)
+				);
+				*/
+
+		$debug = empty($this->params->get('gzip.debug_pwa') ? '' : '.min');
+		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
+
+		$replace = [
+		//	empty($this->params->get('gzip.debug_pwa') ? '' : '.min',
+		//	GZipHelper::url('/plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
+			'"gzip_sync_tag"',
 			json_encode($worker_id),
+			json_encode([
+				'enabled' => $sync_enabled != 'disabled',
+				'method' => $this->params->get('gzip.pwa_sync_method', ['GET']),
+				'pattern' => $sync_enabled == 'enabled' ? [] : array_filter(preg_split('#\s+#', $this->params->get('gzip.pwa_sync_patterns', ''), PREG_SPLIT_NO_EMPTY))
+			]),
 			json_encode(array_values(array_unique($hosts))),
 			json_encode(array_merge(['gzip_sw_worker_expiration_cache_private'], array_map(function ($key) { return 'gzip_sw_worker_expiration_cache_private_'.$key; }, array_keys($strategies)))),
 			'v_'.$hash, 
-			$this->params->get('gzip.cache_key', '7BOCz'), 
+			$this->params->get('gzip.cache_key'),
 			json_encode($cacheExpiryStrategy),
 			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
 			JUri::root(true),
 			json_encode($exclude_urls), 
 			json_encode($preloaded_urls), 
-			$import_scripts,
+		//	$import_scripts,
 			json_encode(array_map(function ($key, $values) {
 
 					return [$values['value'], '\.(('.implode(')|(', $values['network']).'))([#?].*)?$', ['cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 'maxAge' => +$values['cache']]];
@@ -952,10 +1080,16 @@ class PlgSystemGzip extends JPlugin
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
 
-        file_put_contents($path.'serviceworker.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
-        file_put_contents($path.'serviceworker.min.js', $data);
+		$data = $data;
+
+        file_put_contents($path.'serviceworker.js', str_replace($search, $replace, $import_scripts.file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
+		file_put_contents($path.'serviceworker.min.js', $import_scripts.$data);
+		
+        file_put_contents($path.'sync.fallback.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/sync.fallback.js')));
+        file_put_contents($path.'sync.fallback.min.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/sync.fallback.min.js')));
+		
         // => update the service worker whenever the manifest changes
-        file_put_contents($path.'worker_version', hash('sha1', json_encode($options).$hash.$data));
+        file_put_contents($path.'worker_version', hash('sha1', json_encode($options).$hash.$import_scripts.$data));
     }
 
     protected function cleanCache() {

@@ -10,7 +10,9 @@
  * @license     MIT License
  */
 
-import {Utils} from "../utils/sw.utils.js";
+import {
+	Utils
+} from "../utils/sw.utils.js";
 
 // @ts-check
 /* eslint wrap-iife: 0 */
@@ -28,7 +30,7 @@ const Event = {
 	// Example: promisify('click:once', function () { console.log('clicked'); }) <- the event handler is fired once and removed
 	// accept object with events as keys and handlers as values
 	// Example promisify({'click:once': function () { console.log('clicked once'); }, 'click': function () { console.log('click'); }})
-	on: extendArgs(function(name, fn, sticky) {
+	on: extendArgs(function (name, fn, sticky) {
 		const self = this;
 
 		if (fn == undef) {
@@ -81,11 +83,13 @@ const Event = {
 		}
 
 		//    sticky = !!sticky;
-		Object.defineProperty(event, "sticky", {value: !!sticky});
+		Object.defineProperty(event, "sticky", {
+			value: !!sticky
+		});
 
 		self.$events[name].push(event);
 	}),
-	off: extendArgs(function(name, fn, sticky) {
+	off: extendArgs(function (name, fn, sticky) {
 		const self = this;
 		let undef, event, i;
 
@@ -117,7 +121,26 @@ const Event = {
 			delete self.$events[name];
 		}
 	}),
-	// return a promise
+
+	// invoke event handlers
+	trigger(name) {
+
+		name = name.toLowerCase();
+
+		const self = this;
+		const args = arguments.length > 1 ? [].slice.call(arguments, 1) : [];
+		const events = self.$events[name] || [];
+
+		let i = 0;
+
+		for (; i < events.length; i++) {
+
+			events[i].cb.apply(self, args)
+		}
+
+		return this;
+	},
+	// invoke event handler using a promise
 	resolve(name) {
 		name = name.toLowerCase();
 
@@ -127,9 +150,9 @@ const Event = {
 		return Promise.all(
 			(self.$events[name] || []).concat().map(
 				(event) =>
-					new Promise((resolve) => {
-						resolve(event.cb.apply(self, args));
-					})
+				new Promise((resolve) => {
+					resolve(event.cb.apply(self, args));
+				})
 			)
 		);
 	},
@@ -139,8 +162,8 @@ const Event = {
 	}
 };
 
-Event.addPseudo("once", function(event) {
-	event.cb = function() {
+Event.addPseudo("once", function (event) {
+	event.cb = function () {
 		const context = this;
 
 		const value = event.fn.apply(context, arguments);
@@ -152,4 +175,6 @@ Event.addPseudo("once", function(event) {
 	return this;
 });
 
-export {Event};
+export {
+	Event
+};
