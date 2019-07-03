@@ -1033,26 +1033,13 @@ class PlgSystemGzip extends JPlugin
 			//	'"{IMPORT_SCRIPTS}"',
 				'"{network_strategies}"'];
 
-				/*
-				echo str_replace(
-					[
-						'"{SYNC_API_TAG}"',
-						"{CACHE_NAME}"], 
-					[
-						'"gzip_sync_tag"',
-						'v_'.$this->worker_id
-					], 
-					file_get_contents($file)
-				);
-				*/
-
 		$debug = empty($this->params->get('gzip.debug_pwa') ? '' : '.min');
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
 		$replace = [
 		//	empty($this->params->get('gzip.debug_pwa') ? '' : '.min',
 		//	GZipHelper::url('/plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
-			'"gzip_sync_tag"',
+			'"gzip_sync_queue"',
 			json_encode($worker_id),
 			json_encode([
 				'enabled' => $sync_enabled != 'disabled',

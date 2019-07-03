@@ -121,25 +121,25 @@ const Event = {
 			delete self.$events[name];
 		}
 	}),
+	/*
+		// invoke event handlers
+		trigger(name) {
 
-	// invoke event handlers
-	trigger(name) {
+			name = name.toLowerCase();
 
-		name = name.toLowerCase();
+			const self = this;
+			const args = arguments.length > 1 ? [].slice.call(arguments, 1) : [];
+			const events = self.$events[name] || [];
 
-		const self = this;
-		const args = arguments.length > 1 ? [].slice.call(arguments, 1) : [];
-		const events = self.$events[name] || [];
+			let i = 0;
 
-		let i = 0;
+			for (; i < events.length; i++) {
 
-		for (; i < events.length; i++) {
+				events[i].cb.apply(self, args)
+			}
 
-			events[i].cb.apply(self, args)
-		}
-
-		return this;
-	},
+			return this;
+		},*/
 	// invoke event handler using a promise
 	resolve(name) {
 		name = name.toLowerCase();

@@ -18,13 +18,13 @@ import {
 import {
     DB
 } from "../db/db";
-import {
-    TaskManager
-} from "../task/sw.task.manager.js";
+// // import {
+//    TaskManager
+// } from "../task/sw.task.manager.js";
 
 if (SW.app.backgroundSync.enabled) {
 
-    const taskManager = new TaskManager();
+    //   const taskManager = new TaskManager();
     const manager = new SyncManager();
 
     SW.on({
@@ -81,7 +81,9 @@ if (SW.app.backgroundSync.enabled) {
             console.info('Sync Tag ' + event.tag);
 
             event.waitUntil(
-                manager.replay(event.tag).then(() => taskManager.run(event.tag)).catch(error => console.error({
+                manager.replay(event.tag).
+                // then(() => taskManager.run(event.tag)).
+                catch(error => console.error({
                     error
                 }))
             );
