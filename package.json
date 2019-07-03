@@ -10,10 +10,8 @@
     "docdash": "github:clenemt/docdash",
     "jsdoc": "^3.5.5",
     "rollup": "^1.16.2",
-    "uglify-es": "^3.3.9",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5"
+    "uglify-es": "^3.3.9"
   },
-  "license": "(MIT OR LGPL-3.0-only)",
+  "license": "MIT OR LGPL-3.0",
   "repository": "github:tbela99/gzip"
 }

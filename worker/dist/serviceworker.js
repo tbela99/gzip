@@ -870,11 +870,11 @@
 			enumerable: true
 		},
 		buildid: {
-			value: "d3477f0",
+			value: "0642ffc",
 			enumerable: true
 		},
 		builddate: {
-			value: "2019-07-03 17:29:36-04:00",
+			value: "2019-07-03 18:49:40-04:00",
 			enumerable: true
 		},
 		urls: {
@@ -1772,7 +1772,7 @@
 	for (entry of strategies) {
 		route.registerRoute(
 			new Router.ExpressRouter(
-				scope + "/{ROUTE}/media/z/" + entry[0] + "/",
+				scope + "{ROUTE}/media/z/" + entry[0] + "/",
 				entry[1]
 			)
 		);

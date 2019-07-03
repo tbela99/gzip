@@ -180,13 +180,7 @@ class PlgSystemGzip extends JPlugin
 
 						$debug = empty($this->options['debug']) ? '.min' : '';
 						$debug_pwa = (empty($this->options['debug_pwa']) ? '.min' : '');
-
-						$data = file_get_contents(__DIR__.'/worker/dist/browser'.$debug_pwa.'.js');
-
-						if ($this->params->get('gzip.pwa_sync_enabled', 'disabled') != 'disabled') {
-							
-							$data .= "\n".file_get_contents(__DIR__.'/worker/dist/browser.sync'.$debug_pwa.'.js');
-						}
+						$data = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/browser'.$debug_pwa.'.js');
 
 						if (empty($debug)) {
 
@@ -194,25 +188,7 @@ class PlgSystemGzip extends JPlugin
 							$data = preg_replace('#\/\*.*?\*\/#s', '', $data);
 						}
 
-						$script = str_replace(
-							[
-								'"{SYNC_API_TAG}"',
-							//	'"{SYNC_FALLBACK_PATH}"',
-								'{CACHE_NAME}', 
-								'{defaultStrategy}', 
-								'{scope}', 
-								'{debug}'
-							], 
-							[ 
-								'"gzip_sync_queue"',
-							//	GZipHelper::url('plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
-								'v_'.$this->worker_id, 
-								empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], 
-								\JUri::root(true) . '/', 
-								$this->worker_id.$debug_pwa
-							], 
-								$data
-							);
+						$script = $data;
 
 						$onesignal = (array) $this->options['onesignal'];
 						if(!empty($onesignal['enabled']) && !empty($onesignal['web_push_app_id'])) {
@@ -227,21 +203,7 @@ class PlgSystemGzip extends JPlugin
 					else if ($this->options['pwaenabled'] == -1) {
 
 						$debug_pwa = empty($this->options['debug_pwa']) ? '.min' : '';
-
-						$script = str_replace(
-							[
-								'{CACHE_NAME}', 
-								'{defaultStrategy}', 
-								'{scope}', 
-								'{debug}'
-							], 
-							[
-								'v_'.$this->worker_id, 
-								empty($this->options['pwa_network_strategy']) ? 'nf' : $this->options['pwa_network_strategy'], 
-								\JUri::root(true) . '/', 
-								$this->worker_id.$debug_pwa
-							], 
-								file_get_contents(__DIR__.'/worker/dist/browser.uninstall'.$debug_pwa.'.js'));
+						$script = file_get_contents(JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/browser.uninstall'.$debug_pwa.'.js');
 					}
                 }
 
@@ -1052,7 +1014,7 @@ class PlgSystemGzip extends JPlugin
 			$this->params->get('gzip.cache_key'),
 			json_encode($cacheExpiryStrategy),
 			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
-			JUri::root(true),
+			JUri::root(true).'/',
 			json_encode($exclude_urls), 
 			json_encode($preloaded_urls), 
 		//	$import_scripts,
@@ -1067,16 +1029,42 @@ class PlgSystemGzip extends JPlugin
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
 
-		$data = $data;
+	//	$data = $data;
 
         file_put_contents($path.'serviceworker.js', str_replace($search, $replace, $import_scripts.file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
 		file_put_contents($path.'serviceworker.min.js', $import_scripts.$data);
 		
         file_put_contents($path.'sync.fallback.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/sync.fallback.js')));
         file_put_contents($path.'sync.fallback.min.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/sync.fallback.min.js')));
+				
+		// => update the service worker whenever the manifest changes
+		$worker_id = hash('sha1', json_encode($options).$hash.$import_scripts.$data);
+		file_put_contents($path.'worker_version', $worker_id);
+
+		$search[] = '{debug}';
+		 
+		$replace[] = $worker_id.$debug;
+
+        file_put_contents($path.'browser.uninstall.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/browser.uninstall.js')));
+        file_put_contents($path.'browser.uninstall.min.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js')));
+				
+		$data = file_get_contents(__DIR__.'/worker/dist/browser.js');
+
+		if ($sync_enabled != 'disabled') {
+
+			$data .= file_get_contents(__DIR__.'/worker/dist/browser.sync.js');
+		}
 		
-        // => update the service worker whenever the manifest changes
-        file_put_contents($path.'worker_version', hash('sha1', json_encode($options).$hash.$import_scripts.$data));
+		file_put_contents($path.'browser.js', str_replace($search, $replace, $data));
+		
+		$data = file_get_contents(__DIR__.'/worker/dist/browser.min.js');
+
+		if ($sync_enabled) {
+
+			$data .= file_get_contents(__DIR__.'/worker/dist/browser.sync.min.js');
+		}
+		
+        file_put_contents($path.'browser.min.js', str_replace($search, $replace, $data));
     }
 
     protected function cleanCache() {

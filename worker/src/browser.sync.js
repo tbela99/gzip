@@ -30,8 +30,7 @@ if ('serviceWorker' in navigator && 'SyncManager' in window) {
   });
 } else {
   // serviceworker/sync not supported, use a worker instead
-  console.error('sync api not supported 😭');
-  console.error('use web worker instead');
+  console.info('{fallback} sync api not supported 😭');
 
   const script = document.createElement('script');
 

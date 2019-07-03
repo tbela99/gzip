@@ -261,9 +261,10 @@
         const manager = new SyncManager();
     let timeout = 0;
     // retry using back off algorithm
+    // 0 - 1 minute - 2 minutes - 4 minutes - 8 minutes 16 minutes 32 minutes 60 minutes ...
         function nextRetry(n, max = 1e3 * 60 * 60) {
         // 1 hour max
-        return 1e3 * Math.min(max, 1 / 2 * (2 ** n - 1));
+        return 6e4 * Math.min(max, 1 / 2 * (2 ** n - 1));
     }
     async function replay() {
         console.log("replay requests ...");

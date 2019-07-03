@@ -159,7 +159,7 @@ for (entry of "{network_strategies}") {
 for (entry of strategies) {
 	route.registerRoute(
 		new Router.ExpressRouter(
-			scope + "/{ROUTE}/media/z/" + entry[0] + "/",
+			scope + "{ROUTE}/media/z/" + entry[0] + "/",
 			entry[1]
 		)
 	);
