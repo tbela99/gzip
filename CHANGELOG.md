@@ -4,8 +4,8 @@ https://extensions.joomla.org/extensions/extension/core-enhancements/performance
 
 ## V2.5.1
 
-- Implement background sync with no fallback
-- Allow dns prefetch configuration
+- Implement background sync with fallback
+- Build scripts using rollup instead of webpack
 
 ## V2.5.0
 

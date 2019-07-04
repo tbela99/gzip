@@ -36,7 +36,7 @@ There are additional plugins that help optimizing and profiling your page or ser
   - [5.6. Web Push](#56-Web-Push)
   - [5.7. Service worker router api](#57-Service-worker-router-api)
   - [5.8. Exclude resources from the service worker management](#58-Exclude-resources-from-the-service-worker-management)
-  - [5.1 Background Sync](#51-Background-Sync)
+  - [5.9 Background Sync](#59-Background-Sync)
 - [6. CDN and Cookieless Domains](#6-CDN-and-Cookieless-Domains)
 - [7. Misc](#7-Misc)
 
@@ -176,9 +176,9 @@ Add routes to customize fetch event networking strategy by using either a static
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
-## 5.1 Background Sync
+## 5.9 Background Sync
 
-With this API you can automatically replay some or all the requests that fails. You can also register custom tasks that will be run with Background Sync
+With this API you can automatically replay some or all the requests that fail. You can choose to replay either GET or POST requests or requests that match a pattern.
 
 # 6. CDN and Cookieless Domains
 
@@ -188,5 +188,6 @@ With this API you can automatically replay some or all the requests that fails. 
 
 # 7. Misc
 
+-   Preview the changes to the manifest before you save them
 -   Joomla administrator is excluded from the service worker cached resources
 -   You can secure your Joomla administrator access by defining a secret access token.

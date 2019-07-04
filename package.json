@@ -1,17 +1,17 @@
 {
-  "name": "GZip",
-  "version": "2.5.0",
-  "scripts": {
-    "build": "sh ./build.sh",
-    "docs": "jsdoc -c jsdoc.json",
-    "build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
-  },
-  "devDependencies": {
-    "docdash": "github:clenemt/docdash",
-    "jsdoc": "^3.5.5",
-    "rollup": "^1.16.2",
-    "uglify-es": "^3.3.9"
-  },
-  "license": "MIT OR LGPL-3.0",
-  "repository": "github:tbela99/gzip"
+	"name": "GZip",
+	"version": "2.5.1",
+	"scripts": {
+		"build": "sh ./build.sh",
+		"docs": "jsdoc -c jsdoc.json",
+		"build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
+	},
+	"devDependencies": {
+		"docdash": "github:clenemt/docdash",
+		"jsdoc": "^3.5.5",
+		"rollup": "^1.16.2",
+		"uglify-es": "^3.3.9"
+	},
+	"license": "MIT OR LGPL-3.0",
+	"repository": "github:tbela99/gzip"
 }

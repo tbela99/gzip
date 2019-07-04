@@ -1,7 +1,6 @@
 # Roadmap
 
 ## High priority list
-1.  Background Sync see [here](https://developers.google.com/web/updates/2015/12/background-sync)
 2.  Offline page: failed navigate requests should return the offline page instead of network error
 3.  Build scripts using Babel instead of uglify-es
 4.  Use ES6+ syntax for scripts used only by the service worker

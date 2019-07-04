@@ -29,6 +29,7 @@ if ('serviceWorker' in navigator && 'SyncManager' in window) {
 
   });
 } else {
+
   // serviceworker/sync not supported, use a worker instead
   console.info('{fallback} sync api not supported 😭');
 
