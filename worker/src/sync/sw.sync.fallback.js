@@ -34,7 +34,6 @@ function nextRetry(n, max = 1000 * 60 * 60) {
 
 async function replay() {
 
-    console.log('replay requests ...');
     await manager.replay("{SYNC_API_TAG}");
 
     setTimeout(replay, nextRetry(++timeout));

@@ -995,7 +995,7 @@ class PlgSystemGzip extends JPlugin
 			//	'"{IMPORT_SCRIPTS}"',
 				'"{network_strategies}"'];
 
-		$debug = empty($this->params->get('gzip.debug_pwa') ? '' : '.min');
+		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
 		$replace = [
@@ -1042,11 +1042,13 @@ class PlgSystemGzip extends JPlugin
 		file_put_contents($path.'worker_version', $worker_id);
 
 		$search[] = '{debug}';
+
+		$replace_min = array_merge($replace, [$worker_id.'.min']);
 		 
-		$replace[] = $worker_id.$debug;
+		$replace[] = $worker_id;
 
         file_put_contents($path.'browser.uninstall.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/browser.uninstall.js')));
-        file_put_contents($path.'browser.uninstall.min.js', str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js')));
+        file_put_contents($path.'browser.uninstall.min.js', str_replace($search, $replace_min, file_get_contents(__DIR__.'/worker/dist/browser.uninstall.min.js')));
 				
 		$data = file_get_contents(__DIR__.'/worker/dist/browser.js');
 
@@ -1064,7 +1066,7 @@ class PlgSystemGzip extends JPlugin
 			$data .= file_get_contents(__DIR__.'/worker/dist/browser.sync.min.js');
 		}
 		
-        file_put_contents($path.'browser.min.js', str_replace($search, $replace, $data));
+        file_put_contents($path.'browser.min.js', str_replace($search, $replace_min, $data));
     }
 
     protected function cleanCache() {

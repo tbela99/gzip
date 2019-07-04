@@ -150,10 +150,6 @@ export class SyncManager {
 
     async replay(tag) {
 
-        console.log({
-            tag
-        });
-
         if (tag != "{SYNC_API_TAG}") {
 
             return
@@ -197,15 +193,10 @@ export class SyncManager {
 
             } catch (e) {
 
-
             }
 
             if (remove || data.lastRetry <= Date.now()) {
 
-                console.log({
-                    remove,
-                    expired: data.lastRetry <= Date.now()
-                });
                 await db.delete(data.id);
             }
         }

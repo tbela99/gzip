@@ -870,11 +870,11 @@
 			enumerable: true
 		},
 		buildid: {
-			value: "0642ffc",
+			value: "3c98be6",
 			enumerable: true
 		},
 		builddate: {
-			value: "2019-07-03 18:49:40-04:00",
+			value: "2019-07-03 21:31:33-04:00",
 			enumerable: true
 		},
 		urls: {
@@ -1579,10 +1579,6 @@
 
 	    async replay(tag) {
 
-	        console.log({
-	            tag
-	        });
-
 	        if (tag != "{SYNC_API_TAG}") {
 
 	            return
@@ -1626,15 +1622,10 @@
 
 	            } catch (e) {
 
-
 	            }
 
 	            if (remove || data.lastRetry <= Date.now()) {
 
-	                console.log({
-	                    remove,
-	                    expired: data.lastRetry <= Date.now()
-	                });
 	                await db.delete(data.id);
 	            }
 	        }

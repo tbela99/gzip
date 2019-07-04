@@ -10,7 +10,7 @@
  * @license     MIT License
  */
 // @ts-check
-// build 0642ffc 2019-07-03 18:49:45-04:00
+// build 3c98be6 2019-07-03 21:31:39-04:00
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
         let registration, i = registrations.length;
