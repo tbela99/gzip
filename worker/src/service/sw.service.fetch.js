@@ -42,18 +42,17 @@ async function offline(event) {
  */
 
 self.addEventListener("fetch", (event) => {
-	const router = SW.routes.getRouter(event);
-
 	event.respondWith((async function () {
 
 		let response;
+
+		const router = SW.routes.getRouter(event);
 
 		if (router != null) {
 
 			try {
 
 				response = await router.handler.handle(event);
-				//	.then(response => {
 
 				if (!(response instanceof Response)) {
 
@@ -65,34 +64,23 @@ self.addEventListener("fetch", (event) => {
 					}
 				}
 
-				//		return response
-
-				//	}).
-				//	then(response => {
-
 				if (response == undef) {
 
 					response = await offline(event);
-					//.then(response => {
 
 					if (response == undef) {
 
 						response = await fetch(event.request);
 					}
-
-					//	return response
-					//	})
 				}
 
-				return response
-				//	}).
+				return response;
+
 			} catch (error) {
-				//	catch ((error) => {
 
 				console.error("😭", error);
 
-				return offline(event)
-				//	});
+				return offline(event);
 			}
 		}
 
