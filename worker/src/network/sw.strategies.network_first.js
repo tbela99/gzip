@@ -35,7 +35,7 @@ export async function networkFirst(event) {
 		return response;
 		//	})
 	} catch (error) {
-		console.error("😭", error);
+	//	console.error("😭", error);
 	}
 
 	return caches.match(event.request, {cacheName});

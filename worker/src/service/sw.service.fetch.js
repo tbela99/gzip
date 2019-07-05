@@ -9,7 +9,10 @@
  * @license     MIT License
  */
 // @ts-check
-import {SW} from "../serviceworker.js";
+
+import {
+	SW
+} from "../serviceworker.js";
 
 /**
  * @param {FetchEvent} event
@@ -20,11 +23,19 @@ self.addEventListener("fetch", (event) => {
 
 	if (router != null) {
 		event.respondWith(
-			router.handler.handle(event).catch((error) => {
+			router.handler.handle(event).then(response => {
+
+				if (!(response instanceof Response)) {
+
+					return SW.routes.resolve('fail', event.request, response).then(() => response);
+				}
+
+				return response
+
+			}).catch((error) => {
 				console.error("😭", error);
 				return fetch(event.request);
 			})
 		);
 	}
-	//	}
 });

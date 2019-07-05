@@ -17,42 +17,28 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-- [1. General improvements](#1-general-improvements)
-  - [1.1 Moving script and css position in the page](#11-moving-script-and-css-position-in-the-page)
-  - [1.2 Caching](#12-caching)
-  - [1.3 Sub Resource Integrity (SRI)](#13-sub-resource-integrity-sri)
-  - [1.4 Critical CSS Path](#14-critical-css-path)
-- [2. Images](#2-images)
-  - [2.1. Responsive images](#21-responsive-images)
-- [3. Javascript Improvements](#3-javascript-improvements)
-- [4. CSS Improvements](#4-css-improvements)
-- [5. Progressive Web App](#5-progressive-web-app)
-  - [5.1. Installable web app](#51-installable-web-app)
-  - [5.2. Web Share Target Level 2](#52-web-share-target-level-2)
-  - [5.3. Offline mode](#53-offline-mode)
-  - [5.4. Preloaded resources](#54-preloaded-resources)
-  - [5.5. Network cache strategies](#55-network-cache-strategies)
-  - [5.6. Web Push](#56-web-push)
-  - [5.7. Service worker router api](#57-service-worker-router-api)
-  - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
-- [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
-- [7. Misc](#7-misc)
-- [8. Change History](#8-change-history)
-  - [V2.5.0](#v250)
-  - [V2.4.2](#v242)
-  - [V2.4.1](#v241)
-  - [V2.4](#v24)
-  - [V2.3](#v23)
-  - [V2.2](#v22)
-  - [V2.1](#v21)
-  - [V2.0](#v20)
-    - [PWA: implemented network strategies:](#pwa-implemented-network-strategies)
-  - [V1.1](#v11)
-  - [V1.0](#v10)
-    - [SRI (Sub resources integrity)](#sri-sub-resources-integrity)
-    - [Critical CSS Path](#critical-css-path)
-    - [Javascript](#javascript)
-    - [CSS](#css)
+- [1. General improvements](#1-General-improvements)
+  - [1.1 Moving script and css position in the page](#11-Moving-script-and-css-position-in-the-page)
+  - [1.2 Caching](#12-Caching)
+  - [1.3 Sub Resource Integrity (SRI)](#13-Sub-Resource-Integrity-SRI)
+  - [1.4 Critical CSS Path](#14-Critical-CSS-Path)
+- [2. Images](#2-Images)
+  - [2.1. Responsive images](#21-Responsive-images)
+- [3. Javascript Improvements](#3-Javascript-Improvements)
+- [4. CSS Improvements](#4-CSS-Improvements)
+- [5. Progressive Web App](#5-Progressive-Web-App)
+  - [Features](#Features)
+  - [5.1. Installable web app](#51-Installable-web-app)
+  - [5.2. Web Share Target Level 2](#52-Web-Share-Target-Level-2)
+  - [5.3. Offline mode](#53-Offline-mode)
+  - [5.4. Preloaded resources](#54-Preloaded-resources)
+  - [5.5. Network cache strategies](#55-Network-cache-strategies)
+  - [5.6. Web Push](#56-Web-Push)
+  - [5.7. Service worker router api](#57-Service-worker-router-api)
+  - [5.8. Exclude resources from the service worker management](#58-Exclude-resources-from-the-service-worker-management)
+  - [5.9 Background Sync](#59-Background-Sync)
+- [6. CDN and Cookieless Domains](#6-CDN-and-Cookieless-Domains)
+- [7. Misc](#7-Misc)
 
 # 1. General improvements
 
@@ -132,6 +118,21 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 
 # 5. Progressive Web App
 
+## Features
+
+here are some of the features implemented
+- Offline mode
+- Installable web app with configurable settings
+- Background Sync with fallback support
+- Configurable manifest settings
+- Configurable cache settings per resource type
+- Preloaded resource can be configured
+- Configurable network caching strategies
+- Automatic service worker update. A new version is available whenever you change the settings
+- Mobile apps deep linking
+- Web share target level 2 support.
+- Push notifications using Onesignal
+
 ## 5.1. Installable web app
 
 -   The app can be installed as a standalone web app with google chrome / firefox on android via the menu “Menu / Add to home page”. You need to configure the manifest file and provide icons first.
@@ -175,6 +176,10 @@ Add routes to customize fetch event networking strategy by using either a static
 
 You can specify which resource are not managed by the service worker by specifying a list of patterns. They will always use the network only strategy.
 
+## 5.9 Background Sync
+
+With this API you can automatically replay some or all the requests that fail. You can choose to replay either GET or POST requests or requests that match a pattern.
+
 # 6. CDN and Cookieless Domains
 
 -   Configure up to 3 domains from which resources will be loaded.
@@ -183,119 +188,6 @@ You can specify which resource are not managed by the service worker by specifyi
 
 # 7. Misc
 
+-   Preview the changes to the manifest before you save them
 -   Joomla administrator is excluded from the service worker cached resources
 -   You can secure your Joomla administrator access by defining a secret access token.
-
-# 8. Change History
-
-## V2.5.0
-
-- Implement Web Share Target api level 2
-
-## V2.4.2
-
-- Fix file not found error
-- Add the possibility to ignore images based on a pattern
-
-## V2.4.1
-
--   Load images using LQIP technique
--   Add a service worker for administrator with no caching because admin requests were still cached by the website service worker
--   Make lazyloaded images indexable using noscript tag
--   force file name generation whenever the settings are changed
--   Add new breakpoint 1920px for responsive images and css background images
-
-## V2.4
-
--   Customize max-age value for cached resources
--   remove Expires header in favor of max-age
--   Service worker cache expiration api
--   Define cache expiration rule per file type
--   Add missing files to the git repo
-
-## V2.3
-
--   Web fonts preloading: Choose how the text is rendered while web fonts are loading by customizing font-display
--   Enable CDN / cookieless domain support
--   Enable CORS headers for cached resources
--   The service worker is able to intercept CDN files as long as they are sent with CORS headers
--   Access to the website through CDN / cookieless domain can be redirected to a custom domain
--   Extend the list of file type supported by the cdn or cookieless domain
--   Extend the list of file type supported by the url rewrite feature
--   Add a third option for service worker (disable, enable, force removal).
--   Configure service worker route strategy per resource type from the Joomla administrator
--   Implement the beforeinstallprompt event. see [here](https://w3c.github.io/manifest/#beforeinstallpromptevent-interface)
-
-## V2.2
-
--   optimized image lazyloader
--   generate svg placeholder from images for quick preview
--   resize css images for mobile / tablet
--   IMAGES: Implement progressive images loading with intersectionObserver
--   remove '+' '=' and ',' from the hash generation alphabet
--   Responsive images: resize images using breakpoints and leverage < img srcset >
--   serve webp whenever the browser/webserver (using gd) supports it
--   Disabling service worker will actually uninstall it
--   Server Timing Header see [here](https://w3c.github.io/server-timing/#examples)
--   automatic preconnect < link > added, web fonts preload moved closer to < head > for faster font load
--   Add < link > with < noscript > when async css loading is enabled. without javascript, stylesheet were not previously rendered.
-
-## V2.1
-
--   Added push notifications using onesignal
--   Added pwa manifest. The app is installable as a standalone application (tested on google chrome/android é windows 10 / firefox android)
--   Precached urls list. You can now provide a list of urls that will be precached when the service worker is installed.
--   Added router api. Add routes to customize fetch event networking strategy by using either a static route or a regexp
--   Rebuild service worker and the manifest whenever the plugin is installed or the settings are updated
--   Override meta name=generator with custom text
--   Add a secret token to prevent administrator access
--   Insert scripts and css that have 'data-position="head"' attribute in head instead of the body
-
-## V2.0
-
-### PWA: implemented network strategies:
-
--   Cache only
--   Network only
--   Cache first, falling back to network
--   Network first, falling back to cache
--   Cache, with network update
-
-## V1.1
-
-CSS: preload web fonts
-
-## V1.0
-
-this release implements to to bottom page loading optimization
-
-### SRI (Sub resources integrity)
-
-generate SRI for javascript and css files
-
-### Critical CSS Path
-
-generate critical css path based on the list of selectors you provide.
-
-### Javascript
-
--   fetch files hosted on remote servers
--   minify javascript files
--   merge javascript files
--   minify inline javascript
--   ignore files based on pattern
--   remove javascript files that match a pattern
--   remove duplicates
--   move javascript at the bottom of the page
-
-### CSS
-
--   fetch files hosted on remote servers
--   minify css files
--   merge css files (flatten @import)
--   minify inline css
--   ignore files based on pattern
--   remove css files that match a pattern
--   remove duplicates
--   move css at the bottom of the page
--   load css in a non blocking way

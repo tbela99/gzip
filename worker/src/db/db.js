@@ -3,14 +3,14 @@
 
 /**
  * @typedef DBType
- * @callback count
- * @callback getEntry
- * @callback getAll
- * @callback put
- * @callback deleteEntry
- * @callback flush
- * @callback then
- * @callback catch
+ * @function count
+ * @function getEntry
+ * @function getAll
+ * @function put
+ * @function delete
+ * @function flush
+ * @function then
+ * @function catch
  */
 
 /**
@@ -25,7 +25,9 @@ export async function DB(dbName, key = "id", indexes = []) {
 		let db;
 		const _upgrade = () => {
 			db = openDBRequest.result;
-			const store = db.createObjectStore(storeName, {keyPath: key});
+			const store = db.createObjectStore(storeName, {
+				keyPath: key
+			});
 
 			let index;
 
@@ -85,7 +87,7 @@ export async function DB(dbName, key = "id", indexes = []) {
 			resolve(methods);
 		};
 		const _errorOnBuild = e => {
-			reject(new Error(e));
+			reject(new Error(e.originalTarget && e.originalTarget.error || e));
 		};
 		openDBRequest.onupgradeneeded = _upgrade.bind(this);
 		openDBRequest.onsuccess = _successOnBuild.bind(this);

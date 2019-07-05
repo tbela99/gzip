@@ -36,21 +36,54 @@
 
 /**
  * @typedef SWType
- * @method {callback} SW.resolve
- * @method {callback} SW.on
- * @method {callback} SW.off
+ * @property {SWPropAPP} app
+ * @property {Route} routes
+ * @method {callback} resolve
+ * @method {callback} on
+ * @method {callback} off
  * @property Expiration
  */
 
 /**
- * @typedef {RouteHandler}
+ * @typedef SWPropAPP
+ * @property {string} name
+ * @property {string} scope
+ * @property {string} route
+ * @property {string} cacheName
+ * @property {string} codeName
+ * @property {string} build
+ * @property {string} buildid
+ * @property {string} builddate
+ * @property {[]<string>} urls
+ * @property {bool} backgroundSync
+ * @property {string} homepage
+ */
+
+/**
+ * @typedef DBType
+ * @method {callback} count
+ * @method {callback} getEntry
+ * @method {callback} getAll
+ * @method {callback} put
+ * @method {callback} delete
+ * @method {callback} flush
+ * @method {callback} then
+ * @method {callback} catch
+ */
+
+/**
+ *
+ * @var {DBType} DB
+ * */
+/**
+ * @typedef RouteHandler
  * @property {Router} router
  * @property {RouterOptions} options
  *
  */
 
 /**
- * @typedef {RouterOptions}
+ * @typedef RouterOptions
  * @property {cacheName} string cache name
  * @property {number} expiration
  *
@@ -73,16 +106,22 @@
  * @typedef {RegExp|string|URL} routerPath
  */
 
-import {DB} from "./db/db.js";
-import {Event} from "./event/sw.event.promise.js";
-import {expiration} from "./expiration/sw.expiration.js";
-import {Route, Router} from "./router/sw.router.js";
-import {strategies} from "./network/index.js";
-import {cacheName, SW} from "./serviceworker.js";
-import {Utils} from "./utils/sw.utils.js";
-
-// SW.PromiseEvent = Event;
-Utils.merge(true, SW, Event);
+import {
+	DB
+} from "./db/db.js";
+import {
+	expiration
+} from "./expiration/sw.expiration.js";
+import {
+	Router
+} from "./router/sw.router.js";
+import {
+	strategies
+} from "./network/index.js";
+import {
+	cacheName,
+	SW
+} from "./serviceworker.js";
 
 const undef = null;
 const route = SW.routes;
@@ -108,9 +147,10 @@ for (entry of "{network_strategies}") {
 		new Router.RegExpRouter(
 			new RegExp(entry[1], "i"),
 			strategies.get(entry[0]),
-			option == undef
-				? option
-				: {plugins: [new expiration.CacheExpiration(option)]}
+			option == undef ?
+			option : {
+				plugins: [new expiration.CacheExpiration(option)]
+			}
 		)
 	);
 }
@@ -119,7 +159,7 @@ for (entry of "{network_strategies}") {
 for (entry of strategies) {
 	route.registerRoute(
 		new Router.ExpressRouter(
-			scope + "/{ROUTE}/media/z/" + entry[0] + "/",
+			scope + "{ROUTE}/media/z/" + entry[0] + "/",
 			entry[1]
 		)
 	);
@@ -136,6 +176,13 @@ route.setDefaultRouter(
 
 // service worker activation
 SW.on({
+	error(error, event) {
+
+		console.error({
+			error,
+			event
+		});
+	},
 	async install() {
 		console.info("🛠️ service worker install event");
 
@@ -158,12 +205,19 @@ SW.on({
 				let storeName, store;
 
 				for (storeName of "{STORES}") {
-					console.info({storeName});
 
-					store = await DB(storeName, "url", [
-						{name: "url", key: "url"},
-						{name: "version", key: "version"},
-						{name: "route", key: "route"}
+					store = await DB(storeName, "url", [{
+							name: "url",
+							key: "url"
+						},
+						{
+							name: "version",
+							key: "version"
+						},
+						{
+							name: "route",
+							key: "route"
+						}
 					]);
 
 					if (store != undef) {
@@ -175,7 +229,7 @@ SW.on({
 
 		await db.put(SW.app);
 
-		// delete obsolet caches
+		// delete obsolete caches
 		const keyList = await caches.keys();
 		const tokens = cacheName.split(/_/, 2);
 		/**
@@ -188,9 +242,9 @@ SW.on({
 			await Promise.all(
 				keyList.map(
 					key =>
-						key.indexOf(search) == 0 &&
-						key != cacheName &&
-						caches.delete(key)
+					key.indexOf(search) == 0 &&
+					key != cacheName &&
+					caches.delete(key)
 				)
 			);
 		}
@@ -200,3 +254,4 @@ SW.on({
 import "./service/sw.service.activate.js";
 import "./service/sw.service.fetch.js";
 import "./service/sw.service.install.js";
+import "./sync/index.js";

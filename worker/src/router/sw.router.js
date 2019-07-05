@@ -14,18 +14,38 @@
 //s(function(SW) {
 //	const weakmap = new WeakMap();
 
-import {Event} from "../event/sw.event.promise.js";
-import {Utils} from "../utils/sw.utils.js";
+import {
+	Event
+} from "../event/sw.event.promise.js";
+import {
+	Utils
+} from "../utils/sw.utils.js";
 
 const undef = null;
 const CRY = "😭";
 
+/**
+ * 
+ * @param {[]<string>|string} method 
+ * @return []<string>
+ */
 function normalize(method = "GET") {
-	if (method == undef || method == "HEAD") {
-		return "GET";
+
+	if (!Array.isArray(method)) {
+
+		method = [method];
 	}
 
-	return method.toUpperCase();
+	method.forEach(method => {
+
+		if (method == undef || method == "HEAD") {
+			return "GET";
+		}
+
+		return method.toUpperCase();
+	});
+
+	return method;
 }
 
 /**
@@ -33,17 +53,19 @@ function normalize(method = "GET") {
  *
  * @property {Object.<string, Router[]>} routes
  * @property {Object.<string, routerHandle>} defaultRouter
+ * @method {function} route
  * @method {function} on
  * @method {function} off
- * @method {function} trigger
+ * @method {function} resolve
  *
  * @class Route
  */
-class Route {
+export class Route {
 	constructor() {
 		this.routers = Object.create(undef);
 		this.defaultRouter = Object.create(undef);
 	}
+
 
 	/**
 	 * get the handler that matches the request event
@@ -62,14 +84,14 @@ class Route {
 			route = routes[i];
 
 			if (route.match(event)) {
-				console.info({
-					match: true,
-					strategy: route.strategy,
-					name: route.constructor.name,
-					url: event.request.url,
-					path: route.path,
-					route
-				});
+				/*	console.info({
+						match: true,
+						strategy: route.strategy,
+						name: route.constructor.name,
+						url: event.request.url,
+						path: route.path,
+						route
+					});*/
 				return route;
 			}
 		}
@@ -81,16 +103,18 @@ class Route {
 	 * register a handler for an http method
 	 *
 	 * @param {Router} router router instance
-	 * @param {string} method http method
+	 * @param {[]<string>|string} method http method
 	 */
 	registerRoute(router, method = "GET") {
-		method = normalize(method);
 
-		if (!(method in this.routers)) {
-			this.routers[method] = [];
-		}
+		normalize(method).forEach(method => {
 
-		this.routers[method].push(router);
+			if (!(method in this.routers)) {
+				this.routers[method] = [];
+			}
+
+			this.routers[method].push(router);
+		});
 
 		return this;
 	}
@@ -102,15 +126,16 @@ class Route {
 	 * @param {string} method http method
 	 */
 	unregisterRoute(router, method) {
-		method = normalize(method);
 
-		const routers = this.routers[method] || [];
+		normalize(method).forEach(method => {
 
-		const index = routers.indexOf(router);
+			const routers = this.routers[method] || [];
+			const index = routers.indexOf(router);
 
-		if (index != -1) {
-			routers.splice(index, 1);
-		}
+			if (index != -1) {
+				routers.splice(index, 1);
+			}
+		});
 
 		return this;
 	}
@@ -122,9 +147,12 @@ class Route {
 	 * @param {string} method http method
 	 */
 	setDefaultRouter(router, method) {
-		this.defaultRouter[normalize(method)] = router;
+
+		normalize(method).forEach(method => this.defaultRouter[method] = router);
 	}
 }
+
+Utils.merge(true, Route.prototype, Event);
 
 /**
  * @property {string} strategy router strategy name
@@ -137,18 +165,20 @@ class Route {
  *
  * @class Router
  */
-class Router {
+export class Router {
 	/**
 	 *
 	 * @param {routerPath} path
 	 * @param {routerHandle} handler
 	 * @param {RouterOptions} options
 	 */
-	constructor(path, handler, options) {
+	constructor(path, handler, options = null) {
 		const self = this;
 
 		self.options = Object.assign(
-			Object.create({plugins: []}),
+			Object.create({
+				plugins: []
+			}),
 			options || {}
 		);
 
@@ -169,6 +199,7 @@ class Router {
 						}
 					}
 
+					/*
 					console.log({
 						precheck: "precheck",
 						match: response instanceof Response,
@@ -176,6 +207,7 @@ class Router {
 						router: self,
 						url: event.request.url
 					});
+					*/
 
 					if (response instanceof Response) {
 						return response;
@@ -288,9 +320,3 @@ class CallbackRouter extends Router {
 Router.RegExpRouter = RegExpRouter;
 Router.ExpressRouter = ExpressRouter;
 Router.CallbackRouter = CallbackRouter;
-
-export {Route, Router};
-
-//SW.Router = Router;
-//SW.route = new Route();
-//})(SW);

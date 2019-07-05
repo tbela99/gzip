@@ -2613,9 +2613,9 @@ class GZipHelper {
 
                                 if (!\is_file($img)) {
 
-	                                (clone $image)->resizeAndCrop($mq[$k], null, $method)->save($img);
+									$cloneImg = clone $image;
+	                                $cloneImg->resizeAndCrop($mq[$k], null, $method)->save($img);
                                 }
-                             //   if (à)
 
                                 $srcset[] = $img.' '.$mq[$k].'w';
                             }

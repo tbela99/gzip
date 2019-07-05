@@ -14,14 +14,14 @@
 
 const undef = null;
 
-const Utils = {
+export const Utils = {
 	implement(target) {
 		const proto = target.prototype,
 			args = [].slice.call(arguments, 1);
 		let i, source, key;
 
 		function makefunc(fn, previous, parent) {
-			return function() {
+			return function () {
 				const self = this,
 					hasPrevious = "previous" in self,
 					hasParent = "parent" in self,
@@ -50,22 +50,22 @@ const Utils = {
 				source = args[i][key];
 
 				switch (typeof source) {
-				case "function":
-					proto[key] = makefunc(source, target[key], proto[key]);
+					case "function":
+						proto[key] = makefunc(source, target[key], proto[key]);
 
-					break;
+						break;
 
-				case "object":
-					proto[key] = merge(
-						true,
-						Array.isArray(source) ? [] : {},
-						source
-					);
-					break;
+					case "object":
+						proto[key] = merge(
+							true,
+							Array.isArray(source) ? [] : {},
+							source
+						);
+						break;
 
-				default:
-					proto[key] = source;
-					break;
+					default:
+						proto[key] = source;
+						break;
 				}
 			}
 		}
@@ -89,7 +89,7 @@ const Utils = {
 	 * @param {Function} fn
 	 */
 	extendArgs(fn) {
-		return function(key) {
+		return function (key) {
 			if (typeof key == "object") {
 				const args = [].slice.call(arguments, 1);
 				let k;
@@ -136,133 +136,8 @@ const Utils = {
 		}
 
 		return properties;
-	},
-	getObjectHash(object) {
-		return hashCode(getObjectHashString(object)).toString(16);
 	}
 };
-
-function getObjectHashString(object) {
-	let toString = "",
-		property,
-		value,
-		key,
-		i = 0,
-		j;
-
-	if ((!object && typeof object == "object") || typeof object == "string") {
-		toString = "" + (object == "string" ? JSON.stringify(object) : object);
-	} else {
-		const properties = Utils.getOwnPropertyDescriptorNames(object);
-
-		for (; i < properties.length; i++) {
-			property = properties[i];
-
-			try {
-				value = object[property];
-			} catch (e) {
-				//	console.error(property, object, e);
-				toString += "!Error[" + JSON.stringify(e.message) + "],";
-				continue;
-			}
-
-			toString += property + ":";
-
-			if (Array.isArray(value)) {
-				toString += "[";
-
-				for (j = 0; j < value.length; j++) {
-					toString += getObjectHashString(value[j]) + ",";
-				}
-
-				if (toString[toString.length - 1] == ",") {
-					toString = toString.substr(0, toString.length - 2);
-				}
-
-				toString += "]";
-			} else if (typeof value == "object") {
-				/* eslint max-depth: 0 */
-				if (!value || typeof value == "string") {
-					toString += "" + value;
-				} else if (value[Symbol.iterator] != null) {
-					if (value.constructor && value.constructor.name) {
-						toString += value.constructor.name;
-					}
-
-					if (typeof value.forEach == "function") {
-						toString += "{";
-
-						/* eslint no-loop-func: 0 */
-						value.forEach(
-							(value, key) =>
-								(toString +=
-									key +
-									":" +
-									getObjectHashString(value) +
-									",")
-						);
-
-						if (toString[toString.length - 1] == ",") {
-							toString = toString.substr(0, toString.length - 2);
-						}
-
-						toString += "}";
-					} else {
-						toString += "[";
-
-						for (key of value) {
-							toString += getObjectHashString(key) + ",";
-						}
-
-						if (toString[toString.length - 1] == ",") {
-							toString = toString.substr(0, toString.length - 2);
-						}
-
-						toString += "]";
-					}
-				} else {
-					toString += "{" + getObjectHashString(value) + "}";
-				}
-			} else {
-				toString += JSON.stringify(value);
-			}
-
-			toString += ",";
-		}
-
-		if (toString[toString.length - 1] == ",") {
-			toString = toString.substr(0, toString.length - 2);
-		}
-
-		if (Array.isArray(object)) {
-			toString = "[" + toString + "]";
-		} else if (typeof object == "object") {
-			toString = "{" + toString + "}";
-		}
-	}
-
-	return toString;
-}
-
-function hashCode(string) {
-	let hash = 0,
-		char,
-		i;
-
-	if (string.length == 0) {
-		return hash;
-	}
-
-	for (i = 0; i < string.length; i++) {
-		char = string.charCodeAt(i);
-
-		hash = (hash << 5) - hash + char;
-
-		hash = hash & hash; // Convert to 32bit integer
-	}
-
-	return hash;
-}
 
 function merge(target) {
 	const args = [].slice.call(arguments, 1);
@@ -288,28 +163,26 @@ function merge(target) {
 			value = source[prop];
 
 			switch (typeof value) {
-			case "object":
-				if (value == undef || !deep) {
+				case "object":
+					if (value == undef || !deep) {
+						target[prop] = value;
+					} else {
+						target[prop] = merge(
+							deep,
+							typeof target[prop] == "object" &&
+							target[prop] != undef ?
+							target[prop] :
+							Array.isArray(value) ? [] : {},
+							//
+							value
+						);
+					}
+
+					break;
+
+				default:
 					target[prop] = value;
-				} else {
-					target[prop] = merge(
-						deep,
-						typeof target[prop] == "object" &&
-							target[prop] != undef
-							? target[prop]
-							: Array.isArray(value)
-								? []
-								: {},
-						//
-						value
-					);
-				}
-
-				break;
-
-			default:
-				target[prop] = value;
-				break;
+					break;
 			}
 		}
 	}
@@ -348,4 +221,6 @@ function reset(object) {
 	return object;
 }
 
-export {Utils};
+//export {
+//	Utils
+//};
