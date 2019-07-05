@@ -108,6 +108,7 @@ If you use a cdn, you will need to disable cdn optimizations for css and javascr
 
 # 4. CSS Improvements
 
+-   Configure the text rendering until the web font are loaded
 -   Fetch remote css files, images and fonts and store them locally
 -   Merge css files (this process @import directive)
 -   Minify css files

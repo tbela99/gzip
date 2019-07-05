@@ -2,11 +2,15 @@ https://extensions.joomla.org/extensions/extension/core-enhancements/performance
 
 # Change History
 
+## V2.5.2
+
+- Added offline page support
+
+
 ## V2.5.1
 
 - Implement background sync with fallback
 - Build scripts using rollup instead of webpack
-
 ## V2.5.0
 
 - Implement Web Share Target api level 2

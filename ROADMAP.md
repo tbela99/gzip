@@ -1,7 +1,8 @@
 # Roadmap
 
-## High priority list
-2.  Offline page: failed navigate requests should return the offline page instead of network error
+## High priority list 
+1.  Run custom code with background sync
+2.  merge multiple google font < link > tag
 3.  Build scripts using Babel instead of uglify-es
 4.  Use ES6+ syntax for scripts used only by the service worker
 5.  Clear Joomla cache when settings are updated
@@ -17,8 +18,8 @@
 
 ## Low priority list
 
+1. Translation: french?
 1.  handle < script nomodule > and < script type=module > ? see [here](https://developers.google.com/web/fundamentals/primers/modules)
 1.  Manage the service worker settings from the front end (notify when a new version is available, manually unregister, delete cache, etc ...)?
 1.  Manage user push notification subscription from the Joomla backend (link user to his Id, etc ...)?
 2.  Provide push notification endpoints (get user Id, notification clicked, notification closed, etc ...)
-3.  PWA: Deep links in pwa app or website. see [here](http://blog.teamtreehouse.com/registering-protocol-handlers-web-applications) and [here](https://developer.mozilla.org/en-US/docs/Web-based_protocol_handlers)

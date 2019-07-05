@@ -887,7 +887,14 @@ class PlgSystemGzip extends JPlugin
         $exclude_urls = empty($options['pwa_app_cache_exclude_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_exclude_urls'], -1, PREG_SPLIT_NO_EMPTY);
                 
         $exclude_urls[] = JUri::root(true).'/administrator';
-        $exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
+		$exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
+		
+		if (!empty($options['pwa_offline_page'])) {
+
+			$preloaded_urls[] = $options['pwa_offline_page'];
+		}
+
+		$preloaded_urls = array_values(array_unique($preloaded_urls));
 
         $import_scripts = '';
         $onesignal = (array) $options['onesignal'];
@@ -980,6 +987,7 @@ class PlgSystemGzip extends JPlugin
 			[
 			//	'"{DEBUG}"',
 		//	'"{SYNC_FALLBACK_PATH}"',
+				'"{pwa_offline_page}"',
 				'"{SYNC_API_TAG}"',
 				'"{VERSION}"', 
 				'"{BACKGROUND_SYNC}"',
@@ -1001,6 +1009,11 @@ class PlgSystemGzip extends JPlugin
 		$replace = [
 		//	empty($this->params->get('gzip.debug_pwa') ? '' : '.min',
 		//	GZipHelper::url('/plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
+			json_encode(
+				[
+					'url' => (string) $options['pwa_offline_page'], 
+					'methods' => empty($options['pwa_offline_method']) ? ['GET'] : $options['pwa_offline_method']
+				]),
 			'"gzip_sync_queue"',
 			json_encode($worker_id),
 			json_encode([

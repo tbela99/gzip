@@ -69,7 +69,12 @@
                 getAll: (keyToUse, index) => _query("getAll", true, keyToUse, index),
                 put: entryData => _query("put", false, entryData),
                 delete: keyToUse => _query("delete", false, keyToUse),
-                clear: () => _query("clear", false)
+                clear: () => _query("clear", false),
+                deleteDatabase: () => new Promise(function(resolve, reject) {
+                    const result = indexedDB.deleteDatabase;
+                    result.onerror = reject;
+                    result.onsuccess = resolve;
+                })
             };
             const _successOnBuild = () => {
                 db = openDBRequest.result;
