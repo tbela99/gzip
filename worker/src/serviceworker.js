@@ -95,6 +95,9 @@ Object.defineProperties(SW.app, {
 		value: "{BACKGROUND_SYNC}",
 		enumerable: true
 	},
+	offline: {
+		value: "{pwa_offline_page}"
+	},
 	homepage: {
 		value: "https://github.com/tbela99/gzip",
 		enumerable: true

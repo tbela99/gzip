@@ -14,28 +14,76 @@ import {
 	SW
 } from "../serviceworker.js";
 
+let undef;
+
+async function offline(event) {
+
+	console.log({
+		'SW.app.offline': SW.app.offline,
+		'event.request.mode': event.request.mode,
+		'event.request.method': event.request.method
+	});
+
+	if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
+
+		const match = caches.match(SW.app.offline.url);
+
+		if (match != undef) {
+
+			return match;
+		}
+
+		return match;
+	}
+}
+
 /**
  * @param {FetchEvent} event
  */
 
 self.addEventListener("fetch", (event) => {
-	const router = SW.routes.getRouter(event);
+	event.respondWith((async function () {
 
-	if (router != null) {
-		event.respondWith(
-			router.handler.handle(event).then(response => {
+		let response;
+
+		const router = SW.routes.getRouter(event);
+
+		if (router != null) {
+
+			try {
+
+				response = await router.handler.handle(event);
 
 				if (!(response instanceof Response)) {
 
-					return SW.routes.resolve('fail', event.request, response).then(() => response);
+					let resp = await SW.routes.resolve('fail', event.request, response);
+
+					if (resp instanceof Response) {
+
+						response = resp;
+					}
 				}
 
-				return response
+				if (response == undef) {
 
-			}).catch((error) => {
+					response = await offline(event);
+
+					if (response == undef) {
+
+						response = await fetch(event.request);
+					}
+				}
+
+				return response;
+
+			} catch (error) {
+
 				console.error("😭", error);
-				return fetch(event.request);
-			})
-		);
-	}
+
+				return offline(event);
+			}
+		}
+
+		return fetch(event.request).catch(() => offline(event))
+	})());
 });

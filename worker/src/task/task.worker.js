@@ -1,6 +1,6 @@
 /**
  *
- * @package     workerize
+ * @package     GZip Plugin
  * @copyright   Copyright (C) 2005 - 2019 Thierry Bela.
  *
  * dual licensed
