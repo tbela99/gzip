@@ -183,7 +183,15 @@ if (!ini_get('zlib.output_compression')) {
 	$dt = new DateTime();
 
 	$now = $dt->getTimestamp();
-	$dt->modify('+'.$this->params->get('gzip.maxage', 2).$this->params->get('gzip.maxage_unit', 'months'));
+
+	$maxage = $this->params->get('gzip.pwa_cache.'.$ext);
+
+	if ((int) $maxage == 0) {
+
+		$maxage = $this->params->get('gzip.maxage', '2months');
+	}
+
+	$dt->modify('+'.$maxage);
 
 	header('Accept-Ranges: bytes');
 	header('Cache-Control: public, max-age='.($dt->getTimestamp() - $now).', immutable');

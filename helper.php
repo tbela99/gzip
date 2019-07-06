@@ -102,7 +102,8 @@ class GZipHelper {
         "txt" => "text/plain",
         "xml" => "text/xml",
         "pdf" => "application/pdf",
-        'mp3' => 'audio/mpeg'
+        'mp3' => 'audio/mpeg',
+        'html' => 'text/html'
     );
 
     static $pwa_network_strategy = '';
@@ -882,7 +883,9 @@ class GZipHelper {
             }
 
             return $matches[0];
-        }, $body);
+		}, $body);
+		
+	//	if ()
 
         $profiler = \JProfiler::getInstance('Application');
         $profiler->mark('afterParseLinks');

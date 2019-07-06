@@ -18,12 +18,6 @@ let undef;
 
 async function offline(event) {
 
-	console.log({
-		'SW.app.offline': SW.app.offline,
-		'event.request.mode': event.request.mode,
-		'event.request.method': event.request.method
-	});
-
 	if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
 
 		const match = caches.match(SW.app.offline.url);

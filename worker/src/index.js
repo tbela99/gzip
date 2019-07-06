@@ -171,7 +171,7 @@ if (!strategies.has(defaultStrategy)) {
 }
 
 route.setDefaultRouter(
-	new Router.ExpressRouter("/", strategies.get(defaultStrategy))
+	new Router.ExpressRouter(scope, strategies.get(defaultStrategy))
 );
 
 // service worker activation

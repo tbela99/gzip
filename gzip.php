@@ -220,7 +220,7 @@ class PlgSystemGzip extends JPlugin
 		//  pattern="^([a-zA-Z0-9_-]*)$"
         if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
-            $options = $data['params']['gzip'];
+			$options = $data['params']['gzip'];
 			
 			if (isset($options['admin_secret'])) {
 				
@@ -864,6 +864,11 @@ class PlgSystemGzip extends JPlugin
 	
     protected function updateServiceWorker($options) {
 
+		if (is_object($options)) {
+
+			$options = get_object_vars($options);
+		}
+
 	    if (empty($options['pwaenabled'])) {
 
 	    	return;
@@ -883,7 +888,7 @@ class PlgSystemGzip extends JPlugin
         $preloaded_urls = empty($options['pwa_app_cache_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_urls'], -1, PREG_SPLIT_NO_EMPTY);
         $exclude_urls = empty($options['pwa_app_cache_exclude_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_exclude_urls'], -1, PREG_SPLIT_NO_EMPTY);
                 
-        $exclude_urls[] = JUri::root(true).'/administrator';
+        $exclude_urls[] = JUri::root(true).'/administrator/';
 		$exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
 		
 		if (!empty($options['pwa_offline_page'])) {
@@ -914,15 +919,30 @@ class PlgSystemGzip extends JPlugin
 		// additional routing startegies
 		$strategies = [];
 
+		if (is_object($options['pwa_network_strategies'])) {
+
+			$options['pwa_network_strategies'] = get_object_vars($options['pwa_network_strategies']);
+		}
+
+		if (!isset($options['pwa_cache'])) {
+
+			$options['pwa_cache'] = [];
+		}
+
+		if (is_object($options['pwa_cache'])) {
+
+			$options['pwa_cache'] = get_object_vars($options['pwa_cache']);
+		}
+
 		foreach ($options['pwa_network_strategies'] as $key => $value) {
 
 			// use default settings
-			if (empty($value) && empty($options['pwa_cache'][$key])) {
+			if (empty($options['pwa_cache'][$key])) {
 
 				continue;
 			}
 
-			if (is_null($value)) {
+			if (empty($value)) {
 
 				$value = $options['pwa_network_strategy'];
 			}
@@ -932,6 +952,7 @@ class PlgSystemGzip extends JPlugin
 				$value = 'no';
 			}
 
+			$strategies[$key]['mime'] = [];
 			$strategies[$key]['network'] = [];
 
 			foreach (GZipHelper::$accepted as $ext => $mime_type) {
@@ -939,6 +960,7 @@ class PlgSystemGzip extends JPlugin
 				if ($ext == $key || strpos($mime_type, $key) !== false) {
 
 					$strategies[$key]['network'][] = $ext;
+					$strategies[$key]['mime'][] = $mime_type;
 				}
 			}
 
@@ -951,7 +973,7 @@ class PlgSystemGzip extends JPlugin
 			// fallback to default pwa cache settings if not set
 			$cache_duration = empty($options['pwa_cache'][$key]) ? $options['pwa_cache_default'] : $options['pwa_cache'][$key];
 
-			if (empty($cache_duration)) {
+			if ((int) $cache_duration == 0) {
 
 				// fallback to the default http cache settings if none set
 				$cache_duration = $this->params->get('gzip.maxage', '2months');
@@ -1000,6 +1022,11 @@ class PlgSystemGzip extends JPlugin
 		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
+	//	$strategies = array_filter($strategies, function ($values) {
+
+	//		return !empty($values['value']);
+	//	});
+
 		$replace = [
 			json_encode(
 				[
@@ -1024,7 +1051,15 @@ class PlgSystemGzip extends JPlugin
 			json_encode($preloaded_urls), 
 			json_encode(array_map(function ($key, $values) {
 
-					return [$values['value'], '\.(('.implode(')|(', $values['network']).'))([#?].*)?$', ['cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 'maxAge' => +$values['cache']]];
+					return [
+						$values['value'], 
+						'\.(('.implode(')|(', $values['network']).'))([#?].*)?$', 
+						[
+							'cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 
+							'maxAge' => +$values['cache'],
+							'mime' => $values['mime']
+						]
+					];
 				}, 
 				array_keys($strategies), 
 				array_values($strategies)

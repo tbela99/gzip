@@ -217,7 +217,7 @@
                     <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
                 </fields>
             </fieldset>
-            <fieldset name="pwa_app" label="PWA::App">
+            <fieldset name="pwa_app" label="App">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -271,7 +271,7 @@
                     <field name="webmanifestpreview" label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL" description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION" readonly="readonly" hiddenLabel="true" class="input-block2" row="15" type="webmanifestpreview" default="" />
                 </fields>
             </fieldset>
-            <fieldset name="pwa_web_share_target" label="PWA::Web Share Target">
+            <fieldset name="pwa_web_share_target" label="Web Share Target">
                 <field type="spacer" label="Configure share target from mobile device" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Share target settings" />
@@ -315,7 +315,7 @@
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_network" label="PWA::Network">
+            <fieldset name="pwa_network" label="Network">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Networking settings" />
@@ -365,11 +365,20 @@
                             <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
                             <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
                         </field>
+                        <field name="html" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_HTML_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_HTML_DESCRIPTION" type="list" default="">
+                            <option value="">JFIELD_OPTION_PWA_NETWORK_STRATEGY_DEFAULT</option>
+                            <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
+                            <option value="no">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_ONLY</option>
+                            <option value="nf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NETWORK_FIRST</option>
+                            <option value="cf">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_FIRST</option>
+                            <option value="cn">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_AND_NETWORK_UPDATE</option>
+                            <option value="co">JFIELD_OPTION_PWA_NETWORK_STRATEGY_CACHE_ONLY</option>
+                        </field>
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_cache" label="PWA::Cache">
-                <field type="spacer" label="Configure progressive web application settings" />
+            <fieldset name="pwa_cache" label="Cache">
+                <field type="spacer" label="Configure progressive web application cache settings" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Cache retention settings" />
@@ -379,10 +388,11 @@
                         <field name="js" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_JAVASCRIPT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_JAVASCRIPT_DESCRIPTION" type="maxage" default="0months" />
                         <field name="css" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_CSS_DESCRIPTION" type="maxage" default="0months" />
                         <field name="font" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_FONTS_DESCRIPTION" type="maxage" default="0months" />
+                        <field name="html" label="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_HTML_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_STRATEGY_HTML_DESCRIPTION" type="maxage" default="0months" />
                     </fields>
                 </fields>
             </fieldset>
-            <fieldset name="pwa_sync" label="PWA::Sync">
+            <fieldset name="pwa_sync" label="Sync">
                 <field type="spacer" label="Configure Background Sync" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
@@ -399,7 +409,7 @@
                     <field name="pwa_sync_patterns" label="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_LABEL" description="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_HINT" type="textarea" default="" rows="15" />
                 </fields>
             </fieldset>
-            <fieldset name="webpush" label="PWA::Web Push">
+            <fieldset name="webpush" label="Web Push">
                 <field type="spacer" label="Configure Web Push" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="OneSignal app settings" />

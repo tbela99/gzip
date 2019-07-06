@@ -15,15 +15,22 @@
  * - timestamp ((getHeader(Date) || Date.now()) + maxAge)
  **/
 
-import {DB} from "../db/db.js";
-import {SW, cacheName} from "../serviceworker.js";
-import {Utils} from "../utils/sw.utils.js";
+import {
+	DB
+} from "../db/db.js";
+import {
+	SW,
+	cacheName
+} from "../serviceworker.js";
+import {
+	Utils
+} from "../utils/sw.utils.js";
 
 // @ts-check
 //SW.expiration = (function() {
 const CRY = "😭";
 const undef = null;
-const expiration = Object.create(undef);
+export const expiration = Object.create(undef);
 
 /**
  * @property {DBType} db
@@ -37,10 +44,10 @@ class CacheExpiration {
 
 	getRouteTag(url) {
 		const route = SW.app.route;
-		let h, host;
+		let host;
 
 		for (host of SW.app.urls) {
-			if (new RegExp("^https?://" + host + "/" + route + "/").test(url)) {
+			if (new RegExp("^https?://" + host + SW.app.scope + route + "/").test(url)) {
 				return route;
 			}
 		}
@@ -49,23 +56,28 @@ class CacheExpiration {
 	}
 
 	async setOptions(options) {
-		//cacheName = "gzip_sw_worker_expiration_cache_private",
-		//	limit = 0,
-		//	maxAge = 0
-		//
+
 		this.limit = +options.limit || 0;
 		this.maxAge = +options.maxAge * 1000 || 0;
 
 		try {
 			this.db = await DB(
-				options.cacheName != undef
-					? options.cacheName
-					: "gzip_sw_worker_expiration_cache_private",
+				options.cacheName != undef ?
+				options.cacheName :
+				"gzip_sw_worker_expiration_cache_private",
 				"url",
-				[
-					{name: "url", key: "url"},
-					{name: "version", key: "version"},
-					{name: "route", key: "route"}
+				[{
+						name: "url",
+						key: "url"
+					},
+					{
+						name: "version",
+						key: "version"
+					},
+					{
+						name: "route",
+						key: "route"
+					}
 				]
 			);
 		} catch (e) {
@@ -89,9 +101,9 @@ class CacheExpiration {
 			) {
 				console.info(
 					"CacheExpiration [precheck][obsolete][" +
-						version +
-						"] " +
-						event.request.url
+					version +
+					"] " +
+					event.request.url
 				);
 
 				caches.delete(event.request);
@@ -107,10 +119,6 @@ class CacheExpiration {
 		// todo -> delete if count > limit
 
 		return true;
-
-		//	return (
-		//		entries == undef || Date.now() - entry.timestamp < this.maxAge
-		//	);
 	}
 
 	async postcheck(event) {
@@ -130,13 +138,13 @@ class CacheExpiration {
 			) {
 				console.info(
 					"CacheExpiration [postcheck][update][version=" +
-						version +
-						"][expires=" +
-						(Date.now() + this.maxAge) +
-						"|" +
-						new Date(Date.now() + this.maxAge).toUTCString() +
-						"] " +
-						url,
+					version +
+					"][expires=" +
+					(Date.now() + this.maxAge) +
+					"|" +
+					new Date(Date.now() + this.maxAge).toUTCString() +
+					"] " +
+					url,
 					this
 				);
 
@@ -151,13 +159,13 @@ class CacheExpiration {
 			} else {
 				console.info(
 					"CacheExpiration [postcheck][no update][version=" +
-						version +
-						"][expires=" +
-						entry.timestamp +
-						"|" +
-						new Date(entry.timestamp).toUTCString() +
-						"] " +
-						url,
+					version +
+					"][expires=" +
+					entry.timestamp +
+					"|" +
+					new Date(entry.timestamp).toUTCString() +
+					"] " +
+					url,
 					entry
 				);
 			}
@@ -172,7 +180,3 @@ class CacheExpiration {
 }
 
 expiration.CacheExpiration = CacheExpiration;
-//	return expiration;
-//})();
-
-export {expiration};

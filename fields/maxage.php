@@ -78,7 +78,7 @@ class JFormFieldMaxAge extends JFormField
 			$attributes .= ' disabled';
 		}
 
-		$html = '<select'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+this.nextElementSibling.options[this.nextElementSibling.selectedIndex].value">';
+		$html = '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
 
 		for ($i = $first; $i <= $last; $i += $step) {
 
@@ -87,12 +87,13 @@ class JFormFieldMaxAge extends JFormField
 
 		$html .= '</select>';
 
-		$html .= ' <select'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="document.getElementById(\''.$this->id.'\').value=this.previousElementSibling.options[this.selectedIndex].value+this.options[this.selectedIndex].value">';
+		$html .= ' <select id="'.$this->id.'_1"'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="var n=document.getElementById(\''.$this->id.'_0\');document.getElementById(\''.$this->id.'\').value=n.options[n.selectedIndex].value+this.options[this.selectedIndex].value">';
 
-		$html .= '<option value="hours"'.($matches[2] == 'hours' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_HOURS').'</option>
+		$html .= '<option value="minutes"'.($matches[2] == 'minutes' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_MINUTES').'</option>
+		<option value="hours"'.($matches[2] == 'hours' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_HOURS').'</option>
 		<option value="months"'.($matches[2] == 'months' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_MONTHS').'</option></select>';
 
-		$html .= '<input type="hidden" value="'.htmlspecialchars($this->value).'" id="'.htmlspecialchars($this->id).'"'.$attributes.'>';
+		$html .= '<input type="hidden" value="'.htmlspecialchars($this->value).'" id="'.htmlspecialchars($this->id).'" name="'.$this->name.'"'.$attributes.'>';
  
         return $html;
 	}

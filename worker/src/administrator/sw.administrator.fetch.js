@@ -13,21 +13,6 @@
 
 // @ts-check
 /* eslint wrap-iife: 0 */
-/*
-
-Object.defineProperties(SW.app, {
-	name: {value: "gzip", enumerable: true},
-	//	cacheName: {value: CACHE_NAME, enumerable: true},
-	route: {value: "{ROUTE}", enumerable: true},
-	codeName: {value: "Page Optimizer Plugin", enumerable: true},
-	build: {value: "{VERSION}", enumerable: true},
-	buildid: {value: "build-id", enumerable: true},
-	builddate: {value: "build-date", enumerable: true},
-	urls: {value: "{CDN_HOSTS}", enumerable: true},
-	homepage: {value: "https://github.com/tbela99/gzip", enumerable: true}
-});
-
-*/
 
 "use strict;";
 

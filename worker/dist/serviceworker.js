@@ -877,11 +877,11 @@
 			enumerable: true
 		},
 		buildid: {
-			value: "ed388ad",
+			value: "8bac6aa",
 			enumerable: true
 		},
 		builddate: {
-			value: "2019-07-05 02:14:58-04:00",
+			value: "2019-07-07 17:15:13-04:00",
 			enumerable: true
 		},
 		urls: {
@@ -933,7 +933,7 @@
 			let host;
 
 			for (host of SW.app.urls) {
-				if (new RegExp("^https?://" + host + "/" + route + "/").test(url)) {
+				if (new RegExp("^https?://" + host + SW.app.scope + route + "/").test(url)) {
 					return route;
 				}
 			}
@@ -942,23 +942,28 @@
 		}
 
 		async setOptions(options) {
-			//cacheName = "gzip_sw_worker_expiration_cache_private",
-			//	limit = 0,
-			//	maxAge = 0
-			//
+
 			this.limit = +options.limit || 0;
 			this.maxAge = +options.maxAge * 1000 || 0;
 
 			try {
 				this.db = await DB(
-					options.cacheName != undef$4
-						? options.cacheName
-						: "gzip_sw_worker_expiration_cache_private",
+					options.cacheName != undef$4 ?
+					options.cacheName :
+					"gzip_sw_worker_expiration_cache_private",
 					"url",
-					[
-						{name: "url", key: "url"},
-						{name: "version", key: "version"},
-						{name: "route", key: "route"}
+					[{
+							name: "url",
+							key: "url"
+						},
+						{
+							name: "version",
+							key: "version"
+						},
+						{
+							name: "route",
+							key: "route"
+						}
 					]
 				);
 			} catch (e) {
@@ -982,9 +987,9 @@
 				) {
 					console.info(
 						"CacheExpiration [precheck][obsolete][" +
-							version +
-							"] " +
-							event.request.url
+						version +
+						"] " +
+						event.request.url
 					);
 
 					caches.delete(event.request);
@@ -1000,10 +1005,6 @@
 			// todo -> delete if count > limit
 
 			return true;
-
-			//	return (
-			//		entries == undef || Date.now() - entry.timestamp < this.maxAge
-			//	);
 		}
 
 		async postcheck(event) {
@@ -1023,13 +1024,13 @@
 				) {
 					console.info(
 						"CacheExpiration [postcheck][update][version=" +
-							version +
-							"][expires=" +
-							(Date.now() + this.maxAge) +
-							"|" +
-							new Date(Date.now() + this.maxAge).toUTCString() +
-							"] " +
-							url,
+						version +
+						"][expires=" +
+						(Date.now() + this.maxAge) +
+						"|" +
+						new Date(Date.now() + this.maxAge).toUTCString() +
+						"] " +
+						url,
 						this
 					);
 
@@ -1044,13 +1045,13 @@
 				} else {
 					console.info(
 						"CacheExpiration [postcheck][no update][version=" +
-							version +
-							"][expires=" +
-							entry.timestamp +
-							"|" +
-							new Date(entry.timestamp).toUTCString() +
-							"] " +
-							url,
+						version +
+						"][expires=" +
+						entry.timestamp +
+						"|" +
+						new Date(entry.timestamp).toUTCString() +
+						"] " +
+						url,
 						entry
 					);
 				}
@@ -1377,12 +1378,6 @@
 
 	async function offline(event) {
 
-		console.log({
-			'SW.app.offline': SW.app.offline,
-			'event.request.mode': event.request.mode,
-			'event.request.method': event.request.method
-		});
-
 		if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
 
 			const match = caches.match(SW.app.offline.url);
@@ -1401,18 +1396,17 @@
 	 */
 
 	self.addEventListener("fetch", (event) => {
-		const router = SW.routes.getRouter(event);
-
 		event.respondWith((async function () {
 
 			let response;
+
+			const router = SW.routes.getRouter(event);
 
 			if (router != null) {
 
 				try {
 
 					response = await router.handler.handle(event);
-					//	.then(response => {
 
 					if (!(response instanceof Response)) {
 
@@ -1424,34 +1418,23 @@
 						}
 					}
 
-					//		return response
-
-					//	}).
-					//	then(response => {
-
 					if (response == undef$6) {
 
 						response = await offline(event);
-						//.then(response => {
 
 						if (response == undef$6) {
 
 							response = await fetch(event.request);
 						}
-
-						//	return response
-						//	})
 					}
 
-					return response
-					//	}).
+					return response;
+
 				} catch (error) {
-					//	catch ((error) => {
 
 					console.error("😭", error);
 
-					return offline(event)
-					//	});
+					return offline(event);
 				}
 			}
 
@@ -1845,7 +1828,7 @@
 	}
 
 	route.setDefaultRouter(
-		new Router.ExpressRouter("/", strategies.get(defaultStrategy))
+		new Router.ExpressRouter(scope, strategies.get(defaultStrategy))
 	);
 
 	// service worker activation
@@ -1910,10 +1893,6 @@
 			 * @var {boolean|string}
 			 */
 			const search = tokens.length == 2 && tokens[0] + "_";
-
-			console.log({
-				search
-			});
 
 			// delete older app caches
 			if (search != false) {
