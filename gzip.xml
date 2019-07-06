@@ -6,8 +6,8 @@
     <copyright>Copyright (C) 2005 - 2016 Thierry Bela.</copyright>
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
-    <authorUrl>www.tbela.net</authorUrl>
-    <version>2.5.1</version>
+    <authorUrl>https://tbela.net</authorUrl>
+    <version>2.5.2</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>

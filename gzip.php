@@ -595,8 +595,6 @@ class PlgSystemGzip extends JPlugin
 
     	$app = JFactory::$application;
 
-    //    $app = JFactory::getApplication();
-
         if(!$app->isClient('site') || JFactory::getDocument()->getType() != 'html') {
 
             return;
@@ -685,7 +683,6 @@ class PlgSystemGzip extends JPlugin
 
         GZipHelper::$options = $options;
 
-    //    $profiler->mark('beforeParseImages');
         $body = GZipHelper::parseImages($body, $options);
 
         $profiler->mark('afterParseImages');
@@ -985,8 +982,6 @@ class PlgSystemGzip extends JPlugin
 
 		$search = 
 			[
-			//	'"{DEBUG}"',
-		//	'"{SYNC_FALLBACK_PATH}"',
 				'"{pwa_offline_page}"',
 				'"{SYNC_API_TAG}"',
 				'"{VERSION}"', 
@@ -1000,15 +995,12 @@ class PlgSystemGzip extends JPlugin
 				'{scope}', 
 				'"{exclude_urls}"',
 				'"{preloaded_urls}"',
-			//	'"{IMPORT_SCRIPTS}"',
 				'"{network_strategies}"'];
 
 		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
 		$replace = [
-		//	empty($this->params->get('gzip.debug_pwa') ? '' : '.min',
-		//	GZipHelper::url('/plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js'),
 			json_encode(
 				[
 					'url' => (string) $options['pwa_offline_page'], 
@@ -1030,7 +1022,6 @@ class PlgSystemGzip extends JPlugin
 			JUri::root(true).'/',
 			json_encode($exclude_urls), 
 			json_encode($preloaded_urls), 
-		//	$import_scripts,
 			json_encode(array_map(function ($key, $values) {
 
 					return [$values['value'], '\.(('.implode(')|(', $values['network']).'))([#?].*)?$', ['cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 'maxAge' => +$values['cache']]];
@@ -1041,8 +1032,6 @@ class PlgSystemGzip extends JPlugin
 		];
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
-
-	//	$data = $data;
 
         file_put_contents($path.'serviceworker.js', str_replace($search, $replace, $import_scripts.file_get_contents(__DIR__.'/worker/dist/serviceworker.js')));
 		file_put_contents($path.'serviceworker.min.js', $import_scripts.$data);
