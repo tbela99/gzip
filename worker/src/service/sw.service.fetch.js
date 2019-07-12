@@ -14,7 +14,7 @@ import {
 	SW
 } from "../serviceworker.js";
 
-let undef;
+const undef = null;
 
 async function offline(event) {
 
@@ -42,7 +42,7 @@ self.addEventListener("fetch", (event) => {
 
 		const router = SW.routes.getRouter(event);
 
-		if (router != null) {
+		if (router != undef) {
 
 			try {
 

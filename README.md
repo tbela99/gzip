@@ -1,4 +1,4 @@
-# Website Optimizer Plugin
+# Joomla Website Optimizer Plugin
 
 [https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
@@ -17,7 +17,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-- [Website Optimizer Plugin](#Website-Optimizer-Plugin)
+- [Joomla Website Optimizer Plugin](#Joomla-Website-Optimizer-Plugin)
   - [1. General improvements](#1-General-improvements)
     - [Moving script and css position in the page](#Moving-script-and-css-position-in-the-page)
   - [1.2 Caching](#12-Caching)

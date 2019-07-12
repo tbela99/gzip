@@ -12,7 +12,9 @@
 /* eslint wrap-iife: 0 */
 
 import {strategies} from "./sw.strategies.js";
-import {cacheName} from "../serviceworker.js";
+import {SW} from "../serviceworker.js";
+
+const cacheName = SW.app.cacheName;
 
 export async function networkFirst(event) {
 	"use strict;";

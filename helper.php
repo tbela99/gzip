@@ -103,6 +103,7 @@ class GZipHelper {
         "xml" => "text/xml",
         "pdf" => "application/pdf",
         'mp3' => 'audio/mpeg',
+        'htm' => 'text/html',
         'html' => 'text/html'
     );
 
@@ -1864,6 +1865,8 @@ class GZipHelper {
                 }
             }
 
+            $position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
+            
             // ignore custom type
          //   preg_match('#\btype=(["\'])(.*?)\1#', $matches[1], $match);
             if (isset($attributes['type']) && stripos($attributes['type'], 'javascript') === false) {
@@ -1886,8 +1889,6 @@ class GZipHelper {
                 return $script.'>'.$matches[2].'</script>';
             }
 
-            $position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-            
             //else {
 
             //    $matches[1] = str_replace($match[0], '', $matches[1]);

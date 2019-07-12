@@ -10,15 +10,13 @@
  * @license     MIT License
  */
 // @ts-check
-// build 8bac6aa 2019-07-07 17:15:18-04:00
+// build 07de133 2019-07-12 19:16:29-04:00
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        let registration, i = registrations.length;
-        while (i && i--) {
-            registration = registrations[i];
-            if (registration.scope == location.origin + "{scope}") {
-                registration.unregister();
+    navigator.serviceWorker.getRegistration().then(function(registration) {
+        registration.unregister().then(function(result) {
+            if (result) {
+                console.info("The service worker has been successfully removed 😭");
             }
-        }
+        });
     });
 }

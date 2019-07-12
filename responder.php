@@ -186,7 +186,9 @@ if (!ini_get('zlib.output_compression')) {
 
 	$maxage = $this->params->get('gzip.pwa_cache.'.$ext);
 
-	if ((int) $maxage == 0) {
+	// -1 - ignore
+	//  0 - unset
+	if (intval($maxage) <= 0) {
 
 		$maxage = $this->params->get('gzip.maxage', '2months');
 	}

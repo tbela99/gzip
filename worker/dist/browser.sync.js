@@ -21,20 +21,12 @@ if ("serviceWorker" in navigator) {
         }).catch(function(error) {
             // system was unable to register for a sync,
             // this could be an OS-level restriction
-            console.error("cannot setup sync api 😭", error);
+            console.error("cannot setup native sync api, using fallback 😭", error);
+            new Worker("{scope}sync-fallback{debug}.js");
         });
     } else {
         // serviceworker/sync not supported, use a worker instead
-        console.info("background sync api not supported 😭");
+        console.info("background sync api not supported, using fallback 😭");
         new Worker("{scope}sync-fallback{debug}.js");
-        /*
-    const script = document.createElement('script');
-
-    script.src = "{scope}sync-fallback{debug}.js";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-    */
-        // fallback support - maybe someday
-        }
+    }
 }

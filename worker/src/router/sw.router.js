@@ -84,14 +84,7 @@ export class Route {
 			route = routes[i];
 
 			if (route.match(event)) {
-				/*	console.info({
-						match: true,
-						strategy: route.strategy,
-						name: route.constructor.name,
-						url: event.request.url,
-						path: route.path,
-						route
-					});*/
+
 				return route;
 			}
 		}
@@ -150,11 +143,26 @@ export class Route {
 
 		normalize(method).forEach(method => this.defaultRouter[method] = router);
 	}
+
+	/**
+	 * @returns {Router}
+	 */
+	getDefaultRouter() {
+
+
+		for (let method in this.defaultRouter) {
+
+			return this.defaultRouter[method];
+		}
+
+		return undef;
+	}
 }
 
 Utils.merge(true, Route.prototype, Event);
 
 /**
+ * @property {[]} plugins plugins that respond to events on this router
  * @property {string} strategy router strategy name
  * @property {routerPath} path path used to match requests
  * @property {routerHandleObject} handler
@@ -175,10 +183,11 @@ export class Router {
 	constructor(path, handler, options = null) {
 		const self = this;
 
+		self.plugins = [];
 		self.options = Object.assign(
-			Object.create({
-				plugins: []
-			}),
+			Object.create(undef), {
+				mime: []
+			},
 			options || {}
 		);
 
@@ -186,60 +195,66 @@ export class Router {
 		self.strategy = handler.name;
 		self.handler = {
 			handle: async event => {
-				// before route
-				let result;
-				let response, res, plugin;
 
-				try {
-					for (plugin of self.options.plugins) {
-						res = await plugin.precheck(event, response);
+				let plugin, response;
 
-						if (response == undef && res instanceof Response) {
-							response = res;
-						}
-					}
+				for (plugin of self.plugins) {
 
-					/*
-					console.log({
-						precheck: "precheck",
-						match: response instanceof Response,
-						response,
-						router: self,
-						url: event.request.url
-					});
-					*/
+					try {
 
-					if (response instanceof Response) {
-						return response;
-					}
+						response = await plugin.precheck(event);
 
-					result = await self.resolve("beforeroute", event, response);
-
-					for (response of result) {
 						if (response instanceof Response) {
+
 							return response;
 						}
+					} catch (error) {
+
+						console.error({
+							error
+						});
 					}
-				} catch (error) {
-					console.error(CRY, error);
 				}
 
 				response = await handler.handle(event);
-				result = await self.resolve("afterroute", event, response);
 
-				for (plugin of self.options.plugins) {
-					await plugin.postcheck(event, response);
-				}
+				if (response instanceof Response) {
 
-				for (res of result) {
-					if (res instanceof Response) {
-						return res;
+					/*
+					console.log({
+						response: response.url,
+						plugins: self.plugins
+					});
+					*/
+
+					for (plugin of self.plugins) {
+
+						try {
+
+							await plugin.postcheck(event, response);
+						} catch (error) {
+
+							console.error(error.message);
+						}
 					}
 				}
 
 				return response;
 			}
-		};
+		}
+	}
+	addPlugin(plugin) {
+
+		if (!this.plugins.includes(plugin)) {
+
+			this.plugins.push(plugin);
+		}
+
+		return this;
+	}
+	match(event, response) {
+
+		return true;
 	}
 }
 
@@ -252,14 +267,16 @@ Utils.merge(true, Router.prototype, Event);
  * @extends Router
  * @inheritdoc
  */
-class RegExpRouter extends Router {
+export class RegExpRouter extends Router {
 	/**
 	 *
 	 * @param {FetchEvent} event
 	 */
-	match(event) {
+	match(event, response) {
 		const url = event.request.url;
-		return /^https?:/.test(url) && this.path.test(url);
+		return (/^https?:/.test(url) && this.path.test(url)) ||
+			this.options.mime.includes(event.request.headers.get('Content-Type')) ||
+			(response != undef && this.options.mime.includes(response.headers.get('Content-Type')));
 	}
 }
 
@@ -269,7 +286,7 @@ class RegExpRouter extends Router {
  * @extends Router
  * @inheritdoc
  */
-class ExpressRouter extends Router {
+export class ExpressRouter extends Router {
 	/**
 	 * @inheritdoc
 	 */
@@ -280,7 +297,7 @@ class ExpressRouter extends Router {
 	 * @param  {object} options
 	 * @memberof ExpressRouter
 	 */
-	constructor(path, handler, options) {
+	constructor(path, handler, options = null) {
 		super(path, handler, options);
 		this.url = new URL(path, self.origin);
 	}
@@ -289,15 +306,17 @@ class ExpressRouter extends Router {
 	 *
 	 * @param {FetchEvent} event
 	 */
-	match(event) {
+	match(event, response) {
 		const url = event.request.url;
 		const u = new URL(url);
 
 		return (
-			/^https?:/.test(url) &&
-			u.origin == this.url.origin &&
-			u.pathname.indexOf(this.url.pathname) == 0
-		);
+				/^https?:/.test(url) &&
+				u.origin == this.url.origin &&
+				u.pathname.indexOf(this.url.pathname) == 0
+			) ||
+			this.options.mime.includes(event.request.headers.get('Content-Type')) ||
+			(response != undef && this.options.mime.includes(response.headers.get('Content-Type')));
 	}
 }
 
@@ -307,16 +326,18 @@ class ExpressRouter extends Router {
  * @extends Router
  * @inheritdoc
  */
-class CallbackRouter extends Router {
+export class CallbackRouter extends Router {
 	/**
 	 *
 	 * @param {FetchEvent} event
 	 */
-	match(event) {
-		return this.path(event.request.url, event);
+	match(event, response) {
+		return this.path(event.request.url, event) ||
+			this.options.mime.includes(event.request.headers.get('Content-Type')) ||
+			(response != undef && this.options.mime.includes(response.headers.get('Content-Type')));
 	}
 }
 
-Router.RegExpRouter = RegExpRouter;
-Router.ExpressRouter = ExpressRouter;
-Router.CallbackRouter = CallbackRouter;
+//Router.RegExpRouter = RegExpRouter;
+//Router.ExpressRouter = ExpressRouter;
+//Router.CallbackRouter = CallbackRouter;

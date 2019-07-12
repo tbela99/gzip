@@ -15,9 +15,9 @@
 // If a match isn't found in the cache, the response
 // will look like a connection error);
 
-import {
-	cacheName
-} from "../serviceworker.js";
+import {SW} from "../serviceworker.js";
+
+const cacheName = SW.app.cacheName;
 
 export async function cacheOnly(event) {
 	return await caches.match(event.request, {

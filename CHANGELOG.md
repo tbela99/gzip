@@ -1,5 +1,8 @@
 # Change History
 
+## V2.5.3
+- enforce the service worker script position in the head
+
 ## V2.5.2
 
 - Added offline page support

@@ -3,6 +3,8 @@
 defined('JPATH_PLATFORM') or die;
 
 /**
+ * max age in minutes / hours / months. Negative maxage means ignore the setting. 0 means use default
+ * 
  * @package     GZip Plugin
  * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
@@ -34,10 +36,7 @@ class JFormFieldMaxAge extends JFormField
 	protected function getInput()
 	{
 		$attributes = '';
-		$data_attr = '';
 		$html = '';
-
-		preg_match('#(\d+)(.+)#', $this->value, $matches);
 
 		$step = (string) $this->element['step'];
 		$first = (string) $this->element['first'];
@@ -58,8 +57,6 @@ class JFormFieldMaxAge extends JFormField
 			$last = 24;
 		}
 
-		$attributes = '';
-
 		$readonly = (string) $this->element['readonly'];
 		$readonly = $readonly == 'readonly' || $readonly == 'true';
 
@@ -78,7 +75,41 @@ class JFormFieldMaxAge extends JFormField
 			$attributes .= ' disabled';
 		}
 
-		$html = '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
+		$options = [];
+
+		foreach($this->element->children() as $option) {
+
+			if ($option->getName() != 'option') {
+
+				continue;
+			}
+
+			$option['value'] = intval((string) $option['value']);
+			$option['text'] = (string) $option;
+
+			$options[] = $option;
+		}
+		
+		$html .= '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
+
+		foreach ($options as $option) {
+
+			$html .= '<option value="'.htmlspecialchars($option['value']).'"'.(intval($option['value']) == intval($this->value) ? ' selected' : '').'>'.JText::_($option['text']).'</option>';
+		}
+
+		preg_match('#([+-]?\d+)(.+)#', $this->value, $matches);
+
+		if (!isset($matches[1])) {
+
+			$matches[1] = 0;
+		}
+
+		if (!isset($matches[2])) {
+
+			$matches[2] = 'months';
+		}
+
+	//	var_dump($matches);
 
 		for ($i = $first; $i <= $last; $i += $step) {
 

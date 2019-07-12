@@ -9,36 +9,45 @@
  * @license     MIT License
  */
 
-/**
- * - url
- * - method
- * - timestamp ((getHeader(Date) || Date.now()) + maxAge)
- **/
-
 import {
 	DB
 } from "../db/db.js";
 import {
-	SW,
-	cacheName
+	SW
 } from "../serviceworker.js";
 import {
-	Utils
-} from "../utils/sw.utils.js";
+	hashCode,
+	getObjectHash
+} from "../crypto/sw.crypto.js";
+import {
+	num2FileSize
+} from '../utils/sw.file.js';
+import {
+	sprintf,
+	capitalize,
+	ellipsis
+} from "../utils/sw.string.js";
+import {
+	expo
+} from "../utils/sw.backoff.js";
 
 // @ts-check
 //SW.expiration = (function() {
 const CRY = "😭";
 const undef = null;
-export const expiration = Object.create(undef);
+let cache;
+
+caches.open(SW.app.cacheName).then(c => cache = c);
 
 /**
  * @property {DBType} db
  * @class CacheExpiration
  */
 
-class CacheExpiration {
+export class CacheExpiration {
+
 	constructor(options) {
+
 		this.setOptions(options);
 	}
 
@@ -57,8 +66,35 @@ class CacheExpiration {
 
 	async setOptions(options) {
 
+		const date = new Date;
+		const now = +date;
+
+		this.maxAge = 0;
 		this.limit = +options.limit || 0;
-		this.maxAge = +options.maxAge * 1000 || 0;
+		this.maxFileSize = +options.maxFileSize || 0;
+
+		const match = options.maxAge.match(/([+-]?\d+)(.*)$/);
+
+		if (match != null) {
+
+			switch (match[2]) {
+
+				//	case 'seconds':
+				case 'months':
+				case 'minutes':
+				case 'hours':
+
+					let name = capitalize(match[2]);
+
+					if (name == 'months') {
+
+						name = 'month';
+					}
+
+					date['set' + name](+match[1] + date['get' + name]());
+					this.maxAge = date - now;
+			}
+		}
 
 		try {
 			this.db = await DB(
@@ -80,6 +116,49 @@ class CacheExpiration {
 					}
 				]
 			);
+
+			if (this.limit > 0) {
+
+				const db = this.db;
+				const limit = this.limit;
+				const retry = expo();
+				let tick = 0;
+
+				const cleanup = async function () {
+
+					try {
+
+						let count = await db.count();
+
+						if (count > limit) {
+
+							console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
+
+							for (let metadata of await db.getAll()) {
+
+								console.info(sprintf('removing [%s]', metadata.url));
+
+								cache.delete(metadata.url);
+								db.delete(metadata.url);
+
+								if (--count <= limit) {
+
+									break;
+								}
+							}
+
+							console.info(sprintf('cleaned up [%s] items present. [%s] items allowed', count, limit));
+						}
+					} catch (error) {
+
+					}
+
+
+					setTimeout(cleanup, retry(tick++));
+				}
+
+				setTimeout(cleanup, retry(tick++));
+			}
 		} catch (e) {
 			console.error(CRY, e);
 		}
@@ -87,26 +166,19 @@ class CacheExpiration {
 
 	async precheck(event) {
 		try {
-			if (this.db == undef) {
+			if (this.db == undef || this.maxAge == 0) {
 				return true;
 			}
 
-			const version = Utils.getObjectHash(event.request);
+			const version = hashCode(getObjectHash(event.request));
 			const entry = await this.db.get(event.request.url, "url");
-			const cache = await caches.open(cacheName);
 
 			if (
 				entry != undef &&
 				(entry.version != version || entry.timestamp < Date.now())
 			) {
-				console.info(
-					"CacheExpiration [precheck][obsolete][" +
-					version +
-					"] " +
-					event.request.url
-				);
 
-				caches.delete(event.request);
+				await caches.delete(event.request);
 				return true;
 			}
 
@@ -121,53 +193,54 @@ class CacheExpiration {
 		return true;
 	}
 
-	async postcheck(event) {
+	/**
+	 * 
+	 * @param {FetchEvent} event 
+	 * @param {Response} response 
+	 */
+	async postcheck(event, response) {
+
 		if (this.db == undef) {
 			return true;
+		}
+
+		if (this.maxFileSize > 0) {
+
+			if (response.body != undef) {
+
+				const blob = await response.clone().blob();
+
+				if (blob.size > this.maxFileSize) {
+
+					console.info(sprintf('cache limit exceeded. Deleting item [%s]', ellipsis(response.url)));
+
+					// delete any cached response
+					await this.db.delete(response.url);
+					await cache.delete(response);
+					throw new Error(sprintf('[%s][cache failed] cache size limit exceeded %s of %s', ellipsis(response.url, 42), num2FileSize(blob.size), num2FileSize(this.maxFileSize)));
+				}
+			}
 		}
 
 		try {
 			const url = event.request.url;
 			const entry = await this.db.get(url, "url");
-			const version = Utils.getObjectHash(event.request);
+			const version = hashCode(getObjectHash(event.request));
 
 			if (
 				entry == undef ||
 				entry.version != version ||
 				entry.timestamp < Date.now()
 			) {
-				console.info(
-					"CacheExpiration [postcheck][update][version=" +
-					version +
-					"][expires=" +
-					(Date.now() + this.maxAge) +
-					"|" +
-					new Date(Date.now() + this.maxAge).toUTCString() +
-					"] " +
-					url,
-					this
-				);
 
 				// need to update
 				return await this.db.put({
 					url,
-					method: event.request.method,
+					//	method: event.request.method,
 					timestamp: Date.now() + this.maxAge,
 					route: this.getRouteTag(url),
 					version
 				});
-			} else {
-				console.info(
-					"CacheExpiration [postcheck][no update][version=" +
-					version +
-					"][expires=" +
-					entry.timestamp +
-					"|" +
-					new Date(entry.timestamp).toUTCString() +
-					"] " +
-					url,
-					entry
-				);
 			}
 
 			return url;
@@ -178,5 +251,3 @@ class CacheExpiration {
 		return true;
 	}
 }
-
-expiration.CacheExpiration = CacheExpiration;

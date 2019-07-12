@@ -1,6 +1,7 @@
 import {
     SyncManager
 } from "./sw.sync.js";
+import {expo} from "../utils/sw.backoff.js";
 /**
  *
  * @package     GZip Plugin
@@ -26,11 +27,7 @@ let timeout = 0;
 // - 16 minutes
 // - 32 minutes
 // - 60 minutes ...
-function nextRetry(n, max = 1000 * 60 * 60) {
-
-    // 1 hour max
-    return 60000 * Math.min(max, 1 / 2 * (2 ** n - 1));
-}
+const nextRetry = expo();
 
 async function replay() {
 
