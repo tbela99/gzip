@@ -1,7 +1,9 @@
 import {
     SyncManager
 } from "./sw.sync.js";
-import {expo} from "../utils/sw.backoff.js";
+import {
+    expo
+} from "../utils/sw.backoff.js";
 /**
  *
  * @package     GZip Plugin
@@ -14,26 +16,31 @@ import {expo} from "../utils/sw.backoff.js";
  */
 
 // @ts-check
+const syncSettings = "{BACKGROUND_SYNC}";
 
-const manager = new SyncManager;
-let timeout = 0;
+if (syncSettings.enabled) {
 
-// retry using back off algorithm
-// - 0
-// - 1 minute
-// - 2 minutes
-// - 4 minutes
-// - 8 minutes
-// - 16 minutes
-// - 32 minutes
-// - 60 minutes ...
-const nextRetry = expo();
+    const manager = new SyncManager;
+    let timeout = 0;
 
-async function replay() {
+    // retry using back off algorithm
+    // - 0
+    // - 1 minute
+    // - 2 minutes
+    // - 4 minutes
+    // - 8 minutes
+    // - 16 minutes
+    // - 32 minutes
+    // - 60 minutes ...
+    const nextRetry = expo();
 
-    await manager.replay("{SYNC_API_TAG}");
+    async function replay() {
 
-    setTimeout(replay, nextRetry(++timeout));
+        await manager.replay("{SYNC_API_TAG}");
+
+        setTimeout(replay, nextRetry(++timeout));
+    }
+
+    setTimeout(replay, nextRetry(timeout));
+
 }
-
-setTimeout(replay, nextRetry(timeout));

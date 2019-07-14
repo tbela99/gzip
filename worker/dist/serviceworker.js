@@ -566,14 +566,7 @@
 				route = routes[i];
 
 				if (route.match(event)) {
-					/*	console.info({
-							match: true,
-							strategy: route.strategy,
-							name: route.constructor.name,
-							url: event.request.url,
-							path: route.path,
-							route
-						});*/
+
 					return route;
 				}
 			}
@@ -898,14 +891,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "07de133",
+			value: "0c68a48",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-12 19:16:20-04:00",
+			value: "2019-07-13 20:12:08-04:00",
 			enumerable: true
 		},
 		/**
@@ -1157,45 +1150,6 @@
 	 */
 
 	// @ts-check
-	/* eslint wrap-iife: 0 */
-
-	/**
-	 *
-	 * Exponentially increase the delay until it reaches max hours. It will no longer increase from that point.
-	 * - 0
-	 * - 1 minute
-	 * - 2 minutes
-	 * - 4 minutes
-	 * - 8 minutes
-	 * - 16 minutes
-	 * - 32 minutes
-	 * - max hours ...
-	 * @param {number} max
-	 * @returns {function(number): number}
-	 */
-	function expo(max = 1) {
-
-		max *= 3600;
-
-		return function (n) {
-
-			// 1 hour max
-			return 1000 * Math.min(max, 1 / 2 * (2 ** n - 1));
-		}
-	}
-
-	/**
-	 *
-	 * @package     GZip Plugin
-	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
-	 *
-	 * dual licensed
-	 *
-	 * @license     LGPL v3
-	 * @license     MIT License
-	 */
-
-	// @ts-check
 	//SW.expiration = (function() {
 	const CRY = "😭";
 	const undef$4 = null;
@@ -1260,7 +1214,6 @@
 				}
 			}
 
-			try {
 				this.db = await DB(
 					options.cacheName != undef$4 ?
 					options.cacheName :
@@ -1280,52 +1233,6 @@
 						}
 					]
 				);
-
-				if (this.limit > 0) {
-
-					const db = this.db;
-					const limit = this.limit;
-					const retry = expo();
-					let tick = 0;
-
-					const cleanup = async function () {
-
-						try {
-
-							let count = await db.count();
-
-							if (count > limit) {
-
-								console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
-
-								for (let metadata of await db.getAll()) {
-
-									console.info(sprintf('removing [%s]', metadata.url));
-
-									cache.delete(metadata.url);
-									db.delete(metadata.url);
-
-									if (--count <= limit) {
-
-										break;
-									}
-								}
-
-								console.info(sprintf('cleaned up [%s] items present. [%s] items allowed', count, limit));
-							}
-						} catch (error) {
-
-						}
-
-
-						setTimeout(cleanup, retry(tick++));
-					};
-
-					setTimeout(cleanup, retry(tick++));
-				}
-			} catch (e) {
-				console.error(CRY, e);
-			}
 		}
 
 		async precheck(event) {
@@ -2098,6 +2005,88 @@
 	                }))
 	            );
 	        });
+	}
+
+	/**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+
+	/**
+	 * enforce the limitation of the number of files in the cache
+	 */
+	const cleanup = (async function () {
+
+		let cache = await caches.open('{CACHE_NAME}');
+
+		const limit = "{pwa_cache_max_file_count}";
+		const db = await DB(
+			"gzip_sw_worker_expiration_cache_private",
+			"url",
+			[{
+					name: "url",
+					key: "url"
+				},
+				{
+					name: "version",
+					key: "version"
+				},
+				{
+					name: "route",
+					key: "route"
+				}
+			]
+		);
+
+		return async function () {
+
+			let count = await db.count();
+
+			if (count > limit) {
+
+				console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
+
+				for (let metadata of await db.getAll()) {
+
+					console.info(sprintf('removing [%s]', metadata.url));
+
+					await cache.delete(metadata.url);
+					await db.delete(metadata.url);
+
+					if (--count <= limit) {
+
+						break;
+					}
+				}
+
+				console.info(sprintf('cleaned up [%s] items present. [%s] items allowed', count, limit));
+			}
+		}
+	});
+
+	/**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+
+	if (SW.app.network.limit > 0) {
+
+		self.addEventListener('sync', async (event) => {
+
+			event.waitUntil(cleanup());
+		});
 	}
 
 	/**

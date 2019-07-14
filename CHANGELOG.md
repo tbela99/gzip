@@ -1,7 +1,8 @@
 # Change History
 
 ## V2.5.3
-- enforce the service worker script position in the head
+
+- Limit cache size by controlling the maximum size per file and the maximum of files in the cache.
 
 ## V2.5.2
 

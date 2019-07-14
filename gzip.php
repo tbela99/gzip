@@ -1068,18 +1068,13 @@ class PlgSystemGzip extends JPlugin
 				'{scope}', 
 				'"{exclude_urls}"',
 				'"{preloaded_urls}"',
-			//	'"{network_strategies}"'
+				'"{pwa_cache_max_file_count}"'
 			];
 
 		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
 		$json_debug = $debug ? JSON_PRETTY_PRINT : 0;
-
-	//	$strategies = array_filter($strategies, function ($values) {
-
-	//		return !empty($values['value']);
-	//	});
 
 		$replace = [
 			json_encode($cache_settings, $json_debug),
@@ -1104,22 +1099,7 @@ class PlgSystemGzip extends JPlugin
 			JUri::root(true).'/',
 			json_encode($exclude_urls, $json_debug), 
 			json_encode($preloaded_urls, $json_debug), 
-		/*	json_encode(array_map(function ($key, $values) {
-
-					return [
-						$values['value'], 
-						'\.(('.implode(')|(', $values['network']).'))([#?].*)?$', 
-						[
-							'cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 
-							'maxAge' => +$values['cache'],
-							'mime' => $values['mime']
-						]
-					];
-				}, 
-				array_keys($strategies), 
-				array_values($strategies)
-			), $json_debug)
-			*/
+			+$options['pwa_cache_max_file_count']
 		];
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));

@@ -96,7 +96,6 @@ export class CacheExpiration {
 			}
 		}
 
-		try {
 			this.db = await DB(
 				options.cacheName != undef ?
 				options.cacheName :
@@ -116,52 +115,6 @@ export class CacheExpiration {
 					}
 				]
 			);
-
-			if (this.limit > 0) {
-
-				const db = this.db;
-				const limit = this.limit;
-				const retry = expo();
-				let tick = 0;
-
-				const cleanup = async function () {
-
-					try {
-
-						let count = await db.count();
-
-						if (count > limit) {
-
-							console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
-
-							for (let metadata of await db.getAll()) {
-
-								console.info(sprintf('removing [%s]', metadata.url));
-
-								cache.delete(metadata.url);
-								db.delete(metadata.url);
-
-								if (--count <= limit) {
-
-									break;
-								}
-							}
-
-							console.info(sprintf('cleaned up [%s] items present. [%s] items allowed', count, limit));
-						}
-					} catch (error) {
-
-					}
-
-
-					setTimeout(cleanup, retry(tick++));
-				}
-
-				setTimeout(cleanup, retry(tick++));
-			}
-		} catch (e) {
-			console.error(CRY, e);
-		}
 	}
 
 	async precheck(event) {

@@ -298,21 +298,110 @@
 	 * @license     MIT License
 	 */
     // @ts-check
+        const syncSettings = "{BACKGROUND_SYNC}";
+    if (syncSettings.enabled) {
         const manager = new SyncManager();
-    let timeout = 0;
-    // retry using back off algorithm
-    // - 0
-    // - 1 minute
-    // - 2 minutes
-    // - 4 minutes
-    // - 8 minutes
-    // - 16 minutes
-    // - 32 minutes
-    // - 60 minutes ...
-        const nextRetry = expo();
-    async function replay() {
-        await manager.replay("{SYNC_API_TAG}");
-        setTimeout(replay, nextRetry(++timeout));
+        let timeout = 0;
+        // retry using back off algorithm
+        // - 0
+        // - 1 minute
+        // - 2 minutes
+        // - 4 minutes
+        // - 8 minutes
+        // - 16 minutes
+        // - 32 minutes
+        // - 60 minutes ...
+                const nextRetry = expo();
+        async function replay() {
+            await manager.replay("{SYNC_API_TAG}");
+            setTimeout(replay, nextRetry(++timeout));
+        }
+        setTimeout(replay, nextRetry(timeout));
     }
-    setTimeout(replay, nextRetry(timeout));
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    // @ts-check
+    /* eslint wrap-iife: 0 */    function sprintf(string) {
+        let index = -1;
+        let value;
+        const args = [].slice.apply(arguments).slice(1);
+        return string.replace(/%([s%])/g, function(all, modifier) {
+            if (modifier == "%") {
+                return modifier;
+            }
+            value = args[++index];
+            switch (modifier) {
+              case "s":
+                return value == null ? "" : value;
+            }
+        });
+    }
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    /**
+	 * enforce the limitation of the number of files in the cache
+	 */    const cleanup = async function() {
+        let cache = await caches.open("{CACHE_NAME}");
+        const limit = "{pwa_cache_max_file_count}";
+        const db = await DB("gzip_sw_worker_expiration_cache_private", "url", [ {
+            name: "url",
+            key: "url"
+        }, {
+            name: "version",
+            key: "version"
+        }, {
+            name: "route",
+            key: "route"
+        } ]);
+        return async function() {
+            let count = await db.count();
+            if (count > limit) {
+                console.info(sprintf("cleaning up [%s] items present. [%s] items allowed", count, limit));
+                for (let metadata of await db.getAll()) {
+                    console.info(sprintf("removing [%s]", metadata.url));
+                    await cache.delete(metadata.url);
+                    await db.delete(metadata.url);
+                    if (--count <= limit) {
+                        break;
+                    }
+                }
+                console.info(sprintf("cleaned up [%s] items present. [%s] items allowed", count, limit));
+            }
+        };
+    };
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    /**
+	 * cleanup using a web worker
+	 */    const scheduler = expo();
+    let thick = 0;
+    async function clean() {
+        await cleanup();
+        setTimeout(clean, scheduler(++thick));
+    }
+    setTimeout(clean, scheduler(thick));
 })();

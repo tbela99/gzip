@@ -299,3 +299,4 @@ import "./service/sw.service.activate.js";
 import "./service/sw.service.fetch.js";
 import "./service/sw.service.install.js";
 import "./sync/index.js";
+import './expiration/index.js';
