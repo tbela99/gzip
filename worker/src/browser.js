@@ -13,17 +13,47 @@
 
 // build build-id build-date
 
+/*
+function debug_js_window() {
+
+	window.addEventListener('error', function (error) {
+
+		console.error(error.message + '\n' + error.stack);
+	});
+	window.addEventListener("rejectionhandled", function (error) {
+		// handle error here, for example log   
+		console.error({
+			reason: error.reason,
+			promise: error.promise,
+			error
+		});
+	});
+	window.addEventListener("unhandledrejection", function (error) {
+		// handle error here, for example log   
+		console.error({
+			reason: error.reason,
+			promise: error.promise,
+			error
+		});
+	});
+}
+
+debug_js_window();
+*/
+
 if ("serviceWorker" in navigator) {
 	navigator.serviceWorker.
-		register("{scope}worker{debug}.js", {scope: "{scope}"}).
-		//    .then(function(registration) {
+	register("{scope}worker{debug}.js", {
+		scope: "{scope}"
+	}).
+	//    .then(function(registration) {
 
-		//    console.log("🍻");
-		//    })
-		catch(function(error) {
-			//	console.log(error);
-			console.error("😭", error);
-		});
+	//    console.log("🍻");
+	//    })
+	catch(function (error) {
+		//	console.log(error);
+		console.error("😭", error);
+	});
 
 	if ("onbeforeinstallprompt" in window) {
 		let deferredPrompt;
@@ -36,7 +66,7 @@ if ("serviceWorker" in navigator) {
 			"</button>" +
 			"Click <a href=# data-action=install-pwa-app>here</a> to make this site available offline.";
 
-		const clickHandler = function(e) {
+		const clickHandler = function (e) {
 			e.preventDefault();
 			e.stopPropagation();
 
@@ -49,10 +79,10 @@ if ("serviceWorker" in navigator) {
 			//	console.log(deferredPrompt.platforms); // e.g., ["web", "android", "windows"]
 
 			deferredPrompt.userChoice.then(
-				function(outcome) {
+				function (outcome) {
 					console.info(outcome); // either "installed", "dismissed", etc.
 				},
-				function(error) {
+				function (error) {
 					console.error("😭", error);
 				}
 			);
@@ -60,14 +90,14 @@ if ("serviceWorker" in navigator) {
 			// e.target.closest('[data-action=install-pwa-app]').removeEventListener('click', clickHandler, false)
 		};
 
-		const createButton = function() {
+		const createButton = function () {
 			document.body.insertAdjacentHTML("beforeend", buttonHTML);
 			button = document.querySelector("a[data-action=install-pwa-app]");
 
 			button.addEventListener("click", clickHandler, false);
 		};
 
-		window.addEventListener("beforeinstallprompt", function(e) {
+		window.addEventListener("beforeinstallprompt", function (e) {
 			//	console.log("beforeinstallprompt", e);
 
 			deferredPrompt = e;

@@ -23,6 +23,8 @@ export const cleanup = (async function () {
 
 	let cache = await caches.open('{CACHE_NAME}');
 
+	const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.location).href);
+
 	const limit = "{pwa_cache_max_file_count}";
 	const db = await DB(
 		"gzip_sw_worker_expiration_cache_private",
@@ -51,6 +53,12 @@ export const cleanup = (async function () {
 			console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
 
 			for (let metadata of await db.getAll()) {
+
+				if (preloaded_urls.includes(metadata.url)) {
+
+					console.info(sprintf('skipped preloaded resource [%s]', metadata.url));
+					continue;
+				}
 
 				console.info(sprintf('removing [%s]', metadata.url));
 

@@ -2,7 +2,7 @@
 
 ## V2.5.3
 
-- Limit cache size by controlling the maximum size per file and the maximum of files in the cache.
+- Limit cache file size by controlling the maximum size per file and the maximum of files in the cache.
 
 ## V2.5.2
 

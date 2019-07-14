@@ -2,8 +2,6 @@
 
 ## High priority list
 
-1. Add data-position-location="pre" to inject elements after the < head >
-1. implement maxFileSize and limit in the cache expiration api
 1. do not cache partial request
 1. intercept partial requests and return response from cache
 1. merge multiple google font < link > tag

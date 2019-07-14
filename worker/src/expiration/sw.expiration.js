@@ -86,9 +86,9 @@ export class CacheExpiration {
 
 					let name = capitalize(match[2]);
 
-					if (name == 'months') {
+					if (name == 'Months') {
 
-						name = 'month';
+						name = 'Month';
 					}
 
 					date['set' + name](+match[1] + date['get' + name]());
@@ -96,25 +96,25 @@ export class CacheExpiration {
 			}
 		}
 
-			this.db = await DB(
-				options.cacheName != undef ?
-				options.cacheName :
-				"gzip_sw_worker_expiration_cache_private",
-				"url",
-				[{
-						name: "url",
-						key: "url"
-					},
-					{
-						name: "version",
-						key: "version"
-					},
-					{
-						name: "route",
-						key: "route"
-					}
-				]
-			);
+		this.db = await DB(
+			options.cacheName != undef ?
+			options.cacheName :
+			"gzip_sw_worker_expiration_cache_private",
+			"url",
+			[{
+					name: "url",
+					key: "url"
+				},
+				{
+					name: "version",
+					key: "version"
+				},
+				{
+					name: "route",
+					key: "route"
+				}
+			]
+		);
 	}
 
 	async precheck(event) {

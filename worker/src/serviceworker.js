@@ -146,7 +146,7 @@ Object.defineProperties(SW.app, {
 	 * precached resources
 	 */
 	precache: {
-		value: "{preloaded_urls}",
+		value: "{preloaded_urls}".map(url => new URL(url, self.location).href),
 		enumerable: true
 	},
 	homepage: {

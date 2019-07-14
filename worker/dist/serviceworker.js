@@ -891,14 +891,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "0c68a48",
+			value: "63dfd3f",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-13 20:12:08-04:00",
+			value: "2019-07-14 17:35:59-04:00",
 			enumerable: true
 		},
 		/**
@@ -931,7 +931,7 @@
 		 * precached resources
 		 */
 		precache: {
-			value: "{preloaded_urls}",
+			value: "{preloaded_urls}".map(url => new URL(url, self.location).href),
 			enumerable: true
 		},
 		homepage: {
@@ -1204,9 +1204,9 @@
 
 						let name = capitalize(match[2]);
 
-						if (name == 'months') {
+						if (name == 'Months') {
 
-							name = 'month';
+							name = 'Month';
 						}
 
 						date['set' + name](+match[1] + date['get' + name]());
@@ -1214,25 +1214,25 @@
 				}
 			}
 
-				this.db = await DB(
-					options.cacheName != undef$4 ?
-					options.cacheName :
-					"gzip_sw_worker_expiration_cache_private",
-					"url",
-					[{
-							name: "url",
-							key: "url"
-						},
-						{
-							name: "version",
-							key: "version"
-						},
-						{
-							name: "route",
-							key: "route"
-						}
-					]
-				);
+			this.db = await DB(
+				options.cacheName != undef$4 ?
+				options.cacheName :
+				"gzip_sw_worker_expiration_cache_private",
+				"url",
+				[{
+						name: "url",
+						key: "url"
+					},
+					{
+						name: "version",
+						key: "version"
+					},
+					{
+						name: "route",
+						key: "route"
+					}
+				]
+			);
 		}
 
 		async precheck(event) {
@@ -2025,6 +2025,8 @@
 
 		let cache = await caches.open('{CACHE_NAME}');
 
+		const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.location).href);
+
 		const limit = "{pwa_cache_max_file_count}";
 		const db = await DB(
 			"gzip_sw_worker_expiration_cache_private",
@@ -2053,6 +2055,12 @@
 				console.info(sprintf('cleaning up [%s] items present. [%s] items allowed', count, limit));
 
 				for (let metadata of await db.getAll()) {
+
+					if (preloaded_urls.includes(metadata.url)) {
+
+						console.info(sprintf('skipped preloaded resource [%s]', metadata.url));
+						continue;
+					}
 
 					console.info(sprintf('removing [%s]', metadata.url));
 
@@ -2083,10 +2091,17 @@
 
 	if (SW.app.network.limit > 0) {
 
+		//	(async function () {
+
+		//	const func = await cleanup();
+
 		self.addEventListener('sync', async (event) => {
 
-			event.waitUntil(cleanup());
+			const callback = await cleanup();
+
+			event.waitUntil(callback());
 		});
+		//	})();
 	}
 
 	/**

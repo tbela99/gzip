@@ -19,15 +19,18 @@ import {
 /**
  * cleanup using a web worker
  */
+(async function () {
 
-const scheduler = expo();
-let thick = 0;
+	const func = await cleanup();
+	const scheduler = expo();
+	let thick = 0;
 
-async function clean() {
+	async function clean() {
 
-	await cleanup();
+		await func();
 
-	setTimeout(clean, scheduler(++thick));
-}
+		setTimeout(clean, scheduler(++thick));
+	}
 
-setTimeout(clean, scheduler(thick));
+	setTimeout(clean, scheduler(thick));
+})();
