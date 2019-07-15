@@ -86,6 +86,7 @@
  * @typedef RouterOptions
  * @property {cacheName} string cache name
  * @property {number} expiration
+ * @property {[]<string>} mime
  *
  */
 
@@ -110,69 +111,116 @@ import {
 	DB
 } from "./db/db.js";
 import {
-	expiration
+	CacheExpiration
 } from "./expiration/sw.expiration.js";
 import {
-	Router
+	Router,
+	ExpressRouter,
+	RegExpRouter
 } from "./router/sw.router.js";
 import {
 	strategies
 } from "./network/index.js";
 import {
-	cacheName,
 	SW
 } from "./serviceworker.js";
 
 const undef = null;
 const route = SW.routes;
 const scope = SW.app.scope;
-const cacheExpiryStrategy = "{cacheExpiryStrategy}";
+const networkSettings = SW.app.network;
+const caching = networkSettings.caching;
+//const cacheExpiryStrategy = "{cacheExpiryStrategy}";
 let entry;
-let option;
+let router;
 
-let defaultStrategy = "{defaultStrategy}";
+let maxAge;
+let maxFileSize;
+let limit;
+let cacheName;
+let strategy;
+
+({
+	limit,
+	maxAge,
+	cacheName,
+	strategy,
+	maxFileSize
+} = networkSettings);
+
+const defaultCacheSettings = {
+	limit,
+	maxAge,
+	strategy,
+	maxFileSize
+};
+
+//let option;
 
 // excluded urls fallback on network only
 for (entry of "{exclude_urls}") {
 	route.registerRoute(
-		new Router.RegExpRouter(new RegExp(entry), strategies.get("no"))
+		new RegExpRouter(new RegExp(entry), strategies.get("no"))
 	);
 }
 
 // excluded urls fallback on network only
-for (entry of "{network_strategies}") {
-	option = entry[2] || cacheExpiryStrategy;
+//const network_strategies = "{network_strategies}";
 
-	route.registerRoute(
-		new Router.RegExpRouter(
-			new RegExp(entry[1], "i"),
-			strategies.get(entry[0]),
-			option == undef ?
-			option : {
-				plugins: [new expiration.CacheExpiration(option)]
-			}
-		)
+for (entry of networkSettings.settings) {
+
+	router = new RegExpRouter(
+		new RegExp('(' + entry.ext.join(')|(') + ')', "i"),
+		strategies.get(entry.strategy),
+		entry
 	);
+
+	if (caching) {
+
+		({
+			limit,
+			maxAge,
+			//	cacheName,
+			maxFileSize
+		} = entry);
+
+		router.addPlugin(new CacheExpiration({
+			limit,
+			maxAge,
+			maxFileSize
+		}));
+	}
+
+	route.registerRoute(router);
 }
+
 
 // register strategies routers
 for (entry of strategies) {
-	route.registerRoute(
-		new Router.ExpressRouter(
-			scope + "{ROUTE}/media/z/" + entry[0] + "/",
-			entry[1]
-		)
+
+	router = new ExpressRouter(
+		scope + "{ROUTE}/media/z/" + entry[0] + "/",
+		entry[1]
 	);
+
+	if (caching) {
+
+		router.addPlugin(new CacheExpiration(defaultCacheSettings));
+	}
+
+	route.registerRoute(router);
 }
 
-if (!strategies.has(defaultStrategy)) {
-	// default browser behavior
-	defaultStrategy = "no";
+router = new ExpressRouter(scope, strategies.get(networkSettings.strategy));
+
+if (caching) {
+
+	router.addPlugin(new CacheExpiration(defaultCacheSettings));
 }
 
-route.setDefaultRouter(
-	new Router.ExpressRouter("/", strategies.get(defaultStrategy))
-);
+route.setDefaultRouter(router);
+
+cacheName = SW.app.cacheName;
 
 // service worker activation
 SW.on({
@@ -186,16 +234,12 @@ SW.on({
 	async install() {
 		console.info("🛠️ service worker install event");
 
-		await caches.open(cacheName).then(async cache => {
-			await cache.addAll("{preloaded_urls}");
-		});
+		await caches.open(cacheName).then(async cache => await cache.addAll(SW.app.precache));
 	},
 	async activate() {
 		console.info("🚁 service worker activate event");
 
 		const db = await DB("gzip_sw_worker_config_cache_private", "name");
-
-		//	console.log("{STORES}");
 
 		const settings = await db.get("gzip");
 
@@ -255,3 +299,4 @@ import "./service/sw.service.activate.js";
 import "./service/sw.service.fetch.js";
 import "./service/sw.service.install.js";
 import "./sync/index.js";
+import './expiration/index.js';

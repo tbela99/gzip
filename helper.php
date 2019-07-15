@@ -102,7 +102,9 @@ class GZipHelper {
         "txt" => "text/plain",
         "xml" => "text/xml",
         "pdf" => "application/pdf",
-        'mp3' => 'audio/mpeg'
+        'mp3' => 'audio/mpeg',
+        'htm' => 'text/html',
+        'html' => 'text/html'
     );
 
     static $pwa_network_strategy = '';
@@ -792,6 +794,11 @@ class GZipHelper {
 
     public static function parseCss($body, array $options = []) {
 
+        if (isset($options['cssenabled']) && $options['cssenabled'] == 0) {
+
+            return $body;
+        }
+
         $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
         $fetch_remote = !empty($options['fetchcss']);
@@ -882,7 +889,9 @@ class GZipHelper {
             }
 
             return $matches[0];
-        }, $body);
+		}, $body);
+		
+	//	if ()
 
         $profiler = \JProfiler::getInstance('Application');
         $profiler->mark('afterParseLinks');
@@ -1812,6 +1821,11 @@ class GZipHelper {
 
     public static function parseScripts($body, array $options = []) {
 
+        if (isset($options['jsenabled']) && $options['jsenabled'] == 0) {
+
+            return $body;
+        }
+
         $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
 
         $comments = [];
@@ -1861,6 +1875,8 @@ class GZipHelper {
                 }
             }
 
+            $position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
+            
             // ignore custom type
          //   preg_match('#\btype=(["\'])(.*?)\1#', $matches[1], $match);
             if (isset($attributes['type']) && stripos($attributes['type'], 'javascript') === false) {
@@ -1883,8 +1899,6 @@ class GZipHelper {
                 return $script.'>'.$matches[2].'</script>';
             }
 
-            $position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-            
             //else {
 
             //    $matches[1] = str_replace($match[0], '', $matches[1]);

@@ -13,15 +13,14 @@
 // build build-id build-date
 
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-	navigator.serviceWorker.getRegistrations().then(function(registrations) {
-		let registration,
-			i = registrations.length;
+	navigator.serviceWorker.getRegistration().then(function (registration) {
 
-		while (i && i--) {
-			registration = registrations[i];
-			if (registration.scope == location.origin + "{scope}") {
-				registration.unregister();
+		registration.unregister().then(function (result) {
+
+			if (result) {
+
+				console.info('The service worker has been successfully removed 😭');
 			}
-		}
+		});
 	});
 }

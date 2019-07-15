@@ -64,7 +64,19 @@
                 }
             });
             const methods = {
-                count: () => _query("count", true, keyToUse),
+                count: async () => {
+                    const transaction = db.transaction(storeName, "readonly");
+                    const store = transaction.objectStore(storeName);
+                    const countRequest = store.count();
+                    return new Promise(function(resolve, reject) {
+                        countRequest.onsuccess = function(event) {
+                            resolve(event.target.result);
+                        };
+                        countRequest.onerror = function(error) {
+                            reject(error);
+                        };
+                    });
+                },
                 get: (keyToUse, index) => _query("get", true, keyToUse, index),
                 getAll: (keyToUse, index) => _query("getAll", true, keyToUse, index),
                 put: entryData => _query("put", false, entryData),
@@ -97,9 +109,7 @@
 	 *
 	 * @license     LGPL v3
 	 * @license     MIT License
-	 */
-    // @ts-check
-    /* eslint wrap-iife: 0 */    function hashCode(string) {
+	 */    function hashCode(string) {
         var hash = 0, i, chr;
         if (string.length === 0) return hash;
         for (i = 0; i < string.length; i++) {
@@ -108,7 +118,7 @@
             hash |= 0;
  // Convert to 32bit integer
                 }
-        return Number(hash).toString(16);
+        return Number(hash).toString(36);
     }
     /**
 	 *
@@ -256,24 +266,164 @@
 	 * @license     MIT License
 	 */
     // @ts-check
+    /* eslint wrap-iife: 0 */
+    /**
+	 *
+	 * Exponentially increase the delay until it reaches max hours. It will no longer increase from that point.
+	 * - 0
+	 * - 1 minute
+	 * - 2 minutes
+	 * - 4 minutes
+	 * - 8 minutes
+	 * - 16 minutes
+	 * - 32 minutes
+	 * - max hours ...
+	 * @param {number} max
+	 * @returns {function(number): number}
+	 */    function expo(max = 1) {
+        max *= 3600;
+        return function(n) {
+            // 1 hour max
+            return 1e3 * Math.min(max, 1 / 2 * (2 ** n - 1));
+        };
+    }
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    // @ts-check
+        const syncSettings = "{BACKGROUND_SYNC}";
+    if (syncSettings.enabled) {
         const manager = new SyncManager();
-    let timeout = 0;
-    // retry using back off algorithm
-    // - 0
-    // - 1 minute
-    // - 2 minutes
-    // - 4 minutes
-    // - 8 minutes
-    // - 16 minutes
-    // - 32 minutes
-    // - 60 minutes ...
-        function nextRetry(n, max = 1e3 * 60 * 60) {
-        // 1 hour max
-        return 6e4 * Math.min(max, 1 / 2 * (2 ** n - 1));
+        let timeout = 0;
+        // retry using back off algorithm
+        // - 0
+        // - 1 minute
+        // - 2 minutes
+        // - 4 minutes
+        // - 8 minutes
+        // - 16 minutes
+        // - 32 minutes
+        // - 60 minutes ...
+                const nextRetry = expo();
+        async function replay() {
+            await manager.replay("{SYNC_API_TAG}");
+            setTimeout(replay, nextRetry(++timeout));
+        }
+        setTimeout(replay, nextRetry(timeout));
     }
-    async function replay() {
-        await manager.replay("{SYNC_API_TAG}");
-        setTimeout(replay, nextRetry(++timeout));
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    // @ts-check
+    /* eslint wrap-iife: 0 */    function sprintf(string) {
+        let index = -1;
+        let value;
+        const args = [].slice.apply(arguments).slice(1);
+        return string.replace(/%([s%])/g, function(all, modifier) {
+            if (modifier == "%") {
+                return modifier;
+            }
+            value = args[++index];
+            switch (modifier) {
+              case "s":
+                return value == null ? "" : value;
+            }
+        });
     }
-    setTimeout(replay, nextRetry(timeout));
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    /**
+	 * enforce the limitation of the number of files in the cache
+	 */    const cleanup = async function() {
+        let cache = await caches.open("{CACHE_NAME}");
+        const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.location).href);
+        const limit = "{pwa_cache_max_file_count}";
+        const db = await DB("gzip_sw_worker_expiration_cache_private", "url", [ {
+            name: "url",
+            key: "url"
+        }, {
+            name: "version",
+            key: "version"
+        }, {
+            name: "route",
+            key: "route"
+        } ]);
+        return async function() {
+            let count = await db.count();
+            if (count > limit) {
+                console.info(sprintf("cleaning up [%s] items present. [%s] items allowed", count, limit));
+                for (let metadata of await db.getAll()) {
+                    if (preloaded_urls.includes(metadata.url)) {
+                        console.info(sprintf("skipped preloaded resource [%s]", metadata.url));
+                        continue;
+                    }
+                    console.info(sprintf("removing [%s]", metadata.url));
+                    await cache.delete(metadata.url);
+                    await db.delete(metadata.url);
+                    if (--count <= limit) {
+                        break;
+                    }
+                }
+                console.info(sprintf("cleaned up [%s] items present. [%s] items allowed", count, limit));
+            }
+        };
+    };
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    /**
+	 * cleanup using a web worker
+	 */    
+    /**
+	 *
+	 * @package     GZip Plugin
+	 * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
+	 *
+	 * dual licensed
+	 *
+	 * @license     LGPL v3
+	 * @license     MIT License
+	 */
+    /**
+	 * cleanup using a web worker
+	 */
+    (async function() {
+        const func = await cleanup();
+        const scheduler = expo();
+        let thick = 0;
+        async function clean() {
+            await func();
+            setTimeout(clean, scheduler(++thick));
+        }
+        setTimeout(clean, scheduler(thick));
+    })();
 })();

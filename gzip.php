@@ -210,7 +210,7 @@ class PlgSystemGzip extends JPlugin
                 if (!empty($script)) {
 
 	                $document->addScriptDeclaration($script);
-                }
+				}
             }
         }
     }
@@ -220,7 +220,7 @@ class PlgSystemGzip extends JPlugin
 		//  pattern="^([a-zA-Z0-9_-]*)$"
         if ($context == 'com_plugins.plugin' && !empty($data) && $data['type'] == 'plugin' && $data['element'] == 'gzip') {
 
-            $options = $data['params']['gzip'];
+			$options = $data['params']['gzip'];
 			
 			if (isset($options['admin_secret'])) {
 				
@@ -607,9 +607,9 @@ class PlgSystemGzip extends JPlugin
 		
         if(!empty($options['pwaenabled'])) {
 
-            if(empty($options['pwa_network_strategy'])) {
+            if(empty($options['pwa_network_strategy']) || $options['pwa_network_strategy'] == 'un') {
 
-                $options['pwa_network_strategy'] = 'un';
+                $options['pwa_network_strategy'] = 'no';
             }
 
             $prefix .= $options['pwa_network_strategy'].'/';
@@ -683,7 +683,7 @@ class PlgSystemGzip extends JPlugin
 
         GZipHelper::$options = $options;
 
-        $body = GZipHelper::parseImages($body, $options);
+		$body = GZipHelper::parseImages($body, $options);
 
         $profiler->mark('afterParseImages');
         $body = GZipHelper::parseCss($body, $options);
@@ -696,7 +696,7 @@ class PlgSystemGzip extends JPlugin
         $body = GZipHelper::parseURLs($body, $options);
 
         $profiler->mark('afterParseURLs');
-        $app->setBody($body);
+		$app->setBody($body);
     }
 
 	public function onInstallerAfterInstaller($model, $package, $installer, $result) {
@@ -864,6 +864,11 @@ class PlgSystemGzip extends JPlugin
 	
     protected function updateServiceWorker($options) {
 
+		if (is_object($options)) {
+
+			$options = get_object_vars($options);
+		}
+
 	    if (empty($options['pwaenabled'])) {
 
 	    	return;
@@ -883,7 +888,7 @@ class PlgSystemGzip extends JPlugin
         $preloaded_urls = empty($options['pwa_app_cache_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_urls'], -1, PREG_SPLIT_NO_EMPTY);
         $exclude_urls = empty($options['pwa_app_cache_exclude_urls']) ? [] : preg_split('#\s#s', $options['pwa_app_cache_exclude_urls'], -1, PREG_SPLIT_NO_EMPTY);
                 
-        $exclude_urls[] = JUri::root(true).'/administrator';
+        $exclude_urls[] = JUri::root(true).'/administrator/';
 		$exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
 		
 		if (!empty($options['pwa_offline_page'])) {
@@ -903,26 +908,71 @@ class PlgSystemGzip extends JPlugin
 		}
 		
 		$cache_duration = !empty($options['pwa_cache_default']) ? $options['pwa_cache_default'] : $this->params->get('gzip.maxage', '2months');
+		$defaultNetworkStrategy = empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'];
 
-		$cacheExpiryStrategy = [
+		if ($defaultNetworkStrategy == 'un') {
 
-			'cacheName' => 'gzip_sw_worker_expiration_cache_default_private',
-			'maxAge' => $cache_duration,
-			'limit' => +$this->params->get('gzip.http_cache_limit', '0')
-		];
+			$defaultNetworkStrategy = 'no';
+		}
 
 		// additional routing startegies
 		$strategies = [];
 
+		if (is_object($options['pwa_network_strategies'])) {
+
+			$options['pwa_network_strategies'] = get_object_vars($options['pwa_network_strategies']);
+		}
+
+		if (!isset($options['pwa_cache'])) {
+
+			$options['pwa_cache'] = [];
+		}
+
+		if (is_object($options['pwa_cache'])) {
+
+			$options['pwa_cache'] = get_object_vars($options['pwa_cache']);
+		}
+
+		$maxFileSize = +preg_replace_callback('#(\d+)(.*+)#', function ($matches) {
+
+			switch($matches[2]) {
+
+				case 'Kb':
+
+					return $matches[1] * 1024;
+				case 'Mb':
+
+					return $matches[1] * 1024 * 1024;
+				case 'Gb':
+
+					return $matches[1] * 1024 * 1024 * 1024;
+			}
+
+			return $matches[1];
+
+		}, $options['pwa_cache_max_file_size']);
+
+		$cache_settings = [
+			'caching' => (bool) $options['pwa_cache_enabled'],
+			'strategy' => $defaultNetworkStrategy,
+			'maxAge' => $cache_duration,
+			// maximum number of files in the cache
+			'limit' => +$options['pwa_cache_max_file_count'],
+			// maximum cacheable file sze
+			'maxFileSize' => $maxFileSize,
+			'cacheName' => 'gzip_sw_worker_expiration_cache_default_private',
+			'settings' => []
+		];
+
 		foreach ($options['pwa_network_strategies'] as $key => $value) {
 
 			// use default settings
-			if (empty($value) && empty($options['pwa_cache'][$key])) {
+			if (empty($options['pwa_cache'][$key])) {
 
 				continue;
 			}
 
-			if (is_null($value)) {
+			if (empty($value)) {
 
 				$value = $options['pwa_network_strategy'];
 			}
@@ -932,6 +982,7 @@ class PlgSystemGzip extends JPlugin
 				$value = 'no';
 			}
 
+			$strategies[$key]['mime'] = [];
 			$strategies[$key]['network'] = [];
 
 			foreach (GZipHelper::$accepted as $ext => $mime_type) {
@@ -939,33 +990,54 @@ class PlgSystemGzip extends JPlugin
 				if ($ext == $key || strpos($mime_type, $key) !== false) {
 
 					$strategies[$key]['network'][] = $ext;
+					$strategies[$key]['mime'][] = $mime_type;
 				}
 			}
 
-			if (empty($strategies[$key]['network'])) {
+			// fallback to default pwa cache settings if not set
+			$cache_duration_type = empty($options['pwa_cache'][$key]) ? $options['pwa_cache_default'] : $options['pwa_cache'][$key];
+
+			if (intval($cache_duration_type) == -1 || empty($strategies[$key]['network'])) {
 
 				unset($strategies[$key]);
+				unset($options['pwa_network_strategies'][$key]);
 				continue;
 			}
 
-			// fallback to default pwa cache settings if not set
-			$cache_duration = empty($options['pwa_cache'][$key]) ? $options['pwa_cache_default'] : $options['pwa_cache'][$key];
-
-			if (empty($cache_duration)) {
+			if (intval($cache_duration_type) == 0) {
 
 				// fallback to the default http cache settings if none set
-				$cache_duration = $this->params->get('gzip.maxage', '2months');
+				$cache_duration_type = $this->params->get('gzip.maxage', '2months');
 			}
 
-			$dt = new DateTime();
+			//	$strategies[$key]['value'] = $value;
+			//	$strategies[$key]['cache'] = $dt->getTimestamp() - $now;
+			//	$strategies[$key]['key'] = $key;
 
-			$now = $dt->getTimestamp();
-			$dt->modify($cache_duration);
+			//	$strategies[$key]['network'][] = $ext;
+			//	$strategies[$key]['mime'][] = $mime_type;
 
-			$strategies[$key]['value'] = $value;
-			$strategies[$key]['cache'] = $dt->getTimestamp() - $now;
-			$strategies[$key]['key'] = $key;
-		}
+			$cache_settings['settings'][$key] = [
+			//	'type' => $key,
+				//	'cacheName' => 'gzip_sw_worker_expiration_cache_'.$key.'_private',
+				'strategy' => $value,
+				'ext' => $strategies[$key]['network'],
+				'mime' => $strategies[$key]['mime'],
+				'maxAge' => $cache_duration_type,
+				'maxFileSize' => $maxFileSize,
+				'limit' => +$options['pwa_cache_max_file_count']
+			];
+
+			// delete defaults
+			if ($value == $defaultNetworkStrategy && 
+				$cache_settings['settings'][$key]['maxAge'] == $cache_duration) {
+
+				unset($cache_settings['settings'][$key]);
+			}
+		}	
+
+		$cache_settings['settings'] = array_values($cache_settings['settings']);
+
 
 		$worker_id = trim(file_get_contents(__DIR__.'/worker_version'));
 		$hash = hash('sha1', json_encode($options).$worker_id);
@@ -982,6 +1054,7 @@ class PlgSystemGzip extends JPlugin
 
 		$search = 
 			[
+				'"{pwa_cache_settings}"',
 				'"{pwa_offline_page}"',
 				'"{SYNC_API_TAG}"',
 				'"{VERSION}"', 
@@ -990,45 +1063,41 @@ class PlgSystemGzip extends JPlugin
 				'"{STORES}"', 
 				'{CACHE_NAME}', 
 				'{ROUTE}',
-				'"{cacheExpiryStrategy}"', 
-				'{defaultStrategy}', 
 				'{scope}', 
 				'"{exclude_urls}"',
 				'"{preloaded_urls}"',
-				'"{network_strategies}"'];
+				'"{pwa_cache_max_file_count}"'
+			];
 
 		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
+		$json_debug = $debug ? JSON_PRETTY_PRINT : 0;
+
 		$replace = [
+			json_encode($cache_settings, $json_debug),
 			json_encode(
 				[
 					'url' => (string) $options['pwa_offline_page'], 
 					'methods' => empty($options['pwa_offline_method']) ? ['GET'] : $options['pwa_offline_method']
-				]),
+				], $json_debug),
 			'"gzip_sync_queue"',
 			json_encode($worker_id),
 			json_encode([
 				'enabled' => $sync_enabled != 'disabled',
 				'method' => $this->params->get('gzip.pwa_sync_method', ['GET']),
 				'pattern' => $sync_enabled == 'enabled' ? [] : array_filter(preg_split('#\s+#', $this->params->get('gzip.pwa_sync_patterns', ''), PREG_SPLIT_NO_EMPTY))
-			]),
-			json_encode(array_values(array_unique($hosts))),
-			json_encode(array_merge(['gzip_sw_worker_expiration_cache_private'], array_map(function ($key) { return 'gzip_sw_worker_expiration_cache_private_'.$key; }, array_keys($strategies)))),
+			], $json_debug),
+			json_encode(array_values(array_unique($hosts)), $json_debug),
+			json_encode(array_merge(['gzip_sw_worker_expiration_cache_private'], array_map(function ($key) { return 'gzip_sw_worker_expiration_cache_private_'.$key; }, array_keys($strategies))), $json_debug),
 			'v_'.$hash, 
 			$this->params->get('gzip.cache_key'),
-			json_encode($cacheExpiryStrategy),
-			empty($options['pwa_network_strategy']) ? 'nf' : $options['pwa_network_strategy'], 
+		//	json_encode($cacheExpiryStrategy, $json_debug),
+		//	json_decode($defaultNetworkStrategy, $json_debug), 
 			JUri::root(true).'/',
-			json_encode($exclude_urls), 
-			json_encode($preloaded_urls), 
-			json_encode(array_map(function ($key, $values) {
-
-					return [$values['value'], '\.(('.implode(')|(', $values['network']).'))([#?].*)?$', ['cacheName' => 'gzip_sw_worker_expiration_cache_private_'.$values['key'], 'maxAge' => +$values['cache']]];
-				}, 
-				array_keys($strategies), 
-				array_values($strategies)
-			))
+			json_encode($exclude_urls, $json_debug), 
+			json_encode($preloaded_urls, $json_debug), 
+			+$options['pwa_cache_max_file_count']
 		];
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));

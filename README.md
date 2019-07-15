@@ -1,4 +1,4 @@
-# Website Optimizer Plugin
+# Joomla Website Optimizer Plugin
 
 [https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
@@ -17,7 +17,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-- [Website Optimizer Plugin](#Website-Optimizer-Plugin)
+- [Joomla Website Optimizer Plugin](#Joomla-Website-Optimizer-Plugin)
   - [1. General improvements](#1-General-improvements)
     - [Moving script and css position in the page](#Moving-script-and-css-position-in-the-page)
   - [1.2 Caching](#12-Caching)
@@ -32,6 +32,7 @@ There are additional plugins that help optimizing and profiling your page or ser
     - [5.1. Installable web app](#51-Installable-web-app)
     - [5.2. Web Share Target Level 2](#52-Web-Share-Target-Level-2)
     - [5.3. Offline mode](#53-Offline-mode)
+    - [5.4. Configurable cache](#54-Configurable-cache)
     - [5.5. Network cache strategies](#55-Network-cache-strategies)
     - [5.6. Web Push](#56-Web-Push)
     - [5.7. Service worker router api](#57-Service-worker-router-api)
@@ -62,6 +63,7 @@ script and css position can be controlled by add 'data-position' attribute to th
 
 - Efficiently cache resources using http caching headers. This requires apache mod_rewite. I have not tested on other web servers
 - Range requests are supported for cached resources (you can cache audio & video content)
+- Configurable cache using the service worker
 
 ## 1.3 Sub Resource Integrity (SRI)
 
@@ -127,6 +129,8 @@ here are some of the features implemented
 - Background Sync with fallback support
 - Configurable manifest settings
 - Configurable cache settings per resource type
+- Limit the number of files in the cache
+- Limit the maximum file size
 - Preloaded resource can be configured
 - Configurable network caching strategies
 - Automatic service worker update. A new version is available whenever you change the settings
@@ -154,6 +158,12 @@ You can also configure which data you want to be sent to your app. To learn more
 
 - **Preloaded resources**:
   You can provide the list of urls to load when the service worker is installed like icons, logo, css files, web pages, etc ...
+
+### 5.4. Configurable cache
+
+- Configure cache eviction settings by file type
+- Configure the maximum file size for files that can be stored in the cache
+- Configure the maximum number of files allowed in the cache
 
 ### 5.5. Network cache strategies
 

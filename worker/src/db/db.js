@@ -74,7 +74,25 @@ export async function DB(dbName, key = "id", indexes = []) {
 			});
 
 		const methods = {
-			count: () => _query("count", true, keyToUse),
+			count: async () => {
+
+				const transaction = db.transaction(storeName, "readonly");
+				const store = transaction.objectStore(storeName);
+
+				const countRequest = store.count();
+
+				return new Promise(function (resolve, reject) {
+
+					countRequest.onsuccess = function(event) {
+
+						resolve(event.target.result);
+					}
+
+					countRequest.onerror = function(error) {
+						reject(error);
+					}
+				});
+			},
 			get: (keyToUse, index) => _query("get", true, keyToUse, index),
 			getAll: (keyToUse, index) =>
 				_query("getAll", true, keyToUse, index),

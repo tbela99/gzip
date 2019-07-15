@@ -74,15 +74,6 @@ export const Utils = {
 	},
 	merge,
 	reset,
-
-	//	btoa(str) {
-	//		return btoa(unescape(encodeURIComponent(str)));
-	//	},
-
-	//	atob(str) {
-	//		return decodeURIComponent(escape(atob(str)));
-	//	},
-
 	/**
 	 *  extend a function to accept either a key/value or an object as arguments
 	 * 	ex set(name, value, [...]) or set({name: value, name2: value2}, [...])
@@ -103,39 +94,6 @@ export const Utils = {
 
 			return this;
 		};
-	},
-	getAllPropertiesName(object) {
-		const properties = [];
-		let current = object,
-			props,
-			prop,
-			i;
-
-		do {
-			props = Object.getOwnPropertyNames(current);
-
-			for (i = 0; i < props.length; i++) {
-				prop = props[i];
-				if (properties.indexOf(prop) === -1) {
-					properties.push(prop);
-				}
-			}
-		} while ((current = Object.getPrototypeOf(current)));
-
-		return properties;
-	},
-	getOwnPropertyDescriptorNames(object) {
-		let properties = Object.keys(Object.getOwnPropertyDescriptors(object));
-		let current = Object.getPrototypeOf(object);
-		while (current) {
-			properties = properties.concat(
-				Object.keys(Object.getOwnPropertyDescriptors(current))
-			);
-
-			current = Object.getPrototypeOf(current);
-		}
-
-		return properties;
 	}
 };
 
@@ -221,6 +179,37 @@ function reset(object) {
 	return object;
 }
 
-//export {
-//	Utils
-//};
+export function getAllPropertiesName(object) {
+	const properties = [];
+	let current = object,
+		props,
+		prop,
+		i;
+
+	do {
+		props = Object.getOwnPropertyNames(current);
+
+		for (i = 0; i < props.length; i++) {
+			prop = props[i];
+			if (properties.indexOf(prop) === -1) {
+				properties.push(prop);
+			}
+		}
+	} while ((current = Object.getPrototypeOf(current)));
+
+	return properties;
+}
+
+export function getOwnPropertyDescriptorNames(object) {
+	let properties = Object.keys(Object.getOwnPropertyDescriptors(object));
+	let current = Object.getPrototypeOf(object);
+	while (current) {
+		properties = properties.concat(
+			Object.keys(Object.getOwnPropertyDescriptors(current))
+		);
+
+		current = Object.getPrototypeOf(current);
+	}
+
+	return properties;
+}

@@ -14,15 +14,9 @@ import {
 	SW
 } from "../serviceworker.js";
 
-let undef;
+const undef = null;
 
 async function offline(event) {
-
-	console.log({
-		'SW.app.offline': SW.app.offline,
-		'event.request.mode': event.request.mode,
-		'event.request.method': event.request.method
-	});
 
 	if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
 
@@ -48,7 +42,7 @@ self.addEventListener("fetch", (event) => {
 
 		const router = SW.routes.getRouter(event);
 
-		if (router != null) {
+		if (router != undef) {
 
 			try {
 
