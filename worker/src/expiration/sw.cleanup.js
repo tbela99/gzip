@@ -23,7 +23,7 @@ export const cleanup = (async function () {
 
 	let cache = await caches.open('{CACHE_NAME}');
 
-	const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.location).href);
+	const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.origin).href);
 
 	const limit = "{pwa_cache_max_file_count}";
 	const db = await DB(
