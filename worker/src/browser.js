@@ -13,34 +13,6 @@
 
 // build build-id build-date
 
-/*
-function debug_js_window() {
-
-	window.addEventListener('error', function (error) {
-
-		console.error(error.message + '\n' + error.stack);
-	});
-	window.addEventListener("rejectionhandled", function (error) {
-		// handle error here, for example log   
-		console.error({
-			reason: error.reason,
-			promise: error.promise,
-			error
-		});
-	});
-	window.addEventListener("unhandledrejection", function (error) {
-		// handle error here, for example log   
-		console.error({
-			reason: error.reason,
-			promise: error.promise,
-			error
-		});
-	});
-}
-
-debug_js_window();
-*/
-
 if ("serviceWorker" in navigator) {
 	navigator.serviceWorker.
 	register("{scope}worker{debug}.js", {
