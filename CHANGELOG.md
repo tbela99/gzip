@@ -2,16 +2,21 @@
 
 ## V2.5.3
 
-- Limit cache file size by controlling the maximum size per file and the maximum of files in the cache.
+- Limit the number of files cached
+- Limit the size of files that can be cached
+- Cache settings do not apply to precached resources
+- Fix issue that prevented to apply settings on cached resources based of the file type
+- Add a switch to disable CSS processing
+- Add a switch to disable Javascript processing
 
 ## V2.5.2
 
-- Added offline page support
+- Added the possibility to display an offline page when a navigation page request fails.
 
 ## V2.5.1
 
 - Implement background sync with fallback
-- Build scripts using rollup instead of webpack
+- Build scripts using rollup instead of webpack. Thos produce smaller output.
 
 ## V2.5.0
 

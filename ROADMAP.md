@@ -8,7 +8,6 @@
 1. Build scripts using Babel instead of uglify-es
 1. Use ES6+ syntax for scripts used only by the service worker
 1. Implement backgroundFetch API
-1. Clear Joomla cache when settings are updated
 1. Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for anaytic scripts and and hosted fonts.
 1. Web push notifications with firebase?
 1. prerender images using primitive.js svg generation [https://github.com/ondras/primitive.js/blob/master/js/app.js](https://github.com/ondras/primitive.js/blob/master/js/app.js)

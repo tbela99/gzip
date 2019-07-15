@@ -33,6 +33,11 @@ export function expo(max = 1) {
 	return function (n) {
 
 		// 1 hour max
+		if (n > 12.8139) {
+
+			n = 12.8139;
+		}
+
 		return 1000 * Math.min(max, 1 / 2 * (2 ** n - 1));
 	}
 }

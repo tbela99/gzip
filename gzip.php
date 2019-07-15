@@ -1063,8 +1063,6 @@ class PlgSystemGzip extends JPlugin
 				'"{STORES}"', 
 				'{CACHE_NAME}', 
 				'{ROUTE}',
-			//	'"{cacheExpiryStrategy}"', 
-			//	'{defaultStrategy}', 
 				'{scope}', 
 				'"{exclude_urls}"',
 				'"{preloaded_urls}"',

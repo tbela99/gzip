@@ -794,6 +794,11 @@ class GZipHelper {
 
     public static function parseCss($body, array $options = []) {
 
+        if (isset($options['cssenabled']) && $options['cssenabled'] == 0) {
+
+            return $body;
+        }
+
         $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
         $fetch_remote = !empty($options['fetchcss']);
@@ -1815,6 +1820,11 @@ class GZipHelper {
     }
 
     public static function parseScripts($body, array $options = []) {
+
+        if (isset($options['jsenabled']) && $options['jsenabled'] == 0) {
+
+            return $body;
+        }
 
         $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
 

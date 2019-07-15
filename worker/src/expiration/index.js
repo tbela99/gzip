@@ -18,15 +18,10 @@ import {
 
 if (SW.app.network.limit > 0) {
 
-	//	(async function () {
-
-	//	const func = await cleanup();
-
 	self.addEventListener('sync', async (event) => {
 
 		const callback = await cleanup();
 
 		event.waitUntil(callback());
 	});
-	//	})();
 }

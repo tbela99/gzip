@@ -158,6 +158,10 @@
                 <field type="spacer" label="Configure Javascript settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="jsenabled" label="PLG_GZIP_FIELD_JS_ENABLED_LABEL" description="PLG_GZIP_FIELD_JS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="fetchjs" label="PLG_GZIP_FIELD_FETCHJS_LABEL" description="PLG_GZIP_FIELD_FETCHJS_DESCRIPTION" type="radio" class="btn-group" default="1">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -178,6 +182,10 @@
                 <field type="spacer" label="Configure Css settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="cssenabled" label="PLG_GZIP_FIELD_CSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
                         <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
                         <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
