@@ -16,7 +16,7 @@
 ## V2.5.1
 
 - Implement background sync with fallback
-- Build scripts using rollup instead of webpack. Thos produce smaller output.
+- Build scripts using rollup instead of webpack. This produce smaller output.
 
 ## V2.5.0
 
