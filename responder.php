@@ -211,10 +211,11 @@ if (!ini_get('zlib.output_compression')) {
 			fseek($handle, $cur);
 		}
 
+		//1024 * 16 = 16384
 		while(!feof($handle) && $cur <= $end && (connection_status() == 0))
 		{
-			print fread($handle, min(1024 * 16, ($end - $cur) + 1));
-			$cur += 1024 * 16;
+			print fread($handle, min(16384, ($end - $cur) + 1));
+			$cur += 16384;
 		}
 
 		fclose($handle);
