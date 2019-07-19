@@ -194,9 +194,10 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	$dt->modify('+'.$maxage);
+	$maxage = $dt->getTimestamp() - $now;
 
 	header('Accept-Ranges: bytes');
-	header('Cache-Control: public, max-age='.($dt->getTimestamp() - $now).', immutable');
+	header('Cache-Control: public, max-age='.$maxage.', stale-while-revalidate='.(2 * $maxage).', immutable');
 
 	if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
 
