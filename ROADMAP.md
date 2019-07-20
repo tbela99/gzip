@@ -3,6 +3,8 @@
 ## High priority list
 
 1. add support of stale-while-revalidate in Cache-Control header
+1. implement csp features
+1. add support for the user action Log see [here](https://docs.joomla.org/J3.x:User_Action_Logs)
 1. do not cache partial request
 1. intercept partial requests and return response from cache
 1. merge multiple google font < link > tag
