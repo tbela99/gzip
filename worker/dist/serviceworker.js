@@ -891,14 +891,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "63dfd3f",
+			value: "37599c4",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-14 17:35:59-04:00",
+			value: "2019-07-20 15:14:53-04:00",
 			enumerable: true
 		},
 		/**
@@ -931,7 +931,7 @@
 		 * precached resources
 		 */
 		precache: {
-			value: "{preloaded_urls}".map(url => new URL(url, self.location).href),
+			value: "{preloaded_urls}".map(url => new URL(url, self.origin).href),
 			enumerable: true
 		},
 		homepage: {
@@ -2025,7 +2025,7 @@
 
 		let cache = await caches.open('{CACHE_NAME}');
 
-		const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.location).href);
+		const preloaded_urls = "{preloaded_urls}".map(url => new URL(url, self.origin).href);
 
 		const limit = "{pwa_cache_max_file_count}";
 		const db = await DB(
@@ -2091,17 +2091,12 @@
 
 	if (SW.app.network.limit > 0) {
 
-		//	(async function () {
-
-		//	const func = await cleanup();
-
 		self.addEventListener('sync', async (event) => {
 
 			const callback = await cleanup();
 
 			event.waitUntil(callback());
 		});
-		//	})();
 	}
 
 	/**
