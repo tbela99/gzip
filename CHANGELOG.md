@@ -1,5 +1,10 @@
 # Change History
 
+## V2.5.4
+
+- add support of stale-while-revalidate in Cache-Control header
+- add missing administrator service worker client file
+
 ## V2.5.3
 
 - Limit the number of files cached
