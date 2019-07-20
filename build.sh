@@ -68,10 +68,17 @@ uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edi
 #
 #
 uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
+ -- ./browser.administrator.js | sed "s/build-date/$(date '+%F %H:%M:%S%:z')/g" | sed "s/build-id/$(git rev-parse --short HEAD)/g" > ../dist/browser.administrator.js
+#
+#
+uglifyjs --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
  -- ./browser.sync.js | sed "s/build-date/$(date '+%F %H:%M:%S%:z')/g" | sed "s/build-id/$(git rev-parse --short HEAD)/g" > ../dist/browser.sync.js
 #
 uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle toplevel=true -- ../dist/browser.js > ../dist/browser.min.js
+#
+uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
+  --warn --mangle toplevel=true -- ../dist/browser.administrator.js > ../dist/browser.administrator.min.js
 #
 uglifyjs --ecma=8 --compress passes=3,toplevel=true,unsafe_comps=true,unsafe_proto=true,warnings=true,pure_funcs=["console.log","console.info"]\
   --warn --mangle toplevel=true -- ../dist/browser.sync.js > ../dist/browser.sync.min.js
