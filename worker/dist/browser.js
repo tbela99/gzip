@@ -10,34 +10,7 @@
  * @license     MIT License
  */
 // @ts-check
-// build 63dfd3f 2019-07-14 17:36:02-04:00
-/*
-function debug_js_window() {
-
-	window.addEventListener('error', function (error) {
-
-		console.error(error.message + '\n' + error.stack);
-	});
-	window.addEventListener("rejectionhandled", function (error) {
-		// handle error here, for example log   
-		console.error({
-			reason: error.reason,
-			promise: error.promise,
-			error
-		});
-	});
-	window.addEventListener("unhandledrejection", function (error) {
-		// handle error here, for example log   
-		console.error({
-			reason: error.reason,
-			promise: error.promise,
-			error
-		});
-	});
-}
-
-debug_js_window();
-*/
+// build 37599c4 2019-07-20 15:14:56-04:00
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("{scope}worker{debug}.js", {
         scope: "{scope}"
