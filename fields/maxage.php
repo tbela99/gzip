@@ -90,7 +90,7 @@ class JFormFieldMaxAge extends JFormField
 			$options[] = $option;
 		}
 		
-		$html .= '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
+		$html .= '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
 
 		foreach ($options as $option) {
 

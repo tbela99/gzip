@@ -12,167 +12,168 @@
  */
 
 LIB.ready(function(undef) {
-	// intersection-observer.min.js
+  // intersection-observer.min.js
 
-	if (!("srcset" in new Image())) {
-		//    try {
+  if (!("srcset" in new Image())) {
+    //    try {
 
-		document.body.insertAdjacentHTML(
-			"beforeend",
-			"<svg xmlns=http://www.w3.org/2000/svg width=1 height=1>" +
-			"<defs>" +
-				"<filter id=blur-lqip width=100% height=100% >" +
-				"<feGaussianBlur stdDeviation=20 />" +
-			    '</filter>' +
-			    '</defs>'+
-			   '</svg>'
-		);
-	}
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      "<svg xmlns=http://www.w3.org/2000/svg width=1 height=1>" +
+        "<defs>" +
+        "<filter id=blur-lqip width=100% height=100% >" +
+        "<feGaussianBlur stdDeviation=20 />" +
+        "</filter>" +
+        "</defs>" +
+        "</svg>"
+    );
+  }
 
-	function lazyload() {
-		LIB.images.lazy(".image-placeholder").on({
+  function lazyload() {
+    LIB.images.lazy(".image-placeholder").on({
+      /**
+       *
+       * @param {HTMLImageElement} img
+       * @param {HTMLImageElement} oldImage
+       */
+      preload: function(img, oldImage) {
+        const legacy = !("currentSrc" in img);
 
-            /**
-             *
-             * @param {HTMLImageElement} img
-             * @param {HTMLImageElement} oldImage
-             */
-			preload: function(img, oldImage) {
+        if (!legacy) {
+          oldImage.insertAdjacentHTML(
+            "beforebegin",
+            "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=\"background-image:url('" +
+              (img.currentSrc || img.src) +
+              "')\">"
+          );
+        } else {
+          oldImage.insertAdjacentHTML(
+            "beforebegin",
+            "<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg >" +
+              '<image xlink:href="' +
+              (img.currentSrc || img.src) +
+              '" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />"'
+          );
+        }
 
-			    const legacy = !("currentSrc" in img);
+        const container = oldImage.previousElementSibling;
 
-				if (!legacy) {
-					oldImage.insertAdjacentHTML(
-						"beforebegin",
-						'<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style="background-image:url(\'' +
-							(img.currentSrc || img.src) +
-							"')\">"
-					);
-				}
+        if (legacy) {
+          if (typeof window.CustomEvent != "function") {
+            function CustomEvent(event, params) {
+              params = params || {
+                bubbles: false,
+                cancelable: false,
+                detail: undefined
+              };
+              const evt = document.createEvent("CustomEvent");
+              evt.initCustomEvent(
+                event,
+                params.bubbles,
+                params.cancelable,
+                params.detail
+              );
+              return evt;
+            }
 
-				else {
-					oldImage.insertAdjacentHTML(
-						"beforebegin",
-						"<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg >" +
-							'<image xlink:href="' +
-							(img.currentSrc || img.src) +
-							'" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />"'
-					);
-				}
+            CustomEvent.prototype = window.Event.prototype;
+          }
 
-				const container = oldImage.previousElementSibling;
+          const svg = container.querySelector("svg");
+          //   const svgImage = container.querySelector('svg image');
+          function resize() {
+            const height = this.height;
+            const width = this.width;
 
-				if (legacy) {
+            svg.setAttribute("height", height);
+            svg.setAttribute("width", width);
 
-                    if ( typeof window.CustomEvent != "function" ) {
+            //   svgImage.setAttribute('height', height);
+            //   svgImage.setAttribute('width', width);
+          }
 
-                        function CustomEvent ( event, params ) {
-                            params = params || { bubbles: false, cancelable: false, detail: undefined };
-                            const evt = document.createEvent( 'CustomEvent' );
-                            evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-                            return evt;
-                        }
+          img.addEventListener("sourcechange", resize);
+          img.addEventListener("load", resize);
+        }
 
-                        CustomEvent.prototype = window.Event.prototype;
-                    }
+        oldImage.classList.remove(
+          "image-placeholder-lqip",
+          "image-placeholder-svg",
+          "image-placeholder"
+        );
+        container.insertBefore(oldImage, container.firstElementChild);
+      },
+      load: load,
+      error: function(error, img, oldImage) {
+        load(img, oldImage);
+      }
+    });
+  }
 
-                    const svg = container.querySelector('svg');
-                 //   const svgImage = container.querySelector('svg image');
-                    function resize () {
+  function load(img, oldImage) {
+    if (oldImage.dataset.src) {
+      oldImage.src = oldImage.dataset.src;
+      //	oldImage.removeAttribute("data-src");
+    }
 
-                        const height = this.height;
-                        const width = this.width;
+    if (oldImage.dataset.srcset) {
+      oldImage.srcset = oldImage.dataset.srcset;
+      //	oldImage.removeAttribute("data-srcset");
+    }
 
-                        svg.setAttribute('height', height);
-                        svg.setAttribute('width', width);
+    setTimeout(function() {
+      let container = oldImage;
 
-                        //   svgImage.setAttribute('height', height);
-                        //   svgImage.setAttribute('width', width);
-                    }
+      oldImage.removeAttribute("data-srcset");
+      oldImage.removeAttribute("data-src");
 
-                    img.addEventListener('sourcechange', resize);
-                    img.addEventListener('load', resize);
-                }
+      while (
+        container != undef &&
+        !container.classList.contains("image-placeholder-wrapper")
+      ) {
+        container = container.parentElement;
+      }
 
-				oldImage.classList.remove(
-					"image-placeholder-lqip",
-					"image-placeholder-svg",
-					"image-placeholder"
-				);
-				container.insertBefore(oldImage, container.firstElementChild);
-			},
-			load: function(img, oldImage) {
-				if (oldImage.dataset.src != undef) {
-					oldImage.src = oldImage.dataset.src;
-					//	oldImage.removeAttribute("data-src");
-				}
+      container.classList.add("image-placeholder-complete");
 
-				if (oldImage.dataset.srcset != undef) {
-					oldImage.srcset = oldImage.dataset.srcset;
-					//	oldImage.removeAttribute("data-srcset");
-				}
+      setTimeout(function() {
+        //    if (container.parentElement != null) {
 
-				setTimeout(function() {
-					let container = oldImage;
+        container.parentElement.insertBefore(oldImage, container);
 
-					oldImage.removeAttribute("data-srcset");
-					oldImage.removeAttribute("data-src");
+        container.parentElement.removeChild(container);
+        //	}
+      }, 10);
+    }, 10);
+  }
 
-					while (
-						container != undef &&
-						!container.classList.contains(
-							"image-placeholder-wrapper"
-						)
-					) {
-						container = container.parentElement;
-					}
+  if (
+    !(
+      "IntersectionObserver" in window &&
+      "IntersectionObserverEntry" in window &&
+      "intersectionRatio" in IntersectionObserverEntry.prototype
+    )
+  ) {
+    const script = document.createElement("script");
+    /*script.onreadystatechange =*/
+    script.onload = lazyload;
+    script.defer = true;
+    script.async = true;
+    script.src = "{script-src}";
+    document.body.appendChild(script);
+  } else {
+    if (!("isIntersecting" in IntersectionObserverEntry.prototype)) {
+      Object.defineProperty(
+        IntersectionObserverEntry.prototype,
+        "isIntersecting",
+        {
+          get: function() {
+            return this.intersectionRatio > 0;
+          }
+        }
+      );
+    }
 
-					container.classList.add("image-placeholder-complete");
-
-					setTimeout(function() {
-
-					//    if (container.parentElement != null) {
-
-                            container.parentElement.insertBefore(
-                                oldImage,
-                                container
-                            );
-
-                            container.parentElement.removeChild(container);
-					//	}
-
-					}, 10);
-				}, 10);
-			}
-		});
-	}
-
-	if (
-		!(
-			"IntersectionObserver" in window &&
-			"IntersectionObserverEntry" in window &&
-			"intersectionRatio" in window.IntersectionObserverEntry.prototype
-		)
-	) {
-		const script = document.createElement("script");
-		/*script.onreadystatechange =*/ script.onload = lazyload;
-		script.defer = true;
-		script.async = true;
-		script.src = "{script-src}";
-		document.body.appendChild(script);
-	} else {
-		if (!("isIntersecting" in window.IntersectionObserverEntry.prototype)) {
-			Object.defineProperty(
-				window.IntersectionObserverEntry.prototype,
-				"isIntersecting",
-				{
-					get: function() {
-						return this.intersectionRatio > 0;
-					}
-				}
-			);
-		}
-
-		lazyload();
-	}
+    lazyload();
+  }
 });

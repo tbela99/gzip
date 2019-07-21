@@ -1351,7 +1351,8 @@ class GZipHelper {
 
                         if (isset($link['media'])) {
 
-                            $noscript .= str_replace(['data-media', ' onload="_l(this)"', ' media="none"'], ['media', ''], $css);
+							$noscript .= str_replace(['data-media', ' onload="_l(this)"', ' media="none"'], ['media', ''], $css);
+							$css = str_replace(' media="none"', ' media="print"', $css);
                         }
 
                         else {
@@ -2341,7 +2342,7 @@ class GZipHelper {
                                 
                             default:
                             
-                                continue;
+                                continue 2;
                         }
                     }
                 
@@ -2515,7 +2516,7 @@ class GZipHelper {
 	                // end fetch remote files
                     if(isset($options['imagedimensions'])) {
 
-                        if (!isset($attributes['width']) && !isset($attributes['height'])) {
+                        if ($sizes !== false && !isset($attributes['width']) && !isset($attributes['height'])) {
 
                             $attributes['width'] = $sizes[0];
                             $attributes['height'] = $sizes[1];
@@ -2565,12 +2566,12 @@ class GZipHelper {
                     $short_name = strtolower(str_replace('CROP_', '', $method));
                  //   $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
-                    $image = new \Image\Image($file);
+                    $image = $sizes === false ? null : new \Image\Image($file);
 
                     $src = '';
 
 					// generate svg placeholder for faster image preview
-					if (!empty($options['imagesvgplaceholder'])) {
+					if ($sizes !== false && !empty($options['imagesvgplaceholder'])) {
 
 						switch ($options['imagesvgplaceholder']) {
 
@@ -2597,7 +2598,7 @@ class GZipHelper {
                     }
 
 	                // responsive images?
-                    if (!empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
+                    if ($sizes !== false && !empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {
 
                         // build mq based on actual image size
                         $mq = array_filter ($options['sizes'], function ($size) use($maxwidth) {
@@ -2606,6 +2607,8 @@ class GZipHelper {
                         });
 
                         if (!empty($mq)) {
+
+							$mq = array_values($mq);
 
                         //    $image = null;
                             $resource = null;
@@ -2661,8 +2664,22 @@ class GZipHelper {
 		                        }
 	                        }
 
-                            $attributes['data-srcset'] = implode(',', $srcset);
-                            $attributes['sizes'] = implode(',', $mq);
+							if (!empty($mq)) {
+
+								$attributes['data-srcset'] = implode(',', array_map(function ($url) {
+
+									$data = explode(' ', $url, 2);
+
+									if (count($data) == 2) {
+
+										return static::url($data[0]).' '.$data[1];
+									}
+
+									return static::url($url);
+
+								}, $srcset));
+								$attributes['sizes'] = implode(',', $mq);
+							}
                         }						
 					}
                 }
