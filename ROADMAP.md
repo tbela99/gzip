@@ -2,6 +2,7 @@
 
 ## High priority list
 
+1. add support of stale-while-revalidate in Cache-Control header
 1. do not cache partial request
 1. intercept partial requests and return response from cache
 1. merge multiple google font < link > tag
