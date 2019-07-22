@@ -1,6 +1,6 @@
 # Joomla Website Optimizer Plugin
 
-[![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![Download from JED](https://img.shields.io/badge/JED-Download-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+[![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![Download from JED](https://img.shields.io/badge/Download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
 Do you want to improve your website by
 
