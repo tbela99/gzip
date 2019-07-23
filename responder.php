@@ -58,6 +58,7 @@ if (!ini_get('zlib.output_compression')) {
 	if (!empty($this->options['cdn_cors'])) {
 		
 		header('Access-Control-Allow-Origin: *', true);
+		header('Access-Control-Expose-Headers: Date');
 	}
 
 	$uri = $_SERVER['REQUEST_URI'];
@@ -170,6 +171,7 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $mtime));
+	header('Date: ' . gmdate('D, d M Y H:i:s T'));
 
 	if(preg_match('#(text)|(xml)#', $accepted[$ext])) {
 
