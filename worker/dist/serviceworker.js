@@ -1,7 +1,5 @@
-(function (factory) {
-	typeof define === 'function' && define.amd ? define(factory) :
-	factory();
-}(function () { 'use strict';
+(function () {
+	'use strict';
 
 	/* LICENSE: MIT LICENSE | https://github.com/msandrini/minimal-indexed-db */
 	/* global window */
@@ -891,14 +889,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "8293390",
+			value: "32fca33",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-23 16:42:23-04:00",
+			value: "2019-07-23 19:34:33-04:00",
 			enumerable: true
 		},
 		/**
@@ -1640,22 +1638,6 @@
 	 */
 
 	const undef$6 = null;
-
-	async function offline(event) {
-
-		if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
-
-			const match = caches.match(SW.app.offline.url);
-
-			if (match != undef$6) {
-
-				return match;
-			}
-
-			return match;
-		}
-	}
-
 	/**
 	 * @param {FetchEvent} event
 	 */
@@ -1673,33 +1655,31 @@
 
 					response = await router.handler.handle(event);
 
-					if (!(response instanceof Response)) {
+					if (response instanceof Response) {
 
-						let resp = await SW.routes.resolve('fail', event.request, response);
+						return response;
+					}
 
-						if (resp instanceof Response) {
+					for (response of await SW.routes.resolve('fail', event, response)) {
 
-							response = resp;
+						console.log({
+							fail: response
+						});
+
+						if (response instanceof Response) {
+
+							return response;
 						}
 					}
 
-					if (response == undef$6) {
-
-						response = await offline(event);
-
-						if (response == undef$6) {
-
-							response = await fetch(event.request);
-						}
-					}
-
-					return response;
+					// offline page should be returned from the previous loop
+					return fetch(event.request);
 
 				} catch (error) {
 
 					console.error("😭", error);
 
-					return offline(event);
+					return fetch(event);
 				}
 			}
 
@@ -2099,6 +2079,30 @@
 		});
 	}
 
+	if (SW.app.offline.enabled) {
+
+	    SW.routes.on('fail', async (event) => {
+
+	        if (event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
+
+	            if (SW.app.offline.type == 'response') {
+
+	                return new Response(SW.app.offline.body, {
+	                    headers: new Headers({
+	                        'Content-Type': 'text/html; charset=utf-8'
+	                    })
+	                });
+	            }
+
+	            if (SW.app.offline.url != '') {
+
+	                return caches.match(SW.app.offline.url);
+	            }
+	        }
+
+	    });
+	}
+
 	/**
 	 *
 	 * main service worker file
@@ -2282,4 +2286,4 @@
 		}
 	});
 
-}));
+}());

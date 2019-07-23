@@ -829,7 +829,7 @@ class PlgSystemGzip extends JPlugin
 				$value = array_filter($value, function ($v) { return $v !== ''; });
 			}
 
-			return $value !== '' && !is_null($value) && count($value) != 0;			
+			return $value !== '' && !is_null($value) && (!is_array($value) || count($value) != 0);			
 		});
 
 		if (empty ($manifest)) {
@@ -1074,13 +1074,47 @@ class PlgSystemGzip extends JPlugin
 
 		$json_debug = $debug ? JSON_PRETTY_PRINT : 0;
 
+	//	$offline_data = [];
+
+		$offline_data = [
+			'enabled' => !empty($options['pwa_offline_enabled']),
+			'url' => '',
+			'methods' => []
+		];
+
+		if (!empty($options['pwa_offline_enabled']) &&
+		
+			(
+				!empty($options['pwa_offline_page']) || 
+				!empty($options['pwa_offline_html_page'])
+			)
+		) {
+
+			$offline_data['methods'] = empty($options['pwa_offline_method']) ? ['GET'] : $options['pwa_offline_method'];
+
+			$offline_data['type'] = 'url';
+	//	}
+
+	//	else {
+
+			if (isset($options['pwa_offline_pref']) && $options['pwa_offline_pref'] == 'html') {
+
+				$offline_data['type'] = 'response';
+				$offline_data['body'] = (string) $options['pwa_offline_html_page'];
+				unset($options['pwa_offline_page']);
+			}
+
+			else {
+
+				$offline_data['url'] = $options['pwa_offline_page'];
+				unset($options['pwa_offline_html_page']);
+			}
+		}
+
 		$replace = [
 			json_encode($cache_settings, $json_debug),
 			json_encode(
-				[
-					'url' => (string) $options['pwa_offline_page'], 
-					'methods' => empty($options['pwa_offline_method']) ? ['GET'] : $options['pwa_offline_method']
-				], $json_debug),
+				$offline_data, $json_debug),
 			'"gzip_sync_queue"',
 			json_encode($worker_id),
 			json_encode([

@@ -300,3 +300,4 @@ import "./service/sw.service.fetch.js";
 import "./service/sw.service.install.js";
 import "./sync/index.js";
 import './expiration/index.js';
+import './offline/index.js';
