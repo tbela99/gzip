@@ -10,7 +10,7 @@
  * @license     MIT License
  */
 // @ts-check
-// build 32fca33 2019-07-23 19:34:36-04:00
+// build 5f5b826 2019-07-25 22:29:49-04:00
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("{scope}worker{debug}.js", {
         scope: "{scope}"

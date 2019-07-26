@@ -2,6 +2,7 @@
 
 ## V2.5.4
 
+- add the possibility to provide the html for the offline page as an alternative to providing an url
 - add support of stale-while-revalidate in Cache-Control header
 - add missing administrator service worker client file
 

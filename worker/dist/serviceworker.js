@@ -889,14 +889,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "32fca33",
+			value: "5f5b826",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-23 19:34:33-04:00",
+			value: "2019-07-25 22:29:45-04:00",
 			enumerable: true
 		},
 		/**
@@ -1661,10 +1661,6 @@
 					}
 
 					for (response of await SW.routes.resolve('fail', event, response)) {
-
-						console.log({
-							fail: response
-						});
 
 						if (response instanceof Response) {
 

@@ -1,6 +1,6 @@
 # Joomla Website Optimizer Plugin
 
-[![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![Download from JED](https://img.shields.io/badge/Download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/json?color=green&label=current%20version&query=version&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fpackage.json) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![Download from JED](https://img.shields.io/badge/Download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
 Do you want to improve your website by
 
@@ -17,29 +17,29 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-- [Joomla Website Optimizer Plugin](#Joomla-Website-Optimizer-Plugin)
-  - [1. General improvements](#1-General-improvements)
-    - [Moving script and css position in the page](#Moving-script-and-css-position-in-the-page)
-  - [1.2 Caching](#12-Caching)
-  - [1.3 Sub Resource Integrity (SRI)](#13-Sub-Resource-Integrity-SRI)
-  - [1.4 Critical CSS Path](#14-Critical-CSS-Path)
-  - [2. Images](#2-Images)
-    - [Responsive images](#Responsive-images)
-  - [3. Javascript Improvements](#3-Javascript-Improvements)
-  - [4. CSS Improvements](#4-CSS-Improvements)
-  - [5. Progressive Web App](#5-Progressive-Web-App)
-    - [Features](#Features)
-    - [5.1. Installable web app](#51-Installable-web-app)
-    - [5.2. Web Share Target Level 2](#52-Web-Share-Target-Level-2)
-    - [5.3. Offline first](#53-Offline-first)
-    - [5.4. Configurable cache](#54-Configurable-cache)
-    - [5.5. Network cache strategies](#55-Network-cache-strategies)
-    - [5.6. Web Push](#56-Web-Push)
-    - [5.7. Service worker router api](#57-Service-worker-router-api)
-    - [5.8. Exclude resources from the service worker management](#58-Exclude-resources-from-the-service-worker-management)
-    - [5.9 Background Sync](#59-Background-Sync)
-  - [6. CDN and Cookieless Domains](#6-CDN-and-Cookieless-Domains)
-  - [7. Misc](#7-Misc)
+- [Joomla Website Optimizer Plugin](#joomla-website-optimizer-plugin)
+  - [1. General improvements](#1-general-improvements)
+    - [Moving script and css position in the page](#moving-script-and-css-position-in-the-page)
+  - [1.2 Caching](#12-caching)
+  - [1.3 Sub Resource Integrity (SRI)](#13-sub-resource-integrity-sri)
+  - [1.4 Critical CSS Path](#14-critical-css-path)
+  - [2. Images](#2-images)
+    - [Responsive images](#responsive-images)
+  - [3. Javascript Improvements](#3-javascript-improvements)
+  - [4. CSS Improvements](#4-css-improvements)
+  - [5. Progressive Web App](#5-progressive-web-app)
+    - [Features](#features)
+    - [5.1. Installable web app](#51-installable-web-app)
+    - [5.2. Web Share Target Level 2](#52-web-share-target-level-2)
+    - [5.3. Offline first](#53-offline-first)
+    - [5.4. Configurable cache](#54-configurable-cache)
+    - [5.5. Network cache strategies](#55-network-cache-strategies)
+    - [5.6. Web Push](#56-web-push)
+    - [5.7. Service worker router api](#57-service-worker-router-api)
+    - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
+    - [5.9 Background Sync](#59-background-sync)
+  - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
+  - [7. Misc](#7-misc)
 
 ## 1. General improvements
 

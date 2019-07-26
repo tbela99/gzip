@@ -39,10 +39,6 @@ self.addEventListener("fetch", (event) => {
 
 				for (response of await SW.routes.resolve('fail', event, response)) {
 
-					console.log({
-						fail: response
-					});
-
 					if (response instanceof Response) {
 
 						return response;
