@@ -889,14 +889,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "32fca33",
+			value: "e3d3421",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-23 19:34:33-04:00",
+			value: "2019-07-25 22:40:36-04:00",
 			enumerable: true
 		},
 		/**
@@ -1662,10 +1662,6 @@
 
 					for (response of await SW.routes.resolve('fail', event, response)) {
 
-						console.log({
-							fail: response
-						});
-
 						if (response instanceof Response) {
 
 							return response;
@@ -1673,17 +1669,13 @@
 					}
 
 					// offline page should be returned from the previous loop
-					return fetch(event.request);
-
 				} catch (error) {
 
 					console.error("😭", error);
-
-					return fetch(event);
 				}
 			}
 
-			return fetch(event.request).catch(() => offline(event))
+			return fetch(event.request);
 		})());
 	});
 
