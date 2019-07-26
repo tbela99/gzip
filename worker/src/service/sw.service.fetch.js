@@ -22,7 +22,7 @@ const undef = null;
 self.addEventListener("fetch", (event) => {
 	event.respondWith((async function () {
 
-		let response, resp;
+		let response;
 
 		const router = SW.routes.getRouter(event);
 
@@ -46,16 +46,12 @@ self.addEventListener("fetch", (event) => {
 				}
 
 				// offline page should be returned from the previous loop
-				return fetch(event.request);
-
 			} catch (error) {
 
 				console.error("😭", error);
-
-				return fetch(event);
 			}
 		}
 
-		return fetch(event.request).catch(() => offline(event))
+		return fetch(event.request);
 	})());
 });

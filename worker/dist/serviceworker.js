@@ -889,14 +889,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "5f5b826",
+			value: "e3d3421",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-25 22:29:45-04:00",
+			value: "2019-07-25 22:44:54-04:00",
 			enumerable: true
 		},
 		/**
@@ -1669,17 +1669,13 @@
 					}
 
 					// offline page should be returned from the previous loop
-					return fetch(event.request);
-
 				} catch (error) {
 
 					console.error("😭", error);
-
-					return fetch(event);
 				}
 			}
 
-			return fetch(event.request).catch(() => offline(event))
+			return fetch(event.request);
 		})());
 	});
 
