@@ -1,5 +1,10 @@
 # Change History
 
+# 2.6.0
+
+- Enforce optimization when [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/) is sent
+- integrate html minification
+
 ## V2.5.4
 
 - add the possibility to provide the html for the offline page as an alternative to providing an url

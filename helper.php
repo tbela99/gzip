@@ -354,41 +354,36 @@ class GZipHelper {
         return $minifier->minify($content);
     }
 
-    public static function parseURLs($body, array $options = []) {
-
-        if (empty($options['cachefiles'])) {
-
-            return $body;
-        }
+    public static function parseURLs($html, array $options = []) {
 
         $accepted = static::accepted();
         $hashFile = static::getHashMethod($options);
 
         $replace = [];
-        $body = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
+        $html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
 
             $hash = '--ht' . crc32($matches[0]) . 'ht--';
             $replace[$hash] = $matches[0];
 
             return $hash;
 
-        }, $body);
+        }, $html);
 
-        $body = preg_replace_callback('#(<script(\s[^>]*)?>)(.*?)</script>#s', function ($matches) use(&$replace) {
+        $html = preg_replace_callback('#(<script(\s[^>]*)?>)(.*?)</script>#s', function ($matches) use(&$replace) {
 
             $hash = '--ht' . crc32($matches[3]) . 'ht--';
             $replace[$hash] = $matches[3];
 
             return $matches[1].$hash.'</script>';
-        }, $body);
+        }, $html);
 
-        $body = preg_replace_callback('#(<style(\s[^>]*)?>)(.*?)</style>#s', function ($matches) use(&$replace) {
+        $html = preg_replace_callback('#(<style(\s[^>]*)?>)(.*?)</style>#s', function ($matches) use(&$replace) {
 
             $hash = '--ht' . crc32($matches[3]) . 'ht--';
             $replace[$hash] = $matches[3];
 
             return $matches[1].$hash.'</style>';
-        }, $body);
+        }, $html);
 
         // TODO: parse url() in styles
         $pushed = [];
@@ -406,7 +401,7 @@ class GZipHelper {
 
         $domains = [];
 
-        $body = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
+        $html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
             $tag = $matches[1];
 	        $attributes = [];
@@ -527,7 +522,7 @@ class GZipHelper {
 
 	        return $result .'>';
 
-        }, $body);
+        }, $html);
 
     //    $profiler->mark('end parse urls');
 
@@ -578,10 +573,10 @@ class GZipHelper {
 
         if (!empty($replace)) {
 
-            return str_replace(array_keys($replace), array_values($replace), $body);
+            return str_replace(array_keys($replace), array_values($replace), $html);
         }
 
-        return $body;
+        return $html;
     }
 
     public static function url($file) {
@@ -790,13 +785,102 @@ class GZipHelper {
 	    }
 
 	    return $file;
-    }
+	}
+	
+	public static function minifyHTML($html) {
 
-    public static function parseCss($body, array $options = []) {
+        $scripts = [];
+        $tags = ['script', 'link', 'style', 'pre'];
+        $html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$scripts, $tags) {
+			
+			$match = $matches[count($tags) + 3];
+            $hash = '--***-' . crc32($match) . '-***--';
+            $scripts[$hash] = $match;
+            return $matches[1] . $hash . '</'.$matches[2].'>';
+            
+        }, $html);
+        
+        $self = [
+            
+            'meta',
+            'link',
+            'br',
+            'base',
+            'input'
+        ];
+        
+        $html = str_replace(\JURI::getInstance()->getScheme().'://', '//', $html);        
+        $html = preg_replace_callback('#<html(\s[^>]+)?>(.*?)</head>#si', function ($matches) {
+            
+            return '<html'.$matches[1].'>'. preg_replace('#>[\r\n\t ]+<#s', '><', $matches[2]).'</head>';
+        }, $html, 1);
+        
+        //remove optional ending tags (see http://www.w3.org/TR/html5/syntax.html#syntax-tag-omission )
+        $remove = [
+			'</rt>', '</caption>', 
+            '</option>', '</li>', '</dt>', '</dd>', '</tr>', '</th>', '</td>', '</thead>', '</tbody>', '</tfoot>', '</colgroup>'
+        ];
+        
+        if(stripos($html, '<!DOCTYPE html>') !== false) {
+            
+            $remove = array_merge($remove, [
+                
+                '<head>',
+                '</head>',
+                '<body>',
+                '</body>',
+                '<html>',
+                '</html>'
+            ]);
+        }
+        
+        $html = str_ireplace($remove, '', $html);
+        // minify html
+        //remove redundant (white-space) characters
+        $replace = [
+            
+        //    '#<!DOCTYPE ([^>]+)>[\n\s]+#si' => '<!DOCTYPE $1>',
+            '#<(('.implode(')|(', $self).'))(\s[^>]*?)?/>#si' => '<$1$'.(count($self) + 2).'>',
+            //remove tabs before and after HTML tags
+            '#<!--.*?-->#s' => '',
+            '/\>[^\S ]+/s' => '>',
+            '/[^\S ]+\</s' => '<',
+            //shorten multiple whitespace sequences; keep new-line characters because they matter in JS!!!
+            '/([\t\r\n ])+/s' => ' ',
+            //remove leading and trailing spaces
+            '/(^([\t ])+)|(([\t ])+$)/m' => '',
+            //remove empty lines (sequence of line-end and white-space characters)
+            '/[\r\n]+([\t ]?[\r\n]+)+/s' => '',
+            //remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
+            '~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~' => '$1$2=$4$5', //$1 and $4 insert first white-space character found before/after attribute
+            // <p > => <p>
+            '#<([^>]+)([^/])\s+>#s' => '<$1$2>'
+        ];
+        $html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
+        $html = preg_replace(array_keys($replace), array_values($replace), $html);
+        
+        /*
+        $html = preg_replace_callback('#(\S)[\r\n\t ]+<(/?)#s', function ($matches) {
+            
+            if($matches[2] == '/') {
+                
+                return $matches[1].'</';
+            }
+            return $matches[1].' <';
+            
+        }, $html);*/
+        if (!empty($scripts)) {
+            $html = str_replace(array_keys($scripts), array_values($scripts), $html);
+        }
+
+		return $html;
+	}
+
+    public static function parseCss($html, array $options = []) {
 
         if (isset($options['cssenabled']) && $options['cssenabled'] == 0) {
 
-            return $body;
+            return $html;
         }
 
         $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
@@ -810,7 +894,7 @@ class GZipHelper {
 		
         $async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
-        $body = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
+        $html = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
 
             $attributes = [];
 
@@ -889,13 +973,10 @@ class GZipHelper {
             }
 
             return $matches[0];
-		}, $body);
+		}, $html);
 		
-	//	if ()
-
         $profiler = \JProfiler::getInstance('Application');
         $profiler->mark('afterParseLinks');
-
         
     //    $profiler->mark("done parse <link>");
         $hashFile = static::getHashMethod($options);
@@ -1042,7 +1123,7 @@ class GZipHelper {
             $minifier = new CSSmin;
         }
 
-        $body = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use(&$links, $minifier) {
+        $html = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use(&$links, $minifier) {
 
             $attributes = [];
 
@@ -1064,7 +1145,7 @@ class GZipHelper {
             $links[$position]['style'][] = empty($minifier) ? $matches[2] : $minifier->minify($matches[2]);
 
             return '';
-		}, $body);
+		}, $html);
 		
 		
 		$profiler->mark('afterParseStyles');
@@ -1087,7 +1168,7 @@ class GZipHelper {
             }
 
             // really needed?
-            preg_match('#<((body)|(html))(\s.*?)? class=(["\'])(.*?)\5>#si', $body, $match);
+            preg_match('#<((body)|(html))(\s.*?)? class=(["\'])(.*?)\5>#si', $html, $match);
 
             if (!empty($match[6])) {
 
@@ -1398,7 +1479,7 @@ class GZipHelper {
 
         if (!empty($search)) {
 
-            $body = str_replace($search, $replace, $body);
+            $html = str_replace($search, $replace, $html);
         }
 
     //    $profiler->mark("done links & styles");
@@ -1408,7 +1489,7 @@ class GZipHelper {
 	
 		if(!empty($options['imagecssresize'])) {
 
-			$body = preg_replace_callback('#<html([>]*)>#', function ($matches) {
+			$html = preg_replace_callback('#<html([>]*)>#', function ($matches) {
 
 			preg_match_all(static::regexAttr, $matches[1], $attr);
 
@@ -1431,10 +1512,10 @@ class GZipHelper {
 
 			return $result .'>';
 
-			}, $body, 1);
+			}, $html, 1);
 		}
 	
-        return $body;
+        return $html;
     }
 
     public static function getName($name) {
@@ -1820,12 +1901,7 @@ class GZipHelper {
         return '';
     }
 
-    public static function parseScripts($body, array $options = []) {
-
-        if (isset($options['jsenabled']) && $options['jsenabled'] == 0) {
-
-            return $body;
-        }
+    public static function parseScripts($html, array $options = []) {
 
         $path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
 
@@ -1833,13 +1909,13 @@ class GZipHelper {
 
     //    $profiler = \JProfiler::getInstance('Application');
 
-        $body = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$comments) {
+        $html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$comments) {
 
             $hash = '--***c-' . crc32($matches[0]) . '-c***--';
             $comments[$hash] = $matches[0];
 
             return $hash;
-        }, $body);
+        }, $html);
 
 
     //    $files = [];
@@ -1864,7 +1940,7 @@ class GZipHelper {
     //    $profiler->mark('parse <script>');
 
         // parse scripts
-        $body = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, $path, $fetch_remote, $ignore, $remove) {
+        $html = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, $path, $fetch_remote, $ignore, $remove) {
 
             $attributes = [];
 
@@ -1899,11 +1975,6 @@ class GZipHelper {
 
                 return $script.'>'.$matches[2].'</script>';
             }
-
-            //else {
-
-            //    $matches[1] = str_replace($match[0], '', $matches[1]);
-           // }
 
            unset($attributes['type']);
 
@@ -1969,7 +2040,7 @@ class GZipHelper {
 
             return '';
 
-        }, $body);
+        }, $html);
 
   //      $profiler->mark('done parse <script>');
 
@@ -2030,10 +2101,6 @@ class GZipHelper {
 
         if (!empty($options['mergejs'])) {
 
-            if (!empty($sources['files'])) {
-
-            }
-
             foreach($sources['files'] as $position => $filesList) {
                 
                 $hash = '';
@@ -2089,17 +2156,17 @@ class GZipHelper {
             if (!empty($sources['inline'])) {
                     
                 foreach($sources['inline'] as $position => $js) {
-                        
-                    foreach($js as $key => $data) {
+
+					$data = implode(';', $js);
+
+                //    foreach($js as $key => $data) {
 
                         if (!empty($data)) {
 
-                            
                             $jSqueeze = new JSqueeze();                  
-                            $sources['inline'][$position][$key] = trim($jSqueeze->squeeze($data), ';');
-                            
+                            $sources['inline'][$position] = [trim($jSqueeze->squeeze($data), ';')];
                         }
-                    }
+                //    }
                 }
             }
         }
@@ -2116,9 +2183,6 @@ class GZipHelper {
 
             foreach ($sources['ignored'] as $position => $fileList) {
 
-            //    $script[$position] .=  implode('', $content);
-
-                
                 $attr = '';
                 $hasScript = !empty($sources['inline'][$position]) && empty($files[$position]);
 
@@ -2212,15 +2276,15 @@ class GZipHelper {
 
         if (!empty($strings)) {
                 
-            $body = str_replace($strings, $replace, $body);
+            $html = str_replace($strings, $replace, $html);
         }
 
         if (!empty($comments)) {
 
-            $body = str_replace(array_keys($comments), array_values($comments), $body);
+            $html = str_replace(array_keys($comments), array_values($comments), $html);
         }
 
-        return $body;
+        return $html;
     }
 
     protected static function parseSVGAttribute($value, $attr, $tag) {
@@ -2431,18 +2495,13 @@ class GZipHelper {
 		return '';
 	}
 
-    public static function parseImages($body, array $options = []) {
-
-        if (empty($options['imageenabled'])) {
-
-            return $body;
-        }
+    public static function parseImages($html, array $options = []) {
 
 		$path = $options['img_path'];
 		$ignored_image = !empty($options['imageignore']) ? $options['imageignore'] : [];
 
         // parse scripts
-        $body = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options, $ignored_image) {
+        $html = preg_replace_callback('#<img([^>]*)>#si', function ($matches) use($path, $options, $ignored_image) {
 
             $attributes = [];
             
@@ -2507,7 +2566,12 @@ class GZipHelper {
                 } 
 
                 if (static::isFile($file)) {
-                
+
+					if (!in_array(strtolower(pathinfo(static::getName($file), PATHINFO_EXTENSION)), ['png', 'gif', 'jpg', 'jpeg'])) {
+
+						return $matches[0];
+					}
+
                     $sizes = \getimagesize($file);
 
 	                $maxwidth = $sizes[0];
@@ -2728,8 +2792,8 @@ class GZipHelper {
             }
 
             return $matches[0];
-        }, $body);
+        }, $html);
 
-        return $body;
+        return $html;
     }
 }

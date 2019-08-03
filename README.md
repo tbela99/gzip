@@ -1,6 +1,7 @@
+
 # Joomla Website Optimizer Plugin
 
-![Current version](https://img.shields.io/badge/dynamic/json?color=green&label=current%20version&query=version&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fpackage.json) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![Download from JED](https://img.shields.io/badge/Download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
 Do you want to improve your website by
 
@@ -43,7 +44,8 @@ There are additional plugins that help optimizing and profiling your page or ser
 
 ## 1. General improvements
 
-- advanced page optimizations which drastically improve the page performance score over various tools.
+- HTML minification
+- advanced optimizations which drastically improve the page performance score over various tools.
 - turn the website into an installable Progressive Web Application
 - Sub-resources integrity check: computed for javascript and css files (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
 - Push resources (require http 2 protocol). you can configure which resources will be pushed

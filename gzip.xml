@@ -38,6 +38,10 @@
         <fields name="params">
             <fieldset name="basic">
                 <fields name="gzip">
+                    <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -229,7 +233,7 @@
                     <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
                 </fields>
             </fieldset>
-            <fieldset name="pwa_app" label="App">
+            <fieldset name="pwa_app" label="Service Worker">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">

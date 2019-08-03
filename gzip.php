@@ -164,10 +164,10 @@ class PlgSystemGzip extends JPlugin
 
 				if (!empty($this->options['imagesvgplaceholder'])) {
 
-					$debug = empty($this->options['debug']) ? '.min' : '';
+					$debug = empty($this->options['debug']) || !empty($options['minifyjs']) ? '.min' : '';
 
 					$document->addCustomTag('<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>');
-					$document->addCustomTag('<script data-position="head" data-ignore="true">'.file_get_contents(__DIR__.'/imagesnojs'.($debug || !empty($this->options['minifyjs']) ? '.min' : '').'.js').'</script>');
+					$document->addCustomTag('<script data-position="head" data-ignore="true">'.file_get_contents(__DIR__.'/imagesnojs'.$debug.'.js').'</script>');
 
 					$document->addScript('plugins/system/gzip/js/dist/lib'.$debug.'.js');
 					$document->addScript('plugins/system/gzip/js/dist/lib.images'.$debug.'.js');
@@ -683,19 +683,36 @@ class PlgSystemGzip extends JPlugin
 
         GZipHelper::$options = $options;
 
-		$body = GZipHelper::parseImages($body, $options);
+        if (!empty($options['imageenabled'])) {
 
-        $profiler->mark('afterParseImages');
-        $body = GZipHelper::parseCss($body, $options);
-
-        $profiler->mark('afterParseCss');
-		$body = GZipHelper::parseScripts($body, $options);
+			$body = GZipHelper::parseImages($body, $options);
+			$profiler->mark('afterParseImages');
+		}
 		
-        
-        $profiler->mark('afterParseScripts');
-        $body = GZipHelper::parseURLs($body, $options);
+        if (!empty($options['cssenabled'])) {
 
-        $profiler->mark('afterParseURLs');
+			$body = GZipHelper::parseCss($body, $options);
+			$profiler->mark('afterParseCss');
+		}
+		
+        if (!empty($options['jsenabled'])) {
+
+			$body = GZipHelper::parseScripts($body, $options);
+			$profiler->mark('afterParseScripts');
+		}
+		
+        if (!empty($options['cachefiles'])) {
+
+			$body = GZipHelper::parseURLs($body, $options);
+			$profiler->mark('afterParseURLs');
+		}
+		
+		if (!empty($options['minifyhtml'])) {
+				
+			$body = GZipHelper::minifyHTML($body, $options);
+			$profiler->mark('afterMinifyHTML');
+		}
+
 		$app->setBody($body);
     }
 
