@@ -675,7 +675,33 @@ class PlgSystemGzip extends JPlugin
             }
 
             $options[$key.'_path'] = $prefix.$path;
-        }
+		}
+		
+		// Save-Data header enforce some settings
+		if (isset($_SERVER["HTTP_SAVE_DATA"]) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
+			
+			// optimize images
+			$options['imageenabled'] = true;
+			$options['imageconvert'] = true;
+			$options['imagedimensions'] = true;
+
+			// optimize css
+			$options['asynccss'] = true;
+			$options['minifycss'] = true;
+			$options['fetchcss'] = true;
+			$options['cssenabled'] = true;
+			$options['mergecss'] = true;
+			$options['imagecssresize'] = true;
+			$options['criticalcssenabled'] = true;
+
+			// optimize javascript
+			$options['jsenabled'] = true;
+			$options['fetchjs'] = true;
+			$options['minifyjs'] = true;
+			$options['mergejs'] = true;
+
+			// enable service worker? no?
+		}
 
         $body = $app->getBody();
 
