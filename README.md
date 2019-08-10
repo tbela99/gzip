@@ -1,6 +1,6 @@
 # Joomla Website Optimizer Plugin
 
-![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fv.next%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
 Do you want to improve your website by
 
