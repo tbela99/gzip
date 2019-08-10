@@ -731,16 +731,21 @@ class PlgSystemGzip extends JPlugin
 			$body = GZipHelper::parseScripts($body, $options);
 			$profiler->mark('afterParseScripts');
 		}
-		
-        if (!empty($options['cspenabled'])) {
 
-			foreach(GZipHelper::parseCSP($body, $options) as $key => $rule) {
+		foreach(GZipHelper::parseSecureHeaders($body, $options) as $key => $rule) {
 
-			//	header('Content-Security-Policy: '.$key.' '.$rule);
+			if (is_array($rule)) {
+
+				$app->setHeader($key, $rule[0], $rule[1]);
 			}
 
-			$profiler->mark('afterParseCSP');
+			else {
+
+				$app->setHeader($key, $rule);
+			}
 		}
+
+		$profiler->mark('afterParseSecureHeaders');
 		
         if (!empty($options['cachefiles'])) {
 
@@ -754,39 +759,6 @@ class PlgSystemGzip extends JPlugin
 			$profiler->mark('afterMinifyHTML');
 		}
 
-		if (!empty($options['frameoptions'])) {
-
-			switch($options['frameoptions']) {
-
-				case 'allow-from':
-
-					if (!empty($options['frameoptions_uri'])) {
-
-						header('X-Frame-Options: '.$options['frameoptions'].' '.$options['frameoptions_uri'], true);
-					}
-
-					break;
-				default:
-
-					header('X-Frame-Options: '.$options['frameoptions'], true);
-					break;
-			}
-		}
-
-        if (!empty($options['servertiming'])) {
-				
-			$data = $this->getTimingData();
-			$header = [];
-			
-			foreach ($data['marks'] as $k => $mark) {
-
-				$header[] = substr('00'.($k + 1), -3).'-'.preg_replace('#[^A-Za-z0-9]#', '', $mark->tip).';dur='.$mark->time; //.';memory='.$mark->memory;
-			}
-
-			$header[] = 'total;dur='.$data['totalTime']; //.';memory='.$data['totalMemory'];
-			header('Server-Timing: '.implode(',', $header));    
-        }
-
 		$app->setBody($body);
     }
 
@@ -798,35 +770,6 @@ class PlgSystemGzip extends JPlugin
 		}
 	}
 	
-	/**
-	 * Display profile information.
-	 *
-	 * @return  string
-	 *
-	 * @since   2.5
-	 */
-	protected function getTimingData()
-	{
-		$totalTime = 0;
-	//	$totalMem  = 0;
-		$marks     = array();
-		foreach (JProfiler::getInstance('Application')->getMarks() as $mark)
-		{
-			$totalTime += $mark->time;
-		//	$totalMem  += (float) $mark->memory;
-			$marks[] = (object) array(
-				'time'   => $mark->time,
-			//	'memory' => $mark->memory,
-				'tip'    => $mark->label
-			);
-		}
-        return [
-		'totalTime' => $totalTime, 
-		//'totalMemory' => $totalMem, 
-		'marks' => $marks
-		];
-    }
-
 	protected function buildManifest($options) {
 
 		$config = JFactory::getConfig();

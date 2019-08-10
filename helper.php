@@ -19,14 +19,15 @@ use function array_unshift;
 use function base64_encode;
 use function file_get_contents;
 use function getimagesize;
+use function str_replace;
+use function strtolower;
+use \JProfiler as JProfiler;
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
 use Sabberworm\CSS\Rule\Rule;
 use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
-use function str_replace;
-use function strtolower;
 
 define('WEBP', function_exists('imagewebp') && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
@@ -1195,12 +1196,12 @@ class GZipHelper {
                             continue;
                         }
 
-                        $hash = crc32($hashFile($fname) . '.' . $regexp . '.' . $fname);
-
                         $info = pathinfo($fname);
 
-                        $name = $info['dirname'] . '/' . $info['filename'] . '-crit';
-                        $bgname = $info['dirname'] . '/' . $info['filename'] . '-bg';
+                        $hash = base_convert (crc32($info['filename'] . '.' . $regexp . '.' . $fname), 10, 36);
+
+                        $name = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-crit';
+                        $bgname = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-bg';
 
                         $css_file = $name . '.css';
                         $css_hash = $name . '.php';
@@ -2800,39 +2801,140 @@ class GZipHelper {
         return $html;
 	}
 
-	public static function parseCSP($html, $options) {
+	public static function parseSecureHeaders($html, $options) {
 
-		$csp = [];
+		$headers = [];
 
-		if (preg_match_all('#<((script)|(link)|(i?frame)|(object))\s([^>]+)>#is', $html, $matches)) {
+		if (!empty($options['cspenabled'])) {
+		
+			if (preg_match_all('#<((script)|(link)|(i?frame)|(object))\s([^>]+)>#is', $html, $matches)) {
 
-			// script frame iframe style style-attr script-attr inline-script
-			foreach ($matches[1] as $key => $tag) {
+				// script frame iframe style style-attr script-attr inline-script
+				foreach ($matches[1] as $key => $tag) {
 
-				switch (\strtolower($tag)) {
+					switch (\strtolower($tag)) {
 
-					case 'script':
+						case 'script':
 
-					//	if ()
+						//	if ()
 
-						break;
-					case 'style':
+							break;
+						case 'style':
 
-						break;
-					case 'link':
+							break;
+						case 'link':
 
-						break;
-					case 'frame':
-					case 'iframe':
+							break;
+						case 'frame':
+						case 'iframe':
 
-						break;
-					case 'object':
+							break;
+						case 'object':
 
-						break;
+							break;
+					}
 				}
 			}
 		}
 
-		return $csp;
+		if (!empty($options['frameoptions'])) {
+
+			switch($options['frameoptions']) {
+
+				case 'allow-from':
+
+					if (!empty($options['frameoptions_uri'])) {
+
+						$headers['X-Frame-Options'] = [$options['frameoptions'].' '.$options['frameoptions_uri'], true];
+					}
+
+					break;
+				default:
+
+					$headers['X-Frame-Options'] = [$options['frameoptions'], true];
+					break;
+			}
+		}
+
+		if (!empty($options['xcontenttype'])) {
+
+			$headers['X-Content-Type-Options'] = [$options['xcontenttype'], true];
+		}
+
+		if (isset($options['xssprotection'])) {
+
+			switch($options['xssprotection']) {
+
+				case '0':
+				case '1':
+
+					$headers['X-XSS-Protection'] = [$options['xssprotection'].' '.$options['xss_uri'], true];
+					break;
+					
+				case 'block':
+
+					$headers['X-XSS-Protection'] = ['1; mode=block', true];
+					break;
+					
+				case 'report':
+
+					if (!empty($options['xss_uri'])) {
+
+						$headers['X-XSS-Protection'] = ['1; report='.$options['xss_uri'], true];
+					}
+
+					break;
+				default:
+
+					$headers['X-XSS-Protection'] = [$options['xssprotection'], true];
+					break;
+			}
+		}
+
+		if (!empty($options['servertiming'])) {
+				
+			$data = static::getTimingData();
+			$header = [];
+			
+			foreach ($data['marks'] as $k => $mark) {
+
+				$header[] = substr('00'.($k + 1), -3).'-'.preg_replace('#[^A-Za-z0-9]#', '', $mark->tip).';dur='.$mark->time; //.';memory='.$mark->memory;
+			}
+
+			$header[] = 'total;dur='.$data['totalTime']; //.';memory='.$data['totalMemory'];
+			$headers['Server-Timing'] = implode(',', $header);
+		}
+
+		return $headers;
 	}
+	
+	/**
+	 * Display profile information.
+	 *
+	 * @return  string
+	 *
+	 * @since   2.5
+	 */
+	protected static function getTimingData()
+	{
+		$totalTime = 0;
+	//	$totalMem  = 0;
+		$marks     = array();
+		foreach (JProfiler::getInstance('Application')->getMarks() as $mark)
+		{
+			$totalTime += $mark->time;
+		//	$totalMem  += (float) $mark->memory;
+			$marks[] = (object) array(
+				'time'   => $mark->time,
+			//	'memory' => $mark->memory,
+				'tip'    => $mark->label
+			);
+		}
+        return [
+		'totalTime' => $totalTime, 
+		//'totalMemory' => $totalMem, 
+		'marks' => $marks
+		];
+    }
+
 }
