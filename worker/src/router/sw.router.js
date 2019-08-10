@@ -20,8 +20,11 @@ import {
 import {
 	Utils
 } from "../utils/sw.utils.js";
+import {
+	undef
+} from '../serviceworker.js';
 
-const undef = null;
+//const undef = null;
 const CRY = "😭";
 
 /**

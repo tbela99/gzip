@@ -11,8 +11,9 @@
  * @license     LGPL v3
  * @license     MIT License
  */
-!function(LIB, undef) {
+(function(LIB) {
     "use strict";
+    const undef = null;
     const merge = LIB.Utils.merge;
     /**
    * legacy srcset support
@@ -114,7 +115,7 @@
      * @param string selector
      * @param object options
      */
-        lazy: function(selector, options) {
+        lazy(selector, options) {
             const images = [].slice.apply((options && options.container || document).querySelectorAll(selector));
             const observer = merge(true, Object.create(null), LIB.Event);
             const io = new IntersectionObserver(function(entries) {
@@ -144,4 +145,4 @@
             return observer;
         }
     });
-}(LIB);
+})(LIB);

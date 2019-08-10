@@ -282,7 +282,7 @@ class PlgSystemGzip extends JPlugin
 
 	    if(!empty($options)) {
 
-		    $this->options = (array) $options;
+		    $this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
 	    }
 
 	    if (!is_file($file)) {
@@ -320,7 +320,7 @@ class PlgSystemGzip extends JPlugin
 
             if (!empty($this->options['cdn'])) {
 
-				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
+				$this->options['cdn'] = array_filter(array_values($this->options['cdn']));
 			}
 
 			else
@@ -330,7 +330,7 @@ class PlgSystemGzip extends JPlugin
 
 			if (is_object($this->options['cdn'])) {
 
-				$this->options['cdn'] = array_filter(array_values(get_object_vars($this->options['cdn'])));
+				$this->options['cdn'] = array_filter(array_values($this->options['cdn']));
 			}
 
 			if (empty($this->options['cdn'])) {
@@ -676,9 +676,9 @@ class PlgSystemGzip extends JPlugin
 
             $options[$key.'_path'] = $prefix.$path;
 		}
-		
+
 		// Save-Data header enforce some settings
-		if (isset($_SERVER["HTTP_SAVE_DATA"]) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
+		if (isset($_SERVER["HTTP_SAVE_DATA"]) && $this->params->get('gzip.savedata', true) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
 			
 			// optimize images
 			$options['imageenabled'] = true;
@@ -700,6 +700,9 @@ class PlgSystemGzip extends JPlugin
 			$options['minifyjs'] = true;
 			$options['mergejs'] = true;
 
+			// minify html
+			$options['minifyhtml'] = true;
+
 			// enable service worker? no?
 		}
 
@@ -708,6 +711,8 @@ class PlgSystemGzip extends JPlugin
         $profiler = JProfiler::getInstance('Application');
 
         GZipHelper::$options = $options;
+
+		$profiler->mark('afterRenderStart');
 
         if (!empty($options['imageenabled'])) {
 
@@ -727,6 +732,16 @@ class PlgSystemGzip extends JPlugin
 			$profiler->mark('afterParseScripts');
 		}
 		
+        if (!empty($options['cspenabled'])) {
+
+			foreach(GZipHelper::parseCSP($body, $options) as $key => $rule) {
+
+			//	header('Content-Security-Policy: '.$key.' '.$rule);
+			}
+
+			$profiler->mark('afterParseCSP');
+		}
+		
         if (!empty($options['cachefiles'])) {
 
 			$body = GZipHelper::parseURLs($body, $options);
@@ -739,6 +754,39 @@ class PlgSystemGzip extends JPlugin
 			$profiler->mark('afterMinifyHTML');
 		}
 
+		if (!empty($options['frameoptions'])) {
+
+			switch($options['frameoptions']) {
+
+				case 'allow-from':
+
+					if (!empty($options['frameoptions_uri'])) {
+
+						header('X-Frame-Options: '.$options['frameoptions'].' '.$options['frameoptions_uri'], true);
+					}
+
+					break;
+				default:
+
+					header('X-Frame-Options: '.$options['frameoptions'], true);
+					break;
+			}
+		}
+
+        if (!empty($options['servertiming'])) {
+				
+			$data = $this->getTimingData();
+			$header = [];
+			
+			foreach ($data['marks'] as $k => $mark) {
+
+				$header[] = substr('00'.($k + 1), -3).'-'.preg_replace('#[^A-Za-z0-9]#', '', $mark->tip).';dur='.$mark->time; //.';memory='.$mark->memory;
+			}
+
+			$header[] = 'total;dur='.$data['totalTime']; //.';memory='.$data['totalMemory'];
+			header('Server-Timing: '.implode(',', $header));    
+        }
+
 		$app->setBody($body);
     }
 
@@ -749,10 +797,41 @@ class PlgSystemGzip extends JPlugin
 			$this->cleanCache();
 		}
 	}
+	
+	/**
+	 * Display profile information.
+	 *
+	 * @return  string
+	 *
+	 * @since   2.5
+	 */
+	protected function getTimingData()
+	{
+		$totalTime = 0;
+	//	$totalMem  = 0;
+		$marks     = array();
+		foreach (JProfiler::getInstance('Application')->getMarks() as $mark)
+		{
+			$totalTime += $mark->time;
+		//	$totalMem  += (float) $mark->memory;
+			$marks[] = (object) array(
+				'time'   => $mark->time,
+			//	'memory' => $mark->memory,
+				'tip'    => $mark->label
+			);
+		}
+        return [
+		'totalTime' => $totalTime, 
+		//'totalMemory' => $totalMem, 
+		'marks' => $marks
+		];
+    }
 
 	protected function buildManifest($options) {
 
 		$config = JFactory::getConfig();
+
+		$options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
 
 		$short_name = $options['pwa_app_short_name'] === '' ? $_SERVER['SERVER_NAME'] : $options['pwa_app_short_name'];
 		$name = $options['pwa_app_name'] === '' ? $config->get('sitename') : $options['pwa_app_name'];
@@ -780,11 +859,6 @@ class PlgSystemGzip extends JPlugin
 				'method' => $options['pwa_share_target_method'],
 				'enctype' => $options['pwa_share_target_enctype']
 			];
-
-			if (is_object($options['pwa_share_target_params'])) {
-
-				$options['pwa_share_target_params'] = get_object_vars($options['pwa_share_target_params']);
-			}
 
 			if (!empty($options['title_supported'])) {
 
@@ -909,7 +983,7 @@ class PlgSystemGzip extends JPlugin
 
 		if (is_object($options)) {
 
-			$options = get_object_vars($options);
+			$options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
 		}
 
 	    if (empty($options['pwaenabled'])) {
@@ -961,19 +1035,9 @@ class PlgSystemGzip extends JPlugin
 		// additional routing startegies
 		$strategies = [];
 
-		if (is_object($options['pwa_network_strategies'])) {
-
-			$options['pwa_network_strategies'] = get_object_vars($options['pwa_network_strategies']);
-		}
-
 		if (!isset($options['pwa_cache'])) {
 
 			$options['pwa_cache'] = [];
-		}
-
-		if (is_object($options['pwa_cache'])) {
-
-			$options['pwa_cache'] = get_object_vars($options['pwa_cache']);
 		}
 
 		$maxFileSize = +preg_replace_callback('#(\d+)(.*+)#', function ($matches) {
@@ -1089,7 +1153,7 @@ class PlgSystemGzip extends JPlugin
 
 		if (!empty($options['cnd_enabled'])) {
 
-			foreach ((is_object($options['cdn']) ? get_object_vars($options['cdn']) : $options['cdn']) as $option) {
+			foreach ($options['cdn'] as $option) {
 
 				$hosts[] = preg_replace('#^([a-zA-z]+:)?//#', '', $option);
 			}

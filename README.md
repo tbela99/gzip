@@ -1,4 +1,3 @@
-
 # Joomla Website Optimizer Plugin
 
 ![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
@@ -45,6 +44,7 @@ There are additional plugins that help optimizing and profiling your page or ser
 ## 1. General improvements
 
 - HTML minification
+- support of Save-Data header, this means some optimizations will be turned on when this header is provided.
 - advanced optimizations which drastically improve the page performance score over various tools.
 - turn the website into an installable Progressive Web Application
 - Sub-resources integrity check: computed for javascript and css files (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
@@ -209,3 +209,5 @@ With this API you can automatically replay some or all the requests that fail. Y
 - Preview the changes to the manifest before you save them
 - Joomla administrator is excluded from the service worker cached resources
 - You can secure your Joomla administrator access by defining a secret access token.
+
+more details are available in the [change log](./CHANGELOG.md)

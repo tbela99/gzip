@@ -114,7 +114,7 @@ import {
 	CacheExpiration
 } from "./expiration/sw.expiration.js";
 import {
-	Router,
+	//	Router,
 	ExpressRouter,
 	RegExpRouter
 } from "./router/sw.router.js";
@@ -122,10 +122,11 @@ import {
 	strategies
 } from "./network/index.js";
 import {
-	SW
+	SW,
+	undef
 } from "./serviceworker.js";
 
-const undef = null;
+//const undef = null;
 const route = SW.routes;
 const scope = SW.app.scope;
 const networkSettings = SW.app.network;

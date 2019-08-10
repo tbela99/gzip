@@ -13,7 +13,8 @@ import {
 	DB
 } from "../db/db.js";
 import {
-	SW
+	SW,
+	undef
 } from "../serviceworker.js";
 import {
 	hashCode,
@@ -27,14 +28,14 @@ import {
 	capitalize,
 	ellipsis
 } from "../utils/sw.string.js";
-import {
-	expo
-} from "../utils/sw.backoff.js";
+//import {
+//	expo
+//} from "../utils/sw.backoff.js";
 
 // @ts-check
 //SW.expiration = (function() {
 const CRY = "😭";
-const undef = null;
+//const undef = null;
 let cache;
 
 caches.open(SW.app.cacheName).then(c => cache = c);

@@ -11,9 +11,10 @@
  * @license     MIT License
  */
 
-!(function(LIB, undef) {
+(function (LIB) {
   "use strict";
 
+  const undef = null;
   const merge = LIB.Utils.merge;
 
   /**
@@ -28,7 +29,7 @@
       .getAttribute("sizes")
       .replace(/\)\s[^,$]+/g, ")")
       .split(",");
-    const images = image.dataset.srcset.split(",").map(function(src) {
+    const images = image.dataset.srcset.split(",").map(function (src) {
       return src.split(" ")[0];
     });
 
@@ -94,8 +95,7 @@
   function load(oldImage, observer) {
     const img = new Image();
 
-    img.src =
-      oldImage.dataset.src != undef ? oldImage.dataset.src : oldImage.src;
+    img.src = oldImage.dataset.src != undef ? oldImage.dataset.src : oldImage.src;
 
     if (oldImage.dataset.srcset != undef && window.matchMedia) {
       if (!("srcset" in img)) {
@@ -109,7 +109,7 @@
 
           img.addEventListener(
             "load",
-            function() {
+            function () {
               window.removeEventListener("resize", update, false);
               rspimages(oldImage);
             },
@@ -119,8 +119,7 @@
       } else {
         if (oldImage.dataset.srcset != undef) {
           img.srcset = oldImage.dataset.srcset;
-        } else {
-        }
+        } else {}
       }
     }
 
@@ -129,21 +128,21 @@
     if (img.decode != undef) {
       img
         .decode()
-        .then(function() {
+        .then(function () {
           observer.trigger("load", img, oldImage);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           observer.trigger("error", error, img, oldImage);
         });
     } else {
-      img.onerror = function(error) {
+      img.onerror = function (error) {
         observer.trigger("error", error, img, oldImage);
       };
 
       if (img.height > 0 && img.width > 0) {
         observer.trigger("load", img, oldImage);
       } else {
-        img.onload = function() {
+        img.onload = function () {
           observer.trigger("load", img, oldImage);
         };
       }
@@ -160,12 +159,12 @@
      * @param string selector
      * @param object options
      */
-    lazy: function(selector, options) {
+    lazy(selector, options) {
       const images = [].slice.apply(
         ((options && options.container) || document).querySelectorAll(selector)
       );
       const observer = merge(true, Object.create(null), LIB.Event);
-      const io = new IntersectionObserver(function(entries) {
+      const io = new IntersectionObserver(function (entries) {
         let i = entries.length,
           index,
           entry;

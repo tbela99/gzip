@@ -11,10 +11,11 @@
 // @ts-check
 
 import {
-	SW
+	SW,
+	undef
 } from "../serviceworker.js";
 
-const undef = null;
+//const undef = null;
 /**
  * @param {FetchEvent} event
  */

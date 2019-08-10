@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.5.4</version>
+    <version>2.6.0dev</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>
@@ -38,11 +38,11 @@
         <fields name="params">
             <fieldset name="basic">
                 <fields name="gzip">
-                    <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -52,6 +52,15 @@
                 <field type="spacer" label="Configure HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="savedata" label="PLG_GZIP_FIELD_SAVE_DATA_LABEL" description="PLG_GZIP_FIELD_SAVE_DATA_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="servertiming" label="PLG_GZIP_FIELD_SERVER_TIMING_LABEL" description="PLG_GZIP_FIELD_SERVER_TIMING_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Push" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
@@ -229,8 +238,8 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
-                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
+                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_CLASS_HINT" type="textarea" rows="5" cols="15" default="" />
+                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_HINT" type="textarea" rows="5" cols="15" default="" />
                 </fields>
             </fieldset>
             <fieldset name="pwa_app" label="Service Worker">
@@ -493,9 +502,16 @@
                 </fields>
             </fieldset>
             <fieldset name="security" label="Security">
-                <field type="spacer" label="Configure Security" />
-                <field type="spacer" hr="true" />
+                <field type="spacer" label="Security Features" />
                 <fields name="gzip">
+                    <field name="frameoptions" label="PLG_GZIP_FIELD_FRAME_OPTIONS_LABEL" description="PLG_GZIP_FIELD_FRAME_OPTIONS_DESCRIPTION" type="list" default="">
+                        <option value="">JNone</option>
+                        <option value="deny">JOPTION_FRAME_OPTIONS_DENY</option>
+                        <option value="sameorigin">JOPTION_FRAME_OPTIONS_SAMEORIGIN</option>
+                        <option value="allow-from">JOPTION_FRAME_OPTIONS_ALLOW_FROM</option>
+                    </field>
+                    <field name="frameoptions_uri" label="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_LABEL" description="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_HINT" type="url" default="" />
+                    <field type="spacer" hr="true" />
                     <field type="spacer" label="Sub Resource Integrity" />
                     <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
                         <option value="none">JNone</option>
@@ -507,6 +523,51 @@
                     <field type="spacer" label="Misc" />
                     <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default="" />
                     <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default="" />
+                </fields>
+            </fieldset>
+            <fieldset name="csp" label="CSP">
+                <field type="spacer" label="Content Security Policy" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="cspenabled" label="PLG_GZIP_FIELD_CSP_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <fields name="csp">
+
+                        <field type="spacer" label="Scripts" />
+                        <field name="scripts" label="PLG_GZIP_FIELD_CSP_SCRIPTS_LABEL" description="PLG_GZIP_FIELD_CSP_SCRIPTS_DESCRIPTION" type="csp" default="dynamic">
+                            <option value="ignore">JOPTION_CSP_SCRIPTS_IGNORE</option>
+                            <option value="none">JOPTION_CSP_SCRIPTS_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_SCRIPTS_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_SCRIPTS_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_SCRIPTS_MIXED</option>
+                        </field>
+                        <field name="workers" label="PLG_GZIP_FIELD_CSP_WORKERS_LABEL" description="PLG_GZIP_FIELD_CSP_WORKERS_DESCRIPTION" type="csp" default="dynamic">
+                            <option value="ignore">JOPTION_CSP_SCRIPTS_IGNORE</option>
+                            <option value="none">JOPTION_CSP_SCRIPTS_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_SCRIPTS_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_SCRIPTS_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_SCRIPTS_MIXED</option>
+                        </field>
+                        <field name="inlinescript" label="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="1">
+                            <option value="1">JYes</option>
+                            <option value="0">JNone</option>
+                        </field>
+                        <field name="eval" label="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="1">
+                            <option value="1">JYes</option>
+                            <option value="0">JNone</option>
+                        </field>
+                        <field name="disposition-script" label="PLG_GZIP_FIELD_CSP_DISPOSITION_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_DISPOSITON_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="report">
+                            <option value="report">JYes</option>
+                            <option value="enforce">JNone</option>
+                        </field>
+                        <field name="report-sample-script" label="PLG_GZIP_FIELD_CSP_REPORT_SAMPLE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_SAMPLE_DESCRIPTION" type="radio" class="btn-group" default="1">
+                            <option value="1">JYes</option>
+                            <option value="0">JNone</option>
+                        </field>
+                    </fields>
                 </fields>
             </fieldset>
         </fields>

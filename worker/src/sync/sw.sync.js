@@ -19,9 +19,12 @@ import {
 import {
     isCacheableRequest
 } from "../network/sw.iscacheable.js"
+import {
+    undef
+} from '../serviceworker.js';
 
 const cacheName = "{CACHE_NAME}";
-let undef = null;
+//let undef = null;
 
 const serializableProperties = [
     'method',

@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 defined('JPATH_PLATFORM') or die;
 
 /**
  * max age in minutes / hours / months. Negative maxage means ignore the setting. 0 means use default
- * 
+ *
  * @package     GZip Plugin
  * @subpackage  System.Gzip *
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
@@ -66,7 +66,7 @@ class JFormFieldMaxAge extends JFormField
 		$class = trim($this->element['class']);
 
 		if ($class !== '') {
-			
+
 			$class = ' class="'.$class.'"';
 		}
 
@@ -89,8 +89,8 @@ class JFormFieldMaxAge extends JFormField
 
 			$options[] = $option;
 		}
-		
-		$html .= '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
+
+		$html .= '<select id="'.$this->id.'_0"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.options[this.selectedIndex].value+n.options[n.selectedIndex].value">';
 
 		foreach ($options as $option) {
 
@@ -109,8 +109,6 @@ class JFormFieldMaxAge extends JFormField
 			$matches[2] = 'months';
 		}
 
-	//	var_dump($matches);
-
 		for ($i = $first; $i <= $last; $i += $step) {
 
 			$html .= '<option value="'.($i == 0 ? '' : $i).'"'.($matches[1] == $i ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_'.$i).'</option>';
@@ -125,7 +123,7 @@ class JFormFieldMaxAge extends JFormField
 		<option value="months"'.($matches[2] == 'months' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_MONTHS').'</option></select>';
 
 		$html .= '<input type="hidden" value="'.htmlspecialchars($this->value).'" id="'.htmlspecialchars($this->id).'" name="'.$this->name.'"'.$attributes.'>';
- 
-        return $html;
+
+		return $html;
 	}
 }

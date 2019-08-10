@@ -33,7 +33,7 @@ import {
 	Route
 } from "./router/sw.router.js";
 
-const undef = null; //
+export const undef = null; //
 
 /**
  * service worker configuration issue

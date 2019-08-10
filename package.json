@@ -1,6 +1,6 @@
 {
   "name": "gzip",
-  "version": "2.5.4",
+  "version": "2.6.0dev",
   "scripts": {
     "build": "sh ./build.sh",
     "docs": "jsdoc -c jsdoc.json",

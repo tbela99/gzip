@@ -44,7 +44,7 @@ class GZipHelper {
     static $uri = '';
 
     // JURI::root();
-    static $url = '';
+	static $url = '';
 
     static $options = [];
 
@@ -878,11 +878,6 @@ class GZipHelper {
 
     public static function parseCss($html, array $options = []) {
 
-        if (isset($options['cssenabled']) && $options['cssenabled'] == 0) {
-
-            return $html;
-        }
-
         $path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.static::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
         $fetch_remote = !empty($options['fetchcss']);
@@ -1146,7 +1141,7 @@ class GZipHelper {
 
             return '';
 		}, $html);
-		
+	
 		
 		$profiler->mark('afterParseStyles');
 		
@@ -1160,26 +1155,29 @@ class GZipHelper {
             $critical_path = isset($options['criticalcssclass']) ? $options['criticalcssclass'] : '';
             $background_css_path = '';
 
-            $styles = ['html', 'body'];
+			$styles = ['html', 'body'];
+			
+			if ($parseCritical) {
+					
+				if (!empty($options['criticalcss'])) {
 
-            if (!empty($options['criticalcss'])) {
+					$styles = array_filter(array_map('trim', array_merge($styles, preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY))));
+					
+					// really needed?
+					preg_match('#<((body)|(html))(\s[^>]*?)? class=(["\'])([^>]*?)\5>#si', $html, $match);
 
-                $styles = array_filter(array_map('trim', array_merge($styles, preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY))));
-            }
+					if (!empty($match[6])) {
 
-            // really needed?
-            preg_match('#<((body)|(html))(\s.*?)? class=(["\'])(.*?)\5>#si', $html, $match);
+						$styles = array_unique(array_merge($styles, explode(' ', $match[6])));
+					}
+				}
+				
+				foreach ($styles as &$style) {
 
-            if (!empty($match[6])) {
-
-                $styles = array_unique(array_merge($styles, explode(' ', $match[6])));
-            }
-
-            foreach ($styles as &$style) {
-
-                $style = preg_quote(preg_replace('#\s+([>+\[:,{])\s+#s', '$1', $style), '#');
-                unset($style);
-            }
+					$style = preg_quote(preg_replace('#\s+([>+\[:,{])\s+#s', '$1', $style), '#');
+					unset($style);
+				}
+			}
 
             # '#((html)|(body))#si'
             $regexp = '#(^|[>\s,~+},])((' . implode(')|(', $styles) . '))([\s:,~+\[{>,]|$)#si';
@@ -1188,7 +1186,7 @@ class GZipHelper {
 
                 if (!empty($blob['links'])) {
 
-                    foreach ($blob['links'] as $link) {
+                    foreach ($blob['links'] as $k => $link) {
 
                         $fname = static::getName($link['href']);
 
@@ -1213,7 +1211,7 @@ class GZipHelper {
 						$content = null;
 						
 						if ($parseCssResize) {
-								
+
 							if (!is_file($css_bg_file) || file_get_contents($css_bg_hash) != $hash) {
 
 								$content = file_get_contents($fname);
@@ -1240,14 +1238,16 @@ class GZipHelper {
 							//	$css_background = static::expandCss($css_background, dirname($css_bg_file));
                             	$background_css_path .= $css_background;
 
-								\file_put_contents($css_bg_file, $css_background);
-								\file_put_contents($css_bg_hash, $hash);
+								file_put_contents($css_bg_file, $css_background);
+								file_put_contents($css_bg_hash, $hash);
 							}
 
 							else {
 
-								$background_css_path .= \file_get_contents($css_bg_file);
+								$background_css_path .= file_get_contents($css_bg_file);
 							}
+
+							$profiler->mark('afterParseCssBGResize'.$k);
 						}
 
 						if ($parseCritical) {
@@ -1301,6 +1301,8 @@ class GZipHelper {
 						}
                     }
                 }
+
+				$profiler->mark('afterParseCssBGResize');
             }
 
             if ($background_css_path !== '') {
@@ -1313,6 +1315,7 @@ class GZipHelper {
                 if (!is_file($background_css_file) || file_get_contents($background_css_hash) != $hash) {
 
                     \file_put_contents($background_css_file, static::buildCssBackground($background_css_path, $options));
+                    \file_put_contents($background_css_hash, $hash);
                 }
 
                 $background_css_path = \file_get_contents($background_css_file);
@@ -2175,8 +2178,8 @@ class GZipHelper {
     
             'head' => '',
             'body' => ''
-        ];
-
+		];
+		
         $async = false;
 
         if (!empty($sources['ignored'])) {
@@ -2795,5 +2798,41 @@ class GZipHelper {
         }, $html);
 
         return $html;
-    }
+	}
+
+	public static function parseCSP($html, $options) {
+
+		$csp = [];
+
+		if (preg_match_all('#<((script)|(link)|(i?frame)|(object))\s([^>]+)>#is', $html, $matches)) {
+
+			// script frame iframe style style-attr script-attr inline-script
+			foreach ($matches[1] as $key => $tag) {
+
+				switch (\strtolower($tag)) {
+
+					case 'script':
+
+					//	if ()
+
+						break;
+					case 'style':
+
+						break;
+					case 'link':
+
+						break;
+					case 'frame':
+					case 'iframe':
+
+						break;
+					case 'object':
+
+						break;
+				}
+			}
+		}
+
+		return $csp;
+	}
 }

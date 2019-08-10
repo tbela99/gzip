@@ -2,6 +2,8 @@
 
 ## High priority list
 
+1. Server timing headers
+1. LQIP broken in google chrome (they ahev removed support for something I think)
 1. implement csp features
 1. add support for the user action Log see [here](https://docs.joomla.org/J3.x:User_Action_Logs)
 1. do not cache partial request

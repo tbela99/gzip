@@ -19,11 +19,11 @@ LIB.ready(function(undef) {
     function lazyload() {
         LIB.images.lazy(".image-placeholder").on({
             /**
-       *
-       * @param {HTMLImageElement} img
-       * @param {HTMLImageElement} oldImage
-       */
-            preload: function(img, oldImage) {
+			 *
+			 * @param {HTMLImageElement} img
+			 * @param {HTMLImageElement} oldImage
+			 */
+            preload(img, oldImage) {
                 const legacy = !("currentSrc" in img);
                 if (!legacy) {
                     oldImage.insertAdjacentHTML("beforebegin", "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=\"background-image:url('" + (img.currentSrc || img.src) + "')\">");
@@ -62,7 +62,7 @@ LIB.ready(function(undef) {
                 container.insertBefore(oldImage, container.firstElementChild);
             },
             load: load,
-            error: function(error, img, oldImage) {
+            error(error, img, oldImage) {
                 load(img, oldImage);
             }
         });

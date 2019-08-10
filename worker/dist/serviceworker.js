@@ -336,7 +336,7 @@
 	// promisified event api on(event, handler) => resolve(event, [args...])
 	// promisified event api on({event: handler, event2: handler2}) => resolve(event, [args...])
 
-	const undef$1 = null;
+	//const undef = null;
 	const extendArgs = Utils.extendArgs;
 
 	const Event = {
@@ -502,8 +502,6 @@
 	 * @license     MIT License
 	 */
 
-	const undef$2 = null;
-
 	/**
 	 * 
 	 * @param {[]<string>|string} method 
@@ -518,7 +516,7 @@
 
 		method.forEach(method => {
 
-			if (method == undef$2 || method == "HEAD") {
+			if (method == undef$1 || method == "HEAD") {
 				return "GET";
 			}
 
@@ -542,8 +540,8 @@
 	 */
 	class Route {
 		constructor() {
-			this.routers = Object.create(undef$2);
-			this.defaultRouter = Object.create(undef$2);
+			this.routers = Object.create(undef$1);
+			this.defaultRouter = Object.create(undef$1);
 		}
 
 
@@ -554,7 +552,7 @@
 		 * @return {RouteHandler}
 		 */
 		getRouter(event) {
-			const method = (event != undef$2 && event.request.method) || "GET";
+			const method = (event != undef$1 && event.request.method) || "GET";
 			const routes = this.routers[method] || [];
 			const j = routes.length;
 			let route,
@@ -635,7 +633,7 @@
 				return this.defaultRouter[method];
 			}
 
-			return undef$2;
+			return undef$1;
 		}
 	}
 
@@ -665,7 +663,7 @@
 
 			self.plugins = [];
 			self.options = Object.assign(
-				Object.create(undef$2), {
+				Object.create(undef$1), {
 					mime: []
 				},
 				options || {}
@@ -756,7 +754,7 @@
 			const url = event.request.url;
 			return (/^https?:/.test(url) && this.path.test(url)) ||
 				this.options.mime.includes(event.request.headers.get('Content-Type')) ||
-				(response != undef$2 && this.options.mime.includes(response.headers.get('Content-Type')));
+				(response != undef$1 && this.options.mime.includes(response.headers.get('Content-Type')));
 		}
 	}
 
@@ -796,7 +794,7 @@
 					u.pathname.indexOf(this.url.pathname) == 0
 				) ||
 				this.options.mime.includes(event.request.headers.get('Content-Type')) ||
-				(response != undef$2 && this.options.mime.includes(response.headers.get('Content-Type')));
+				(response != undef$1 && this.options.mime.includes(response.headers.get('Content-Type')));
 		}
 	}
 
@@ -816,13 +814,13 @@
 	 * @license     MIT License
 	 */
 
-	const undef$3 = null; //
+	const undef$1 = null; //
 
 	/**
 	 * service worker configuration issue
 	 * {SWType} SW
 	 */
-	const SW = Object.create(undef$3);
+	const SW = Object.create(undef$1);
 	//const CRY = "😭";
 	//const scope = "{scope}";
 
@@ -833,7 +831,7 @@
 		 * app config
 		 */
 		app: {
-			value: Object.create(undef$3)
+			value: Object.create(undef$1)
 		},
 		/**
 		 * app routes
@@ -889,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "e3d3421",
+			value: "51dff00",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-07-25 22:44:54-04:00",
+			value: "2019-08-08 11:38:27-04:00",
 			enumerable: true
 		},
 		/**
@@ -1146,11 +1144,14 @@
 	 * @license     LGPL v3
 	 * @license     MIT License
 	 */
+	//import {
+	//	expo
+	//} from "../utils/sw.backoff.js";
 
 	// @ts-check
 	//SW.expiration = (function() {
 	const CRY = "😭";
-	const undef$4 = null;
+	//const undef = null;
 	let cache;
 
 	caches.open(SW.app.cacheName).then(c => cache = c);
@@ -1177,7 +1178,7 @@
 				}
 			}
 
-			return undef$4;
+			return undef$1;
 		}
 
 		async setOptions(options) {
@@ -1213,7 +1214,7 @@
 			}
 
 			this.db = await DB(
-				options.cacheName != undef$4 ?
+				options.cacheName != undef$1 ?
 				options.cacheName :
 				"gzip_sw_worker_expiration_cache_private",
 				"url",
@@ -1235,7 +1236,7 @@
 
 		async precheck(event) {
 			try {
-				if (this.db == undef$4 || this.maxAge == 0) {
+				if (this.db == undef$1 || this.maxAge == 0) {
 					return true;
 				}
 
@@ -1243,7 +1244,7 @@
 				const entry = await this.db.get(event.request.url, "url");
 
 				if (
-					entry != undef$4 &&
+					entry != undef$1 &&
 					(entry.version != version || entry.timestamp < Date.now())
 				) {
 
@@ -1269,13 +1270,13 @@
 		 */
 		async postcheck(event, response) {
 
-			if (this.db == undef$4) {
+			if (this.db == undef$1) {
 				return true;
 			}
 
 			if (this.maxFileSize > 0) {
 
-				if (response.body != undef$4) {
+				if (response.body != undef$1) {
 
 					const blob = await response.clone().blob();
 
@@ -1297,7 +1298,7 @@
 				const version = hashCode(getObjectHash(event.request));
 
 				if (
-					entry == undef$4 ||
+					entry == undef$1 ||
 					entry.version != version ||
 					entry.timestamp < Date.now()
 				) {
@@ -1361,8 +1362,8 @@
 	 *
 	 */
 	//SW.strategies = (function() {
+
 	const map = new Map();
-	const undef$5 = null;
 
 	const strategies = {
 		/**
@@ -1373,7 +1374,7 @@
 		add: (key, handle, name) =>
 			map.set(key, {
 				key,
-				name: name == undef$5 ? key : name,
+				name: name == undef$1 ? key : name,
 				handle: async event => {
 					const response = await handle(event);
 
@@ -1637,7 +1638,7 @@
 	 * @license     MIT License
 	 */
 
-	const undef$6 = null;
+	//const undef = null;
 	/**
 	 * @param {FetchEvent} event
 	 */
@@ -1649,7 +1650,7 @@
 
 			const router = SW.routes.getRouter(event);
 
-			if (router != undef$6) {
+			if (router != undef$1) {
 
 				try {
 
@@ -1715,7 +1716,7 @@
 	 */
 
 	const cacheName$4 = "{CACHE_NAME}";
-	let undef$7 = null;
+	//let undef = null;
 
 	const serializableProperties = [
 	    'method',
@@ -1754,7 +1755,7 @@
 
 	                let value = data[name];
 
-	                if (value == undef$7) {
+	                if (value == undef$1) {
 
 	                    return '';
 	                }
@@ -1763,10 +1764,10 @@
 
 	                    if (value instanceof Headers) {
 
-	                        return [...value.values()].filter(value => value != undef$7).join('');
+	                        return [...value.values()].filter(value => value != undef$1).join('');
 	                    }
 
-	                    return Object.values(value).map(value => data[name][value] != undef$7 ? data[name][value] : '').join('');
+	                    return Object.values(value).map(value => data[name][value] != undef$1 ? data[name][value] : '').join('');
 	                }
 
 	                if (name == 'body') {
@@ -1834,7 +1835,7 @@
 	     */
 	    async getDB() {
 
-	        if (this.db == undef$7) {
+	        if (this.db == undef$1) {
 
 	            this.db = await DB('gzip_sw_worker_sync_requests', 'id');
 	        }
@@ -1871,13 +1872,13 @@
 
 	                let response = await cache.match(request);
 
-	                remove = response != undef$7;
+	                remove = response != undef$1;
 
 	                if (!remove) {
 
 	                    response = await fetch(request.clone());
 
-	                    remove = response != undef$7 && response.ok;
+	                    remove = response != undef$1 && response.ok;
 
 	                    if (remove && isCacheableRequest(request, response)) {
 
@@ -2108,7 +2109,7 @@
 	 * @license     MIT License
 	 */
 
-	const undef$8 = null;
+	//const undef = null;
 	const route = SW.routes;
 	const scope = SW.app.scope;
 	const networkSettings = SW.app.network;
@@ -2226,7 +2227,7 @@
 
 			const settings = await db.get("gzip");
 
-			if (settings != undef$8) {
+			if (settings != undef$1) {
 				if (settings.route != "{ROUTE}") {
 					// the url cache prefix has changed! delete private cache expiration data
 					let storeName, store;
@@ -2247,7 +2248,7 @@
 							}
 						]);
 
-						if (store != undef$8) {
+						if (store != undef$1) {
 							store.clear();
 						}
 					}

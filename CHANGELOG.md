@@ -1,9 +1,15 @@
 # Change History
 
-# 2.6.0
+# 2.6.dev
 
-- Enforce optimization when [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/) is sent
-- integrate html minification
+- add html minification
+- add server timing headers for server side performance profiling
+- enforce optimization when [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/) is sent
+- add badges for snyk, current version number and a link to the JED
+- add state-while-revalidate to Cache-Control header
+- fix compatibility issues with Joomla 4
+- fix performance regression when critical css feature or resize css image are enabled
+- expose header date to the service worker
 
 ## V2.5.4
 
