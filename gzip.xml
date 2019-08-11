@@ -504,9 +504,22 @@
             <fieldset name="security" label="Security">
                 <field type="spacer" label="Security Features" />
                 <fields name="gzip">
+                    <field type="spacer" label="Strict-Transport-Security" />
+                    <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
+                        <option value="">JNone</option>
+                    </field>
+                    <field name="hsts_subdomains" label="PLG_GZIP_FIELD_HSTS_SUBDOMAINS_LABEL" description="PLG_GZIP_FIELD_HSTS_SUBDOMAINS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="hsts_preload" label="PLG_GZIP_FIELD_HSTS_PRELOAD_LABEL" description="PLG_GZIP_FIELD_HSTS_PRELOAD_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field type="spacer" hr="true" />
                     <field name="xcontenttype" label="PLG_GZIP_FIELD_X_CONTENT_TYPE_LABEL" description="PLG_GZIP_FIELD_X_CONTENT_TYPE_DESCRIPTION" type="list" default="nosniff">
                         <option value="">JNone</option>
-                        <option value="nosniff">JOPTION__X_CONTENT_TYPE_NO_SNIFF</option>
+                        <option value="nosniff">JOPTION_X_CONTENT_TYPE_NO_SNIFF</option>
                     </field>
                     <field type="spacer" hr="true" />
                     <field name="frameoptions" label="PLG_GZIP_FIELD_FRAME_OPTIONS_LABEL" description="PLG_GZIP_FIELD_FRAME_OPTIONS_DESCRIPTION" type="list" default="">

@@ -21,6 +21,7 @@ use function file_get_contents;
 use function getimagesize;
 use function str_replace;
 use function strtolower;
+use \DateTime as DateTime;
 use \JProfiler as JProfiler;
 use Patchwork\JSqueeze as JSqueeze;
 use Patchwork\CSSmin as CSSMin;
@@ -1199,6 +1200,7 @@ class GZipHelper {
                         $info = pathinfo($fname);
 
                         $hash = base_convert (crc32($info['filename'] . '.' . $regexp . '.' . $fname), 10, 36);
+                        $hashValue = $hashFile($fname);
 
                         $name = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-crit';
                         $bgname = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-bg';
@@ -1213,7 +1215,7 @@ class GZipHelper {
 						
 						if ($parseCssResize) {
 
-							if (!is_file($css_bg_file) || file_get_contents($css_bg_hash) != $hash) {
+							if (!is_file($css_bg_file) || file_get_contents($css_bg_hash) != $hashValue) {
 
 								$content = file_get_contents($fname);
 
@@ -1240,7 +1242,7 @@ class GZipHelper {
                             	$background_css_path .= $css_background;
 
 								file_put_contents($css_bg_file, $css_background);
-								file_put_contents($css_bg_hash, $hash);
+								file_put_contents($css_bg_hash, $hashValue);
 							}
 
 							else {
@@ -1253,7 +1255,7 @@ class GZipHelper {
 
 						if ($parseCritical) {
 								
-							if (!is_file($css_file) || file_get_contents($css_hash) != $hash) {
+							if (!is_file($css_file) || file_get_contents($css_hash) != $hashValue) {
 
 								if (is_null($content)) {
 
@@ -1291,7 +1293,7 @@ class GZipHelper {
 									$local_css = static::expandCss($local_css, dirname($css_file));
 
 									\file_put_contents($css_file, $local_css);
-									\file_put_contents($css_hash, $hash);
+									\file_put_contents($css_hash, $hashValue);
 								}
 							}
 
@@ -2834,6 +2836,26 @@ class GZipHelper {
 							break;
 					}
 				}
+			}
+		}
+
+		if (intval($options['hsts_maxage']) > 0) {
+
+			$dt = new DateTime();
+
+			$now = $dt->getTimestamp();
+			$dt->modify($options['hsts_maxage']); 
+
+			$headers['Strict-Transport-Security'] = 'max-age='.($dt->getTimestamp() - $now);
+
+			if (!empty($options['hsts_subdomains'])) {
+
+				$headers['Strict-Transport-Security'] .= '; includeSubDomains';
+			}
+
+			if (!empty($options['hsts_preload'])) {
+
+				$headers['Strict-Transport-Security'] .= '; preload';
 			}
 		}
 
