@@ -138,7 +138,37 @@ class GZipHelper {
 
         file_put_contents($path, '<?php $checksum = ' . var_export($checksum, true) . ';');
         return $checksum;
-    }
+	}
+	
+	public static function preprocessHTML($html, $options = []) {
+
+			$debug = empty($options['debug']) ? '.min' : '';
+
+			// quick test
+			$hasScript = stripos($html, '<script') !== false || stripos($html, '<link ') !== false;
+
+			$script = '';
+			$css = '';
+
+			if ($hasScript || !empty($options['imagesvgplaceholder'])) {
+
+				$script = file_get_contents(__DIR__.'/js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
+				$script .= file_get_contents(__DIR__.'/loader'.$debug.'.js"');
+									
+				if (!empty($options['imagesvgplaceholder'])) {
+
+                    $script .=  file_get_contents(__DIR__.'/imagesnojs'.$debug.'.js');
+					$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>';
+				}
+            }
+            
+            if(!empty($script)) {
+
+                $html = str_replace('</head>', $css.'<script data-position="head" data-ignore="true">'.$script.'</script></head>', $html);
+            }
+
+		return $html;
+	}
 
     public static function accepted() {
 
@@ -1386,10 +1416,10 @@ class GZipHelper {
         $body_string = '';
         $noscript = '';
 
-        if ($async) {
+    //    if ($async) {
 
-            $head_string .= '<script data-ignore="true">'.file_get_contents(__DIR__.'/cssloader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>';
-        }
+    //        $head_string .= '<script data-ignore="true">'.file_get_contents(__DIR__.'/cssloader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>';
+    //    }
 
         if (isset($links['head']['webfonts'])) {
 
@@ -1412,14 +1442,10 @@ class GZipHelper {
 
                     if ($async) {
 
-                        $link['onload'] = '_l(this)';
+                   //     $link['onload'] = '_l(this)'
 
-                        if (isset($link['media'])) {
-
-                            $link['data-media'] = $link['media'];
-                        }
-
-                        $link['media'] = 'none';
+						$link['data-media'] = isset($link['media']) ? $link['media'] : 'all';
+                        $link['media'] = 'print';
                     }
 
                     // 
@@ -1438,8 +1464,7 @@ class GZipHelper {
 
                         if (isset($link['media'])) {
 
-							$noscript .= str_replace(['data-media', ' onload="_l(this)"', ' media="none"'], ['media', ''], $css);
-							$css = str_replace(' media="none"', ' media="print"', $css);
+							$noscript .= str_replace([' media="print"', 'data-media'], ['', 'media'], $css);
                         }
 
                         else {
@@ -2129,7 +2154,7 @@ class GZipHelper {
                 $hash_file = $name . '.php';
 
                 $createFile = !is_file($js_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash;
-
+                                                                                      
                 $content = [];
 
                 foreach ($filesList as $key => $file) {
@@ -2195,7 +2220,7 @@ class GZipHelper {
                 if ($hasScript) {
 
                     $async = true;
-                    $attr = ' onload="il(\''.$position.'\')"';
+                //    $attr = ' onload="il(\''.$position.'\')"';
                 }
 
                 $script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
@@ -2224,7 +2249,7 @@ class GZipHelper {
                         if ($hasScript) {
 
                             $async = true;
-                            $attr = ' onload="il(\''.$position.'\')"';
+                        //    $attr = ' onload="il(\''.$position.'\')"';
                         }
 
                         $script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
@@ -2265,7 +2290,7 @@ class GZipHelper {
                 $script['head'] = '';
             }
 
-            $script['head'] = '<script>'.file_get_contents(__DIR__.'/loader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>'.$script['head'];
+        //    $script['head'] = '<script data-ignore="true">'.file_get_contents(__DIR__.'/loader'.(empty($options['debug']) ? '.min' : '') .'.js').'</script>'.$script['head'];
         }
 
         foreach ($script as $position => $content) {
@@ -2803,39 +2828,190 @@ class GZipHelper {
         return $html;
 	}
 
-	public static function parseSecureHeaders($html, $options) {
+	public static function parseSecureHeaders(&$html, $options) {
 
 		$headers = [];
 
 		if (!empty($options['cspenabled'])) {
-		
-			if (preg_match_all('#<((script)|(link)|(i?frame)|(object))\s([^>]+)>#is', $html, $matches)) {
 
-				// script frame iframe style style-attr script-attr inline-script
-				foreach ($matches[1] as $key => $tag) {
+			$parseHTML = !empty($options['csp_inlinescript']); // or !!empty($options['csp_inlinestyle'])
+			$links = [];
 
-					switch (\strtolower($tag)) {
+			$tags = [];
 
-						case 'script':
+			$sections = array_filter([
+				'default',
+				'script',
+				'style',
+				'connect',
+				'font',
+				'frame',
+				'img',
+				'manifest',
+				'media',
+				'prefetch',
+				'object',
+                //         script-src-elem 'self';
+               //          script-src-attr 'self';
+                //         style-src-elem 'self';
+                //         style-src-attr 'self';
+                'worker'
+			], function ($section) use ($options, &$parseHTML) {
 
-						//	if ()
+				if(isset($options['csp'][$section])) {
 
-							break;
-						case 'style':
+					if ($options['csp'][$section]) {
 
-							break;
-						case 'link':
-
-							break;
-						case 'frame':
-						case 'iframe':
-
-							break;
-						case 'object':
-
-							break;
+						$parseHTML = true;
 					}
+					
+					return $options['csp'][$section] != 'ignore';
 				}
+
+				return false;
+			});
+
+			if (
+				!empty($options['csp_inlinescript']) || 
+				(isset($options['csp']['script']) && in_array($options['csp']['script'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['script'] = 'script';
+				$tags['link'] = 'link'; // rel=preload as=script
+            }
+            
+			if (
+				!empty($options['csp_inlinestyle']) || 
+				(isset($options['csp']['style']) && in_array($options['csp']['style'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['link'] = 'link'; // rel=preload as=script
+				$tags['style'] = 'style';
+            }
+            
+			if (
+				(isset($options['csp']['font']) && in_array($options['csp']['font'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['link'] = 'link'; // rel=preload as=script
+            }
+            
+			if (!empty($tags)) {
+				/*
+            error_log(var_export(['#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is'], true));
+*/
+				$html = preg_replace_callback('#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is', function ($matches) use ($tags, $options) {
+				
+					$tag = strtolower($matches[1]);
+
+					if (in_array($tag, ['link', 'script', 'style'])) {
+
+						$attributes = [];
+
+						if (isset($matches[2 + count($tags)]) && preg_match_all(static::regexAttr, $matches[2 + count($tags)], $attrib)) {
+			
+							foreach ($attrib[2] as $key => $value) {
+			
+								$attributes[$value] = $attrib[6][$key];
+							}
+			
+						//	$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
+						}
+
+						$nonce = ($tag == 'script' && !empty($options['csp_inlinescript']) ||
+									(isset($attributes['rel']) && isset($attributes['as']) &&
+									$attributes['rel'] == 'preload' && $attributes['as'] == 'script')
+							) ||
+							($tag == 'link' && !empty($options['csp_inlinestyle']) ||
+									(isset($attributes['rel']) && isset($attributes['as']) &&
+									$attributes['rel'] == 'preload' && $attributes['as'] == 'style')
+							) ||
+							($tag == 'link' && !empty($options['csp']['font']) ||
+									(isset($attributes['rel']) && isset($attributes['as']) &&
+									$attributes['rel'] == 'preload' && $attributes['as'] == 'font')
+							) ||
+							(!empty($options['csp_inlinestyle']) && $tag == 'style');
+
+						if ($nonce) {
+							
+							$attributes['nonce'] = static::nonce();
+						}
+
+						$string = '<'.$matches[1];
+
+						foreach ($attributes as $key => $value) {
+
+							$string .= ' '.$key.'="'.$value.'"';
+						}
+
+						/*
+                        error_log(var_export([
+                            '$matches[2 + count($tags)]' => isset($matches[2 + count($tags)]) ? $matches[2 + count($tags)] : null,
+                            '$matches[0]' => $matches[0],
+                            '$string' => $string.'>'
+						], true));
+						*/
+    
+						return $string.'>';
+					}
+
+					/*
+					foreach ($matches[1] as $key => $tag) {
+
+						switch (\strtolower($tag)) {
+
+							case 'script':
+
+							//	if ()
+
+								break;
+							case 'style':
+
+								break;
+							case 'link':
+
+								break;
+							case 'frame':
+							case 'iframe':
+
+								break;
+							case 'object':
+
+								break;
+						}
+					}
+					*/
+
+					return $matches[0];
+
+				}, $html);
+			}
+
+			$csp = [];
+
+			if (!empty($options['csp_baseuri'])) {
+
+				$csp[] = 'base-uri \''.$options['csp_baseuri']."'";
+			}
+
+			foreach($sections as $section) {
+
+				$rule = static::parseCSPData($section, $options['csp'][$section], $options['csp'][$section.'_custom'], $links[$section] ?? [], $options);
+
+				if (!empty($rule)) {
+
+					$csp[] = $rule;
+				}
+			}
+
+			if (!empty($csp)) {
+
+				if (!empty($options['csp_report_uri'])) {
+
+					$csp[] = 'report-uri '.$options['csp_report_uri'];
+				}
+				
+				$headers[$options['cspenabled'] == 'enforce' ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only'] = implode('; ', $csp);
 			}
 		}
 
@@ -2926,8 +3102,82 @@ class GZipHelper {
 			$header[] = 'total;dur='.$data['totalTime']; //.';memory='.$data['totalMemory'];
 			$headers['Server-Timing'] = implode(',', $header);
 		}
-
+		
 		return $headers;
+	}
+
+	protected static function nonce () {
+
+		static $nonce = null;
+
+		if (is_null($nonce)) {
+
+			$nonce = \bin2hex(random_bytes(16));
+		}
+
+		return $nonce;
+	}
+
+	protected static function parseCSPData($section, $directive, $custom_rules, $links = [], $options = []) {
+
+	//	error_log(var_export([$section, $directive, $custom_rules, $links], true));
+
+		$rule = '';
+
+		switch($directive) {
+
+			case 'ignore':
+
+				$rule = '';
+				break;
+
+			case 'none':
+
+				$rule = $section."-src 'none'";
+				break;
+
+			case 'custom':
+
+				$rule = $section.'-src '.$custom_rules;
+				break;
+		}
+		
+		if (!empty($options['csp_inline'.$section])) {
+
+			if (empty($rule)) {
+
+				$rule = $section.'-src';
+			}
+
+			if ($options['csp_inline'.$section] == 'legacy') {
+				
+				$rule .= " 'unsafe-inline'";
+
+				if ($section == 'script') {
+
+					$rule .= ' http: https:';
+				}
+			}
+
+			$rule .= " 'nonce-".static::nonce()."'";
+		}
+
+
+		if ($section == 'script') {
+
+			if (!empty($options['csp_eval'])) {
+
+				$rule .= " 'unsafe-eval'";
+			}
+
+			if (!empty($options['csp_strictdynamic'])) {
+
+				$rule .= " 'strict-dynamic'";
+			}
+		}
+
+		// 
+		return $rule;
 	}
 	
 	/**
@@ -2958,5 +3208,4 @@ class GZipHelper {
 		'marks' => $marks
 		];
     }
-
 }

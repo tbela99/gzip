@@ -162,17 +162,7 @@ class PlgSystemGzip extends JPlugin
 
             if($docType == 'html') {
 
-				if (!empty($this->options['imagesvgplaceholder'])) {
-
-					$debug = empty($this->options['debug']) || !empty($options['minifyjs']) ? '.min' : '';
-
-					$document->addCustomTag('<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>');
-					$document->addCustomTag('<script data-position="head" data-ignore="true">'.file_get_contents(__DIR__.'/imagesnojs'.$debug.'.js').'</script>');
-
-					$document->addScript('plugins/system/gzip/js/dist/lib'.$debug.'.js');
-					$document->addScript('plugins/system/gzip/js/dist/lib.images'.$debug.'.js');
-					$document->addScriptDeclaration(str_replace('{script-src}', GZipHelper::url('plugins/system/gzip/js/dist/intersection-observer.min.js'), file_get_contents(__DIR__.'/imagesloader'.$debug.'.js')));
-				}
+				$script = '';
 
                 if(!empty($this->options['pwaenabled'])) {
 
@@ -581,6 +571,8 @@ class PlgSystemGzip extends JPlugin
 
     public function onAfterDispatch() {
 
+        $app = JFactory::$application;
+
         $document = JFactory::getDocument();
 
         $generator = $this->params->get('gzip.metagenerator');
@@ -588,7 +580,7 @@ class PlgSystemGzip extends JPlugin
         if(!is_null($generator)) {
 
             $document->setGenerator($generator);
-        }
+		}
     }
 
     public function onAfterRender() {
@@ -598,8 +590,8 @@ class PlgSystemGzip extends JPlugin
         if(!$app->isClient('site') || JFactory::getDocument()->getType() != 'html') {
 
             return;
-        }
-
+		}
+		
 		$options = $this->options;
 
 		// segregate http and https cache
@@ -713,6 +705,9 @@ class PlgSystemGzip extends JPlugin
         GZipHelper::$options = $options;
 
 		$profiler->mark('afterRenderStart');
+
+		$body = GZipHelper::preprocessHTML($body, $options);
+		$profiler->mark('afterPreprocessHTML');
 
         if (!empty($options['imageenabled'])) {
 

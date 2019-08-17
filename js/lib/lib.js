@@ -1,4 +1,3 @@
-
 /**
  *
  * @package     GZip Plugin
@@ -9,4 +8,4 @@
  * @license     LGPL v3
  * @license     MIT License
  */
-var LIB = LIB || Object.create(null);
+export const undef = null;

@@ -12,53 +12,49 @@
  * @license     LGPL v3
  * @license     MIT License
  */
-LIB.ready = function () {
-	
-    'use strict;';
 
-	const queue = [];
-	let fired = document.readyState != 'loading';
 
-	function readystatechange() {
+'use strict;';
 
-		switch (document.readyState) {
-			
-			case 'loading':				
-				break;
+const queue = [];
+let fired = document.readyState != 'loading';
 
-			case 'interactive':
-			default:
+function readystatechange() {
 
-				fired = true;
+	switch (document.readyState) {
 
-				while(queue.length > 0) {
+		case 'loading':
+			break;
 
-					requestAnimationFrame(queue.shift());
-				}
+		case 'interactive':
+		default:
 
-				document.removeEventListener('readystatechange', readystatechange);
-				break;
-		}
-	}
-		
-	document.addEventListener('readystatechange', readystatechange);
-	
-	return function (cb) {
+			fired = true;
 
-		if (fired) {
-
-			while(queue.length > 0) {
+			while (queue.length > 0) {
 
 				requestAnimationFrame(queue.shift());
 			}
 
-			cb();
-		}
-
-		else {
-
-			queue.push(cb);
-		}
+			document.removeEventListener('readystatechange', readystatechange);
+			break;
 	}
-	
-}();
+}
+
+document.addEventListener('readystatechange', readystatechange);
+
+export function ready(cb) {
+
+	if (fired) {
+
+		while (queue.length > 0) {
+
+			requestAnimationFrame(queue.shift());
+		}
+
+		cb();
+	} else {
+
+		queue.push(cb);
+	}
+}

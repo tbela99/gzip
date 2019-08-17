@@ -10,7 +10,7 @@
  * @license     MIT License
  */
 // @ts-check
-// build 51dff00 2019-08-08 11:38:33-04:00
+// build eb3b73b 2019-08-17 15:46:15-04:00
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.getRegistration().then(function(registration) {
         registration.unregister().then(function(result) {

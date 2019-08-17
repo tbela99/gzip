@@ -11,194 +11,205 @@
  * @license     MIT License
  */
 
-(function (LIB) {
-  "use strict";
+//(function (LIB) {
+// "use strict";
 
-  const undef = null;
-  const merge = LIB.Utils.merge;
+import {
+  undef,
+  // LIB
+} from "./lib.js";
+import {
+  merge
+} from "./lib.utils.js";
 
-  /**
-   * legacy srcset support
-   * @param {HTMLImageElement} image
-   * @returns {Function} update
-   */
-  function rspimages(image) {
-    let mq;
+import {
+  Event
+} from "./lib.event.js";
 
-    const mqs = image
-      .getAttribute("sizes")
-      .replace(/\)\s[^,$]+/g, ")")
-      .split(",");
-    const images = image.dataset.srcset.split(",").map(function (src) {
-      return src.split(" ")[0];
-    });
+import "./lib.event.pseudo.once.js";
 
-    if (typeof window.CustomEvent != "function") {
-      function CustomEvent(event, params) {
-        params = params || {
-          bubbles: false,
-          cancelable: false,
-          detail: undefined
-        };
-        const evt = document.createEvent("CustomEvent");
-        evt.initCustomEvent(
-          event,
-          params.bubbles,
-          params.cancelable,
-          params.detail
-        );
-        return evt;
-      }
+/**
+ * legacy srcset support
+ * @param {HTMLImageElement} image
+ * @returns {Function} update
+ */
+function rspimages(image) {
+  let mq;
 
-      CustomEvent.prototype = window.Event.prototype;
-    }
+  const mqs = image
+    .getAttribute("sizes")
+    .replace(/\)\s[^,$]+/g, ")")
+    .split(",");
+  const images = image.dataset.srcset.split(",").map(function (src) {
+    return src.split(" ")[0];
+  });
 
-    function createEvent(name, params) {
-      try {
-        return new CustomEvent(name, params);
-      } catch (e) {}
-
+  if (typeof window.CustomEvent != "function") {
+    function CustomEvent(event, params) {
+      params = params || {
+        bubbles: false,
+        cancelable: false,
+        detail: undefined
+      };
       const evt = document.createEvent("CustomEvent");
-      evt.initEvent(
-        name,
-        params && params.bubbles,
-        params == undef || (params && params.cancelable),
-        params && params.details
+      evt.initCustomEvent(
+        event,
+        params.bubbles,
+        params.cancelable,
+        params.detail
       );
-
       return evt;
     }
 
-    function update() {
-      let i = 0;
-      const j = mqs.length;
-
-      for (; i < j; i++) {
-        if (matchMedia(mqs[i]).matches) {
-          if (mqs[i] != mq) {
-            mq = mqs[i];
-            image.src = images[i];
-            image.dispatchEvent(createEvent("sourcechange"));
-          }
-
-          break;
-        }
-      }
-    }
-
-    window.addEventListener("resize", update, false);
-    update();
-
-    return update;
+    CustomEvent.prototype = window.Event.prototype;
   }
 
-  function load(oldImage, observer) {
-    const img = new Image();
+  function createEvent(name, params) {
+    try {
+      return new CustomEvent(name, params);
+    } catch (e) {}
 
-    img.src = oldImage.dataset.src != undef ? oldImage.dataset.src : oldImage.src;
+    const evt = document.createEvent("CustomEvent");
+    evt.initEvent(
+      name,
+      params && params.bubbles,
+      params == undef || (params && params.cancelable),
+      params && params.details
+    );
 
-    if (oldImage.dataset.srcset != undef && window.matchMedia) {
-      if (!("srcset" in img)) {
-        if (oldImage.dataset.srcset != undef) {
-          img.dataset.srcset = oldImage.dataset.srcset;
+    return evt;
+  }
+
+  function update() {
+    let i = 0;
+    const j = mqs.length;
+
+    for (; i < j; i++) {
+      if (matchMedia(mqs[i]).matches) {
+        if (mqs[i] != mq) {
+          mq = mqs[i];
+          image.src = images[i];
+          image.dispatchEvent(createEvent("sourcechange"));
         }
-        if (oldImage.hasAttribute("sizes")) {
-          img.setAttribute("sizes", oldImage.getAttribute("sizes"));
 
-          const update = rspimages(img);
-
-          img.addEventListener(
-            "load",
-            function () {
-              window.removeEventListener("resize", update, false);
-              rspimages(oldImage);
-            },
-            false
-          );
-        }
-      } else {
-        if (oldImage.dataset.srcset != undef) {
-          img.srcset = oldImage.dataset.srcset;
-        } else {}
+        break;
       }
     }
+  }
 
-    observer.trigger("preload", img, oldImage);
+  window.addEventListener("resize", update, false);
+  update();
 
-    if (img.decode != undef) {
-      img
-        .decode()
-        .then(function () {
-          observer.trigger("load", img, oldImage);
-        })
-        .catch(function (error) {
-          observer.trigger("error", error, img, oldImage);
-        });
+  return update;
+}
+
+function load(oldImage, observer) {
+  const img = new Image();
+
+  img.src = oldImage.dataset.src != undef ? oldImage.dataset.src : oldImage.src;
+
+  if (oldImage.dataset.srcset != undef && window.matchMedia) {
+    if (!("srcset" in img)) {
+      if (oldImage.dataset.srcset != undef) {
+        img.dataset.srcset = oldImage.dataset.srcset;
+      }
+      if (oldImage.hasAttribute("sizes")) {
+        img.setAttribute("sizes", oldImage.getAttribute("sizes"));
+
+        const update = rspimages(img);
+
+        img.addEventListener(
+          "load",
+          function () {
+            window.removeEventListener("resize", update, false);
+            rspimages(oldImage);
+          },
+          false
+        );
+      }
     } else {
-      img.onerror = function (error) {
-        observer.trigger("error", error, img, oldImage);
-      };
-
-      if (img.height > 0 && img.width > 0) {
-        observer.trigger("load", img, oldImage);
-      } else {
-        img.onload = function () {
-          observer.trigger("load", img, oldImage);
-        };
-      }
+      if (oldImage.dataset.srcset != undef) {
+        img.srcset = oldImage.dataset.srcset;
+      } else {}
     }
   }
 
-  function complete() {
-    this.trigger("complete");
+  observer.trigger("preload", img, oldImage);
+
+  if (img.decode != undef) {
+    img
+      .decode()
+      .then(function () {
+        observer.trigger("load", img, oldImage);
+      })
+      .catch(function (error) {
+        observer.trigger("error", error, img, oldImage);
+      });
+  } else {
+    img.onerror = function (error) {
+      observer.trigger("error", error, img, oldImage);
+    };
+
+    if (img.height > 0 && img.width > 0) {
+      observer.trigger("load", img, oldImage);
+    } else {
+      img.onload = function () {
+        observer.trigger("load", img, oldImage);
+      };
+    }
   }
+}
 
-  LIB.images = merge(Object.create(null), {
-    /**
-     *
-     * @param string selector
-     * @param object options
-     */
-    lazy(selector, options) {
-      const images = [].slice.apply(
-        ((options && options.container) || document).querySelectorAll(selector)
-      );
-      const observer = merge(true, Object.create(null), LIB.Event);
-      const io = new IntersectionObserver(function (entries) {
-        let i = entries.length,
-          index,
-          entry;
+function complete() {
+  this.trigger("complete");
+}
 
-        while (i--) {
-          entry = entries[i];
-
-          if (entry.isIntersecting) {
-            io.unobserve(entry.target);
-
-            index = images.indexOf(entry.target);
-            if (index != -1) {
-              images.splice(index, 1);
-            }
-
-            if (images.length == 0) {
-              observer.on({
-                "load:once": complete,
-                "fail:once": complete
-              });
-            }
-
-            load(entry.target, observer);
-          }
-        }
-      }, options);
-
-      let i = images.length;
+export const images = merge(Object.create(null), {
+  /**
+   *
+   * @param string selector
+   * @param object options
+   */
+  lazy(selector, options) {
+    const images = [].slice.apply(
+      ((options && options.container) || document).querySelectorAll(selector)
+    );
+    const observer = merge(true, Object.create(null), Event);
+    const io = new IntersectionObserver(function (entries) {
+      let i = entries.length,
+        index,
+        entry;
 
       while (i--) {
-        io.observe(images[i]);
-      }
+        entry = entries[i];
 
-      return observer;
+        if (entry.isIntersecting) {
+          io.unobserve(entry.target);
+
+          index = images.indexOf(entry.target);
+          if (index != -1) {
+            images.splice(index, 1);
+          }
+
+          if (images.length == 0) {
+            observer.on({
+              "load:once": complete,
+              "fail:once": complete
+            });
+          }
+
+          load(entry.target, observer);
+        }
+      }
+    }, options);
+
+    let i = images.length;
+
+    while (i--) {
+      io.observe(images[i]);
     }
-  });
-})(LIB);
+
+    return observer;
+  }
+});
+//})(LIB);
