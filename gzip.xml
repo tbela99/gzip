@@ -560,23 +560,15 @@
                         <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
                         <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
                     </field>
-                    <field name="csp_strictdynamic" label="PLG_GZIP_FIELD_CSP_STRICT_DYNAMIC_LABEL" description="PLG_GZIP_FIELD_CSP_STRICT_DYNAMIC_DESCRIPTION" type="list" class="btn-group" default="report">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="csp_baseuri" label="PLG_GZIP_FIELD_CSP_BASE_URI_LABEL" description="PLG_GZIP_FIELD_CSP_BASE_URI_DESCRIPTION" type="list" class="btn-group" default="">
                         <option value="">JOPION_CSP_BASE_URI_IGNORE</option>
                         <option value="self">JOPION_CSP_BASE_URI_SELF</option>
                         <option value="none">JNone</option>
                     </field>
                     <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
-                    <!-- <field name="report-sample-script" label="PLG_GZIP_FIELD_CSP_REPORT_SAMPLE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_SAMPLE_DESCRIPTION" type="radio" class="btn-group" default="1">
-                        <option value="1">JYes</option>
-                        <option value="0">JNone</option>
-                    </field>-->
                     <field name="csp_eval" label="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="1">
-                        <option value="0">JNo</option>
                         <option value="1">JYes</option>
+                        <option value="0">JNo</option>
                     </field>
                     <field name="csp_inlinescript" label="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_DESCRIPTION" type="list" class="btn-group" default="1">
                         <option value="0">JNo</option>
@@ -584,8 +576,8 @@
                         <option value="legacy">JOPTION_CSP_INLINESCRIPT_LEGACY</option>
                     </field>
                     <field name="csp_inlinestyle" label="PLG_GZIP_FIELD_CSP_INLINE_STYLE_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_STYLE_DESCRIPTION" type="list" class="btn-group" default="1">
-                        <option value="0">JNo</option>
                         <option value="1">JYes</option>
+                        <option value="0">JNo</option>
                         <option value="legacy">JOPTION_CSP_INLINESTYLE_LEGACY</option>
                     </field>
                     <field type="spacer" hr="true" />
@@ -634,9 +626,7 @@
                         <field name="img" label="PLG_GZIP_FIELD_CSP_IMG_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
-                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
-                            <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
                         <field name="img_custom" label="PLG_GZIP_FIELD_CSP_IMG_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_IMG_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
@@ -648,7 +638,25 @@
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
                             <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
-                        <field name="worker_custom" label="PLG_GZIP_FIELD_CSP_WORKER_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_DEFAULT_WORKER_HINT" type="text" default="" />
+                        <field name="worker_custom" label="PLG_GZIP_FIELD_CSP_WORKER_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_WORKER_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Manifest Directive" />
+                        <field name="manifest" label="PLG_GZIP_FIELD_CSP_MANIFEST_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="manifest_custom" label="PLG_GZIP_FIELD_CSP_MANIFEST_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MANIFEST_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Object Directive" />
+                        <field name="object" label="PLG_GZIP_FIELD_CSP_OBJECT_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="object_custom" label="PLG_GZIP_FIELD_CSP_OBJECT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_OBJECT_HINT" type="text" default="" />
                     </fields>
                 </fields>
             </fieldset>

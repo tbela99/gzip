@@ -2918,19 +2918,29 @@ class GZipHelper {
 						//	$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 						}
 
-						$nonce = ($tag == 'script' && !empty($options['csp_inlinescript']) ||
+						$nonce = (!empty($options['csp_inlinescript']) && ($tag == 'script' ||
 									(isset($attributes['rel']) && isset($attributes['as']) &&
 									$attributes['rel'] == 'preload' && $attributes['as'] == 'script')
-							) ||
-							($tag == 'link' && !empty($options['csp_inlinestyle']) ||
-									(isset($attributes['rel']) && isset($attributes['as']) &&
-									$attributes['rel'] == 'preload' && $attributes['as'] == 'style')
-							) ||
-							($tag == 'link' && !empty($options['csp']['font']) ||
-									(isset($attributes['rel']) && isset($attributes['as']) &&
-									$attributes['rel'] == 'preload' && $attributes['as'] == 'font')
-							) ||
-							(!empty($options['csp_inlinestyle']) && $tag == 'style');
+							)) ||
+							(!empty($options['csp_inlinestyle'] && $tag == 'link' && 
+									isset($attributes['rel']) && 
+									($attributes['rel'] == 'stylesheet' ||
+									(isset($attributes['as']) && $attributes['rel'] == 'preload' && $attributes['as'] == 'style'))
+									
+							)) ||
+							(!empty($options['csp_inlinestyle']) && $tag == 'style') ||
+
+							array_filter(['font', 'manifest'], function ($entry) use ($tag, $attributes, $options) {
+
+								return $tag == 'link' && !empty($options['csp'][$entry]) && 
+										!in_array($options['csp'][$entry], ['ignore', 'block']) &&
+										isset($attributes['rel']) && 
+										(
+											$attributes['rel'] == $entry || 
+											(isset($attributes['as']) &&
+											$attributes['rel'] == 'preload' && $attributes['as'] == $entry)
+									);
+							});
 
 						if ($nonce) {
 							
@@ -3123,6 +3133,7 @@ class GZipHelper {
 	//	error_log(var_export([$section, $directive, $custom_rules, $links], true));
 
 		$rule = '';
+		$value = '';
 
 		switch($directive) {
 
@@ -3138,7 +3149,10 @@ class GZipHelper {
 
 			case 'custom':
 
-				$rule = $section.'-src '.$custom_rules;
+				if (!empty($custom_rules)) {
+					
+					$rule = $section.'-src '.$custom_rules;
+				}
 				break;
 		}
 		
@@ -3149,30 +3163,29 @@ class GZipHelper {
 				$rule = $section.'-src';
 			}
 
+			if ($section == 'script') {
+				
+				$rule .= " 'strict-dynamic'";
+			}
+
 			if ($options['csp_inline'.$section] == 'legacy') {
 				
 				$rule .= " 'unsafe-inline'";
 
-				if ($section == 'script') {
+			//	if ($section == 'script') {
 
-					$rule .= ' http: https:';
-				}
+			//		$rule .= ' http: https:';
+			//	}
 			}
 
 			$rule .= " 'nonce-".static::nonce()."'";
 		}
-
-
+		
 		if ($section == 'script') {
 
 			if (!empty($options['csp_eval'])) {
 
 				$rule .= " 'unsafe-eval'";
-			}
-
-			if (!empty($options['csp_strictdynamic'])) {
-
-				$rule .= " 'strict-dynamic'";
 			}
 		}
 
