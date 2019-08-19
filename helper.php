@@ -2834,7 +2834,6 @@ class GZipHelper {
 
 		if (!empty($options['cspenabled'])) {
 
-			$parseHTML = !empty($options['csp_inlinescript']); // or !!empty($options['csp_inlinestyle'])
 			$links = [];
 
 			$tags = [];
@@ -2845,26 +2844,18 @@ class GZipHelper {
 				'style',
 				'connect',
 				'font',
+				'child',
 				'frame',
 				'img',
 				'manifest',
 				'media',
 				'prefetch',
 				'object',
-                //         script-src-elem 'self';
-               //          script-src-attr 'self';
-                //         style-src-elem 'self';
-                //         style-src-attr 'self';
                 'worker'
-			], function ($section) use ($options, &$parseHTML) {
+			], function ($section) use ($options) {
 
 				if(isset($options['csp'][$section])) {
 
-					if ($options['csp'][$section]) {
-
-						$parseHTML = true;
-					}
-					
 					return $options['csp'][$section] != 'ignore';
 				}
 
@@ -2896,73 +2887,86 @@ class GZipHelper {
 				$tags['link'] = 'link'; // rel=preload as=script
             }
             
-			if (!empty($tags)) {
-				/*
-            error_log(var_export(['#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is'], true));
-*/
-				$html = preg_replace_callback('#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is', function ($matches) use ($tags, $options) {
+			if (
+				(isset($options['csp']['frame']) && in_array($options['csp']['frame'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['frame'] = 'frame'; // rel=preload as=script
+				$tags['iframe'] = 'iframe'; // rel=preload as=script
+            }
+            
+			if (
+				(isset($options['csp']['img']) && in_array($options['csp']['img'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['img'] = 'img'; // rel=preload as=script
+            }
+			
+			if(!empty($tags)) {
+				
+				$html = preg_replace_callback('#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is', function ($matches) use ($tags, $options, &$links) {
 				
 					$tag = strtolower($matches[1]);
 
-					if (in_array($tag, ['link', 'script', 'style'])) {
+					if (in_array($tag, ['link', 'script', 'style', 'img', 'frame', 'iframe'])) {
 
-						$attributes = [];
+						// capture urls if mode set to dynamic
 
-						if (isset($matches[2 + count($tags)]) && preg_match_all(static::regexAttr, $matches[2 + count($tags)], $attrib)) {
-			
-							foreach ($attrib[2] as $key => $value) {
-			
-								$attributes[$value] = $attrib[6][$key];
+						// yada yada yada ...
+
+						if (in_array($tag, ['style', 'link', 'script'])) {
+
+							$attributes = [];
+
+							if (isset($matches[2 + count($tags)]) && preg_match_all(static::regexAttr, $matches[2 + count($tags)], $attrib)) {
+				
+								foreach ($attrib[2] as $key => $value) {
+				
+									$attributes[$value] = $attrib[6][$key];
+								}
+				
+							//	$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 							}
-			
-						//	$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
-						}
 
-						$nonce = (!empty($options['csp_inlinescript']) && ($tag == 'script' ||
-									(isset($attributes['rel']) && isset($attributes['as']) &&
-									$attributes['rel'] == 'preload' && $attributes['as'] == 'script')
-							)) ||
-							(!empty($options['csp_inlinestyle'] && $tag == 'link' && 
-									isset($attributes['rel']) && 
-									($attributes['rel'] == 'stylesheet' ||
-									(isset($attributes['as']) && $attributes['rel'] == 'preload' && $attributes['as'] == 'style'))
-									
-							)) ||
-							(!empty($options['csp_inlinestyle']) && $tag == 'style') ||
-
-							array_filter(['font', 'manifest'], function ($entry) use ($tag, $attributes, $options) {
-
-								return $tag == 'link' && !empty($options['csp'][$entry]) && 
-										!in_array($options['csp'][$entry], ['ignore', 'block']) &&
+							$nonce = (!empty($options['csp_inlinescript']) && ($tag == 'script' ||
+										(isset($attributes['rel']) && isset($attributes['as']) &&
+										$attributes['rel'] == 'preload' && $attributes['as'] == 'script')
+								)) ||
+								(!empty($options['csp_inlinestyle'] && $tag == 'link' && 
 										isset($attributes['rel']) && 
-										(
-											$attributes['rel'] == $entry || 
-											(isset($attributes['as']) &&
-											$attributes['rel'] == 'preload' && $attributes['as'] == $entry)
-									);
-							});
+										($attributes['rel'] == 'stylesheet' ||
+										(isset($attributes['as']) && $attributes['rel'] == 'preload' && $attributes['as'] == 'style'))
+										
+								)) ||
+								(!empty($options['csp_inlinestyle']) && $tag == 'style') ||
 
-						if ($nonce) {
-							
-							$attributes['nonce'] = static::nonce();
+								array_filter(['font', 'manifest'], function ($entry) use ($tag, $attributes, $options) {
+
+									return $tag == 'link' && !empty($options['csp'][$entry]) && 
+											!in_array($options['csp'][$entry], ['ignore', 'block']) &&
+											isset($attributes['rel']) && 
+											(
+												$attributes['rel'] == $entry || 
+												(isset($attributes['as']) &&
+												$attributes['rel'] == 'preload' && $attributes['as'] == $entry)
+										);
+								});
+
+							if ($nonce) {
+								
+								$attributes['nonce'] = static::nonce();
+							}
+
+							$string = '<'.$matches[1];
+
+							foreach ($attributes as $key => $value) {
+
+								$string .= ' '.$key.'="'.$value.'"';
+							}
+		
+							return $string.'>';
 						}
 
-						$string = '<'.$matches[1];
-
-						foreach ($attributes as $key => $value) {
-
-							$string .= ' '.$key.'="'.$value.'"';
-						}
-
-						/*
-                        error_log(var_export([
-                            '$matches[2 + count($tags)]' => isset($matches[2 + count($tags)]) ? $matches[2 + count($tags)] : null,
-                            '$matches[0]' => $matches[0],
-                            '$string' => $string.'>'
-						], true));
-						*/
-    
-						return $string.'>';
 					}
 
 					/*

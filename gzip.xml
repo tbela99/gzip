@@ -602,7 +602,7 @@
                         </field>
                         <field name="script_custom" label="PLG_GZIP_FIELD_CSP_SCRIPT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_SCRIPT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_SCRIPT_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
-                        <field type="spacer" label="CSS Directive" />
+                        <field type="spacer" label="Style Directive" />
                         <field name="style" label="PLG_GZIP_FIELD_CSP_STYLE_LABEL" description="PLG_GZIP_FIELD_CSP_STYLE_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
@@ -650,6 +650,23 @@
                         </field>
                         <field name="manifest_custom" label="PLG_GZIP_FIELD_CSP_MANIFEST_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MANIFEST_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
+                        <field type="spacer" label="Child Directive" />
+                        <field name="child" label="PLG_GZIP_FIELD_CSP_CHILD_LABEL" description="PLG_GZIP_FIELD_CSP_CHILD_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="child_custom" label="PLG_GZIP_FIELD_CSP_CHILD_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_CHILD_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_CHILD_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Frame Directive" />
+                        <field name="frame" label="PLG_GZIP_FIELD_CSP_FRAME_LABEL" description="PLG_GZIP_FIELD_CSP_FRAME_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="frame_custom" label="PLG_GZIP_FIELD_CSP_FRAME_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FRAME_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FRAME_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
                         <field type="spacer" label="Object Directive" />
                         <field name="object" label="PLG_GZIP_FIELD_CSP_OBJECT_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
@@ -657,6 +674,30 @@
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
                         </field>
                         <field name="object_custom" label="PLG_GZIP_FIELD_CSP_OBJECT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_OBJECT_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Media Directive" />
+                        <field name="media" label="PLG_GZIP_FIELD_CSP_MEDIA_LABEL" description="PLG_GZIP_FIELD_CSP_MEDIA_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="media_custom" label="PLG_GZIP_FIELD_CSP_MEDIA_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MEDIA_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MEDIA_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Prefetch Directive" />
+                        <field name="prefetch" label="PLG_GZIP_FIELD_CSP_PREFETCH_LABEL" description="PLG_GZIP_FIELD_CSP_PREFETCH_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="prefetch_custom" label="PLG_GZIP_FIELD_CSP_PREFETCH_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_PREFETCH_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_PREFETCH_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Connect Directive" />
+                        <field name="connect" label="PLG_GZIP_FIELD_CSP_CONNECT_LABEL" description="PLG_GZIP_FIELD_CSP_CONNECT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="connect_custom" label="PLG_GZIP_FIELD_CSP_CONNECT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_CONNECT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_CONNECT_HINT" type="text" default="" />
                     </fields>
                 </fields>
             </fieldset>
