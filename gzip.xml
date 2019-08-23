@@ -620,7 +620,7 @@
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
                             <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
-                        <field name="font_custom" label="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FONT_LABEL" type="text" default="" />
+                        <field name="font_custom" label="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Image Directive" />
                         <field name="img" label="PLG_GZIP_FIELD_CSP_IMG_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" type="list" default="ignore">
