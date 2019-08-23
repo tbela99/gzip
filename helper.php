@@ -30,7 +30,7 @@ use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
 use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
 use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 
-define('WEBP', function_exists('imagewebp') && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
+define('WEBP', function_exists('imagewebp') && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
 class GZipHelper {
 
@@ -2863,70 +2863,131 @@ class GZipHelper {
 			});
 
 			if (
+				!empty($options['csp_inlinestyle']) || 
+				(isset($options['csp']['style']) && in_array($options['csp']['style'], ['dynamic', 'mixed']))
+			) {
+
+				$tags['link'] = 'link';
+				$tags['style'] = 'style';
+            }
+            
+			if (
 				!empty($options['csp_inlinescript']) || 
 				(isset($options['csp']['script']) && in_array($options['csp']['script'], ['dynamic', 'mixed']))
 			) {
 
 				$tags['script'] = 'script';
-				$tags['link'] = 'link'; // rel=preload as=script
-            }
-            
-			if (
-				!empty($options['csp_inlinestyle']) || 
-				(isset($options['csp']['style']) && in_array($options['csp']['style'], ['dynamic', 'mixed']))
-			) {
-
-				$tags['link'] = 'link'; // rel=preload as=script
-				$tags['style'] = 'style';
+				$tags['link'] = 'link';
             }
             
 			if (
 				(isset($options['csp']['font']) && in_array($options['csp']['font'], ['dynamic', 'mixed']))
 			) {
 
-				$tags['link'] = 'link'; // rel=preload as=script
+				$tags['link'] = 'link';
             }
             
 			if (
 				(isset($options['csp']['frame']) && in_array($options['csp']['frame'], ['dynamic', 'mixed']))
 			) {
 
-				$tags['frame'] = 'frame'; // rel=preload as=script
-				$tags['iframe'] = 'iframe'; // rel=preload as=script
+				$tags['frame'] = 'frame';
+				$tags['iframe'] = 'iframe'; 
             }
             
 			if (
 				(isset($options['csp']['img']) && in_array($options['csp']['img'], ['dynamic', 'mixed']))
 			) {
 
-				$tags['img'] = 'img'; // rel=preload as=script
+				$tags['img'] = 'img';
             }
 			
 			if(!empty($tags)) {
-				
-				$html = preg_replace_callback('#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is', function ($matches) use ($tags, $options, &$links) {
+                
+                $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+                $url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
+                 
+				$html = preg_replace_callback('#<(('.implode(')|(', $tags).'))(\s([^>]*))?>#is', function ($matches) use ($tags, $options, &$links, $url_attr, $scheme) {
 				
 					$tag = strtolower($matches[1]);
 
 					if (in_array($tag, ['link', 'script', 'style', 'img', 'frame', 'iframe'])) {
 
 						// capture urls if mode set to dynamic
+                        $attributes = [];
+                        $tagName = $tag;
+							
+                        if ($tag == 'link') {
+                            
+                            $tagName = 'style';
+                        }
+                        else if ($tag == 'iframe') {
+                            
+                            $tagName = 'frame';
+						}
+						
+                        if (isset($matches[2 + count($tags)]) && preg_match_all(static::regexAttr, $matches[2 + count($tags)], $attrib)) {
+            
+                            foreach ($attrib[2] as $key => $value) {
+            
+                                $attributes[$value] = $attrib[6][$key];
+                            }
+                        }
 
-						// yada yada yada ...
+						// style disabled but script enabled
+						if ($tag == 'link' && isset($attributes['as'])) {
+
+							$tagName = $attributes['as'];
+						}
+
+						// disabled or invalid
+						if (empty($options['csp'][$tagName]) || $options['csp'][$tagName] == 'ignore') {
+
+							return $matches[0];
+						}
+
+                        // yada yada yada ...
+                        if(isset($options['csp'][$tagName]) && in_array($options['csp'][$tagName], ['mixed', 'dynamic'])) {
+
+							$sectionName = $tagName;
+
+							if ($tag == 'link') {
+
+								if (isset($attributes['as'])) {
+
+									$sectionName = $attributes['as'];
+								}
+							}
+
+                            foreach ($url_attr as $prop) {
+
+                                if (!empty($attributes[$prop])) {
+
+                                    switch ($attributes[$prop]) {
+
+                                        case 'srcset':
+
+                                            foreach (explode(',', $attributes[$prop]) as $attr) {
+
+                                                foreach (explode(' ', trim($attr), 2) as $at) {
+                                                            
+                                                    $name = static::parseUrl($at);
+                                                    $links[$sectionName][$name] = $name;
+                                                }
+                                            }
+
+                                            break;
+                                        default:
+
+											$name = static::parseUrl($attributes[$prop]);
+                                            $links[$sectionName][$name] = $name;
+                                            break;
+                                    }
+                                }
+                            }
+                        }
 
 						if (in_array($tag, ['style', 'link', 'script'])) {
-
-							$attributes = [];
-
-							if (isset($matches[2 + count($tags)]) && preg_match_all(static::regexAttr, $matches[2 + count($tags)], $attrib)) {
-				
-								foreach ($attrib[2] as $key => $value) {
-				
-									$attributes[$value] = $attrib[6][$key];
-								}
-				
-							//	$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
-							}
 
 							$nonce = (!empty($options['csp_inlinescript']) && ($tag == 'script' ||
 										(isset($attributes['rel']) && isset($attributes['as']) &&
@@ -2967,40 +3028,13 @@ class GZipHelper {
 							return $string.'>';
 						}
 
-					}
-
-					/*
-					foreach ($matches[1] as $key => $tag) {
-
-						switch (\strtolower($tag)) {
-
-							case 'script':
-
-							//	if ()
-
-								break;
-							case 'style':
-
-								break;
-							case 'link':
-
-								break;
-							case 'frame':
-							case 'iframe':
-
-								break;
-							case 'object':
-
-								break;
-						}
-					}
-					*/
-
+                    }
+                    
 					return $matches[0];
 
 				}, $html);
 			}
-
+			
 			$csp = [];
 
 			if (!empty($options['csp_baseuri'])) {
@@ -3010,7 +3044,7 @@ class GZipHelper {
 
 			foreach($sections as $section) {
 
-				$rule = static::parseCSPData($section, $options['csp'][$section], $options['csp'][$section.'_custom'], $links[$section] ?? [], $options);
+				$rule = static::parseCSPData($section, $options['csp'][$section], $options['csp'][$section.'_custom'], isset($links[$section]) ? $links[$section] : [], $options);
 
 				if (!empty($rule)) {
 
@@ -3120,6 +3154,40 @@ class GZipHelper {
 		return $headers;
 	}
 
+	protected static function parseUrl($url) {
+
+		$result = parse_url($url);
+
+		// match data: blob: etc ...
+		if (preg_match('#^([^:]+\:)[^/]#', $url, $matches)) {
+
+			return $matches[1];
+		}
+
+
+		$name = '';
+
+		if (!isset($result['host'])) {
+
+			$name = "'self'";
+		}
+
+		else {
+
+			if (!isset($result['scheme'])) {
+
+				$name = $scheme.'://'.$result['host'];
+			}
+
+			else {
+
+				$name = $result['scheme'].'://'.$result['host'];
+			}
+		}
+
+		return $name;
+	}
+
 	protected static function nonce () {
 
 		static $nonce = null;
@@ -3134,67 +3202,74 @@ class GZipHelper {
 
 	protected static function parseCSPData($section, $directive, $custom_rules, $links = [], $options = []) {
 
-	//	error_log(var_export([$section, $directive, $custom_rules, $links], true));
-
-		$rule = '';
 		$value = '';
 
 		switch($directive) {
 
 			case 'ignore':
 
-				$rule = '';
-				break;
+				return '';
+            
+            case 'dynamic':
+            case 'mixed':
+
+                if (!empty($links)) {
+
+                    $value .= ' '.implode(' ', $links);
+                }
+                
+                if ($directive == 'mixed' && !empty($custom_rules)) {
+
+					$value .= ' '.$custom_rules;
+                }
+
+                break;
 
 			case 'none':
 
-				$rule = $section."-src 'none'";
-				break;
+				return $section."-src 'none'";
 
 			case 'custom':
 
 				if (!empty($custom_rules)) {
 					
-					$rule = $section.'-src '.$custom_rules;
-				}
-				break;
+					$value .= ' '.$custom_rules;
+                }
+
+                break;
 		}
 		
 		if (!empty($options['csp_inline'.$section])) {
 
-			if (empty($rule)) {
-
-				$rule = $section.'-src';
-			}
-
 			if ($section == 'script') {
 				
-				$rule .= " 'strict-dynamic'";
+				$value .= " 'strict-dynamic'";
 			}
 
 			if ($options['csp_inline'.$section] == 'legacy') {
 				
-				$rule .= " 'unsafe-inline'";
-
-			//	if ($section == 'script') {
-
-			//		$rule .= ' http: https:';
-			//	}
+				$value .= " 'unsafe-inline'";
 			}
 
-			$rule .= " 'nonce-".static::nonce()."'";
+			$value .= " 'nonce-".static::nonce()."'";
 		}
 		
 		if ($section == 'script') {
 
 			if (!empty($options['csp_eval'])) {
 
-				$rule .= " 'unsafe-eval'";
+				$value .= " 'unsafe-eval'";
 			}
-		}
+        }
+        
+        if ($value === '') {
 
-		// 
-		return $rule;
+            return '';
+		}
+		
+		$value = explode(' ', trim($value));
+
+		return $section.'-src '.implode(' ', array_unique($value));
 	}
 	
 	/**

@@ -556,7 +556,7 @@
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="cspenabled" label="PLG_GZIP_FIELD_CSP_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
-                        <option value="0">JNo</option>
+                        <option value="0">JOPTION_CSP_DISPOSITION_DISABLED</option>
                         <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
                         <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
                     </field>
@@ -620,13 +620,15 @@
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
                             <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
-                        <field name="font_custom" label="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSPFONT_HINT" type="text" default="" />
+                        <field name="font_custom" label="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FONT_LABEL" type="text" default="" />
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Image Directive" />
                         <field name="img" label="PLG_GZIP_FIELD_CSP_IMG_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
                         <field name="img_custom" label="PLG_GZIP_FIELD_CSP_IMG_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_IMG_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
@@ -634,9 +636,7 @@
                         <field name="worker" label="PLG_GZIP_FIELD_CSP_WORKER_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
-                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
-                            <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
                         <field name="worker_custom" label="PLG_GZIP_FIELD_CSP_WORKER_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_WORKER_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
@@ -644,9 +644,7 @@
                         <field name="manifest" label="PLG_GZIP_FIELD_CSP_MANIFEST_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
-                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
-                            <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
                         <field name="manifest_custom" label="PLG_GZIP_FIELD_CSP_MANIFEST_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MANIFEST_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
@@ -664,6 +662,7 @@
                             <option value="none">JOPTION_CSP_NONE</option>
                             <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
                             <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
                         </field>
                         <field name="frame_custom" label="PLG_GZIP_FIELD_CSP_FRAME_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FRAME_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FRAME_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
