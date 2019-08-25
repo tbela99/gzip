@@ -58,6 +58,12 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="dns_prefetch" label="PLG_GZIP_FIELD_DNS_PREFETCH_LABEL" description="PLG_GZIP_FIELD_DNS_PREFETCH_DESCRIPTION" type="list" default="">
+                        <option value="">JOPTION_DNS_PREFETCH_IGNORE</option>
+                        <option value="on">JOPTION_DNS_PREFETCH_ON</option>
+                        <option value="off">JOPTION_DNS_PREFETCH_OFF</option>
+
+                    </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Push" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
@@ -88,7 +94,7 @@
                     </field>
 
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
-                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" />
+                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" hint="PLG_GZIP_FIELD_PARSE_URL_ATTR_HINT" />
                 </fields>
             </fieldset>
             <fieldset name="cdn" label="CDN">
@@ -502,6 +508,12 @@
             <fieldset name="security" label="Security">
                 <field type="spacer" label="Security Features" />
                 <fields name="gzip">
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Upgrade-Insecure-Requests" />
+                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
+                        <option value="">JNo</option>
+                        <option value="1">JYes</option>
+                    </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Strict-Transport-Security" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">

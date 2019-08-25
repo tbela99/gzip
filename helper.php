@@ -3063,7 +3063,17 @@ class GZipHelper {
 			}
 		}
 
-		if (intval($options['hsts_maxage']) > 0) {
+		if (!empty($options['upgrade_insecure_requests'])) {
+
+			$headers['Upgrade-Insecure-Requests'] = [$options['upgrade_insecure_requests'], true];
+		}
+
+		if (!empty($options['dns_prefetch'])) {
+
+			$headers['X-DNS-Prefetch-Control'] = [$options['dns_prefetch'], true];
+		}
+
+		if (isset($options['hsts_maxage']) && intval($options['hsts_maxage']) > 0) {
 
 			$dt = new DateTime();
 
