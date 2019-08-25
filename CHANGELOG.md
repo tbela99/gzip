@@ -5,7 +5,7 @@
 - [ ] partly cache security headers
 - [x] add csp level 3 headers
 - [x] add nonce or hash to support inline script and style
-- [ ] fix a regression with images lazy loading in google chrome
+- [x] fix a regression with images lazy loading in google chrome
 - [x] add configurable secure headers (X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, XSS-Protection)
 - [x] add html minification
 - [x] Ignore unsupported images types when optimizing images

@@ -2837,6 +2837,14 @@ class GZipHelper {
 
 		$headers = [];
 
+		
+		$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/headers.php';
+		
+		if (is_file($path)) {
+
+			include $path;
+		}
+
 		if (!empty($options['cspenabled'])) {
 
 			$links = [];
@@ -3065,90 +3073,6 @@ class GZipHelper {
 				}
 				
 				$headers[$options['cspenabled'] == 'enforce' ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only'] = implode('; ', $csp);
-			}
-		}
-
-		if (!empty($options['upgrade_insecure_requests'])) {
-
-			$headers['Upgrade-Insecure-Requests'] = [$options['upgrade_insecure_requests'], true];
-		}
-
-		if (!empty($options['dns_prefetch'])) {
-
-			$headers['X-DNS-Prefetch-Control'] = [$options['dns_prefetch'], true];
-		}
-
-		if (isset($options['hsts_maxage']) && intval($options['hsts_maxage']) > 0) {
-
-			$dt = new DateTime();
-
-			$now = $dt->getTimestamp();
-			$dt->modify($options['hsts_maxage']); 
-
-			$headers['Strict-Transport-Security'] = 'max-age='.($dt->getTimestamp() - $now);
-
-			if (!empty($options['hsts_subdomains'])) {
-
-				$headers['Strict-Transport-Security'] .= '; includeSubDomains';
-			}
-
-			if (!empty($options['hsts_preload'])) {
-
-				$headers['Strict-Transport-Security'] .= '; preload';
-			}
-		}
-
-		if (!empty($options['frameoptions'])) {
-
-			switch($options['frameoptions']) {
-
-				case 'allow-from':
-
-					if (!empty($options['frameoptions_uri'])) {
-
-						$headers['X-Frame-Options'] = [$options['frameoptions'].' '.$options['frameoptions_uri'], true];
-					}
-
-					break;
-				default:
-
-					$headers['X-Frame-Options'] = [$options['frameoptions'], true];
-					break;
-			}
-		}
-
-		if (!empty($options['xcontenttype'])) {
-
-			$headers['X-Content-Type-Options'] = [$options['xcontenttype'], true];
-		}
-
-		if (isset($options['xssprotection'])) {
-
-			switch($options['xssprotection']) {
-
-				case '0':
-				case '1':
-
-					$headers['X-XSS-Protection'] = [$options['xssprotection'].' '.$options['xss_uri'], true];
-					break;
-					
-				case 'block':
-
-					$headers['X-XSS-Protection'] = ['1; mode=block', true];
-					break;
-					
-				case 'report':
-
-					if (!empty($options['xss_uri'])) {
-
-						$headers['X-XSS-Protection'] = ['1; report='.$options['xss_uri'], true];
-					}
-
-					break;
-				default:
-
-					$headers['X-XSS-Protection'] = [$options['xssprotection'], true];
-					break;
 			}
 		}
 
