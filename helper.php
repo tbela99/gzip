@@ -142,30 +142,30 @@ class GZipHelper {
 	
 	public static function preprocessHTML($html, $options = []) {
 
-			$debug = empty($options['debug']) ? '.min' : '';
+		$debug = empty($options['debug']) ? '.min' : '';
 
-			// quick test
-			$hasScript = stripos($html, '<script') !== false || stripos($html, '<link ') !== false;
+		// quick test
+		$hasScript = stripos($html, '<script') !== false || stripos($html, '<link ') !== false;
 
-			$script = '';
-			$css = '';
+		$script = '';
+		$css = '';
 
-			if ($hasScript || !empty($options['imagesvgplaceholder'])) {
+		if ($hasScript || !empty($options['imagesvgplaceholder'])) {
 
-				$script = file_get_contents(__DIR__.'/js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
-				$script .= file_get_contents(__DIR__.'/loader'.$debug.'.js"');
-									
-				if (!empty($options['imagesvgplaceholder'])) {
+			$script = file_get_contents(__DIR__.'/js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
+			$script .= file_get_contents(__DIR__.'/loader'.$debug.'.js"');
+								
+			if (!empty($options['imagesvgplaceholder'])) {
 
-                    $script .=  file_get_contents(__DIR__.'/imagesnojs'.$debug.'.js');
-					$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>';
-				}
-            }
-            
-            if(!empty($script)) {
+				$script .=  file_get_contents(__DIR__.'/imagesloader'.$debug.'.js');
+				$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/css/images.css').'</style>';
+			}
+		}
+		
+		if(!empty($script)) {
 
-                $html = str_replace('</head>', $css.'<script data-position="head" data-ignore="true">'.$script.'</script></head>', $html);
-            }
+			$html = str_replace('</head>', $css.'<script data-position="head" data-ignore="true">'.$script.'</script></head>', $html);
+		}
 
 		return $html;
 	}
@@ -2686,11 +2686,16 @@ class GZipHelper {
                     if ($src !== '') {
 
 	                    $class = !empty($attributes['class']) ? $attributes['class'].' ' : '';
-	                    $attributes['class'] = $class.'image-placeholder image-placeholder-no-js image-placeholder-'.strtolower($options['imagesvgplaceholder']);
+	                    $attributes['class'] = $class.'image-placeholder image-placeholder-'.strtolower($options['imagesvgplaceholder']);
 
 	                    $attributes['src'] = $src;
 						$attributes['data-src'] = $file;
-                    }
+					}
+					
+					if (!empty($options['imagesvgplaceholder'])) {
+
+						$attributes['loading'] = 'lazy';
+					}
 
 	                // responsive images?
                     if ($sizes !== false && !empty($options['imageresize']) && !empty($options['sizes']) && empty($attributes['srcset'])) {

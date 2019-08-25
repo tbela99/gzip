@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "eb3b73b",
+			value: "aabb3e5",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-08-17 15:46:06-04:00",
+			value: "2019-08-25 15:34:51-04:00",
 			enumerable: true
 		},
 		/**
