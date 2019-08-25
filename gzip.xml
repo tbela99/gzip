@@ -509,8 +509,8 @@
                     <field type="spacer" hr="true" />
                     <!--<field type="spacer" label="Upgrade-Insecure-Requests" />-->
                     <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
-                        <option value="">JNo</option>
                         <option value="1">JYes</option>
+                        <option value="">JNo</option>
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Strict-Transport-Security" />
