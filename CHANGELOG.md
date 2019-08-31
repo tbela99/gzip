@@ -1,6 +1,6 @@
 # Change History
 
-# 2.6.0
+# V2.6.0
 
 - partly cache security headers
 - add csp level 3 headers
