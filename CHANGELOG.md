@@ -2,7 +2,7 @@
 
 # 2.6.dev
 
-- [ ] partly cache security headers
+- [x] partly cache security headers
 - [x] add csp level 3 headers
 - [x] add nonce or hash to support inline script and style
 - [x] fix a regression with images lazy loading in google chrome
