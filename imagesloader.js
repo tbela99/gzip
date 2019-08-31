@@ -58,7 +58,7 @@ LIB.ready(function(undef) {
                     img.addEventListener("sourcechange", resize);
                     img.addEventListener("load", resize);
                 }
-                oldImage.classList.remove("image-placeholder-lqip", "image-placeholder-svg", "image-placeholder");
+                oldImage.classList.remove("image-placeholder", "image-placeholder-lqip", "image-placeholder-svg");
                 container.insertBefore(oldImage, container.firstElementChild);
             },
             load: load,
@@ -80,16 +80,16 @@ LIB.ready(function(undef) {
             let container = oldImage;
             oldImage.removeAttribute("data-srcset");
             oldImage.removeAttribute("data-src");
+            oldImage.classList.add("image-placeholder-complete");
             while (container != undef && !container.classList.contains("image-placeholder-wrapper")) {
                 container = container.parentElement;
             }
-            container.classList.add("image-placeholder-complete");
+            //	container.classList.add("image-placeholder-complete");
+                        container.parentElement.insertBefore(oldImage, container);
             setTimeout(function() {
-                //    if (container.parentElement != null) {
-                container.parentElement.insertBefore(oldImage, container);
+                oldImage.classList.remove("image-placeholder-complete");
                 container.parentElement.removeChild(container);
-                //	}
-                        }, 10);
+            }, 10);
         }, 10);
     }
     if (!("IntersectionObserver" in window && "IntersectionObserverEntry" in window && "intersectionRatio" in IntersectionObserverEntry.prototype)) {
