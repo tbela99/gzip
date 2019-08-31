@@ -1,49 +1,53 @@
 # Joomla Website Optimizer Plugin
 
-[https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
-Do you want to improve your website by
+\*_Make your website blazing fast_.\*
 
-- improving loading performance?
-- enable offline first capabilities via service worker?
-- or turn it into a progressive web application?
+This extension provides:
 
-This extension allows you to do all of these things.
+- when the client sends [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/), optimizations are enforced.
+- html, images, javascript and css optimizations (and more) that greatly improve page loading time
+- service worker features like transforming your website into a progressive web application, configure an offline page, offline first application, push notifications, background sync, web share target level 2, network strategy and more ...
+- improve security by providing configurable HTTP secure headers
+- improve security by implementing Content Security Policy level 3 headers
+- improve security by adding Sub Resource Integrity tokens to javascript and css files
+- profile the plugin performance (or your server performance) by using the HTTP server timing headers
 
-There are additional plugins that help optimizing and profiling your page or server
-
-- [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
-- [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
+there are loads of settings provided to help you fine tune your website.
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-- [Joomla Website Optimizer Plugin](#Joomla-Website-Optimizer-Plugin)
-  - [1. General improvements](#1-General-improvements)
-    - [Moving script and css position in the page](#Moving-script-and-css-position-in-the-page)
-  - [1.2 Caching](#12-Caching)
-  - [1.3 Sub Resource Integrity (SRI)](#13-Sub-Resource-Integrity-SRI)
-  - [1.4 Critical CSS Path](#14-Critical-CSS-Path)
-  - [2. Images](#2-Images)
-    - [Responsive images](#Responsive-images)
-  - [3. Javascript Improvements](#3-Javascript-Improvements)
-  - [4. CSS Improvements](#4-CSS-Improvements)
-  - [5. Progressive Web App](#5-Progressive-Web-App)
-    - [Features](#Features)
-    - [5.1. Installable web app](#51-Installable-web-app)
-    - [5.2. Web Share Target Level 2](#52-Web-Share-Target-Level-2)
-    - [5.3. Offline first](#53-Offline-first)
-    - [5.4. Configurable cache](#54-Configurable-cache)
-    - [5.5. Network cache strategies](#55-Network-cache-strategies)
-    - [5.6. Web Push](#56-Web-Push)
-    - [5.7. Service worker router api](#57-Service-worker-router-api)
-    - [5.8. Exclude resources from the service worker management](#58-Exclude-resources-from-the-service-worker-management)
-    - [5.9 Background Sync](#59-Background-Sync)
-  - [6. CDN and Cookieless Domains](#6-CDN-and-Cookieless-Domains)
-  - [7. Misc](#7-Misc)
+- [Joomla Website Optimizer Plugin](#joomla-website-optimizer-plugin)
+  - [1. General improvements](#1-general-improvements)
+    - [Moving script and css position in the page](#moving-script-and-css-position-in-the-page)
+  - [1.2 Caching](#12-caching)
+  - [1.3 Sub Resource Integrity (SRI)](#13-sub-resource-integrity-sri)
+  - [1.4 Critical CSS Path](#14-critical-css-path)
+  - [2. Images](#2-images)
+    - [Responsive images](#responsive-images)
+  - [3. Javascript Improvements](#3-javascript-improvements)
+  - [4. CSS Improvements](#4-css-improvements)
+  - [5. Progressive Web App](#5-progressive-web-app)
+    - [Features](#features)
+    - [5.1. Installable web app](#51-installable-web-app)
+    - [5.2. Web Share Target Level 2](#52-web-share-target-level-2)
+    - [5.3. Offline first](#53-offline-first)
+    - [5.4. Configurable cache](#54-configurable-cache)
+    - [5.5. Network cache strategies](#55-network-cache-strategies)
+    - [5.6. Web Push](#56-web-push)
+    - [5.7. Service worker router api](#57-service-worker-router-api)
+    - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
+    - [5.9 Background Sync](#59-background-sync)
+  - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
+  - [Security](#security)
+  - [8. Misc](#8-misc)
 
 ## 1. General improvements
 
-- advanced page optimizations which drastically improve the page performance score over various tools.
+- HTML minification
+- support of Save-Data header, this means some optimizations will be turned on when this header is provided.
+- advanced optimizations which drastically improve the page performance score over various tools.
 - turn the website into an installable Progressive Web Application
 - Sub-resources integrity check: computed for javascript and css files (for now). see [here](https://hacks.mozilla.org/2015/09/subresource-integrity-in-firefox-43/)
 - Push resources (require http 2 protocol). you can configure which resources will be pushed
@@ -202,8 +206,20 @@ With this API you can automatically replay some or all the requests that fail. Y
 - You can also configure which kind of resource are loaded from these domains.
 - CORS headers are automatically added for responses sent from these domains.
 
-## 7. Misc
+## Security
 
+- Configure Content Security Policy headers to control which resources gets loaded and execiuted in your pages
+- Configure HSTS header
+- Configure X-Frames-Options header
+- Configure X-Content-Type header
+- Configure XSS-Protection header
+- Configure Sub Resource integrity for css and javascript
+
+## 8. Misc
+
+- Configure dns prefetch
 - Preview the changes to the manifest before you save them
 - Joomla administrator is excluded from the service worker cached resources
 - You can secure your Joomla administrator access by defining a secret access token.
+
+more details are available in the [change log](./CHANGELOG.md)

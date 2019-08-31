@@ -17,10 +17,15 @@
  *
  */
 //SW.strategies = (function() {
-const map = new Map();
-const undef = null;
 
-import {isCacheableRequest} from "./sw.iscacheable.js";
+const map = new Map();
+//const undef = null;
+import {
+	undef
+} from '../serviceworker.js';
+import {
+	isCacheableRequest
+} from "./sw.iscacheable.js";
 
 export const strategies = {
 	/**

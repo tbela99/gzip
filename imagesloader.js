@@ -19,11 +19,11 @@ LIB.ready(function(undef) {
     function lazyload() {
         LIB.images.lazy(".image-placeholder").on({
             /**
-             *
-             * @param {HTMLImageElement} img
-             * @param {HTMLImageElement} oldImage
-             */
-            preload: function(img, oldImage) {
+			 *
+			 * @param {HTMLImageElement} img
+			 * @param {HTMLImageElement} oldImage
+			 */
+            preload(img, oldImage) {
                 const legacy = !("currentSrc" in img);
                 if (!legacy) {
                     oldImage.insertAdjacentHTML("beforebegin", "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=\"background-image:url('" + (img.currentSrc || img.src) + "')\">");
@@ -58,37 +58,41 @@ LIB.ready(function(undef) {
                     img.addEventListener("sourcechange", resize);
                     img.addEventListener("load", resize);
                 }
-                oldImage.classList.remove("image-placeholder-lqip", "image-placeholder-svg", "image-placeholder");
+                oldImage.classList.remove("image-placeholder", "image-placeholder-lqip", "image-placeholder-svg");
                 container.insertBefore(oldImage, container.firstElementChild);
             },
-            load: function(img, oldImage) {
-                if (oldImage.dataset.src != undef) {
-                    oldImage.src = oldImage.dataset.src;
-                    //	oldImage.removeAttribute("data-src");
-                                }
-                if (oldImage.dataset.srcset != undef) {
-                    oldImage.srcset = oldImage.dataset.srcset;
-                    //	oldImage.removeAttribute("data-srcset");
-                                }
-                setTimeout(function() {
-                    let container = oldImage;
-                    oldImage.removeAttribute("data-srcset");
-                    oldImage.removeAttribute("data-src");
-                    while (container != undef && !container.classList.contains("image-placeholder-wrapper")) {
-                        container = container.parentElement;
-                    }
-                    container.classList.add("image-placeholder-complete");
-                    setTimeout(function() {
-                        //    if (container.parentElement != null) {
-                        container.parentElement.insertBefore(oldImage, container);
-                        container.parentElement.removeChild(container);
-                        //	}
-                                        }, 10);
-                }, 10);
+            load: load,
+            error(error, img, oldImage) {
+                load(img, oldImage);
             }
         });
     }
-    if (!("IntersectionObserver" in window && "IntersectionObserverEntry" in window && "intersectionRatio" in window.IntersectionObserverEntry.prototype)) {
+    function load(img, oldImage) {
+        if (oldImage.dataset.src) {
+            oldImage.src = oldImage.dataset.src;
+            //	oldImage.removeAttribute("data-src");
+                }
+        if (oldImage.dataset.srcset) {
+            oldImage.srcset = oldImage.dataset.srcset;
+            //	oldImage.removeAttribute("data-srcset");
+                }
+        setTimeout(function() {
+            let container = oldImage;
+            oldImage.removeAttribute("data-srcset");
+            oldImage.removeAttribute("data-src");
+            oldImage.classList.add("image-placeholder-complete");
+            while (container != undef && !container.classList.contains("image-placeholder-wrapper")) {
+                container = container.parentElement;
+            }
+            //	container.classList.add("image-placeholder-complete");
+                        container.parentElement.insertBefore(oldImage, container);
+            setTimeout(function() {
+                oldImage.classList.remove("image-placeholder-complete");
+                container.parentElement.removeChild(container);
+            }, 10);
+        }, 10);
+    }
+    if (!("IntersectionObserver" in window && "IntersectionObserverEntry" in window && "intersectionRatio" in IntersectionObserverEntry.prototype)) {
         const script = document.createElement("script");
         /*script.onreadystatechange =*/        script.onload = lazyload;
         script.defer = true;
@@ -96,8 +100,8 @@ LIB.ready(function(undef) {
         script.src = "{script-src}";
         document.body.appendChild(script);
     } else {
-        if (!("isIntersecting" in window.IntersectionObserverEntry.prototype)) {
-            Object.defineProperty(window.IntersectionObserverEntry.prototype, "isIntersecting", {
+        if (!("isIntersecting" in IntersectionObserverEntry.prototype)) {
+            Object.defineProperty(IntersectionObserverEntry.prototype, "isIntersecting", {
                 get: function() {
                     return this.intersectionRatio > 0;
                 }

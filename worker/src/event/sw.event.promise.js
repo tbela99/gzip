@@ -11,6 +11,9 @@
  */
 
 import {
+	undef
+} from '../serviceworker.js';
+import {
 	Utils
 } from "../utils/sw.utils.js";
 
@@ -20,7 +23,7 @@ import {
 // promisified event api on(event, handler) => resolve(event, [args...])
 // promisified event api on({event: handler, event2: handler2}) => resolve(event, [args...])
 
-const undef = null;
+//const undef = null;
 const extendArgs = Utils.extendArgs;
 
 const Event = {

@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.5.4</version>
+    <version>2.6.0</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>
@@ -25,12 +25,8 @@
         <filename>cacert.pem</filename>
         <filename>loader.js</filename>
         <filename>loader.min.js</filename>
-        <filename>cssloader.js</filename>
-        <filename>cssloader.min.js</filename>
         <filename>imagesloader.js</filename>
         <filename>imagesloader.min.js</filename>
-        <filename>imagesnojs.js</filename>
-        <filename>imagesnojs.min.js</filename>
         <filename>worker_version</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
@@ -42,12 +38,31 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                 </fields>
             </fieldset>
             <fieldset name="http_cache" label="HTTP" addfieldpath="/plugins/system/gzip/fields">
                 <field type="spacer" label="Configure HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="savedata" label="PLG_GZIP_FIELD_SAVE_DATA_LABEL" description="PLG_GZIP_FIELD_SAVE_DATA_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="servertiming" label="PLG_GZIP_FIELD_SERVER_TIMING_LABEL" description="PLG_GZIP_FIELD_SERVER_TIMING_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="dns_prefetch" label="PLG_GZIP_FIELD_DNS_PREFETCH_LABEL" description="PLG_GZIP_FIELD_DNS_PREFETCH_DESCRIPTION" type="list" default="">
+                        <option value="">JOPTION_DNS_PREFETCH_IGNORE</option>
+                        <option value="on">JOPTION_DNS_PREFETCH_ON</option>
+                        <option value="off">JOPTION_DNS_PREFETCH_OFF</option>
+
+                    </field>
+                    <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Push" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
@@ -68,7 +83,7 @@
                         <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
                     </field>
                     <field name="cache_key" label="PLG_GZIP_FIELD_CACHE_KEY_LABEL" description="PLG_GZIP_FIELD_CACHE_KEY_DESCRIPTION" type="text" default="" size="5" pattern="[a-zA-Z0-9@_]+" maxlength="5" class="form-control" />
-                    <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" size="3" first="1" last="24" step="1" type="maxage" class="form-control" default="2months" />
+                    <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="2months" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Misc" />
                     <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
@@ -77,7 +92,7 @@
                     </field>
 
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
-                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" />
+                    <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" hint="PLG_GZIP_FIELD_PARSE_URL_ATTR_HINT" />
                 </fields>
             </fieldset>
             <fieldset name="cdn" label="CDN">
@@ -88,11 +103,15 @@
                     </field>
                     <field name="cdn_access_control_origin" label="PLG_GZIP_FIELD_CDN_ACCESS_CONTROL_ORIGIN_LABEL" type="text" description="PLG_GZIP_FIELD_CDN_CDN_ACCESS_CONTROL_ORIGIN_DESCRIPTION" default="*" />
                     <field name="cdn_redirect" label="PLG_GZIP_FIELD_CDN_REDIRECT_LABEL" type="text" description="PLG_GZIP_FIELD_CDN_REDIRECT_DESCRIPTION" />
+
+                    <field type="spacer" hr="true" />
                     <fields name="cdn">
                         <field name="1" label="PLG_GZIP_FIELD_CDN_0_LABEL" description="PLG_GZIP_FIELD_CDN_0_DESCRIPTION" type="text" />
                         <field name="2" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
                         <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
                     </fields>
+
+                    <field type="spacer" hr="true" />
                     <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="cdn_types" type="checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
                 </fields>
@@ -221,11 +240,11 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
-                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" type="textarea" rows="5" cols="15" default="" />
+                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_CLASS_HINT" type="textarea" rows="5" cols="15" default="" />
+                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_HINT" type="textarea" rows="5" cols="15" default="" />
                 </fields>
             </fieldset>
-            <fieldset name="pwa_app" label="App">
+            <fieldset name="pwa_app" label="Service Worker">
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -240,11 +259,41 @@
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Configure when to display network unavailable page" />
-                    <field name="pwa_offline_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_HINT" type="text" default="" />
-                    <field name="pwa_offline_method" label="PLG_GZIP_FIELD_PWA_OFFLINE_METHOD_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_METHOD_DESCRIPTION" type="list" default="GET" multiple="multiple">
+                    <field name="pwa_offline_enabled" label="PLG_GZIP_FIELD_PWA_OFFLINE_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_ENABLED_DESCRIPTION" class="btn-group" type="radio" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="pwa_offline_method" label="PLG_GZIP_FIELD_PWA_OFFLINE_METHOD_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_METHOD_DESCRIPTION" type="list" class="btn-group" default="GET" multiple="multiple">
                         <option value="GET">JOPTION_PWA_OFFLINE_METHOD_GET</option>
                         <option value="POST">JOPTION_PWA_OFFLINE_METHOD_POST</option>
                     </field>
+                    <field name="pwa_offline_pref" label="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_DESCRIPTION" type="radio" default="html" class="btn-group">
+                        <option value="url">JOPTION_PWA_OFFLINE_PREF_URL</option>
+                        <option value="html">JOPTION_PWA_OFFLINE_PREF_HTML</option>
+                    </field>
+                    <field name="pwa_offline_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_HINT" type="text" default="" />
+                    <field name="pwa_offline_html_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_HINT" type="textarea" rows="15" cols="80" filter="raw" default="&lt;!doctype html&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Site Unreachable&lt;/title&gt;
+&lt;style&gt;
+  body { text-align: center; padding: 150px; }
+  h1 { font-size: 50px; }
+  body { font: 20px Helvetica, sans-serif; color: #333; }
+  article { display: block; text-align: left; width: 650px; margin: 0 auto; }
+  a { color: #dc8100; text-decoration: none; }
+  a:hover { color: #333; text-decoration: none; }
+&lt;/style&gt;
+
+&lt;article&gt;
+    &lt;h1&gt;Page unavailable&lt;/h1&gt;
+    &lt;div&gt;
+        &lt;p&gt;Sorry for the inconvenience but we&amp;rsquo;re are not able to open the page you requested at this time.&lt;/p&gt;
+        &lt;p&gt;&lt;a href=&quot;#&quot; onclick=&quot;location.reload(); return false&quot;&gt;Try again&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/article&gt;
+&lt;script&gt;
+  window.addEventListener(&apos;online&apos;,  function () { location.reload() });
+&lt;/script&gt;" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="App manifest settings" />
                     <field name="pwa_app_manifest" label="PLG_GZIP_FIELD_PWA_MANIFEST_LABEL" description="PLG_GZIP_FIELD_PWA_MANIFEST_DESCRIPTION" type="radio" class="btn-group" default="1">
@@ -455,9 +504,50 @@
                 </fields>
             </fieldset>
             <fieldset name="security" label="Security">
-                <field type="spacer" label="Configure Security" />
-                <field type="spacer" hr="true" />
+                <field type="spacer" label="Security Features" />
                 <fields name="gzip">
+                    <field type="spacer" hr="true" />
+                    <!--<field type="spacer" label="Upgrade-Insecure-Requests" />-->
+                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
+                        <option value="1">JYes</option>
+                        <option value="">JNo</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Strict-Transport-Security" />
+                    <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
+                        <option value="">JNone</option>
+                    </field>
+                    <field name="hsts_subdomains" label="PLG_GZIP_FIELD_HSTS_SUBDOMAINS_LABEL" description="PLG_GZIP_FIELD_HSTS_SUBDOMAINS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="hsts_preload" label="PLG_GZIP_FIELD_HSTS_PRELOAD_LABEL" description="PLG_GZIP_FIELD_HSTS_PRELOAD_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field name="xcontenttype" label="PLG_GZIP_FIELD_X_CONTENT_TYPE_LABEL" description="PLG_GZIP_FIELD_X_CONTENT_TYPE_DESCRIPTION" type="list" default="nosniff">
+                        <option value="">JNone</option>
+                        <option value="nosniff">JOPTION_X_CONTENT_TYPE_NO_SNIFF</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field name="frameoptions" label="PLG_GZIP_FIELD_FRAME_OPTIONS_LABEL" description="PLG_GZIP_FIELD_FRAME_OPTIONS_DESCRIPTION" type="list" default="">
+                        <option value="">JNone</option>
+                        <option value="deny">JOPTION_FRAME_OPTIONS_DENY</option>
+                        <option value="sameorigin">JOPTION_FRAME_OPTIONS_SAMEORIGIN</option>
+                        <option value="allow-from">JOPTION_FRAME_OPTIONS_ALLOW_FROM</option>
+                    </field>
+                    <field name="frameoptions_uri" label="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_LABEL" description="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_FRAME_OPTIONS_URI_HINT" type="url" default="" />
+                    <field type="spacer" hr="true" />
+                    <field name="xssprotection" label="PLG_GZIP_FIELD_XSS_PROTECTION_LABEL" description="PLG_GZIP_FIELD_XSS_PROTECTION_DESCRIPTION" type="list" default="block">
+                        <option value="">JNone</option>
+                        <option value="0">JOPTION_XSS_PROTECTION_DISABLE</option>
+                        <option value="1">JOPTION_XSS_PROTECTION_ENABLE</option>
+                        <option value="block">JOPTION_XSS_PROTECTION_BLOCK</option>
+                        <option value="report">JOPTION_XSS_PROTECTION_REPORT</option>
+                    </field>
+                    <field name="xss_uri" label="PLG_GZIP_XSS_PROTECTION_URI_LABEL" description="PLG_GZIP_FIELD_XSS_PROTECTION_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_XSS_PROTECTION_URI_HINT" type="url" default="" />
+                    <field type="spacer" hr="true" />
                     <field type="spacer" label="Sub Resource Integrity" />
                     <field name="checksum" label="PLG_GZIP_FIELD_CHECKSUM_LABEL" description="PLG_GZIP_FIELD_CHECKSUM_DESCRIPTION" type="list" default="">
                         <option value="none">JNone</option>
@@ -468,7 +558,156 @@
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Misc" />
                     <field name="metagenerator" label="PLG_GZIP_FIELD_METAGENERATOR_LABEL" description="PLG_GZIP_FIELD_METAGENERATOR_DESCRIPTION" type="text" default="" />
-                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" type="text" default="" />
+                    <field name="admin_secret" label="PLG_GZIP_FIELD_ADMIN_SECRET_LABEL" description="PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION" hint="PLG_GZIP_FIELD_ADMIN_SECRET_HINT" type="text" default="" />
+                </fields>
+            </fieldset>
+            <fieldset name="csp" label="CSP">
+                <field type="spacer" label="Content Security Policy" />
+                <field type="spacer" hr="true" />
+                <fields name="gzip">
+                    <field name="cspenabled" label="PLG_GZIP_FIELD_CSP_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
+                        <option value="0">JOPTION_CSP_DISPOSITION_DISABLED</option>
+                        <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
+                        <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
+                    </field>
+                    <field name="csp_baseuri" label="PLG_GZIP_FIELD_CSP_BASE_URI_LABEL" description="PLG_GZIP_FIELD_CSP_BASE_URI_DESCRIPTION" type="list" class="btn-group" default="">
+                        <option value="">JOPION_CSP_BASE_URI_IGNORE</option>
+                        <option value="self">JOPION_CSP_BASE_URI_SELF</option>
+                        <option value="none">JNone</option>
+                    </field>
+                    <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
+                    <field name="csp_eval" label="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="csp_inlinescript" label="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_DESCRIPTION" type="list" class="btn-group" default="1">
+                        <option value="0">JNo</option>
+                        <option value="1">JYes</option>
+                        <option value="legacy">JOPTION_CSP_INLINESCRIPT_LEGACY</option>
+                    </field>
+                    <field name="csp_inlinestyle" label="PLG_GZIP_FIELD_CSP_INLINE_STYLE_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_STYLE_DESCRIPTION" type="list" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                        <option value="legacy">JOPTION_CSP_INLINESTYLE_LEGACY</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <fields name="csp">
+                        <field type="spacer" label="Default Directive" />
+                        <field name="default" label="PLG_GZIP_FIELD_CSP_DEFAULT_LABEL" description="PLG_GZIP_FIELD_CSP_DEFAULT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <!--<option value="dynamic">JOPTION_CSP_DYNAMIC</option>-->
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <!--<option value="mixed">JOPTION_CSP_MIXED</option>-->
+                        </field>
+                        <field name="default_custom" label="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Script Directive" />
+                        <field name="script" label="PLG_GZIP_FIELD_CSP_SCRIPTS_LABEL" description="PLG_GZIP_FIELD_CSP_SCRIPTS_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="script_custom" label="PLG_GZIP_FIELD_CSP_SCRIPT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_SCRIPT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_SCRIPT_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Style Directive" />
+                        <field name="style" label="PLG_GZIP_FIELD_CSP_STYLE_LABEL" description="PLG_GZIP_FIELD_CSP_STYLE_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="style_custom" label="PLG_GZIP_FIELD_CSP_STYLE_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_STYLE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_STYLE_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Font Directive" />
+                        <field name="font" label="PLG_GZIP_FIELD_CSP_FONT_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="font_custom" label="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FONT_CUSTOM_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Image Directive" />
+                        <field name="img" label="PLG_GZIP_FIELD_CSP_IMG_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="img_custom" label="PLG_GZIP_FIELD_CSP_IMG_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_IMG_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_IMG_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Worker Directive" />
+                        <field name="worker" label="PLG_GZIP_FIELD_CSP_WORKER_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="worker_custom" label="PLG_GZIP_FIELD_CSP_WORKER_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_WORKER_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_WORKER_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Manifest Directive" />
+                        <field name="manifest" label="PLG_GZIP_FIELD_CSP_MANIFEST_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="manifest_custom" label="PLG_GZIP_FIELD_CSP_MANIFEST_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MANIFEST_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MANIFEST_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Child Directive" />
+                        <field name="child" label="PLG_GZIP_FIELD_CSP_CHILD_LABEL" description="PLG_GZIP_FIELD_CSP_CHILD_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="child_custom" label="PLG_GZIP_FIELD_CSP_CHILD_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_CHILD_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_CHILD_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Frame Directive" />
+                        <field name="frame" label="PLG_GZIP_FIELD_CSP_FRAME_LABEL" description="PLG_GZIP_FIELD_CSP_FRAME_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="dynamic">JOPTION_CSP_DYNAMIC</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                            <option value="mixed">JOPTION_CSP_MIXED</option>
+                        </field>
+                        <field name="frame_custom" label="PLG_GZIP_FIELD_CSP_FRAME_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_FRAME_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_FRAME_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Object Directive" />
+                        <field name="object" label="PLG_GZIP_FIELD_CSP_OBJECT_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="object_custom" label="PLG_GZIP_FIELD_CSP_OBJECT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_OBJECT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_OBJECT_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Media Directive" />
+                        <field name="media" label="PLG_GZIP_FIELD_CSP_MEDIA_LABEL" description="PLG_GZIP_FIELD_CSP_MEDIA_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="media_custom" label="PLG_GZIP_FIELD_CSP_MEDIA_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_MEDIA_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_MEDIA_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Prefetch Directive" />
+                        <field name="prefetch" label="PLG_GZIP_FIELD_CSP_PREFETCH_LABEL" description="PLG_GZIP_FIELD_CSP_PREFETCH_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="prefetch_custom" label="PLG_GZIP_FIELD_CSP_PREFETCH_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_PREFETCH_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_PREFETCH_HINT" type="text" default="" />
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Connect Directive" />
+                        <field name="connect" label="PLG_GZIP_FIELD_CSP_CONNECT_LABEL" description="PLG_GZIP_FIELD_CSP_CONNECT_DESCRIPTION" type="list" default="ignore">
+                            <option value="ignore">JOPTION_CSP_IGNORE</option>
+                            <option value="none">JOPTION_CSP_NONE</option>
+                            <option value="custom">JOPTION_CSP_CUSTOM</option>
+                        </field>
+                        <field name="connect_custom" label="PLG_GZIP_FIELD_CSP_CONNECT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_CONNECT_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_CONNECT_HINT" type="text" default="" />
+                    </fields>
                 </fields>
             </fieldset>
         </fields>

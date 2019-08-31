@@ -58,6 +58,7 @@ if (!ini_get('zlib.output_compression')) {
 	if (!empty($this->options['cdn_cors'])) {
 		
 		header('Access-Control-Allow-Origin: *', true);
+		header('Access-Control-Expose-Headers: Date');
 	}
 
 	$uri = $_SERVER['REQUEST_URI'];
@@ -170,6 +171,7 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', $mtime));
+	header('Date: ' . gmdate('D, d M Y H:i:s T'));
 
 	if(preg_match('#(text)|(xml)#', $accepted[$ext])) {
 
@@ -194,9 +196,10 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	$dt->modify('+'.$maxage);
+	$maxage = $dt->getTimestamp() - $now;
 
 	header('Accept-Ranges: bytes');
-	header('Cache-Control: public, max-age='.($dt->getTimestamp() - $now).', immutable');
+	header('Cache-Control: public, max-age='.$maxage.', stale-while-revalidate='.(2 * $maxage).', immutable');
 
 	if(!empty($range) && ($range[0] > 0 || $range[1] < $size -1)) {
 
@@ -210,10 +213,11 @@ if (!ini_get('zlib.output_compression')) {
 			fseek($handle, $cur);
 		}
 
+		//1024 * 16 = 16384
 		while(!feof($handle) && $cur <= $end && (connection_status() == 0))
 		{
-			print fread($handle, min(1024 * 16, ($end - $cur) + 1));
-			$cur += 1024 * 16;
+			print fread($handle, min(16384, ($end - $cur) + 1));
+			$cur += 16384;
 		}
 
 		fclose($handle);

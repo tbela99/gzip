@@ -2,10 +2,15 @@
   -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='20');
   filter: blur(20px);
 }
+/*
 .image-placeholder-no-js {
-  position: absolute;
-  opacity: .01;
-  visibility: hidden;
+    position: absolute;
+    opacity: .01;
+    visibility: hidden;
+}
+*/
+.image-placeholder-loaded {
+  transform: translateX(100%);
 }
 .image-placeholder-wrapper {
   position: relative;

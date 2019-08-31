@@ -13,47 +13,47 @@
  * @license     MIT License
  */
 
-!function (LIB, undef) {
-	
-    'use strict;';
+import {
+    //   LIB,
+    undef
+} from "./lib.js";
 
-    const Utils = LIB.Utils;
+import {
+    merge
+} from "./lib.utils.js"
 
-    LIB.Options = {
+export const Options = {
 
-        options: {},
-        setOptions: function (options) {
+    options: {},
+    setOptions: function (options) {
 
-            let key, option, match;
-            const self = this, hasEvent = typeof self.on == 'function';
+        let key, option, match;
+        const self = this,
+            hasEvent = typeof self.on == 'function';
 
-            if(hasEvent) {
+        if (hasEvent) {
 
-                for(key in options) {
+            for (key in options) {
 
-                    option = options[key];
+                option = options[key];
 
-                    if(typeof option == 'function') {
+                if (typeof option == 'function') {
 
-                        match = key.match(/^on(.*)$/);
+                    match = key.match(/^on(.*)$/);
 
-                        if(match != undef) {
+                    if (match != undef) {
 
-                            self.on(match[1], option);
-                            delete options[key];
-                            continue;
-                        }
+                        self.on(match[1], option);
+                        delete options[key];
+                        continue;
                     }
-
-                    self.options[key] = (typeof option == 'object') && option != undef ? Utils.merge(true, option instanceof Array ? [] : {}, option) : option;
                 }
-            }
 
-            else {
-
-                Utils.merge(true, self.options, options);
+                self.options[key] = (typeof option == 'object') && option != undef ? merge(true, option instanceof Array ? [] : {}, option) : option;
             }
+        } else {
+
+            merge(true, self.options, options);
         }
     }
-	
-}(LIB);
+}

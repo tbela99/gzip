@@ -11,26 +11,11 @@
 // @ts-check
 
 import {
-	SW
+	SW,
+	undef
 } from "../serviceworker.js";
 
-const undef = null;
-
-async function offline(event) {
-
-	if (SW.app.offline.url != '' && event.request.mode == 'navigate' && SW.app.offline.methods.includes(event.request.method)) {
-
-		const match = caches.match(SW.app.offline.url);
-
-		if (match != undef) {
-
-			return match;
-		}
-
-		return match;
-	}
-}
-
+//const undef = null;
 /**
  * @param {FetchEvent} event
  */
@@ -48,36 +33,26 @@ self.addEventListener("fetch", (event) => {
 
 				response = await router.handler.handle(event);
 
-				if (!(response instanceof Response)) {
+				if (response instanceof Response) {
 
-					let resp = await SW.routes.resolve('fail', event.request, response);
+					return response;
+				}
 
-					if (resp instanceof Response) {
+				for (response of await SW.routes.resolve('fail', event, response)) {
 
-						response = resp;
+					if (response instanceof Response) {
+
+						return response;
 					}
 				}
 
-				if (response == undef) {
-
-					response = await offline(event);
-
-					if (response == undef) {
-
-						response = await fetch(event.request);
-					}
-				}
-
-				return response;
-
+				// offline page should be returned from the previous loop
 			} catch (error) {
 
 				console.error("😭", error);
-
-				return offline(event);
 			}
 		}
 
-		return fetch(event.request).catch(() => offline(event))
+		return fetch(event.request);
 	})());
 });

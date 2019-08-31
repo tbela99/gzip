@@ -75,7 +75,7 @@ class JFormFieldFileSize extends JFormField
 
 		$html .= '<input type="number" required value="'.intval($this->value).'" min="0" step="1" id="'.$this->id.'_0" '.$attributes.' onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.value+n.options[n.selectedIndex].value">';
 		
-		$html .= ' <select required id="'.$this->id.'_1"'.($disabled || $readonly ? ' disabled' : '').$class.' size="3" onchange="var n=document.getElementById(\''.$this->id.'_0\');document.getElementById(\''.$this->id.'\').value=n.value+this.options[this.selectedIndex].value">';
+		$html .= ' <select required id="'.$this->id.'_1"'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="var n=document.getElementById(\''.$this->id.'_0\');document.getElementById(\''.$this->id.'\').value=n.value+this.options[this.selectedIndex].value">';
 
 		foreach ($options as $option) {
 
