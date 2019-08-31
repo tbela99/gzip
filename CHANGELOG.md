@@ -1,21 +1,21 @@
 # Change History
 
-# 2.6.dev
+# 2.6.0
 
-- [x] partly cache security headers
-- [x] add csp level 3 headers
-- [x] add nonce or hash to support inline script and style
-- [x] fix a regression with images lazy loading in google chrome
-- [x] add configurable secure headers (X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, XSS-Protection)
-- [x] add html minification
-- [x] Ignore unsupported images types when optimizing images
-- [x] add server timing headers for server side performance profiling
-- [x] enforce optimization when [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/) is sent
-- [x] add badges for snyk, current version number and a link to the JED
-- [x] add state-while-revalidate to Cache-Control header
-- [x] fix compatibility issues with Joomla 4
-- [x] fix performance regression when critical css feature or resize css image are enabled
-- [x] expose header date to the service worker
+- partly cache security headers
+- add csp level 3 headers
+- add nonce or hash to support inline script and style
+- fix a regression with images lazy loading in google chrome
+- add configurable secure headers (X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, XSS-Protection)
+- add html minification
+- Ignore unsupported images types when optimizing images
+- add server timing headers for server side performance profiling
+- enforce optimization when [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/) is sent
+- add badges for snyk, current version number and a link to the JED
+- add state-while-revalidate to Cache-Control header
+- fix compatibility issues with Joomla 4
+- fix performance regression when critical css feature or resize css image are enabled
+- expose header date to the service worker
 
 ## V2.5.4
 

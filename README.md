@@ -1,19 +1,20 @@
 # Joomla Website Optimizer Plugin
 
-![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fv.next%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
-Do you want to improve your website by
+\*_Make your website blazing fast_.\*
 
-- improving loading performance?
-- enable offline first capabilities via service worker?
-- or turn it into a progressive web application?
+This extension provides:
 
-This extension allows you to do all of these things.
+- when the client sends [Save-Data header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/), optimizations are enforced.
+- html, images, javascript and css optimizations (and more) that greatly improve page loading time
+- service worker features like transforming your website into a progressive web application, configure an offline page, offline first application, push notifications, background sync, web share target level 2, network strategy and more ...
+- improve security by providing configurable HTTP secure headers
+- improve security by implementing Content Security Policy level 3 headers
+- improve security by adding Sub Resource Integrity tokens to javascript and css files
+- profile the plugin performance (or your server performance) by using the HTTP server timing headers
 
-There are additional plugins that help optimizing and profiling your page or server
-
-- [Server Timing Plugin](https://github.com/tbela99/server-timing) enable the server timing http headers. see [here](https://www.w3.org/TR/server-timing/)
-- [HTML Minifier](https://github.com/tbela99/html-minifier) minify html in an html5 compliant way.
+there are loads of settings provided to help you fine tune your website.
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
@@ -39,7 +40,8 @@ There are additional plugins that help optimizing and profiling your page or ser
     - [5.8. Exclude resources from the service worker management](#58-exclude-resources-from-the-service-worker-management)
     - [5.9 Background Sync](#59-background-sync)
   - [6. CDN and Cookieless Domains](#6-cdn-and-cookieless-domains)
-  - [7. Misc](#7-misc)
+  - [Security](#security)
+  - [8. Misc](#8-misc)
 
 ## 1. General improvements
 
@@ -204,8 +206,18 @@ With this API you can automatically replay some or all the requests that fail. Y
 - You can also configure which kind of resource are loaded from these domains.
 - CORS headers are automatically added for responses sent from these domains.
 
-## 7. Misc
+## Security
 
+- Configure Content Security Policy headers to control which resources gets loaded and execiuted in your pages
+- Configure HSTS header
+- Configure X-Frames-Options header
+- Configure X-Content-Type header
+- Configure XSS-Protection header
+- Configure Sub Resource integrity for css and javascript
+
+## 8. Misc
+
+- Configure dns prefetch
 - Preview the changes to the manifest before you save them
 - Joomla administrator is excluded from the service worker cached resources
 - You can secure your Joomla administrator access by defining a secret access token.
