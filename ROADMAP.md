@@ -2,7 +2,7 @@
 
 ## High priority list
 
-1. oocumentation!
+1. documentation!
 2. implement backgroundFetch API
 3. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
 4. implement [instant page loading](https://instant.page/)
