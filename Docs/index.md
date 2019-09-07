@@ -1,11 +1,6 @@
----
-path: "/help/index"
-title: "Joomla GZIP Plugin Documentation"
----
-
 # Joomla GZIP Plugin Documentation
 
-_V2.6.0_
+_V2.6.1_
 
 - [Joomla GZIP Plugin Documentation](#joomla-gzip-plugin-documentation)
   - [Installing](#installing)

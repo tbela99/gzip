@@ -6,7 +6,7 @@
 2. implement backgroundFetch API
 3. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
 4. implement [instant page loading](https://instant.page/)
-5. Better detect character encoding when amnually editing the offline page HTML
+5. Better detect character encoding when manually editing the offline page HTML
 6. modify service worker cache and network fallback and cache only to attempt an update after a specified time (it will behave like cache and network update with a delayed update)
 7. [bug] When fetch remote scripts is off and a local copy is hosted locally, the local copy should not be used
 8. [feature] Validate integrity data when the integrity attribute is provided for link and script before minifying / merging them together
