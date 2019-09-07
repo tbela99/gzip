@@ -45,7 +45,7 @@
                 </fields>
             </fieldset>
             <fieldset name="http_cache" label="HTTP" addfieldpath="/plugins/system/gzip/fields">
-                <field type="spacer" label="Configure HTTP" />
+                <field type="spacer" label="PLG_GZIP_FIELDSET_HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="savedata" label="PLG_GZIP_FIELD_SAVE_DATA_LABEL" description="PLG_GZIP_FIELD_SAVE_DATA_DESCRIPTION" type="radio" class="btn-group" default="1">
@@ -96,6 +96,8 @@
                 </fields>
             </fieldset>
             <fieldset name="cdn" label="CDN">
+                <field type="spacer" label="PLG_GZIP_FIELDSET_CDN" />
+                <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="cnd_enabled" label="PLG_GZIP_FIELD_CDN_ENABLED_LABEL" description="PLG_GZIP_FIELD_CDN_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
@@ -117,7 +119,7 @@
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
-                <field type="spacer" label="Configure images settings" />
+                <field type="spacer" label="PLG_GZIP_FIELDSET_IMAGES" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="imageenabled" label="PLG_GZIP_FIELD_IMAGE_ENABLED_LABEL" description="PLG_GZIP_FIELD_IMAGE_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
