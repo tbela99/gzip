@@ -1,6 +1,20 @@
 # Change History
 
-# V2.6.0
+## 2.7.0-dev
+
+- [ ] modify service worker cache and network fallback and cache only behavior
+- [ ] Better detect character encoding when manually editing the offline page HTML
+- [ ] Implement instant page loading
+- [ ] Implement backgroundFetch API
+- [ ] use configuration files to build scripts instead of shell commands
+- [ ] missing translation bug good first issue
+- [ ] improved LQIP for jpeg files
+ 
+## 2.6.1-dev
+ 
+- [ ] Add documentation
+  
+## 2.6.0
 
 - partly cache security headers
 - add csp level 3 headers
