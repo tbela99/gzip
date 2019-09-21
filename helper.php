@@ -311,6 +311,9 @@ class GZipHelper {
         return $result;
     }
 
+	/**
+	 * minify css files
+	 */
     public static function js($file, $remote_service = true) {
 
         static $jsShrink;
@@ -347,6 +350,9 @@ class GZipHelper {
         return trim($jsShrink->squeeze($content, false, false), ';');
     }
 
+	/**
+	 * minify css
+	 */
     public static function css($file, $remote_service = true, $path = null) {
 
         static $minifier;
