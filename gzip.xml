@@ -187,11 +187,11 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -218,10 +218,6 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -230,12 +226,16 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="15" cols="45" />
                     <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="critical_path" label="Critical Css">
-                <field type="spacer" label="Critical CSS Path" />
+                <field type="spacer" label="Configure Critical CSS path" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -250,14 +250,14 @@
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
+                        <option value="1">JOPTION_PWAENABLED_ENABLED</option>
+                        <option value="0">JOPTION_PWAENABLED_DISABLED</option>
+                        <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
+                    </field>
                     <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
-                    </field>
-                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                        <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Configure when to display network unavailable page" />
@@ -331,7 +331,7 @@
                 </fields>
             </fieldset>
             <fieldset name="pwa_web_share_target" label="Web Share Target">
-                <field type="spacer" label="Configure share target from mobile device" />
+                <field type="spacer" label="Configure your app to be a target for app data sharing" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Share target settings" />
                 <fields name="gzip">
