@@ -27,8 +27,9 @@ This extension provides:
 
 ## Security
 
-- Content Security Policy Level 3: control execution of scripts, css, frames, workers, etc ...
-- HTTP security headers that provide HSTS, XSS-PROTECTION, X-Frames-Options, etc...
+- Content Security Policy Level 3: control execution of scripts, css, frames, workers
+- HTTP security headers that provide HSTS, XSS-PROTECTION, X-Frames-Options
+- etc ...
 
-- [Online documentation](https://tbela99.github.io/gzip/Docs/dist/)
-- [Change log](./CHANGELOG.md)
+more details available in the [Online documentation](https://tbela99.github.io/gzip/Docs/dist/)
+see the [Change log here](./CHANGELOG.md)
