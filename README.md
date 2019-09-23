@@ -32,4 +32,4 @@ This extension provides:
 - etc ...
 
 more details available in the [Online documentation](https://tbela99.github.io/gzip/Docs/dist/)
-see the [Change log here](./CHANGELOG.md)
+and the [Change log](./CHANGELOG.md)
