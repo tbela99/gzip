@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="" >
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="author" content="Thierry Bela" />
+        <title>Joomla GZIP Plugin Documentation (<em>V2.6.1</em>)</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+        <style>
+    .bd-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1071;
+    }
+
+    pre {
+      background-color: #f4f4f4;
+      padding: 15px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+    }
+
+    .header-big {
+
+      height: 200px;
+      background: url(../images/bg-filter.jpg) no-repeat;
+      background-size: 100% auto;
+      box-shadow: 0 3px 3px 4px rgba(0, 0, 0, 0.37);
+      margin-bottom: 25px;
+    }
+
+    .bd-sidebar {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 4rem;
+      z-index: 1000;
+      height: calc(100vh - 4rem);
+      overflow: auto;
+    }
+
+    .bd-toc-link {
+      display: block;
+      color: rgba(0, 0, 0, .65);
+      padding: .25rem 1.5rem;
+    }
+
+    .nav-level-1>.bd-toc-item>.bd-toc-link {
+
+      font-weight: 600;
+    }
+
+    .nav-level-2>.bd-toc-item>.bd-toc-link {
+
+      font-weight: 500;
+      font-size: .95rem;
+    }
+
+    .nav-level-3>.bd-toc-item {
+
+      padding-left: 1rem;
+    }
+
+    .nav-level-3>.bd-toc-item>.bd-toc-link {
+
+      font-weight: 400;
+      font-size: .85rem;
+    }
+
+    .bd-toc-item {
+      display: block;
+      width: 100%;
+    }
+
+    .side-bar>ul>li>ul>li:not(.open)>a+ul {
+
+      display: none;
+    }
+
+    .nav-level-2>.active>.bd-toc-link {
+      font-weight: 600;
+      color: rgba(0, 0, 0, .85);
+      background-color: transparent;
+    }
+
+    .nav-level-2>.open>.bd-toc-link::after {
+      content: ' \2014 ';
+      text-align: right;
+    }
+
+    figure img {
+      box-shadow: 0 3px 6px rgba(0, 0, 0, .25);
+      margin-bottom: 10px;
+    }
+
+    figure figcaption {
+      font-size: .8rem;
+      color: #777474;
+    }
+  </style>
+</head>
+
+<body>
+    <header class="bd-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#"> </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#general-settings">General Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#http-settings">HTTP Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#cdn">CDN</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#images">Images</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#javascript">Javascript</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#css">CSS</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#critical-css">Critical CSS</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#service-worker">Service Worker</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#web-share-target">Web Share Target</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#network-settings">Network Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#cache">Cache</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#background-sync">Background Sync</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#web-push">Web Push</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#security">Security</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#content-security-policy-csp">Content Security Policy (CSP)</a>
+          </li>
+          <!--
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Another action</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </li>-->
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <div class="d-none d-md-block header-big"></div>
+  <div class="container-fluid">
+    <div class="row flex-xl-nowrap">
+            <div class="col-12 col-md-3 col-xl-2 bd-sidebar d-none d-sm-block">
+        <nav class="side-bar" role="doc-toc">
+<ul class="nav bd-sidenav nav-level-1">
+          <li class="bd-toc-item"><a href="#installing" class="bd-toc-link">Installing</a></li>
+          <li class="bd-toc-item"><a href="#manage-settings" class="bd-toc-link">Manage Settings</a><ul class="nav bd-sidenav nav-level-2">
+          <li class="bd-toc-item"><a href="#general-settings" class="bd-toc-link">General Settings</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#debug" class="bd-toc-link">Debug</a></li>
+          <li class="bd-toc-item"><a href="#minify-html" class="bd-toc-link">Minify HTML</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#http-settings" class="bd-toc-link">HTTP Settings</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable-save-data-support" class="bd-toc-link">Enable Save-Data support</a></li>
+          <li class="bd-toc-item"><a href="#http-server-timing" class="bd-toc-link">HTTP Server Timing</a></li>
+          <li class="bd-toc-item"><a href="#dns-prefetch" class="bd-toc-link">DNS Prefetch</a></li>
+          <li class="bd-toc-item"><a href="#http-push" class="bd-toc-link">HTTP Push</a></li>
+          <li class="bd-toc-item"><a href="#cache-file" class="bd-toc-link">Cache File</a></li>
+          <li class="bd-toc-item"><a href="#hashing-method" class="bd-toc-link">Hashing Method</a></li>
+          <li class="bd-toc-item"><a href="#cache-prefix" class="bd-toc-link">Cache Prefix</a></li>
+          <li class="bd-toc-item"><a href="#max-age" class="bd-toc-link">Max Age</a></li>
+          <li class="bd-toc-item"><a href="#cors-headers" class="bd-toc-link">CORS Headers</a></li>
+          <li class="bd-toc-item"><a href="#custom-mimetypes" class="bd-toc-link">Custom Mimetypes</a></li>
+          <li class="bd-toc-item"><a href="#custom-attributes" class="bd-toc-link">Custom Attributes</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#cdn" class="bd-toc-link">CDN</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable-cdn" class="bd-toc-link">Enable CDN</a></li>
+          <li class="bd-toc-item"><a href="#access-control-allow-origin" class="bd-toc-link">Access Control Allow Origin</a></li>
+          <li class="bd-toc-item"><a href="#redirect-cdn-request" class="bd-toc-link">Redirect CDN Request</a></li>
+          <li class="bd-toc-item"><a href="#cdn1-cdn2-cdn3" class="bd-toc-link">CDN1, CDN2, CDN3</a></li>
+          <li class="bd-toc-item"><a href="#enable-cdn-domain-for-custom-resources-type" class="bd-toc-link">Enable CDN Domain for Custom Resources Type</a></li>
+          <li class="bd-toc-item"><a href="#use-cdn-domain" class="bd-toc-link">Use CDN Domain</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#images" class="bd-toc-link">Images</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#process-images" class="bd-toc-link">Process Images</a></li>
+          <li class="bd-toc-item"><a href="#enforce-width-and-height-attributes" class="bd-toc-link">Enforce Width and Height Attributes</a></li>
+          <li class="bd-toc-item"><a href="#fetch-remote-images" class="bd-toc-link">Fetch Remote Images</a></li>
+          <li class="bd-toc-item"><a href="#convert-images-to-webp" class="bd-toc-link">Convert Images to Webp</a></li>
+          <li class="bd-toc-item"><a href="#ignored-images" class="bd-toc-link">Ignored Images</a></li>
+          <li class="bd-toc-item"><a href="#crop-method" class="bd-toc-link">Crop Method</a></li>
+          <li class="bd-toc-item"><a href="#image-placeholder" class="bd-toc-link">Image Placeholder</a></li>
+          <li class="bd-toc-item"><a href="#responsive-images" class="bd-toc-link">Responsive Images</a></li>
+          <li class="bd-toc-item"><a href="#responsive-image-breakpoints" class="bd-toc-link">Responsive Image Breakpoints</a></li>
+          <li class="bd-toc-item"><a href="#responsive-css-background-images" class="bd-toc-link">Responsive CSS background Images</a></li>
+          <li class="bd-toc-item"><a href="#responsive-css-image-breakpoints" class="bd-toc-link">Responsive CSS Image Breakpoints</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#javascript" class="bd-toc-link">Javascript</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#process-javascript" class="bd-toc-link">Process Javascript</a></li>
+          <li class="bd-toc-item"><a href="#fetch-remotely-hosted-javascript" class="bd-toc-link">Fetch Remotely Hosted Javascript</a></li>
+          <li class="bd-toc-item"><a href="#minify-javascript" class="bd-toc-link">Minify Javascript</a></li>
+          <li class="bd-toc-item"><a href="#merge-javascript" class="bd-toc-link">Merge Javascript</a></li>
+          <li class="bd-toc-item"><a href="#ignore-javascript" class="bd-toc-link">Ignore Javascript</a></li>
+          <li class="bd-toc-item"><a href="#remove-javascript-files" class="bd-toc-link">Remove Javascript Files</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#css" class="bd-toc-link">CSS</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#process-css" class="bd-toc-link">Process CSS</a></li>
+          <li class="bd-toc-item"><a href="#font-display" class="bd-toc-link">Font Display</a></li>
+          <li class="bd-toc-item"><a href="#fetch-remotely-hosted-css" class="bd-toc-link">Fetch Remotely Hosted CSS</a></li>
+          <li class="bd-toc-item"><a href="#minify-css" class="bd-toc-link">Minify CSS</a></li>
+          <li class="bd-toc-item"><a href="#load-css-async" class="bd-toc-link">Load CSS Async</a></li>
+          <li class="bd-toc-item"><a href="#merge-css" class="bd-toc-link">Merge CSS</a></li>
+          <li class="bd-toc-item"><a href="#ignored-javacript-files" class="bd-toc-link">Ignored Javacript files</a></li>
+          <li class="bd-toc-item"><a href="#removed-javacript-files" class="bd-toc-link">Removed Javacript Files</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#critical-css" class="bd-toc-link">Critical CSS</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#parse-critical-css" class="bd-toc-link">Parse Critical CSS</a></li>
+          <li class="bd-toc-item"><a href="#critical-css-rules" class="bd-toc-link">Critical Css Rules</a></li>
+          <li class="bd-toc-item"><a href="#critical-css-selectors" class="bd-toc-link">Critical CSS Selectors</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#service-worker" class="bd-toc-link">Service Worker</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable-service-worker" class="bd-toc-link">Enable Service Worker</a></li>
+          <li class="bd-toc-item"><a href="#debug-service-worker" class="bd-toc-link">Debug Service Worker</a></li>
+          <li class="bd-toc-item"><a href="#enable-offline-page" class="bd-toc-link">Enable Offline Page</a></li>
+          <li class="bd-toc-item"><a href="#offline-method" class="bd-toc-link">Offline Method</a></li>
+          <li class="bd-toc-item"><a href="#prefered-offline-page" class="bd-toc-link">Prefered Offline Page</a></li>
+          <li class="bd-toc-item"><a href="#offline-page-url" class="bd-toc-link">Offline page URL</a></li>
+          <li class="bd-toc-item"><a href="#offline-html-page" class="bd-toc-link">Offline HTML Page</a></li>
+          <li class="bd-toc-item"><a href="#build-manifest-file" class="bd-toc-link">Build Manifest File</a></li>
+          <li class="bd-toc-item"><a href="#app-short-name" class="bd-toc-link">App Short Name</a></li>
+          <li class="bd-toc-item"><a href="#app-name" class="bd-toc-link">App Name</a></li>
+          <li class="bd-toc-item"><a href="#app-description" class="bd-toc-link">App Description</a></li>
+          <li class="bd-toc-item"><a href="#start-url" class="bd-toc-link">Start URL</a></li>
+          <li class="bd-toc-item"><a href="#background-color" class="bd-toc-link">Background Color</a></li>
+          <li class="bd-toc-item"><a href="#theme-color" class="bd-toc-link">Theme Color</a></li>
+          <li class="bd-toc-item"><a href="#display-mode" class="bd-toc-link">Display Mode</a></li>
+          <li class="bd-toc-item"><a href="#cache-urls" class="bd-toc-link">Cache URLs</a></li>
+          <li class="bd-toc-item"><a href="#do-not-cache-urls" class="bd-toc-link">Do Not Cache URLs</a></li>
+          <li class="bd-toc-item"><a href="#apps-icons-directory" class="bd-toc-link">Apps Icons Directory</a></li>
+          <li class="bd-toc-item"><a href="#prefer-native-apps" class="bd-toc-link">Prefer Native Apps</a></li>
+          <li class="bd-toc-item"><a href="#android-app-store-url" class="bd-toc-link">Android App Store Url</a></li>
+          <li class="bd-toc-item"><a href="#ios-app-store-url" class="bd-toc-link">IOS App Store Url</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#web-share-target" class="bd-toc-link">Web Share Target</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable-web-share-target" class="bd-toc-link">Enable Web Share Target</a></li>
+          <li class="bd-toc-item"><a href="#action" class="bd-toc-link">Action</a></li>
+          <li class="bd-toc-item"><a href="#data-transfer-method" class="bd-toc-link">Data Transfer Method</a></li>
+          <li class="bd-toc-item"><a href="#encoding-type" class="bd-toc-link">Encoding Type</a></li>
+          <li class="bd-toc-item"><a href="#use-title-attribute" class="bd-toc-link">Use title attribute</a></li>
+          <li class="bd-toc-item"><a href="#use-text-attribute" class="bd-toc-link">Use text attribute</a></li>
+          <li class="bd-toc-item"><a href="#use-url-attribute" class="bd-toc-link">Use url attribute</a></li>
+          <li class="bd-toc-item"><a href="#enable-file-sharing" class="bd-toc-link">Enable file sharing</a></li>
+          <li class="bd-toc-item"><a href="#title" class="bd-toc-link">Title</a></li>
+          <li class="bd-toc-item"><a href="#text" class="bd-toc-link">Text</a></li>
+          <li class="bd-toc-item"><a href="#url" class="bd-toc-link">Url</a></li>
+          <li class="bd-toc-item"><a href="#file-type-metadata" class="bd-toc-link">File Type Metadata</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#network-settings" class="bd-toc-link">Network Settings</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#default-network-strategy" class="bd-toc-link">Default Network Strategy</a></li>
+          <li class="bd-toc-item"><a href="#images-1" class="bd-toc-link">Images</a></li>
+          <li class="bd-toc-item"><a href="#javacript" class="bd-toc-link">Javacript</a></li>
+          <li class="bd-toc-item"><a href="#css-1" class="bd-toc-link">CSS</a></li>
+          <li class="bd-toc-item"><a href="#fonts" class="bd-toc-link">Fonts</a></li>
+          <li class="bd-toc-item"><a href="#html-documents" class="bd-toc-link">HTML Documents</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#cache" class="bd-toc-link">Cache</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#manage-cache-expiry" class="bd-toc-link">Manage Cache Expiry</a></li>
+          <li class="bd-toc-item"><a href="#max-file-numbers" class="bd-toc-link">Max File Numbers</a></li>
+          <li class="bd-toc-item"><a href="#max-file-size" class="bd-toc-link">Max File Size</a></li>
+          <li class="bd-toc-item"><a href="#default-cache-retention" class="bd-toc-link">Default Cache Retention</a></li>
+          <li class="bd-toc-item"><a href="#image" class="bd-toc-link">Image</a></li>
+          <li class="bd-toc-item"><a href="#javascript-1" class="bd-toc-link">Javascript</a></li>
+          <li class="bd-toc-item"><a href="#css-2" class="bd-toc-link">CSS</a></li>
+          <li class="bd-toc-item"><a href="#fonts-1" class="bd-toc-link">Fonts</a></li>
+          <li class="bd-toc-item"><a href="#html-documents-1" class="bd-toc-link">HTML Documents</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#background-sync" class="bd-toc-link">Background Sync</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#background-sync-1" class="bd-toc-link">Background Sync</a></li>
+          <li class="bd-toc-item"><a href="#sync-methods" class="bd-toc-link">Sync Methods</a></li>
+          <li class="bd-toc-item"><a href="#url-patterns" class="bd-toc-link">URL Patterns</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#web-push" class="bd-toc-link">Web Push</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable" class="bd-toc-link">Enable</a></li>
+          <li class="bd-toc-item"><a href="#app-id" class="bd-toc-link">App ID</a></li>
+          <li class="bd-toc-item"><a href="#api-key" class="bd-toc-link">Api Key</a></li>
+          <li class="bd-toc-item"><a href="#test-user" class="bd-toc-link">Test user</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#security" class="bd-toc-link">Security</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#upgrade-insecure-requests" class="bd-toc-link">Upgrade-Insecure-Requests</a></li>
+          <li class="bd-toc-item"><a href="#maxage" class="bd-toc-link">Maxage</a></li>
+          <li class="bd-toc-item"><a href="#include-subdomains" class="bd-toc-link">Include Subdomains</a></li>
+          <li class="bd-toc-item"><a href="#use-hsts-preload" class="bd-toc-link">Use HSTS Preload</a></li>
+          <li class="bd-toc-item"><a href="#x-content-type-options" class="bd-toc-link">X-Content-Type-Options</a></li>
+          <li class="bd-toc-item"><a href="#x-frames-options" class="bd-toc-link">X-Frames-Options</a></li>
+          <li class="bd-toc-item"><a href="#allow-from-uri" class="bd-toc-link">Allow from URI</a></li>
+          <li class="bd-toc-item"><a href="#xss-protection" class="bd-toc-link">XSS-Protection</a></li>
+          <li class="bd-toc-item"><a href="#subresource-integrity-checksum-sri" class="bd-toc-link">Subresource Integrity Checksum (SRI)</a></li>
+          <li class="bd-toc-item"><a href="#meta-generator" class="bd-toc-link">Meta Generator</a></li>
+          <li class="bd-toc-item"><a href="#admin-area-secret" class="bd-toc-link">Admin Area Secret</a></li>
+          </ul></li>
+          <li class="bd-toc-item"><a href="#content-security-policy-csp" class="bd-toc-link">Content Security Policy (CSP)</a><ul class="nav bd-sidenav nav-level-3">
+          <li class="bd-toc-item"><a href="#enable-csp" class="bd-toc-link">Enable CSP</a></li>
+          <li class="bd-toc-item"><a href="#report-url" class="bd-toc-link">Report URL</a></li>
+          <li class="bd-toc-item"><a href="#base-uri-policy" class="bd-toc-link">Base URI Policy</a></li>
+          <li class="bd-toc-item"><a href="#allow-javascript-eval" class="bd-toc-link">Allow Javascript ‘eval’</a></li>
+          <li class="bd-toc-item"><a href="#allow-inline-scripts" class="bd-toc-link">Allow Inline Scripts</a></li>
+          <li class="bd-toc-item"><a href="#allow-inline-css" class="bd-toc-link">Allow inline CSS</a></li>
+          <li class="bd-toc-item"><a href="#default-directive" class="bd-toc-link">Default Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-settings" class="bd-toc-link">Custom Settings</a></li>
+          <li class="bd-toc-item"><a href="#scripts" class="bd-toc-link">Scripts</a></li>
+          <li class="bd-toc-item"><a href="#custom-script-settings" class="bd-toc-link">Custom Script Settings</a></li>
+          <li class="bd-toc-item"><a href="#styles" class="bd-toc-link">Styles</a></li>
+          <li class="bd-toc-item"><a href="#custom-styles-settings" class="bd-toc-link">Custom Styles Settings</a></li>
+          <li class="bd-toc-item"><a href="#font-directive" class="bd-toc-link">Font Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-font-settings" class="bd-toc-link">Custom Font Settings</a></li>
+          <li class="bd-toc-item"><a href="#image-directive" class="bd-toc-link">Image Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-image-settings" class="bd-toc-link">Custom Image Settings</a></li>
+          <li class="bd-toc-item"><a href="#worker-directive" class="bd-toc-link">Worker Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-worker-settings" class="bd-toc-link">Custom Worker Settings</a></li>
+          <li class="bd-toc-item"><a href="#manifest-directive" class="bd-toc-link">Manifest Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-manifest-settings" class="bd-toc-link">Custom Manifest Settings</a></li>
+          <li class="bd-toc-item"><a href="#child-directive" class="bd-toc-link">Child Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-child-settings" class="bd-toc-link">Custom Child Settings</a></li>
+          <li class="bd-toc-item"><a href="#frame-directive" class="bd-toc-link">Frame Directive</a></li>
+          <li class="bd-toc-item"><a href="#custom-frame-settings" class="bd-toc-link">Custom Frame Settings</a></li>
+          <li class="bd-toc-item"><a href="#object-settings" class="bd-toc-link">Object Settings</a></li>
+          <li class="bd-toc-item"><a href="#custom-object-settings" class="bd-toc-link">Custom Object Settings</a></li>
+          <li class="bd-toc-item"><a href="#media-settings" class="bd-toc-link">Media Settings</a></li>
+          <li class="bd-toc-item"><a href="#custom-media-settings" class="bd-toc-link">Custom Media Settings</a></li>
+          <li class="bd-toc-item"><a href="#prefetch-settings" class="bd-toc-link">Prefetch Settings</a></li>
+          <li class="bd-toc-item"><a href="#custom-prefetch-settings" class="bd-toc-link">Custom Prefetch Settings</a></li>
+          <li class="bd-toc-item"><a href="#connect-settings" class="bd-toc-link">Connect Settings</a></li>
+          <li class="bd-toc-item"><a href="#custom-connect-settings" class="bd-toc-link">Custom Connect Settings</a></li>
+          </ul></li>
+          </ul></li>
+          </ul>
+</nav>
+      </div>
+      <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content" role="main">
+                <h1 class="title">Joomla GZIP Plugin Documentation (<em>V2.6.1</em>)</h1>
+                <!--         <p class="author">Thierry Bela</p>
+         -->
+                        <p>This document explains how to configure the Joomla GZip plugin. it provides:</p>
+<ul>
+<li>optimizations are enforced when the client sends <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/">Save-Data HTTP header</a></li>
+<li>html, images, javascript and css optimizations (and more) that greatly improve page loading time</li>
+<li>service worker features like transforming your website into a progressive web application, configure an offline page, offline first application, push notifications, background sync, web share target level 2, network strategy and more …</li>
+<li>improve security by providing configurable HTTP secure headers</li>
+<li>improve security by implementing Content Security Policy level 3 headers</li>
+<li>improve security by adding Sub Resource Integrity tokens to javascript and css files</li>
+<li>profile the plugin performance (or your server performance) by using the HTTP server timing headers</li>
+</ul>
+<p>There are loads of settings provided to help you fine tune your website.</p>
+<h2 id="installing">Installing</h2>
+<p>This plugin has been developed for Joomla version 3 and 4. It requires rewrite rules to be enabled in order to work properly</p>
+<h2 id="manage-settings">Manage Settings</h2>
+<h3 id="general-settings">General Settings</h3>
+<p>Configure general settings</p>
+<figure>
+<img src="../images/general-settings.PNG" alt="" /><figcaption>General settings</figcaption>
+</figure>
+<h4 id="debug">Debug</h4>
+<p>If yes, load plugin’s unminified css and javascript files, otherwise load minified versions.</p>
+<h4 id="minify-html">Minify HTML</h4>
+<p>Enable or disable HTML minification.</p>
+<h3 id="http-settings">HTTP Settings</h3>
+<p>Configure HTTP settings</p>
+<figure>
+<img src="../images/http-settings.PNG" alt="" /><figcaption>HTTP settings</figcaption>
+</figure>
+<h4 id="enable-save-data-support">Enable Save-Data support</h4>
+<p>If yes, when the client sends Save-Data headers, optimizations are enforced regardless which settings you have configured. Enforced optimizations are</p>
+<ul>
+<li>HTML minification</li>
+<li>Image processing: conversion, size enforcement, resize css images</li>
+<li>CSS: Async loading, css minification, fetching remote css files, critical css settings</li>
+<li>Javascript: merge, minify, fetch remote javascript files</li>
+</ul>
+<h4 id="http-server-timing">HTTP Server Timing</h4>
+<p>Send HTTP Server Timing headers. They can be viewed in the google chrome network panel. Click on the network panel -&gt; Click on your web page -&gt; Click on the timing tab on the right. It should be turned off on production. ps: this helped me spot a <a href="https://github.com/tbela99/gzip/issues/38">regression in the image processing</a> that has since been fixed</p>
+<figure>
+<img src="../images/Server-Timing.PNG" alt="" /><figcaption>Server Timing</figcaption>
+</figure>
+<h4 id="dns-prefetch">DNS Prefetch</h4>
+<p>Enable or disable DNS prefetch</p>
+<ul>
+<li>Ignore: let the browser decide</li>
+<li>Enabled: tell the browser to enable DNS prefetch</li>
+<li>Disabled: tell the browser to turn off DNS prefetch</li>
+</ul>
+<h4 id="http-push">HTTP Push</h4>
+<p>Choose which resource type will be pushed to the browser using HTTP push. Your web server need to use HTTP/2 for this feature to work properly.</p>
+<h4 id="cache-file">Cache File</h4>
+<p>If Yes send file with http caching headers. This helps loading the page faster on the next visit because the file will be loaded from the browser cache instead of the network. Whenever a file is modified a new URL is generated so that the user will not see outdated content.</p>
+<h4 id="hashing-method">Hashing Method</h4>
+<p>Algorithm chosen when generating cached URL.</p>
+<ul>
+<li>Time: use file last modified time</li>
+<li>Etag: use file content instead of last modified time.</li>
+</ul>
+<h4 id="cache-prefix">Cache Prefix</h4>
+<p>Cached URLs prefix.</p>
+<h4 id="max-age">Max Age</h4>
+<p>Control HTTP caching. If the value is large enough, the files are stored in the browser cache.</p>
+<h4 id="cors-headers">CORS Headers</h4>
+<p>If yes send CORS headers when cached files are requested.</p>
+<h4 id="custom-mimetypes">Custom Mimetypes</h4>
+<p>Extend the type of files that support HTTP caching. By default the plugin will cache images, javascript, css, fonts, xml. If you want to add pdf and psd files for example you will add this</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1"></a>  pdf application/octetstream</span>
+<span id="cb1-2"><a href="#cb1-2"></a>  psd application/octetstream</span></code></pre></div>
+<h4 id="custom-attributes">Custom Attributes</h4>
+<p>Extend the list of attributes scanned in order to get urls of resources to cache. If you use lazylaoding, you might want to use custom attributes in order to store full size image. You can specify these here like that</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1"></a>  data-href</span>
+<span id="cb2-2"><a href="#cb2-2"></a>  data-src</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  data-srcset</span></code></pre></div>
+<h3 id="cdn">CDN</h3>
+<p>Configure CDN settings.</p>
+<p>This feature allow you to serve files from a different cookieless domain on your server. You create a different domain that point to the same root as your web site.</p>
+<figure>
+<img src="../images/cdn-settings.PNG" alt="" /><figcaption>CDN settings</figcaption>
+</figure>
+<h4 id="enable-cdn">Enable CDN</h4>
+<p>Enable or disable the CDN feature.</p>
+<h4 id="access-control-allow-origin">Access Control Allow Origin</h4>
+<p>Value sent in the <em>Access Control Allow Origin</em> HTTP header. The default value is <em>*</em></p>
+<h4 id="redirect-cdn-request">Redirect CDN Request</h4>
+<p>If a user access your cdn host name directly, he will be redirected to the url you specify here.</p>
+<h4 id="cdn1-cdn2-cdn3">CDN1, CDN2, CDN3</h4>
+<p>CDN host names from which files will be loaded.</p>
+<h4 id="enable-cdn-domain-for-custom-resources-type">Enable CDN Domain for Custom Resources Type</h4>
+<p>You can specify which custom resources will be served from your custom CDN. you may for example serve pdf from you cdn by adding this for example</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1"></a>  pdf application/octetstream</span></code></pre></div>
+<h4 id="use-cdn-domain">Use CDN Domain</h4>
+<p>Specify Which resource are served from CDN domains.</p>
+<h3 id="images">Images</h3>
+<p>Configure images settings.</p>
+<figure>
+<img src="../images/images-settings.PNG" alt="" /><figcaption>Images settings</figcaption>
+</figure>
+<h4 id="process-images">Process Images</h4>
+<p>Turn images feature ON or OFF. Alt attribute is also enforced on HTML images when this setting is enabled</p>
+<h4 id="enforce-width-and-height-attributes">Enforce Width and Height Attributes</h4>
+<p>Whether or not enforce width and height attributes for all HTML &lt;IMG&gt; tags</p>
+<h4 id="fetch-remote-images">Fetch Remote Images</h4>
+<p>Fetch images hosted on remote hosts and store them locally.</p>
+<h4 id="convert-images-to-webp">Convert Images to Webp</h4>
+<p>Convert images to Webp. Webp produce smaller images than jpg or png.</p>
+<h4 id="ignored-images">Ignored Images</h4>
+<p>Images that match any pattern you specify here will be ignored. Example</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a>  images/optimized/</span>
+<span id="cb4-2"><a href="#cb4-2"></a>  images/thumbnails/</span></code></pre></div>
+<h4 id="crop-method">Crop Method</h4>
+<p>Algorithm used when resizing images. Values are</p>
+<ul>
+<li>Default</li>
+<li>Center</li>
+<li>Entropy</li>
+<li>Face Detection</li>
+</ul>
+<h4 id="image-placeholder">Image Placeholder</h4>
+<p>Whether or not use an image placeholder. <strong>Choosing a placeholder algorithm will enable images lazyloading</strong>. Values are</p>
+<ul>
+<li>None: disable lazyloading</li>
+<li>SVG: use an svg image as the placeholder</li>
+<li>Low Quality Image: generate a low quality image from the picture.</li>
+</ul>
+<h4 id="responsive-images">Responsive Images</h4>
+<p>Enable or disable automatic generation of responsive images. Responsive images are generated for all the breakpoints you select</p>
+<h4 id="responsive-image-breakpoints">Responsive Image Breakpoints</h4>
+<p>Selected breakpoints from which responsive images will be generated. The algorithm used is whatever you have specified in the <em>CROP Method</em> parameter</p>
+<h4 id="responsive-css-background-images">Responsive CSS background Images</h4>
+<p>Enable or disable automatic generation of css background images. Responsive css are generated for the css breakpoints you select</p>
+<h4 id="responsive-css-image-breakpoints">Responsive CSS Image Breakpoints</h4>
+<p>Selected breakpoints from which css background responsive images will be generated. The algorithm used is whatever you have specified in the <em>CROP Method</em> parameter</p>
+<h3 id="javascript">Javascript</h3>
+<p>Configure Javascript settings.</p>
+<figure>
+<img src="../images/javascript-settings.PNG" alt="" /><figcaption>Javascript settings</figcaption>
+</figure>
+<h4 id="process-javascript">Process Javascript</h4>
+<p>Enable or disable javascript processing</p>
+<h4 id="fetch-remotely-hosted-javascript">Fetch Remotely Hosted Javascript</h4>
+<p>Fetch javascript files hosted on remote hosts like cdn and store them locally. The local copy will be used instead.</p>
+<h4 id="minify-javascript">Minify Javascript</h4>
+<p>Minify inline javascript and javascript files</p>
+<h4 id="merge-javascript">Merge Javascript</h4>
+<p>Enable or disable merging javascript files together</p>
+<h4 id="ignore-javascript">Ignore Javascript</h4>
+<p>If you want to exclude a javascript file from processing, add a pattern to match that file here. For example you might have an obligation to run a file from a remote cdn. Adding it here will reven fetching that file locally</p>
+<h4 id="remove-javascript-files">Remove Javascript Files</h4>
+<p>Remove a javascript file from the page. Any file that matches the pattern provided is removed from the page.</p>
+<h3 id="css">CSS</h3>
+<p>Configure CSS settings.</p>
+<figure>
+<img src="../images/css-settings.PNG" alt="" /><figcaption>CSS settings</figcaption>
+</figure>
+<h4 id="process-css">Process CSS</h4>
+<p>Enable or disable CSS processing</p>
+<h4 id="font-display">Font Display</h4>
+<p>Set font-display css property. It requires Parse Critical CSS settings must be enabled</p>
+<h4 id="fetch-remotely-hosted-css">Fetch Remotely Hosted CSS</h4>
+<p>Fetch CSS files hosted on remote servers.</p>
+<h4 id="minify-css">Minify CSS</h4>
+<p>Enable or disable merging css files together</p>
+<h4 id="load-css-async">Load CSS Async</h4>
+<p>Asyncronously load css so that page rendering is not blocked while css files are loading</p>
+<h4 id="merge-css">Merge CSS</h4>
+<p>Enable or disable merging css files together</p>
+<h4 id="ignored-javacript-files">Ignored Javacript files</h4>
+<p>If you want to exclude a css file from processing add a pattern that match that file here.</p>
+<h4 id="removed-javacript-files">Removed Javacript Files</h4>
+<p>Remove a css file from the page. Any file that matches the pattern provided is removed from the page</p>
+<h3 id="critical-css">Critical CSS</h3>
+<p>Configure Critical CSS path.</p>
+<figure>
+<img src="../images/critical-css-settings.PNG" alt="" /><figcaption>Critical CSS settings</figcaption>
+</figure>
+<h4 id="parse-critical-css">Parse Critical CSS</h4>
+<p>Enable or disable Critical CSS processing</p>
+<h4 id="critical-css-rules">Critical Css Rules</h4>
+<p>Add CSS that will be included with the extracted critical css. In general the classes you add there should not contain absolute measures but percentage. Otherwise responsive design might be broken. Example</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">.container</span> {</span>
+<span id="cb5-2"><a href="#cb5-2"></a> <span class="kw">max-width</span>: <span class="dv">100</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="fu">.col-sm-10</span> {</span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a> <span class="kw">width</span>: <span class="dv">10</span><span class="dt">%</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>}</span></code></pre></div>
+<h4 id="critical-css-selectors">Critical CSS Selectors</h4>
+<p>List of css selectors that will be extracted from the page in order to build the critical css. Example</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode css"><code class="sourceCode css"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">.nav</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>header</span></code></pre></div>
+<h3 id="service-worker">Service Worker</h3>
+<p>Configure progressive web application settings</p>
+<figure>
+<img src="../images/service-worker-settings.PNG" alt="" /><figcaption>Service Worker settings</figcaption>
+</figure>
+<h4 id="enable-service-worker">Enable Service Worker</h4>
+<p>Configure the service worker. Values are</p>
+<ul>
+<li>Enabled: Activate the service worker</li>
+<li>Disabled:This will not deactivate the service worker if it is already running in the browser. The service worker initialization script will not be included in the pages.</li>
+<li>Force Uninstall: Actively remove the service worker from the browser</li>
+</ul>
+<h4 id="debug-service-worker">Debug Service Worker</h4>
+<p>Enable or disable debug mode in the service worker.</p>
+<ul>
+<li>Yes: Use unminified files from the service worker. Also log messages in the browser console</li>
+<li>No: Use minified files from the service worker. Only error messages are logged into the browser console</li>
+</ul>
+<h4 id="enable-offline-page">Enable Offline Page</h4>
+<p>Enable or disable offline page settings. Offline page is shown whenever the browser cannot load the page.</p>
+<h4 id="offline-method">Offline Method</h4>
+<p>Configure which requests are intercepted by the service worker. The service worker will intercept the requests that use the method selected here</p>
+<h4 id="prefered-offline-page">Prefered Offline Page</h4>
+<p>Configure which method to use in order to display the offline page. You have two ways of specifying the offline page</p>
+<ul>
+<li>URL: use ‘Offline Page URL’ setting</li>
+<li>HTML: use ‘Offline HTML Page’ setting</li>
+</ul>
+<h4 id="offline-page-url">Offline page URL</h4>
+<p>Specify the URL from which the offline page will be loaded</p>
+<h4 id="offline-html-page">Offline HTML Page</h4>
+<p>Provide HTML content of the offline page</p>
+<p>These settings control the service worker manifest file</p>
+<h4 id="build-manifest-file">Build Manifest File</h4>
+<p>Enable or disable the manifest file. The manifest file is used to configure the progressive app settings. For more information about the manifest settings go to this <a href="https://developer.mozilla.org/en-US/docs/Web/Manifest">mdn page</a></p>
+<h4 id="app-short-name">App Short Name</h4>
+<p>Provide the app short name</p>
+<h4 id="app-name">App Name</h4>
+<p>Provide the app name</p>
+<h4 id="app-description">App Description</h4>
+<p>Provide app description</p>
+<h4 id="start-url">Start URL</h4>
+<p>Provide the URL of the start page of your progressive web application once it is installed</p>
+<h4 id="background-color">Background Color</h4>
+<p>Provide the background color</p>
+<h4 id="theme-color">Theme Color</h4>
+<p>Provide the app theme color</p>
+<h4 id="display-mode">Display Mode</h4>
+<p>Configure the app display mode</p>
+<h4 id="cache-urls">Cache URLs</h4>
+<p>Provide a list of urls available in offline mode.</p>
+<h4 id="do-not-cache-urls">Do Not Cache URLs</h4>
+<p>Provide a list of urls that will never be cached by the service worker</p>
+<h4 id="apps-icons-directory">Apps Icons Directory</h4>
+<p>Select the directory that contains your app icons. The directory must be located under the /images folder</p>
+<h4 id="prefer-native-apps">Prefer Native Apps</h4>
+<p>Indicate whether native apps should be preferred over this app</p>
+<h4 id="android-app-store-url">Android App Store Url</h4>
+<p>Android app associated with this app</p>
+<h4 id="ios-app-store-url">IOS App Store Url</h4>
+<p>IOS app associated with this app</p>
+<h3 id="web-share-target">Web Share Target</h3>
+<p>Configure your app to be a target for app data sharing. This plugin implements Web Share Target Level 2</p>
+<figure>
+<img src="../images/web-share-target-settings.PNG" alt="" /><figcaption>Web Share Target settings</figcaption>
+</figure>
+<h4 id="enable-web-share-target">Enable Web Share Target</h4>
+<p>Enable or disable web share target feature</p>
+<h4 id="action">Action</h4>
+<p>The url where data shared with your app are sent. It can be a relative URL</p>
+<h4 id="data-transfer-method">Data Transfer Method</h4>
+<p>The method used to send data to your action url</p>
+<h4 id="encoding-type">Encoding Type</h4>
+<p>The encoding used by the action request. If you enable file transfer then the encoding type is set to multipart/formdata</p>
+<p>These fields configure the payload sent to your action url</p>
+<h4 id="use-title-attribute">Use title attribute</h4>
+<p>Enable or disable the title attribute</p>
+<h4 id="use-text-attribute">Use text attribute</h4>
+<p>Enable or disable the text attribute</p>
+<h4 id="use-url-attribute">Use url attribute</h4>
+<p>Enable or disable the url attribute</p>
+<h4 id="enable-file-sharing">Enable file sharing</h4>
+<p>Enable file sharing support allow your app to receive pictures shared by the users from their mobile phone or tablet</p>
+<h4 id="title">Title</h4>
+<p>Rename the title field to a name suitable to your application</p>
+<h4 id="text">Text</h4>
+<p>Rename the text field to a name suitable to your application</p>
+<h4 id="url">Url</h4>
+<p>Rename the url field to a name suitable to your application</p>
+<h4 id="file-type-metadata">File Type Metadata</h4>
+<p>A JSON metadata defining which files are accepted by your application. This example show an example of configuration that accepts both csv and jpeg files</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1"></a><span class="ot">[</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">{</span><span class="er">&#39;name&#39;</span><span class="fu">:</span> <span class="er">&#39;records&#39;</span><span class="fu">,</span> <span class="er">&#39;accept&#39;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">&#39;text/csv&#39;</span><span class="ot">,</span> <span class="er">&#39;.csv&#39;</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">{</span><span class="er">&#39;name&#39;</span><span class="fu">:</span> <span class="er">&#39;image&#39;</span><span class="fu">,</span> <span class="er">&#39;accept&#39;</span><span class="fu">:</span> <span class="er">&#39;image/jpg&#39;</span><span class="fu">}</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="ot">]</span></span></code></pre></div>
+<h3 id="network-settings">Network Settings</h3>
+<p>Configure the service worker network strategies. You can customize different network strategies for different resource types</p>
+<figure>
+<img src="../images/network-settings.PNG" alt="" /><figcaption>Network settings</figcaption>
+</figure>
+<p>Network strategies define how the service worker should handle network requests. Implemented strategies are</p>
+<ul>
+<li>Use Default: Use the value configured as <strong>Default Network Startegy</strong></li>
+<li>None: do not intercept network requests</li>
+<li>Network and Cache Fallback: attempt to load resource from the network. It the request fails attempt to load it from the cache</li>
+<li>Cache and Network Fallback: if the resource does not exist in the cache, load it from the network and put it in the cache</li>
+<li>Cache and Network Update: load the resource from the browser cache, fetch and cache the resource in the background</li>
+<li>Cache Only: load the resource from the cache. No network request will be attempted</li>
+</ul>
+<h4 id="default-network-strategy">Default Network Strategy</h4>
+<p>Define the default network strategy</p>
+<h4 id="images-1">Images</h4>
+<p>Defines the network strategy used for images</p>
+<h4 id="javacript">Javacript</h4>
+<p>Defines the network strategy used for javascript files</p>
+<h4 id="css-1">CSS</h4>
+<p>Defines the network strategy used for css files</p>
+<h4 id="fonts">Fonts</h4>
+<p>Defines the network strategy used for fonts</p>
+<h4 id="html-documents">HTML Documents</h4>
+<p>Defines the network strategy used for html documents</p>
+<h3 id="cache">Cache</h3>
+<p>Configure the service worker cache settings</p>
+<figure>
+<img src="../images/cache-settings.PNG" alt="" /><figcaption>Cache settings</figcaption>
+</figure>
+<h4 id="manage-cache-expiry">Manage Cache Expiry</h4>
+<p>Enable or disable cache management</p>
+<h4 id="max-file-numbers">Max File Numbers</h4>
+<p>The maximum number of files allowed in the cache. <em>0</em> means no limit</p>
+<h4 id="max-file-size">Max File Size</h4>
+<p>The maximum size of a cacheable file</p>
+<h4 id="default-cache-retention">Default Cache Retention</h4>
+<p>The maximum caching duration for a file</p>
+<h4 id="image">Image</h4>
+<p>Cache setting for images</p>
+<h4 id="javascript-1">Javascript</h4>
+<p>Cache setting for javascript</p>
+<h4 id="css-2">CSS</h4>
+<p>Cache setting for CSS file</p>
+<h4 id="fonts-1">Fonts</h4>
+<p>Cache setting for fonts</p>
+<h4 id="html-documents-1">HTML Documents</h4>
+<p>Cache setting for HTML documents</p>
+<h3 id="background-sync">Background Sync</h3>
+<p>Configure the service worker cache settings</p>
+<figure>
+<img src="../images/background-sync-settings.PNG" alt="" /><figcaption>Background sync settings</figcaption>
+</figure>
+<h4 id="background-sync-1">Background Sync</h4>
+<p>Configure background sync feature</p>
+<ul>
+<li>Disabled: disable background sync</li>
+<li>Enabled: enable background sync</li>
+<li>Custom: enable background sync only for requests that match the provided pattern</li>
+</ul>
+<h4 id="sync-methods">Sync Methods</h4>
+<p>Sync requets that match the selected methods</p>
+<ul>
+<li>GET: sync GET requests</li>
+<li>POST: sync POST requests</li>
+</ul>
+<h4 id="url-patterns">URL Patterns</h4>
+<p>If <em>Background Sync</em> is set to <em>Custom</em> then sync the requests that match the provided settings</p>
+<h3 id="web-push">Web Push</h3>
+<p>Configure web push settings using One Signal SDK</p>
+<figure>
+<img src="../images/background-sync-settings.PNG" alt="" /><figcaption>Background sync settings</figcaption>
+</figure>
+<h4 id="enable">Enable</h4>
+<p>Enable or disable web push feature</p>
+<h4 id="app-id">App ID</h4>
+<p>One signal app ID</p>
+<h4 id="api-key">Api Key</h4>
+<p>One Signal api key</p>
+<h4 id="test-user">Test user</h4>
+<p>One signal test user ID</p>
+<h3 id="security">Security</h3>
+<p>Configure security features</p>
+<figure>
+<img src="../images/security-settings.PNG" alt="" /><figcaption>Security settings</figcaption>
+</figure>
+<p>Configure security settings such as XSS protection or HSTS</p>
+<h4 id="upgrade-insecure-requests">Upgrade-Insecure-Requests</h4>
+<p>Redirect http to https</p>
+<h4 id="maxage">Maxage</h4>
+<p>Strict-Transport-Security maxage</p>
+<h4 id="include-subdomains">Include Subdomains</h4>
+<p>Include subdomains in the HSTS header</p>
+<h4 id="use-hsts-preload">Use HSTS Preload</h4>
+<p>Make your web site available with https only. For more information, please see <a href="https://hstspreload.org/">https://hstspreload.org/</a></p>
+<h4 id="x-content-type-options">X-Content-Type-Options</h4>
+<p>Configure X-Content-Type-Options header. Values are</p>
+<ul>
+<li>None: do not send the header</li>
+<li>No Sniff: send nosniff</li>
+</ul>
+<h4 id="x-frames-options">X-Frames-Options</h4>
+<p>Configure the X-Frames-Options header. Values are</p>
+<ul>
+<li>None: do not override the header</li>
+<li>Deny: set the value to DENY</li>
+<li>Same Origin: Set the value to SAME_ORIGIN</li>
+<li>Allow From an Origin: allow frame inclusion from the url provided in <em>Allow from URI</em> setting</li>
+</ul>
+<h4 id="allow-from-uri">Allow from URI</h4>
+<p>Allow your website to be embedded from this this URI. X-Frame-Options value must be set to <em>‘Allow from an origin’</em> for this to work</p>
+<h4 id="xss-protection">XSS-Protection</h4>
+<p>Configure XSS-Protection header. Values are</p>
+<ul>
+<li>None: do not override the header</li>
+<li>Disable: do not send the header</li>
+<li>Filter: enable XSS-Protection filtering. The browser will sanitize the page</li>
+<li>Block: enable XSS-Protection filtering. The browser will block page rendering if anattack is detected</li>
+<li>Block and Report: enable XSS-Protection filtering. The browser will sanitize the page and report the violation to the URI configured with <em>XSS Report URL</em> setting</li>
+</ul>
+<h4 id="subresource-integrity-checksum-sri">Subresource Integrity Checksum (SRI)</h4>
+<p>Prevent file tampering by adding a signature to the HTML tag. This feature is used for css and javascript only. Values are</p>
+<ul>
+<li>None: do not set the SRI</li>
+<li>SHA256: compute SRI using SHA256</li>
+<li>SHA384: compute SRI using SHA384</li>
+<li>SHA512: compute SRI using SHA512</li>
+</ul>
+<h4 id="meta-generator">Meta Generator</h4>
+<p>Change the value of the meta generator header</p>
+<h4 id="admin-area-secret">Admin Area Secret</h4>
+<p>Configure the secret token used to access the Joomla administrator. For example if you configure <em>secret123</em> as your secret token, you will need to access your joomla administrator by adding <em>?secret123</em> at the end of the url</p>
+<pre class="http"><code>https://www.mywebsite.com/administrator/?secret123</code></pre>
+<h3 id="content-security-policy-csp">Content Security Policy (CSP)</h3>
+<p>Configure Content Security Policy Level 3 features</p>
+<figure>
+<img src="../images/content-security-policy-settings.PNG" alt="" /><figcaption>Content security policy settings</figcaption>
+</figure>
+<h4 id="enable-csp">Enable CSP</h4>
+<p>Configure CSP policies. Values are</p>
+<ul>
+<li>Disabled: disable CSP feature</li>
+<li>Report Only: CSP settings are not enforced but any violation is sent to the url configured with <em>Report URL</em> setting</li>
+<li>Enforce: apply the CSP settings</li>
+</ul>
+<h4 id="report-url">Report URL</h4>
+<p>CSP violation reports are sent to this url</p>
+<h4 id="base-uri-policy">Base URI Policy</h4>
+<p>Restricts the urls which can be used in a document’s &lt;base&gt; element. Values are</p>
+<ul>
+<li>Ignore: do not set tbe value</li>
+<li>‘Self’: set the value to ‘Self’</li>
+<li>None: set the value to <em>‘none’</em></li>
+</ul>
+<h4 id="allow-javascript-eval">Allow Javascript ‘eval’</h4>
+<p>Enable or disable javascript <em>‘eval’</em> function</p>
+<h4 id="allow-inline-scripts">Allow Inline Scripts</h4>
+<p>Control inline scripts execution. Values are</p>
+<ul>
+<li>None: block all inline scripts</li>
+<li>Yes: this will allow any script with the <em>‘nonce’</em> attribute, every other scripts will be blocked</li>
+<li>Yes, Backward Compatible: compatibility mode. this will enable all the scripts</li>
+</ul>
+<h4 id="allow-inline-css">Allow inline CSS</h4>
+<p>Control inline style. Values are</p>
+<ul>
+<li>None: block all inline styles</li>
+<li>Yes: this will allow any style with the <em>‘nonce’</em> attribute, every other styles will be blocked</li>
+<li>Yes, Backward Compatible: compatibility mode. this will enable all the styles</li>
+</ul>
+<h4 id="default-directive">Default Directive</h4>
+<p>Configure <em>default-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block everything by default</li>
+<li>Custom: use whatever is provided in <em>Custom Settings</em></li>
+</ul>
+<h4 id="custom-settings">Custom Settings</h4>
+<p>Configure additional settings for <em>default-src</em></p>
+<h4 id="scripts">Scripts</h4>
+<p>Configure <em>script-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Dynamic: parse the page and add links to the whitelist</li>
+<li>Block: block scripts</li>
+<li>Custom: use whatever is provided in <em>Custom Script Settings</em></li>
+<li>Mixed: append the value in <em>Custom Script Settings</em> to this setting</li>
+</ul>
+<h4 id="custom-script-settings">Custom Script Settings</h4>
+<p>Configure additional settings for <em>script-src</em></p>
+<h4 id="styles">Styles</h4>
+<p>Configure <em>style-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block styles by default</li>
+<li>Dynamic: parse the page and add links to the whitelist</li>
+<li>Custom: use whatever is provided in <em>Custom Styles Settings</em></li>
+<li>Mixed: append the value in <em>Custom Styles Settings</em> to this setting</li>
+</ul>
+<h4 id="custom-styles-settings">Custom Styles Settings</h4>
+<p>Configure additional settings for <em>style-src</em></p>
+<h4 id="font-directive">Font Directive</h4>
+<p>Configure <em>font-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block fonts by default</li>
+<li>Dynamic: parse the page and add links to the whitelist</li>
+<li>Custom: use whatever is provided in <em>Custom Font Settings</em></li>
+<li>Mixed: append the value in <em>Custom Styles Settings</em> to this setting</li>
+</ul>
+<h4 id="custom-font-settings">Custom Font Settings</h4>
+<p>Configure additional settings for <em>font-src</em></p>
+<h4 id="image-directive">Image Directive</h4>
+<p>Configure <em>img-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block images by default</li>
+<li>Dynamic: parse the page and add links to the whitelist</li>
+<li>Custom: use whatever is provided in <em>Custom Font Settings</em></li>
+<li>Mixed: append the value in <em>Image Custom Settings</em> to this setting</li>
+</ul>
+<h4 id="custom-image-settings">Custom Image Settings</h4>
+<p>Configure additional settings for <em>worker-src</em></p>
+<h4 id="worker-directive">Worker Directive</h4>
+<p>Configure <em>worker-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block workers by default</li>
+<li>Custom: use whatever is provided in <em>Custom Worker Settings</em></li>
+</ul>
+<h4 id="custom-worker-settings">Custom Worker Settings</h4>
+<p>Configure additional settings for <em>worker-src</em></p>
+<h4 id="manifest-directive">Manifest Directive</h4>
+<p>Configure <em>manifest-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block manifest files by default</li>
+<li>Custom: use whatever is provided in <em>Custom Manifest Settings</em></li>
+</ul>
+<h4 id="custom-manifest-settings">Custom Manifest Settings</h4>
+<p>Configure additional settings for <em>manifest-src</em></p>
+<h4 id="child-directive">Child Directive</h4>
+<p>Configure <em>child-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block everything by default</li>
+<li>Custom: use whatever is provided in <em>Custom Settings</em></li>
+</ul>
+<h4 id="custom-child-settings">Custom Child Settings</h4>
+<p>Configure additional settings for <em>child-src</em></p>
+<h4 id="frame-directive">Frame Directive</h4>
+<p>Configure <em>frame-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block frames and iframes by default</li>
+<li>Dynamic: parse the page and add links to the whitelist</li>
+<li>Custom: use whatever is provided in <em>Custom Font Settings</em></li>
+<li>Mixed: append the value in <em>Custom Frame Settings</em> to this setting</li>
+</ul>
+<h4 id="custom-frame-settings">Custom Frame Settings</h4>
+<p>Configure additional settings for <em>frame-src</em></p>
+<h4 id="object-settings">Object Settings</h4>
+<p>Configure <em>object-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block all object by default</li>
+<li>Custom: use whatever is provided in <em>Custom Settings</em></li>
+</ul>
+<h4 id="custom-object-settings">Custom Object Settings</h4>
+<p>Configure additional settings for <em>object-src</em></p>
+<h4 id="media-settings">Media Settings</h4>
+<p>Configure <em>media-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block all media by default</li>
+<li>Custom: use whatever is provided in <em>Custom Media Settings</em></li>
+</ul>
+<h4 id="custom-media-settings">Custom Media Settings</h4>
+<p>Configure additional settings for <em>media-src</em></p>
+<h4 id="prefetch-settings">Prefetch Settings</h4>
+<p>Configure <em>prefetch-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block prefetch requests</li>
+<li>Custom: use whatever is provided in <em>Custom Settings</em></li>
+</ul>
+<h4 id="custom-prefetch-settings">Custom Prefetch Settings</h4>
+<p>Configure additional settings for <em>prefetch-src</em></p>
+<h4 id="connect-settings">Connect Settings</h4>
+<p>Configure <em>connect-src</em> directive. Values are</p>
+<ul>
+<li>Ignore: ignore the directive</li>
+<li>Block: block connect requests</li>
+<li>Custom: use whatever is provided in <em>Custom Connect Settings</em></li>
+</ul>
+<h4 id="custom-connect-settings">Custom Connect Settings</h4>
+<p>Configure additional settings for <em>connect-src</em></p>
+      </main>
+          </div>
+  </div>
+    <script>
+    const links = document.querySelector('.side-bar').addEventListener('click', function (e) {
+
+      const target = e.target;
+
+      if (target.matches('.side-bar>ul>li>ul>li>a')) {
+
+        target.parentElement.classList.toggle('open');
+      }
+    }, false);
+
+    if (window.IntersectionObserver) {
+
+      //  let active;
+      //  function select (fragment) 
+
+      const sidebar = document.querySelector('.side-bar');
+      const menu = document.querySelector('#navbarSupportedContent');
+
+      // active bd-sidenav-active
+      const observer = new IntersectionObserver(function (entries) {
+        // consider only the first visible item
+        //  let firstEntry;
+
+        /*
+         */
+
+        entries.some(function (entry) {
+
+          if (entry.isIntersecting) {
+
+            let node = entry.target;
+            const fragment = entry.target.id;
+
+            // parent previously selected?
+            if (sidebar.querySelector('.nav-level-2 li.active a[href="#' + fragment + '"]')) {
+
+              // -> TODO: select the node in the navbar and exit
+              return true;
+            }
+
+            Array.from(Array.from(sidebar.querySelectorAll('.nav-level-2 li.active'))).concat(Array.from(menu
+                .querySelectorAll('.navbar-nav>.active')))
+              .forEach(function (entry) {
+
+                if (entry) {
+
+                  entry.classList.remove('active', 'bd-sidenav-active');
+                }
+              });
+
+            do {
+              // h3
+              Array.from(sidebar.querySelectorAll('li>a[href="#' + fragment + '"]')).forEach(function (link) {
+
+                //   if (node.tagName == 'H4') {
+
+                let parent = link.parentElement;
+
+                parent.classList.add('active', 'bd-sidenav-active');
+
+                do {
+
+                  parent = parent.parentElement;
+
+                  if (parent && parent.tagName == 'LI') {
+
+                    parent.classList.add('active', 'bd-sidenav-active');
+
+                    if (parent.firstElementChild.tagName == 'A') {
+
+                      const menulink = menu.querySelector('li>a[href="' + parent.firstElementChild
+                        .hash + '"]');
+
+                      if (menulink) {
+
+                        menulink.parentElement.classList.add('active', 'bd-sidenav-active');
+                      }
+                    }
+                    //  break;
+                  }
+                }
+
+                while (parent && parent.tagName != 'LI');
+                //  }
+
+              });
+
+              if (node == entry.target) {
+
+                node = null;
+              }
+            }
+
+            while (node && node.tagName != 'H3');
+
+            return true;
+          }
+
+          return false;
+        });
+
+      }, {
+        //  rootMargin: '40px 0px 0px',
+        threshold: .1
+      });
+
+      Array.from(document.querySelectorAll('h3[id],h4[id]')).forEach(function (node) {
+
+        observer.observe(node);
+      })
+    }
+
+    const btn = document.querySelector('[data-toggle="collapse"]');
+    const toggle = btn.dataset.toggle;
+    const menu = document.querySelector(btn.dataset.target);
+
+    menu.addEventListener('click', function (e) {
+
+      if (e.target.tagName == 'A') {
+
+        menu.classList.add(toggle)
+      }
+    });
+
+    btn.addEventListener('click', function (e) {
+
+      e.stopPropagation();
+      menu.classList.toggle(toggle)
+    }, false);
+
+    document.body.addEventListener('click', function (e) {
+
+      if (e.target.matches('a[href*="*#*"]')) {
+
+        e.preventDefault();
+
+        history.push(e.target.hash)
+
+        document.querySelector(e.target.hash).scrollIntoView({
+          behavior: 'smooth'
+        })
+      }
+    }, false);
+  </script>
+</body>
+
+</html>

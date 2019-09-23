@@ -16,7 +16,9 @@
 import {
 	strategies
 } from "./sw.strategies.js";
-import {SW} from "../serviceworker.js";
+import {
+	SW
+} from "../serviceworker.js";
 
 const cacheName = SW.app.cacheName;
 
@@ -37,7 +39,7 @@ export async function cacheNetwork(event) {
 		}
 
 		return networkResponse;
-	}).catch(error => {
+	}).catch(( /*error*/ ) => {
 
 		// cache update failed
 		/* console.error("😭", error) */

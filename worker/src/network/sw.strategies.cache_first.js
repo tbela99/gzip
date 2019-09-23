@@ -11,8 +11,12 @@
 
 // @ts-check
 /* eslint wrap-iife: 0 */
-import {strategies} from "./sw.strategies.js";
-import {SW} from "../serviceworker.js";
+import {
+	strategies
+} from "./sw.strategies.js";
+import {
+	SW
+} from "../serviceworker.js";
 
 const cacheName = SW.app.cacheName;
 
