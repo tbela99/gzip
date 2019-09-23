@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.6.0</version>
+    <version>2.6.1</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>
@@ -18,6 +18,8 @@
         <folder>language</folder>
         <folder>worker/dist</folder>
         <folder>worker/css</folder>
+        <folder>Docs/dist</folder>
+        <folder>Docs/images</folder>
         <folder>push</folder>
         <filename>autoload.php</filename>
         <filename>responder.php</filename>
@@ -45,7 +47,7 @@
                 </fields>
             </fieldset>
             <fieldset name="http_cache" label="HTTP" addfieldpath="/plugins/system/gzip/fields">
-                <field type="spacer" label="Configure HTTP" />
+                <field type="spacer" label="PLG_GZIP_FIELDSET_HTTP" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="savedata" label="PLG_GZIP_FIELD_SAVE_DATA_LABEL" description="PLG_GZIP_FIELD_SAVE_DATA_DESCRIPTION" type="radio" class="btn-group" default="1">
@@ -96,6 +98,8 @@
                 </fields>
             </fieldset>
             <fieldset name="cdn" label="CDN">
+                <field type="spacer" label="PLG_GZIP_FIELDSET_CDN" />
+                <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="cnd_enabled" label="PLG_GZIP_FIELD_CDN_ENABLED_LABEL" description="PLG_GZIP_FIELD_CDN_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
@@ -117,7 +121,7 @@
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
-                <field type="spacer" label="Configure images settings" />
+                <field type="spacer" label="PLG_GZIP_FIELDSET_IMAGES" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="imageenabled" label="PLG_GZIP_FIELD_IMAGE_ENABLED_LABEL" description="PLG_GZIP_FIELD_IMAGE_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -185,11 +189,11 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="minifyjs" label="PLG_GZIP_FIELD_MINIFYJS_LABEL" description="PLG_GZIP_FIELD_MINIFYJS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                    <field name="mergejs" label="PLG_GZIP_FIELD_MERGEJS_LABEL" description="PLG_GZIP_FIELD_MERGEJS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -216,10 +220,6 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
                     <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -228,12 +228,16 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="15" cols="45" />
                     <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="critical_path" label="Critical Css">
-                <field type="spacer" label="Critical CSS Path" />
+                <field type="spacer" label="Configure Critical CSS path" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
                     <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -248,14 +252,14 @@
                 <field type="spacer" label="Configure progressive web application settings" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
+                        <option value="1">JOPTION_PWAENABLED_ENABLED</option>
+                        <option value="0">JOPTION_PWAENABLED_DISABLED</option>
+                        <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
+                    </field>
                     <field name="debug_pwa" label="PLG_GZIP_FIELD_PWA_DEBUG_LABEL" description="PLG_GZIP_FIELD_PWA_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
-                    </field>
-                    <field name="pwaenabled" label="PLG_GZIP_FIELD_PWA_ENABLED_LABEL" description="PLG_GZIP_FIELD_PWA_ENABLED_DESCRIPTION" type="list" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                        <option value="-1">PLG_GZIP_FIELD_PWA_ENABLED_OPTION_FORCE_UNINSTALL</option>
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Configure when to display network unavailable page" />
@@ -329,7 +333,7 @@
                 </fields>
             </fieldset>
             <fieldset name="pwa_web_share_target" label="Web Share Target">
-                <field type="spacer" label="Configure share target from mobile device" />
+                <field type="spacer" label="Configure your app to be a target for app data sharing" />
                 <field type="spacer" hr="true" />
                 <field type="spacer" label="Share target settings" />
                 <fields name="gzip">
@@ -373,9 +377,9 @@
                 </fields>
             </fieldset>
             <fieldset name="pwa_network" label="Network">
-                <field type="spacer" label="Configure progressive web application settings" />
+                <field type="spacer" label="Configure the sevrice worker network settings" />
                 <field type="spacer" hr="true" />
-                <field type="spacer" label="Networking settings" />
+                <field type="spacer" label="Networking Settings" />
                 <fields name="gzip">
                     <field name="pwa_network_strategy" label="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_LABEL" description="PLG_GZIP_FIELD_PWA_NETWORK_STRATEGY_DESCRIPTION" type="list" default="cn">
                         <option value="un">JFIELD_OPTION_PWA_NETWORK_STRATEGY_NONE</option>
@@ -435,7 +439,7 @@
                 </fields>
             </fieldset>
             <fieldset name="pwa_cache" label="Cache">
-                <field type="spacer" label="Configure progressive web application cache settings" />
+                <field type="spacer" label="Configure service worker cache settings" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Cache retention settings" />
@@ -488,9 +492,9 @@
                 </fields>
             </fieldset>
             <fieldset name="webpush" label="Web Push">
-                <field type="spacer" label="Configure Web Push" />
+                <field type="spacer" label="Configure web push settings using One Signal SDK" />
                 <field type="spacer" hr="true" />
-                <field type="spacer" label="OneSignal app settings" />
+                <field type="spacer" label="Web push settings" />
                 <fields name="gzip">
                     <fields name="onesignal">
                         <field name="enabled" label="PLG_GZIP_FIELD_ONESIGNAL_ENABLED_LABEL" description="PLG_GZIP_FIELD_ONESIGNAL_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -504,7 +508,7 @@
                 </fields>
             </fieldset>
             <fieldset name="security" label="Security">
-                <field type="spacer" label="Security Features" />
+                <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
                     <!--<field type="spacer" label="Upgrade-Insecure-Requests" />-->
@@ -570,12 +574,12 @@
                         <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
                         <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
                     </field>
+                    <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
                     <field name="csp_baseuri" label="PLG_GZIP_FIELD_CSP_BASE_URI_LABEL" description="PLG_GZIP_FIELD_CSP_BASE_URI_DESCRIPTION" type="list" class="btn-group" default="">
                         <option value="">JOPION_CSP_BASE_URI_IGNORE</option>
                         <option value="self">JOPION_CSP_BASE_URI_SELF</option>
                         <option value="none">JNone</option>
                     </field>
-                    <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
                     <field name="csp_eval" label="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_EVAL_SCRIPTS_DESCRIPTION" type="radio" class="btn-group" default="1">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -602,7 +606,7 @@
                         </field>
                         <field name="default_custom" label="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_LABEL" description="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_DEFAULT_CUSTOM_HINT" type="text" default="" />
                         <field type="spacer" hr="true" />
-                        <field type="spacer" label="Script Directive" />
+                        <field type="spacer" label="Scripts Directive" />
                         <field name="script" label="PLG_GZIP_FIELD_CSP_SCRIPTS_LABEL" description="PLG_GZIP_FIELD_CSP_SCRIPTS_DESCRIPTION" type="list" default="ignore">
                             <option value="ignore">JOPTION_CSP_IGNORE</option>
                             <option value="none">JOPTION_CSP_NONE</option>
