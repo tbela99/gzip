@@ -12,7 +12,7 @@
  
 ## 2.6.1-dev
  
-- [ ] Add documentation
+- Add documentation
   
 ## 2.6.0
 
