@@ -2,9 +2,7 @@
 
 ## High priority list
 
-1. documentation!
 2. [bug] Access-Control-Allow-Origin is always '*'
-3. improve the documentation (phase 2)
 4. implement backgroundFetch API
 5. font-display css property is set only when parse critical css is enabled. it should be set independantly
 6. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
