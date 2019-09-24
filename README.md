@@ -37,7 +37,7 @@ Here are some features provided
 - lazyloading images
 - generate responsive css background images
 
-### Performance
+## Performance
 
 - optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
 - dns prefetch
