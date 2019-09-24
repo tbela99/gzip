@@ -6,7 +6,7 @@
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-Here are some features provided
+Here are some features provided by this plugin
 
 ## HTML
 
@@ -18,6 +18,7 @@ Here are some features provided
 - minify files
 - remove files based on a pattern
 - async loading
+- move javascript to the bottom of the page
 
 ## CSS
 
@@ -41,7 +42,7 @@ Here are some features provided
 
 - optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
 - dns prefetch
-- profile plugin performances using HTTP server timing headers
+- profile plugin performance using HTTP server timing headers
 
 ## Service Worker
 
