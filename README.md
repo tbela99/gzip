@@ -6,15 +6,43 @@
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
-This extension provides:
+Here are some features provided by this plugin
 
-## Performance optimization
+## HTML
 
 - HTML minification
-- javascript optimizations: merge, minify, remove javascript files based on a pattern, etc...
-- css optimizations: merge, minify, remove css files based on a pattern, preload css fonts, etc...
-- generate critical css based on settings provided
-- optimize images: automatically resize images, convert to webp, generate responsive images, lazylaoding, etc...
+
+## Javascript
+
+- merge files
+- minify files
+- remove files based on a pattern
+- async loading
+- move javascript to the bottom of the page
+
+## CSS
+
+- merge files
+- minify files
+- remove files based on a pattern
+- async loading
+- web fonts preloading
+- critical css generation based on provided settings
+
+## Images
+
+- automatically resize images
+- convert to webp
+- generate responsive images
+- generate preview images
+- lazyloading images
+- generate responsive css background images
+
+## Performance
+
+- optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
+- dns prefetch
+- profile plugin performance using HTTP server timing headers
 
 ## Service Worker
 
@@ -23,13 +51,14 @@ This extension provides:
 - background sync
 - web share target
 - web push notifications using One Signal
-- etc ...
 
 ## Security
 
+- Sub Resource Integrity
 - Content Security Policy Level 3: control execution of scripts, css, frames, workers
-- HTTP security headers that provide HSTS, XSS-PROTECTION, X-Frames-Options
-- etc ...
+- HSTS header configuration
+- XSS-PROTECTION header configuration
+- X-Frames-Options configuration
 
-more details available in the [Online documentation](https://tbela99.github.io/gzip/Docs/dist/)
+The complete list of features is available in the [Online documentation](https://tbela99.github.io/gzip/Docs/dist/)
 and the [Change log](./CHANGELOG.md)

@@ -214,7 +214,7 @@ Configure Javascript settings.
 
 #### Process Javascript
 
-Enable or disable javascript processing
+Enable or disable javascript processing. Javascript will be moved at the bottom of the page
 
 #### Fetch Remotely Hosted Javascript
 
@@ -260,7 +260,7 @@ Enable or disable merging css files together
 
 #### Load CSS Async
 
-Asyncronously load css so that page rendering is not blocked while css files are loading
+Asyncronously load css so that page rendering is not blocked while css files are loading. CSS files will be moved at the bottom of the page. We should configure critical css in order to avoid FOUC
 
 #### Merge CSS
 

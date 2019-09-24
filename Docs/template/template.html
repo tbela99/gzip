@@ -366,13 +366,18 @@
 
         e.preventDefault();
 
-        history.push(e.target.hash)
+        history.push(e.target.hash);
 
         document.querySelector(e.target.hash).scrollIntoView({
           behavior: 'smooth'
         })
       }
     }, false);
+  </script>
+  <script>
+    navigator.serviceWorker && navigator.serviceWorker.register('../js/sw.js', {
+      scope: '/'
+    })
   </script>
 </body>
 

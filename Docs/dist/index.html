@@ -505,7 +505,7 @@
 <img src="../images/javascript-settings.PNG" alt="" /><figcaption>Javascript settings</figcaption>
 </figure>
 <h4 id="process-javascript">Process Javascript</h4>
-<p>Enable or disable javascript processing</p>
+<p>Enable or disable javascript processing. Javascript will be moved at the bottom of the page</p>
 <h4 id="fetch-remotely-hosted-javascript">Fetch Remotely Hosted Javascript</h4>
 <p>Fetch javascript files hosted on remote hosts like cdn and store them locally. The local copy will be used instead.</p>
 <h4 id="minify-javascript">Minify Javascript</h4>
@@ -530,7 +530,7 @@
 <h4 id="minify-css">Minify CSS</h4>
 <p>Enable or disable merging css files together</p>
 <h4 id="load-css-async">Load CSS Async</h4>
-<p>Asyncronously load css so that page rendering is not blocked while css files are loading</p>
+<p>Asyncronously load css so that page rendering is not blocked while css files are loading. CSS files will be moved at the bottom of the page. We should configure critical css in order to avoid FOUC</p>
 <h4 id="merge-css">Merge CSS</h4>
 <p>Enable or disable merging css files together</p>
 <h4 id="ignored-javacript-files">Ignored Javacript files</h4>
@@ -1090,13 +1090,18 @@
 
         e.preventDefault();
 
-        history.push(e.target.hash)
+        history.push(e.target.hash);
 
         document.querySelector(e.target.hash).scrollIntoView({
           behavior: 'smooth'
         })
       }
     }, false);
+  </script>
+  <script>
+    navigator.serviceWorker && navigator.serviceWorker.register('../js/sw.js', {
+      scope: '/'
+    })
   </script>
 </body>
 
