@@ -4,13 +4,13 @@
 
 - [ ] modify service worker cache and network fallback and cache only behavior
 - [ ] Better detect character encoding when manually editing the offline page HTML
-- [ ] Implement instant page loading
+- [x] Implement instant page loading
 - [ ] Implement backgroundFetch API
 - [ ] use configuration files to build scripts instead of shell commands
 - [ ] missing translation bug good first issue
 - [ ] improved LQIP for jpeg files
  
-## 2.6.1-dev
+## 2.6.1
  
 - Add documentation
   

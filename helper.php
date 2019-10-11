@@ -152,7 +152,7 @@ class GZipHelper {
 
 		if ($hasScript || !empty($options['imagesvgplaceholder'])) {
 
-			$script = file_get_contents(__DIR__.'/js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
+			$script .= file_get_contents(__DIR__.'/js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
 			$script .= file_get_contents(__DIR__.'/loader'.$debug.'.js"');
 								
 			if (!empty($options['imagesvgplaceholder'])) {
@@ -165,6 +165,33 @@ class GZipHelper {
 		if(!empty($script)) {
 
 			$html = str_replace('</head>', $css.'<script data-position="head" data-ignore="true">'.$script.'</script></head>', $html);
+		}
+
+		$script = '';
+
+		if (!empty($options['instant_loading_enabled'])) {
+
+			$hasScript = true;
+			$script .= file_get_contents(__DIR__.'/worker/dist/browser.prefetch'.$debug.'.js');
+
+			$attributes = [];
+
+			$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/config.php';
+			
+			if (is_file($path)) {
+
+				include $path;
+			}
+
+			if (!empty($php_config['instantloading'])) {
+
+				$html = str_replace('<body', '<body data-instant-'.implode(' data-instant-', $php_config['instantloading']), $html);
+			}
+		}
+
+		if(!empty($script)) {
+
+			$html = str_replace('</body>','<script>'.$script.'</script></body>', $html);
 		}
 
 		return $html;
@@ -2842,16 +2869,20 @@ class GZipHelper {
 	public static function parseSecureHeaders(&$html, $options) {
 
 		$headers = [];
-
 		
-		$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/headers.php';
-		
-		if (is_file($path)) {
-
-			include $path;
-		}
-
 		if (!empty($options['cspenabled'])) {
+
+			$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/config.php';
+			
+			if (is_file($path)) {
+
+				include $path;
+			}
+
+			if (!empty($php_config['headers'])) {
+
+				$headers = $php_config['headers'];
+			}
 
 			$links = [];
 

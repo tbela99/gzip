@@ -20,7 +20,6 @@
 // pwa app image generator http://appimagegenerator-pre.azurewebsites.net/
 
 "use strict;";
-//"{IMPORT_SCRIPTS}";
 
 import {
 	Event

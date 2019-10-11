@@ -1,6 +1,6 @@
 {
   "name": "gzip",
-  "version": "2.6.1",
+  "version": "2.7.0-dev",
   "scripts": {
     "build": "sh ./build.sh",
     "docs": "jsdoc -c jsdoc.json",
@@ -9,7 +9,7 @@
   "devDependencies": {
     "docdash": "github:clenemt/docdash",
     "jsdoc": "^3.5.5",
-    "rollup": "^1.16.2",
+    "rollup": "^1.22.0",
     "uglify-es": "^3.3.9"
   },
   "license": "MIT OR LGPL-3.0",
