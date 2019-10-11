@@ -2,35 +2,33 @@
 
 ## High priority list
 
-1. implement [instant page loading](https://instant.page/)
-2. implement expiring links. This will allow you to configure links that expire after a certain time
-3. [bug] Access-Control-Allow-Origin is always '*'
-4. implement backgroundFetch API
-5. font-display css property is set only when parse critical css is enabled. it should be set independantly
-6. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
-7. lower the priority of the service worker initialization script
-8. implement new manifest file [properties](https://developer.mozilla.org/en-US/docs/Web/Manifest)
-9. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
-10. Better detect character encoding when manually editing the offline page HTML
-11. modify service worker cache and network fallback and cache only to attempt an update after a specified time (it will behave like cache and network update with a delayed update)
-12. [bug] When fetch remote scripts is off and a local copy is hosted locally, the local copy should not be used
-13. [feature] Validate integrity data when the integrity attribute is provided for link and script before minifying / merging them together
-14. Implement manual dns prefetch?
-15. add support for the user action Log see [here](https://docs.joomla.org/J1.x:User_Action_Logs)
-16. do not cache partial request?
-17. intercept partial requests and return response from cache?
-18. merge multiple google font < link > tag?
-19. Build scripts using Babel instead of uglify-es???
-20. Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for analytic scripts and and hosted fonts.
-21. Web push notifications with firebase?
-22. prerender images using primitive.js svg generation [https://github.com/ondras/primitive.js/blob/master/js/app.js](https://github.com/ondras/primitive.js/blob/master/js/app.js)
-23. Messaging API (broadcasting messages to and from all/single clients)
-24. Remove < Link rel=preload > http header and use < link > HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
-25. CSS: deduplicate, merge properties, rewrite rules, etc
-26. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria) and [here](https://gist.github.com/ebidel/188a513b1cd5e77d4d1453a4b6d060b0)
-27. Clear Site Data api see [here](https://www.w1.org/TR/clear-site-data/)
-28. code refactoring: make helper properties protected or private and use wrapper methods instead
-29. Implement expiring urls?
+1. implement expiring links. This will allow you to configure links that expire after a certain time
+2. implement backgroundFetch API
+3. font-display css property is set only when parse critical css is enabled. it should be set independantly
+4. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
+5. lower the priority of the service worker initialization script
+6. implement new manifest file [properties](https://developer.mozilla.org/en-US/docs/Web/Manifest)
+7. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
+8. better detect character encoding when manually editing the offline page HTML
+9. modify service worker cache and network fallback and cache only to attempt an update after a specified time (it will behave like cache and network update with a delayed update)
+10. [bug] When fetch remote scripts is off and a local copy is hosted locally, the local copy should not be used
+11. [feature] Validate integrity data when the integrity attribute is provided for link and script before minifying / merging them together
+12. Implement manual dns prefetch?
+13. add support for the user action Log see [here](https://docs.joomla.org/J1.x:User_Action_Logs)
+14. do not cache partial request?
+15. intercept partial requests and return response from cache?
+16. merge multiple google font < link > tag?
+17. Build scripts using Babel instead of uglify-es???
+18. Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for analytic scripts and and hosted fonts.
+19. Web push notifications with firebase?
+20. prerender images using primitive.js svg generation [https://github.com/ondras/primitive.js/blob/master/js/app.js](https://github.com/ondras/primitive.js/blob/master/js/app.js)
+21. Messaging API (broadcasting messages to and from all/single clients)
+22. Remove < Link rel=preload > http header and use < link > HTML tag instead. see [here](https://jakearchibald.com/2017/h2-push-tougher-than-i-thought/)
+23. CSS: deduplicate, merge properties, rewrite rules, etc
+24. Disk quota management see [here](https://developer.chrome.com/apps/offline_storage) and [here](https://developer.mozilla.org/fr/docs/Web/API/API_IndexedDB/Browser_storage_limits_and_eviction_criteria) and [here](https://gist.github.com/ebidel/188a513b1cd5e77d4d1453a4b6d060b0)
+25. Clear Site Data api see [here](https://www.w1.org/TR/clear-site-data/)
+26. code refactoring: make helper properties protected or private and use wrapper methods instead
+27. Implement expiring urls?
 
 ## Low priority list
 
