@@ -57,7 +57,7 @@ if (!ini_get('zlib.output_compression')) {
 
 	if (!empty($this->options['cdn_cors'])) {
 		
-		header('Access-Control-Allow-Origin: *', isset($this->options['cdn_access_control_origin']) ? $this->options['cdn_access_control_origin'] : '*');
+		header('Access-Control-Allow-Origin: '.(isset($this->options['cdn_access_control_origin']) ? $this->options['cdn_access_control_origin'] : '*'));
 		header('Access-Control-Expose-Headers: Date');
 	}
 
