@@ -16,30 +16,50 @@ defined('_JEXEC') or die;
 
 spl_autoload_register(function ($name) {
 
+	if (strpos($name, '\\') === 0) {
+
+		$name = substr($name, 1);
+	}
+
+	$name = str_replace('\\', '/', $name);
+
     switch(strtolower($name)):
 
-        case 'patchwork\jsqueeze':
+        case 'patchwork/jsqueeze':
 
             require __DIR__.'/lib/JSqueeze.php';
             break;
 
-        case 'patchwork\cssmin':
+        case 'patchwork/cssmin':
 
             require __DIR__.'/lib/cssmin.php';
             break;
 
-        case 'gzip\gziphelper':
+        case 'gzip/gziphelper':
 
             require __DIR__.'/helper.php';
             break;
 
         default:
 
-            $file = __DIR__.'/lib/'.str_replace('\\', '/', $name).'.php';
+        	if (stripos($name, 'gzip/helpers/') === 0) {
+
+				$path = preg_replace('#Helper$#i', '', substr($name, 13));
+
+				$file = __DIR__.'/helpers/'.$path.'.php';
+
+        		if (is_file($file)) {
+
+					require $file;
+					break;
+				}
+			}
+
+			$file = __DIR__.'/lib/'.$name.'.php';
 
             if(is_file($file)) {
                     
-                require $file; 
+                require $file;
             }
 
             break;

@@ -195,6 +195,19 @@ for (entry of networkSettings.settings) {
 	route.registerRoute(router);
 }
 
+/*
+// implement encrypted file support as well as expiry date?
+router = new ExpressRouter(
+	scope + "{ROUTE}/e/",
+	entry[1]
+);
+*/
+if (caching) {
+
+	router.addPlugin(new CacheExpiration(defaultCacheSettings));
+}
+
+route.registerRoute(router);
 
 // register strategies routers
 for (entry of strategies) {

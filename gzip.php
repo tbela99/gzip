@@ -95,9 +95,11 @@ class PlgSystemGzip extends JPlugin
                 if ($object->get('type') == 'plugin' && $object->get('element') == 'gzip' && $object->get('folder') == 'system') {
 
                 	$xml = $form->getXml();
-                	$keys = array_keys(GZipHelper::$accepted);
+					$keys = array_keys(GZipHelper::$accepted);
+					
+                	foreach ($xml->xpath('//fieldset[@name="basic"]/fields[@name="gzip"]/fields[@name="expiring_links"]/field[@name="file_type"]|//fieldset[@name="cdn"]/fields[@name="gzip"]/field[@name="cdn_types"]') as $field) {
 
-                	foreach ($xml->xpath('//fieldset[@name="cdn"]/fields[@name="gzip"]/field[@name="cdn_types"]') as $field) {
+					//	reset($keys);
 
 		                foreach ($keys as $key) {
 
@@ -105,14 +107,16 @@ class PlgSystemGzip extends JPlugin
 			                $node['value'] = $key;
 		                }
 
-		                break;
+		           //     break;
 	                }
                 
                     foreach ($xml->xpath('//field[@name="admin_secret"]') as $field) {
 
                         $field['description'] = JText::sprintf('PLG_GZIP_FIELD_ADMIN_SECRET_DESCRIPTION', JURI::root());
                         break;
-                    }
+					}
+					
+					JFactory::getDocument()->addStyleDeclaration('.no-checkboxes>legend{display:none}');
                 }
 
                 break;
@@ -234,6 +238,12 @@ class PlgSystemGzip extends JPlugin
 
 				$shouldUpdate = true;
 				$data['params']['gzip']['cache_key'] = GZipHelper::shorten(filemtime(__FILE__));
+			}
+
+			if (empty($data['params']['gzip']['expiring_links']['secret'])) {
+
+				$shouldUpdate = true;
+				$data['params']['gzip']['expiring_links']['secret'] = bin2hex(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES));
 			}
 
 			if(
@@ -446,7 +456,6 @@ class PlgSystemGzip extends JPlugin
 			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true).'/'.$this->route) === 0) {
 
 				require __DIR__.'/responder.php';
-
 				$app->close();
 			}
 
@@ -468,7 +477,9 @@ class PlgSystemGzip extends JPlugin
             $this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
             $this->options['parse_url_attr']['href'] = '';
             $this->options['parse_url_attr']['src'] = '';
+			$this->options['parse_url_attr']['srcset'] = '';
             $this->options['parse_url_attr']['data-src'] = '';
+			$this->options['parse_url_attr']['data-srcset'] = '';
             
             $dirname = dirname($_SERVER['SCRIPT_NAME']);
 
@@ -754,28 +765,56 @@ class PlgSystemGzip extends JPlugin
 
 		$profiler->mark('afterRenderStart');
 
-		$body = GZipHelper::preprocessHTML($body, $options);
-		$profiler->mark('afterPreprocessHTML');
-
         if (!empty($options['imageenabled'])) {
 
-			$body = GZipHelper::parseImages($body, $options);
-			$profiler->mark('afterParseImages');
+			GZipHelper::register(new Gzip\Helpers\ImagesHelper());
 		}
 		
         if (!empty($options['cssenabled'])) {
 
-			$body = GZipHelper::parseCss($body, $options);
-			$profiler->mark('afterParseCss');
+		//	$body = GZipHelper::parseCss($body, $options);
+		//	$profiler->mark('afterParseCss');
+
+			GZipHelper::register(new Gzip\Helpers\CSSHelper());
 		}
 		
         if (!empty($options['jsenabled'])) {
 
-			$body = GZipHelper::parseScripts($body, $options);
-			$profiler->mark('afterParseScripts');
+		//	$body = GZipHelper::parseScripts($body, $options);
+		//	$profiler->mark('afterParseScripts');
+
+			GZipHelper::register(new Gzip\Helpers\ScriptHelper());
 		}
 
-		foreach(GZipHelper::parseSecureHeaders($body, $options) as $key => $rule) {
+		if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
+
+			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
+		}
+
+        if (!empty($options['cachefiles'])) {
+
+			GZipHelper::register(new Gzip\Helpers\UrlHelper());
+		}
+
+		if (!empty($options['cspenabled'])) {
+
+			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
+		}
+
+	//	if (!empty($options['minifyhtml'])) {
+
+			GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+	//	}
+
+
+		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
+	//	$profiler->mark('afterPreprocessHTML');
+		$body = GZipHelper::trigger('processHTMLAttributes', $body, $options, true);
+	//	$profiler->mark('afterProcessHTMLAttributes');
+		$body = GZipHelper::trigger('postProcessHTML', $body, $options);
+	//	$profiler->mark('afterPostProcessHTML');
+
+		foreach(GZipHelper::getHeaders() as $key => $rule) {
 
 			if (is_array($rule)) {
 
@@ -786,20 +825,6 @@ class PlgSystemGzip extends JPlugin
 
 				$app->setHeader($key, $rule);
 			}
-		}
-
-		$profiler->mark('afterParseSecureHeaders');
-		
-        if (!empty($options['cachefiles'])) {
-
-			$body = GZipHelper::parseURLs($body, $options);
-			$profiler->mark('afterParseURLs');
-		}
-		
-		if (!empty($options['minifyhtml'])) {
-				
-			$body = GZipHelper::minifyHTML($body, $options);
-			$profiler->mark('afterMinifyHTML');
 		}
 
 		$app->setBody($body);
@@ -946,15 +971,6 @@ class PlgSystemGzip extends JPlugin
     protected function updateSecurityHeaders($options) {
 
 		$headers = [];
-
-        if(!is_dir($path)) {
-
-            $old_mask = umask();
-
-            umask(022);
-            mkdir($path, 0755, true);
-            umask($old_mask);            
-        }
 
 		if (!empty($options['upgrade_insecure_requests'])) {
 

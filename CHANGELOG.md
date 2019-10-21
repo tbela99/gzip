@@ -7,8 +7,10 @@
 - [x] Implement instant page loading
 - [ ] Implement backgroundFetch API
 - [ ] use configuration files to build scripts instead of shell commands
-- [ ] missing translation bug good first issue
+- [x] missing translation
 - [ ] improved LQIP for jpeg files
+- [x] Access-Control-Allow-Origin is always '*'
+- [x] Create links to resources that expire after a given time
  
 ## 2.6.1
  
@@ -16,7 +18,7 @@
   
 ## 2.6.0
 
-- partly cache security headers
+- partly cache security support
 - add csp level 3 headers
 - add nonce or hash to support inline script and style
 - fix a regression with images lazy loading in google chrome

@@ -12,6 +12,7 @@
     <files>
         <folder>css</folder>
         <folder>fields</folder>
+        <folder>helpers</folder>
         <folder>js/lib</folder>
         <folder>js/dist</folder>
         <folder>lib</folder>
@@ -45,8 +46,30 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field type="spacer" label="PLG_GZIP_FIELDSET_INSTANT_LOADING" />
                     <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_EXPIRING_LINKS" />
+                    <field name="expiring_links_enabled" label="PLG_GZIP_FIELD_EXPIRING_LINKS_ENABLED_LABEL" description="PLG_GZIP_FIELD_EXPIRING_LINKS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <fields name="expiring_links">
+                        <field name="secret" label="PLG_GZIP_FIELD_EXPIRING_LINKS_SECRET_LABEL" description="PLG_GZIP_EXPIRING_LINKS_SECRET_DESCRIPTION" type="soduimsecret" readonly="readonly" />
+                        <field name="method" label="PLG_GZIP_FIELD_EXPIRING_LINKS_METHOD_LABEL" description="PLG_GZIP_FIELD_EXPIRING_LINKS_METHOD_DESCRIPTION" type="list" default="">
+                            <option value="">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_ANY</option>
+                            <option value="GET">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_GET</option>
+                            <option value="POST">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_POST</option>
+                        </field>
+                        <field name="duration" label="PLG_GZIP_FIELD_DURATION_LABEL" description="PLG_GZIP_FIELD_DURATION_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="4hours" />
+                        <field name="file_type" class="no-checkboxes" type="checkboxes" label="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_LABEL" checked="" description="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_DESCRIPTION" />
+                        <!--
+                             enabled
+                            secret_key
+                            expiry
+                            filetype
+                        -->
+                    </fields>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_INSTANT_LOADING" />
                     <field name="instant_loading_enabled" label="PLG_GZIP_FIELD_INSTANT_LOADING_ENABLED_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -93,7 +116,6 @@
                         <option value="">JOPTION_DNS_PREFETCH_IGNORE</option>
                         <option value="on">JOPTION_DNS_PREFETCH_ON</option>
                         <option value="off">JOPTION_DNS_PREFETCH_OFF</option>
-
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Push" />
@@ -123,12 +145,11 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" hint="PLG_GZIP_FIELD_PARSE_URL_ATTR_HINT" />
                 </fields>
             </fieldset>
-            <fieldset name="cdn" label="CDN">
+            <fieldset name="cdn" label="CDN" addfieldpath="/plugins/system/gzip/fields">
                 <field type="spacer" label="PLG_GZIP_FIELDSET_CDN" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -145,10 +166,9 @@
                         <field name="2" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
                         <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
                     </fields>
-
                     <field type="spacer" hr="true" />
                     <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
-                    <field name="cdn_types" type="checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
+                    <field name="cdn_types" type="checkboxes" class="no-checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">

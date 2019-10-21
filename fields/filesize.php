@@ -49,9 +49,11 @@ class JFormFieldFileSize extends JFormField
 		$unit = preg_replace('#^\d+#', '', $this->value);
 
 		if ($class !== '') {
-			
-			$class = ' class="'.$class.'"';
+
+			$class = ' '.$class;
 		}
+
+		$class = ' class="form-control'.$class.'"';
 
 		if ($disabled) {
 
@@ -73,7 +75,7 @@ class JFormFieldFileSize extends JFormField
 			$options[] = $option;
 		}
 
-		$html .= '<input type="number" required value="'.intval($this->value).'" min="0" step="1" id="'.$this->id.'_0" '.$attributes.' onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.value+n.options[n.selectedIndex].value">';
+		$html .= '<input type="number" required value="'.intval($this->value).'" min="0" step="1" id="'.$this->id.'_0" '.$attributes.$class.' onchange="var n=document.getElementById(\''.$this->id.'_1\');document.getElementById(\''.$this->id.'\').value=this.value+n.options[n.selectedIndex].value">';
 		
 		$html .= ' <select required id="'.$this->id.'_1"'.($disabled || $readonly ? ' disabled' : '').$class.' onchange="var n=document.getElementById(\''.$this->id.'_0\');document.getElementById(\''.$this->id.'\').value=n.value+this.options[this.selectedIndex].value">';
 
@@ -84,6 +86,6 @@ class JFormFieldFileSize extends JFormField
 
 		$html .= '<input type="hidden" value="'.htmlspecialchars($this->value).'" id="'.htmlspecialchars($this->id).'" name="'.$this->name.'"'.$attributes.'>';
  
-        return $html;
+        return '<div class="btn-group">'.$html.'</div>';
 	}
 }

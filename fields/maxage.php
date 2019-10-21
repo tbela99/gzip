@@ -67,8 +67,10 @@ class JFormFieldMaxAge extends JFormField
 
 		if ($class !== '') {
 
-			$class = ' class="'.$class.'"';
+			$class = ' '.$class;
 		}
+
+		$class = ' class="form-control'.$class.'"';
 
 		if ($disabled) {
 
@@ -120,10 +122,12 @@ class JFormFieldMaxAge extends JFormField
 
 		$html .= '<option value="minutes"'.($matches[2] == 'minutes' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_MINUTES').'</option>
 		<option value="hours"'.($matches[2] == 'hours' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_HOURS').'</option>
+		<option value="days"'.($matches[2] == 'days' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_DAYS').'</option>
+		<option value="weeks"'.($matches[2] == 'weeks' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_WEEKS').'</option>
 		<option value="months"'.($matches[2] == 'months' ? ' selected' : '').'>'.JText::_('JOPTION_MAXAGE_UNIT_MONTHS').'</option></select>';
 
 		$html .= '<input type="hidden" value="'.htmlspecialchars($this->value).'" id="'.htmlspecialchars($this->id).'" name="'.$this->name.'"'.$attributes.'>';
 
-		return $html;
+		return '<div class="btn-group">'.$html.'</div>';
 	}
 }

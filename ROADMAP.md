@@ -2,23 +2,23 @@
 
 ## High priority list
 
-1. implement expiring links. This will allow you to configure links that expire after a certain time
+1. replace uglify-es with terser
 2. implement backgroundFetch API
 3. font-display css property is set only when parse critical css is enabled. it should be set independantly
 4. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
 5. lower the priority of the service worker initialization script
 6. implement new manifest file [properties](https://developer.mozilla.org/en-US/docs/Web/Manifest)
-7. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
-8. better detect character encoding when manually editing the offline page HTML
-9. modify service worker cache and network fallback and cache only to attempt an update after a specified time (it will behave like cache and network update with a delayed update)
-10. [bug] When fetch remote scripts is off and a local copy is hosted locally, the local copy should not be used
-11. [feature] Validate integrity data when the integrity attribute is provided for link and script before minifying / merging them together
-12. Implement manual dns prefetch?
-13. add support for the user action Log see [here](https://docs.joomla.org/J1.x:User_Action_Logs)
-14. do not cache partial request?
-15. intercept partial requests and return response from cache?
-16. merge multiple google font < link > tag?
-17. Build scripts using Babel instead of uglify-es???
+7. customize image quality settings (jpeg image quality, jpeg optimization method)
+8. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)
+9.  better detect character encoding when manually editing the offline page HTML
+10. modify service worker cache and network fallback and cache only to attempt an update after a specified time (it will behave like cache and network update with a delayed update)
+11. [bug] When fetch remote scripts is off and a local copy is hosted locally, the local copy should not be used
+12. [feature] Validate integrity data when the integrity attribute is provided for link and script before minifying / merging them together
+13. Implement manual dns prefetch?
+14. add support for the user action Log see [here](https://docs.joomla.org/J1.x:User_Action_Logs)
+15. do not cache partial request?
+16. intercept partial requests and return response from cache?
+17. merge multiple google font < link > tag?
 18. Fetch remote resources periodically (configurable) (css, javascript, fonts, ...). This can be usefull for analytic scripts and and hosted fonts.
 19. Web push notifications with firebase?
 20. prerender images using primitive.js svg generation [https://github.com/ondras/primitive.js/blob/master/js/app.js](https://github.com/ondras/primitive.js/blob/master/js/app.js)
