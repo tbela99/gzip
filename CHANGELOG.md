@@ -11,6 +11,7 @@
 - [ ] improved LQIP for jpeg files
 - [x] Access-Control-Allow-Origin is always '*'
 - [x] Create links to resources that expire after a given time
+- [ ] Missed cache lead to performance issue when parse critical css returns an empty string
  
 ## 2.6.1
  

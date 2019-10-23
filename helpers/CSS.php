@@ -18,6 +18,8 @@ use Patchwork\CSSmin;
 
 class CSSHelper {
 
+//	static $cssBackgrounds = [];
+
 	public function postProcessHTML ($html, array $options = []) {
 
 		$path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
@@ -87,7 +89,7 @@ class CSSHelper {
 
 							if ($content != false) {
 
-								file_put_contents($local, GZipHelper::expandCss($content, dirname($remote), $path));
+								file_put_contents($local, $this->expandCss($content, dirname($remote), $path));
 							}
 						}
 
@@ -112,8 +114,8 @@ class CSSHelper {
 			return $matches[0];
 		}, $html);
 
-		$profiler = \JProfiler::getInstance('Application');
-		$profiler->mark('afterParseLinks');
+	//	$profiler = \JProfiler::getInstance('Application');
+	//	$profiler->mark('ParseLinks');
 
 		//    $profiler->mark("done parse <link>");
 		$hashFile = GZipHelper::getHashMethod($options);
@@ -145,7 +147,7 @@ class CSSHelper {
 
 						if (!is_file($css_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash) {
 
-							$content = GZipHelper::css($name, $remote_service, $path);
+							$content = $this->css($name, $remote_service, $path);
 
 							if ($content != false) {
 
@@ -163,7 +165,7 @@ class CSSHelper {
 			}
 		}
 
-		$profiler->mark('afterMinifyLinks');
+	//	$profiler->mark('afterMinifyLinks');
 
 		if (!empty($options['mergecss'])) {
 
@@ -216,7 +218,7 @@ class CSSHelper {
 
 								//    $profiler->mark("merge expand " . $name . " ");
 
-								$css .= GZipHelper::expandCss(file_get_contents($name), dirname($name), $path);
+								$css .= $this->expandCss(file_get_contents($name), dirname($name), $path);
 
 								//     $profiler->mark("done merge expand " . $attr['href'] . " ");
 
@@ -251,7 +253,7 @@ class CSSHelper {
 			}
 		}
 
-		$profiler->mark('afterMergeLinks');
+	//	$profiler->mark('afterMergeLinks');
 
 		$minifier = null;
 
@@ -285,7 +287,7 @@ class CSSHelper {
 		}, $html);
 
 
-		$profiler->mark('afterParseStyles');
+	//	$profiler->mark('ParseStyles');
 
 		$parseCritical = !empty($options['criticalcssenabled']);
 		$parseCssResize = !empty($options['imagecssresize']);
@@ -343,7 +345,7 @@ class CSSHelper {
 						$hashValue = $hashFile($fname);
 
 						$name = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-crit';
-						$bgname = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-bg';
+					//	$bgname = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-bg';
 
 						$css_file = $name . '.css';
 						$css_hash = $name . '.php';
@@ -367,7 +369,7 @@ class CSSHelper {
 								foreach ($oCssDocument->getContents() as $block) {
 
 									// extractCssBackground
-									$css_background .= GZipHelper::extractCssBackground($block);
+									$css_background .= $this->extractCssBackground($block);
 								}
 
 								if (!empty($css_background)) {
@@ -390,7 +392,7 @@ class CSSHelper {
 								$background_css_path .= file_get_contents($css_bg_file);
 							}
 
-							$profiler->mark('afterParseCssBGResize'.$k);
+					//		$profiler->mark('ParseCssBGResize '.__LINE__);
 						}
 
 						if ($parseCritical) {
@@ -417,8 +419,8 @@ class CSSHelper {
 
 								foreach ($oCssDocument->getContents() as $block) {
 
-									$local_css .= GZipHelper::extractCssRules(clone $block, $regexp);
-									$local_font_face .= GZipHelper::extractFontFace(clone $block, $options);
+									$local_css .= $this->extractCssRules(clone $block, $regexp);
+									$local_font_face .= $this->extractFontFace(clone $block, $options);
 								}
 
 								$local_css = $local_font_face.$local_css;
@@ -430,22 +432,24 @@ class CSSHelper {
 										$local_css = $minifier->minify($local_css);
 									}
 
-									$local_css = GZipHelper::expandCss($local_css, dirname($css_file));
-
-									\file_put_contents($css_file, $local_css);
-									\file_put_contents($css_hash, $hashValue);
+									$local_css = $this->expandCss($local_css, dirname($css_file));
 								}
+
+								\file_put_contents($css_file, $local_css);
+								\file_put_contents($css_hash, $hashValue);
 							}
 
 							else {
 
 								$critical_path .= file_get_contents($css_file);
 							}
+
+					//		$profiler->mark('ParseCssBGResize '.__LINE__);
 						}
 					}
 				}
 
-				$profiler->mark('afterParseCssBGResize');
+			//	$profiler->mark('ParseCssBGResize '.__LINE__);
 			}
 
 			if ($background_css_path !== '') {
@@ -473,7 +477,7 @@ class CSSHelper {
 			}
 		}
 
-		$profiler->mark('afterParseCriticalCss');
+	//	$profiler->mark('ParseCriticalCss');
 
 		// extract web fonts
 		//   $profiler->mark("extract web fonts");
@@ -647,4 +651,529 @@ class CSSHelper {
 
 		return $html;
 	}
+	
+    public function extractFontFace($block, $options = []) {
+
+        $content = '';
+
+        if ($block instanceof AtRuleBlockList || $block instanceof AtRuleSet) {
+
+            $atRuleName = $block->atRuleName();
+
+            switch($atRuleName) {
+
+                case 'media':
+
+                    $result = '';
+
+                    foreach ($block->getContents() as $b) {
+
+                        $result .= $this->extractFontFace($b, $options);
+                    }
+
+                    if($result !== '') {
+
+                        $content .= '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $result . '}';
+                    }
+
+                    break;
+
+                case 'font-face':
+
+                	if (!empty($options['fontdisplay']) && !empty($block->getRules('src'))) {
+
+                		$rule = new \Sabberworm\CSS\Rule\Rule('font-display');
+
+                		$rule->setValue($options['fontdisplay']);
+                		$block->addRule($rule);
+	                }
+
+                    $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . implode('', $block->getRules()) . '}';
+
+                   break;
+            }
+        }
+
+        return $content;
+    }
+
+    public function extractCssRules($block, $regexp) {
+
+        if ($block instanceof DeclarationBlock) {
+
+            $matches = [];
+
+            foreach ($block->getSelectors() as $selector) {
+
+                if (preg_match($regexp, $selector)) {
+
+                    $matches[] = $selector;
+                }
+            }
+
+            if (!empty($matches)) {
+
+                $block->createShorthands();
+                return implode(', ', $matches) . '{' . implode('', $block->getRules()) . '}';
+            }
+
+            return '';
+
+        } else if ($block instanceof AtRuleBlockList) {
+
+            $atRuleName = $block->atRuleName();
+
+            switch($atRuleName) {
+
+                case 'media':
+
+                    $content = '';
+
+                    foreach ($block->getContents() as $b) {
+
+                        $content .= $this->extractCssRules($b, $regexp);
+                    }
+
+                    if ($content !== '') {
+
+                        $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+                    }
+
+                    return $content;
+            }
+        }
+
+        return '';
+    }
+
+    public function buildCssBackground($css, array $options = []) {
+
+		$result = '';
+
+        if (!empty($options['css_sizes'])) {
+
+            if (preg_match_all(GZipHelper::regexUrl, $css, $matches)) {
+
+                $files = [];
+
+                foreach($matches[1] as $file) {
+
+                    if (GZipHelper::isFile($file) && preg_match('#\.(png)|(jpg)#i', $file)) {
+
+                        $size = \getimagesize($file);
+
+                        reset($options['css_sizes']);
+
+                        foreach ($options['css_sizes'] as $s) {
+
+                            if ($size[0] > $s) {
+
+                                $files[$s][] = ['file' => $file, 'width' => $s];
+                            }
+                        }
+                    }
+                }
+
+                $image = new \Image\Image();
+                
+                $path = $options['img_path'];
+                $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+                $const = constant('\Image\Image::'.$method);
+                $short_name = strtolower(str_replace('CROP_', '', $method));
+
+                foreach ($files as $size => $data) {
+
+                    $replace = [];
+
+                    foreach ($data as $d) {
+                            
+                        $file = $d['file'];
+                        
+                        // generate resized file & replace in css
+                        $hash = sha1($file);
+                        $crop =  $path.$hash.'-'. $short_name.'-'.$size.'-'.basename($file);
+
+                        if (!is_file($crop)) {
+
+                            $image->load($file);
+
+                            if ($d['width'] > 1200) {
+
+                                $image->setSize(1200);
+                            }
+                            
+                            $image->resizeAndCrop($size, null, $method)->save($crop);
+                        }
+
+                        $replace[$file] = GZipHelper::url($crop, $options);
+                    }
+
+                    if (!empty($replace)) {
+
+                        $oCssParser = new \Sabberworm\CSS\Parser(str_replace(array_keys($replace), array_values($replace), $css));
+                        $oCssDocument = $oCssParser->parse();
+
+                        $css_background = '';
+
+                        foreach ($oCssDocument->getContents() as $block) {
+
+                            // extractCssBackground
+                            $css_background .= $this->extractCssBackground($block, $size, '.resize-css-images ');
+                        }
+
+                        if (!empty($css_background)) {
+
+                            $result .= '@media (max-width: '.$size.'px) {'.$css_background. '}';
+                        }
+                    }
+                }
+            }
+		}
+		
+        if ($result !== '') {
+
+            $cachefiles = !empty($options['cachefiles']);
+        
+            return \preg_replace_callback('#url\(([^)]+)\)#s', function ($matches) use($cachefiles) {
+
+                $file = $matches[1];
+                
+                if ($cachefiles) {
+                    
+                    $file = GZipHelper::url($file);
+                }
+
+                else {
+
+                    if (GZipHelper::isFile($file)) {
+
+                        $file = \Juri::root(true).'/'.$file;
+                    }
+                }
+
+                return 'url('.$file.')';
+
+            }, $result);
+        }
+
+        return $result;
+    }
+
+    public function extractCssBackground($block, $matchSize = null, $prefix = null) {
+
+        if ($block instanceof DeclarationBlock) {
+
+            $selectors = implode(',', $block->getSelectors());
+            $rules = [];
+
+            $block->createShorthands();
+
+            foreach ($block->getRulesAssoc() as $rule) {
+
+                $name = $rule->getRule();
+
+                if ($name == 'background' || $name == 'background-image') {
+                            
+                    // extract rules and replace with @media (max-width: witdh) { selector { background-image: url() [, url(), url(), ...]}}
+                    if(preg_match_all(GZipHelper::regexUrl, $rule->getValue(), $matches)) {
+
+                        $images = [];
+
+                        $isValid = false;
+
+                        foreach ($matches[1] as $file) {
+
+                            $file = preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($file));
+
+                            $fileName = GZipHelper::getName($file);
+
+                            if (strpos($fileName, GZipHelper::$route) === 0) {
+
+                                $fileName = preg_replace('#^'.GZipHelper::$route.'(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/(1/)?#', '', $fileName);
+                            }
+
+                            $images[] = GZipHelper::url($fileName);
+
+                            if (GZipHelper::isFile($fileName) && preg_match('#\.(png)|(jpg)#i', $fileName)) {
+
+                                $isValid = true;
+
+                                if (!is_null($matchSize)) {
+
+                                    $size = \getimagesize($fileName);
+
+                                    $isValid = $size[0] == $matchSize;
+                                }
+                            }
+                        }
+
+                        if ($isValid) {
+
+                            $rules[] = $prefix.$selectors.'{background-image: url('.implode('),url(', $images).');}';
+                        }
+                    }
+                }
+            }
+
+            if (!empty($rules)) {
+
+                return implode('', $rules);
+            }
+
+            return '';
+
+        } else if ($block instanceof AtRuleBlockList) {
+
+            $atRuleName = $block->atRuleName();
+
+            switch($atRuleName) {
+
+                case 'media':
+
+                    $content = '';
+
+                    foreach ($block->getContents() as $b) {
+
+                        $content .= $this->extractCssBackground($b, $matchSize, $prefix);
+                    }
+
+                    if ($content !== '') {
+
+                        $content = '@' . $atRuleName . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+                    }
+
+                    return $content;
+            }
+        }
+
+        return '';
+    }
+
+    public function removeEmptyRulesets($block) {
+
+        if ($block instanceof AtRuleBlockList) {
+
+            $content = '';
+
+            foreach ($block->getContents() as $b) {
+
+                $content .= $this->removeEmptyRulesets($b);
+            }
+
+            if ($content !== '') {
+
+                $content = '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() . '{' . $content . '}';
+            }
+
+            return $content;
+        }
+
+        else if ($block instanceof AtRuleSet) {
+
+        //    $block->createShorthands();
+            $rules = $block->getRules();
+
+            if(empty($rules)) {
+
+                return '';
+            }
+
+            return '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() .'{' . implode('', $rules) . '}';
+        }
+
+        else if ($block instanceof DeclarationBlock) {
+
+            $block->createShorthands();
+            $rules = $block->getRules();
+
+            if(empty($rules)) {
+
+                return '';
+            }
+
+            return implode(', ', $block->getSelectors()) . '{' . implode('', $rules) . '}';
+        }
+
+        return '';
+	}
+	
+    public function resolvePath($path) {
+
+        if (strpos($path, '../') !== false) {
+
+            $return = [];
+
+            if (strpos($path, '/') === 0)
+                $return[] = '/';
+
+            foreach (explode('/', $path) as $p) {
+
+                if ($p == '..') {
+
+                    array_pop($return);
+                } else {
+
+                    $return[] = $p;
+                }
+            }
+
+            return str_replace('/./', '', implode('/', $return));
+        }
+
+        return $path;
+    }
+
+    // parse @import
+    public function expandCss($css, $path = null) {
+
+        if (!is_null($path)) {
+
+            if (!preg_match('#/$#', $path)) {
+
+                $path .= '/';
+            }
+		}
+		
+        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
+
+            $file = trim(str_replace(array("'", '"'), "", $matches[1]));
+
+            if (strpos($file, 'data:') === 0) {
+
+                return $matches[0];
+			}
+			
+		//	$name = GZipHelper::getName($file);
+
+            if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
+
+                $file = $this->resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
+            }
+
+        //    else {
+
+                if (preg_match('#^(https?:)?//#', $file)) {
+
+                    $content = GZipHelper::getContent($file);
+
+                    if ($content !== false) {
+
+                        preg_match('~(.*?)([#?].*)?$~', $file, $match);
+
+                        $file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
+
+                        if (!is_file($file)) {
+
+                            file_put_contents($file, $content);
+                        }
+
+                        if (isset($match[2])) {
+
+                            $file .= $match[2];
+                        }
+                    }
+				}
+				
+			//	else {
+
+					if(preg_match('#^([a-z]+:)?//#', $path)) {
+
+						$content = GZipHelper::getContent($path.substr($file, 1));
+
+						if ($content !== false) {
+
+							preg_match('~(.*?)([#?].*)?$~', $file, $match);
+	
+							$file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
+	
+							if (!is_file($file)) {
+	
+								file_put_contents($file, $content);
+							}
+	
+							if (isset($match[2])) {
+	
+								$file .= $match[2];
+							}
+						}
+					}
+
+					else {
+							
+						if ($file[0] == '/') {
+
+							return 'url(' . GZipHelper::getHost($file).')';
+						}
+					}
+
+					return 'url(' . GZipHelper::url($file).')';
+        },
+            //resolve import directive, note import directive in imported css will NOT be processed
+            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
+
+                $file = trim($matches[1]);
+
+                if (preg_match('#url\(([^)]+)\)#', $file, $m)) {
+
+                    $file = $m[1];
+                }
+
+                $file = trim(str_replace(array("'", '"'), "", $file));
+
+                if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
+
+                    $file = $this->resolvePath($path . GZipHelper::getName($file));
+                }
+
+                $isFile = GZipHelper::isFile($file);
+
+                return "\n" .
+	            //    '/* @ import ' . $file . ' ' . dirname($file) . ' */' .
+	            //    "\n" .
+	                $this->expandCss($isFile ? file_get_contents($file) : GZipHelper::getContent($file), dirname($file), $path);
+            }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
+        );
+
+        return $css;
+	}
+	
+	/**
+	 * minify css
+	 */
+    public function css($file, $remote_service = true, $path = null) {
+
+        static $minifier;
+
+        if (preg_match('#^(https?:)?//#', $file)) {
+
+            if (strpos($file, '//') === 0) {
+
+                $file = 'http:' . $file;
+            }
+
+            $content = GZipHelper::getContent($file);
+
+            if ($content === false) {
+
+                return false;
+            }
+        }
+
+        else if (is_file($file)) {
+
+            $content = $this->expandCss(file_get_contents($file), dirname($file));
+        }
+
+        else {
+
+            return false;
+        }
+
+        if (is_null($minifier)) {
+
+            $minifier = new CSSMin;
+        }
+
+        return $minifier->minify($content);
+    }
 }

@@ -156,13 +156,13 @@ class ImagesHelper {
 
 						case 'lqip':
 
-							$src = GZipHelper::generateLQIP(clone $image, $file, $options, $path, $hash, $method);
+							$src = $this->generateLQIP(clone $image, $file, $options, $path, $hash, $method);
 							break;
 
 						case 'svg':
 						default:
 
-							$src = GZipHelper::generateSVGPlaceHolder(clone $image, $file, $options, $path, $hash, $method);
+							$src = $this->generateSVGPlaceHolder(clone $image, $file, $options, $path, $hash, $method);
 							break;
 					}
 				}
@@ -277,5 +277,213 @@ class ImagesHelper {
 
 		return $attributes;
 	}
+
+	/**
+	 * @param \Image\Image $image
+	 * @param string $file
+	 * @param array $options
+	 * @param string  $path
+	 * @param string $hash
+	 * @param string $method
+	 *
+	 * @return bool|string
+	 *
+	 * @since 2.4.1
+	 */
+    public function generateLQIP($image, $file, array $options, $path, $hash, $method) {
+
+        if (!empty($options['imagesvgplaceholder'])) {
+
+        	if ($image->getWidth() <= 80) {
+
+        		return '';
+	        }
+
+            $short_name = strtolower(str_replace('CROP_', '', $method));
+
+        	$extension = WEBP ? 'webp' : $image->getExtension();
+            $img = $path.$hash.'-lqip-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.'.$extension;
+
+            if (!is_file($img)) {
+
+                clone $image->setSize(80)->save($img, 1);
+            }
+
+            if (is_file($img)) {
+                
+                return 'data:image/'.$extension.';base64,'.base64_encode(file_get_contents($img));
+            }
+        }
+
+        return '';
+    }
+
+	/**
+	 * @param \Image\Image $image
+	 * @param string $file
+	 * @param array $options
+	 * @param string  $path
+	 * @param string $hash
+	 * @param string $method
+	 *
+	 * @return bool|string
+	 *
+	 * @since 2.4.0
+	 */
+	public function generateSVGPlaceHolder($image, $file, array $options, $path, $hash, $method) {
+
+		if (!empty($options['imagesvgplaceholder'])) {
+
+			$short_name = strtolower(str_replace('CROP_', '', $method));
+
+			$svg = $path.$hash.'-svg-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.svg';
+
+			if (!is_file($svg)) {
+
+				$clone = clone $image;
+				file_put_contents($svg, 'data:image/svg+xml;base64,'.base64_encode($this->minifySVG($clone->load($file)->resizeAndCrop(min($clone->getWidth(), 1024), null, $method)->setSize(200)->toSvg())));
+			}
+
+			if (is_file($svg)) {
+
+				return file_get_contents($svg);
+			}
+		}
+
+		return '';
+	}
+
+    protected function parseSVGAttribute($value, $attr, $tag) {
+	 
+        // remove unit
+        if ($tag == 'svg' && ($attr == 'width' || $attr == 'height')) {
+           
+           $value = (float) $value;
+        }
+        
+	 // shrink color
+	 if ($attr == 'fill') {
+	
+		if (preg_match('#rgb\s*\(([^)]+)\)#i', $value, $matches)) {
+			
+			$matches = explode(',', $matches[1]);
+			$value = sprintf('#%02x%02x%02x', +$matches[0], +$matches[1], +$matches[2]);
+		}
+		 
+		if(strpos($value, '#') === 0) {
+			
+			if (
+				$value[1] == $value[2] &&
+				$value[3] == $value[4] &&
+				$value[5] == $value[6]) {
+
+				return '#'.$value[1].$value[3].$value[5];
+			}
+		}
+	 }
+        
+        //trim float numbers to precision 1
+        $value = preg_replace_callback('#(\d+)\.(\d)(\d+)#', function ($matches) {
+            
+            if ($matches[2] == 0) {
+               
+               return $matches[1];
+            }
+            
+            if ($matches[1] == 0) {
+                   
+                if ($matches[2] == 0) {
+                   
+                   return 0;
+                }
+               
+            
+               return '.'.$matches[2];
+            }
+            
+           return $matches[1].'.'.$matches[2];
+           
+        }, $value);
+        
+        if ($tag == 'path' && $attr == 'd') {
+                
+            // trim commands
+            $value = str_replace(',', ' ', $value);		 
+            $value = preg_replace('#([\r\n\t ]+)?([A-Z-])([\r\n\t ]+)?#si', '$2', $value);
+        }
+        
+        // remove extra space
+        $value = preg_replace('#[\r\t\n ]+#', ' ', $value);	 
+        return trim($value);
+    }
+
+    public function minifySVG ($svg /*, $options = [] */) {
+
+        // remove comments & stuff
+        $svg = preg_replace([
+        
+            '#<\?xml .*?>#',
+            '#<!DOCTYPE .*?>#si',
+            '#<!--.*?-->#s',
+            '#<metadata>.*?</metadata>#s'
+        ], '', $svg);
+        
+        // remove extra space
+        $svg = preg_replace(['#([\r\n\t ]+)<#s', '#>([\r\n\t ]+)#s'],  ['<', '>'], $svg);
+            
+        $cdata = [];
+        
+        $svg = preg_replace_callback('#\s*<!\[CDATA\[(.*?)\]\]>#s', function ($matches) use(&$cdata) {
+            
+            $key = '--cdata'.crc32($matches[0]).'--';
+            
+            $cdata[$key] = '<![CDATA['."\n".preg_replace(['#^([\r\n\t ]+)#ms', '#([\r\n\t ]+)$#sm'], '', $matches[1]).']]>';
+            
+            return $key;
+            
+        }, $svg);
+
+        $svg = preg_replace_callback('#([\r\n\t ])?<([a-zA-Z0-9:-]+)([^>]*?)(\/?)>#s', function ($matches) {
+	 
+            $attributes = '';
+                        
+            if (preg_match_all(GZipHelper::regexAttr, $matches[3], $attrib)) {
+               
+               foreach ($attrib[2] as $key => $value) {
+                   
+                   if (
+                       //$value == 'id' || 
+                      // $value == 'viewBox' || 
+                       $value == 'preserveAspectRatio' || 
+                       $value == 'version') {
+                   
+                       continue;
+                   }
+                
+                    if ($value == 'svg') {
+                        
+                        switch ($attrib[6][$key]) {
+                        
+                            case 'width':
+                            case 'height':
+                            case 'xmlns':
+                            
+                                break;
+                                
+                            default:
+                            
+                                continue 2;
+                        }
+                    }
+                
+                   $attributes .= ' '.$value.'="'.$this->parseSVGAttribute($attrib[6][$key], $value, $matches[2]).'"';
+               }
+            }            
+           
+           return '<'.$matches[2].$attributes.$matches[4].'>';
+       },  $svg);
+
+       return str_replace(array_keys($cdata), array_values($cdata), $svg);
+    }
 
 }
