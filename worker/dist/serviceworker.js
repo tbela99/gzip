@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "4d9fb4e",
+			value: "1b3e02e",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-10-27 10:24:09-04:00",
+			value: "2019-10-27 11:50:58-04:00",
 			enumerable: true
 		},
 		/**
@@ -2082,7 +2082,7 @@
 
 	                return new Response(SW.app.offline.body, {
 	                    headers: new Headers({
-	                        'Content-Type': 'text/html; charset=utf-8'
+	                        'Content-Type': 'text/html; charset="{offline_charset}"'
 	                    })
 	                });
 	            }

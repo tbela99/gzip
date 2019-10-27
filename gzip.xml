@@ -322,7 +322,7 @@
                         <option value="GET">JOPTION_PWA_OFFLINE_METHOD_GET</option>
                         <option value="POST">JOPTION_PWA_OFFLINE_METHOD_POST</option>
                     </field>
-                    <field name="pwa_offline_pref" label="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_DESCRIPTION" type="radio" default="html" class="btn-group">
+                    <field name="pwa_offline_pref" label="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_DESCRIPTION" type="list" default="html">
                         <option value="url">JOPTION_PWA_OFFLINE_PREF_URL</option>
                         <option value="html">JOPTION_PWA_OFFLINE_PREF_HTML</option>
                     </field>

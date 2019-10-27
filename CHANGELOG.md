@@ -2,7 +2,7 @@
 
 ## 2.7.0-dev
 
-- [ ] Better detect character encoding when manually editing the offline page HTML
+- [x] Better detect character encoding when manually editing the offline page HTML
 - [x] Implement instant page loading
 - [ ] Implement backgroundFetch API
 - [x] Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands

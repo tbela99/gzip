@@ -12,7 +12,7 @@ if (SW.app.offline.enabled) {
 
                 return new Response(SW.app.offline.body, {
                     headers: new Headers({
-                        'Content-Type': 'text/html; charset=utf-8'
+                        'Content-Type': 'text/html; charset="{offline_charset}"'
                     })
                 });
             }

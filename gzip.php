@@ -1282,6 +1282,8 @@ class PlgSystemGzip extends JPlugin
 				'"{pwa_cache_max_file_count}"'
 			];
 
+		$replace = [];
+
 		$debug = empty($this->params->get('gzip.debug_pwa')) ? '' : '.min';
 		$sync_enabled = $this->params->get('gzip.pwa_sync_enabled', 'disabled');
 
@@ -1294,6 +1296,8 @@ class PlgSystemGzip extends JPlugin
 			'url' => '',
 			'methods' => []
 		];
+
+				$charset = 'utf-8';
 
 		if (!empty($options['pwa_offline_enabled']) &&
 		
@@ -1312,8 +1316,16 @@ class PlgSystemGzip extends JPlugin
 
 			if (isset($options['pwa_offline_pref']) && $options['pwa_offline_pref'] == 'html') {
 
+				$html = (string) $options['pwa_offline_html_page'];
+
+				if (preg_match('#<meta\s+charset=(["\'])?([^"\']+)\\1#', $html, $matches)) {
+
+					$charset = $matches[2];
+				}
+
+				$offline_data['charset'] = $charset;
 				$offline_data['type'] = 'response';
-				$offline_data['body'] = (string) $options['pwa_offline_html_page'];
+				$offline_data['body'] = $html;
 				unset($options['pwa_offline_page']);
 			}
 
@@ -1324,7 +1336,10 @@ class PlgSystemGzip extends JPlugin
 			}
 		}
 
-		$replace = [
+		array_unshift($search, '"{offline_charset}"');
+		array_unshift($replace, $charset);
+
+		$replace = array_merge($replace, [
 			json_encode($cache_settings, $json_debug),
 			json_encode(
 				$offline_data, $json_debug),
@@ -1345,7 +1360,7 @@ class PlgSystemGzip extends JPlugin
 			json_encode($exclude_urls, $json_debug), 
 			json_encode($preloaded_urls, $json_debug), 
 			+$options['pwa_cache_max_file_count']
-		];
+		]);
 
         $data = str_replace($search, $replace, file_get_contents(__DIR__.'/worker/dist/serviceworker.min.js'));
 
