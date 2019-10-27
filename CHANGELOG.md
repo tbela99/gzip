@@ -2,16 +2,14 @@
 
 ## 2.7.0-dev
 
-- [ ] modify service worker cache and network fallback and cache only behavior
 - [ ] Better detect character encoding when manually editing the offline page HTML
 - [x] Implement instant page loading
 - [ ] Implement backgroundFetch API
-- [ ] use configuration files to build scripts instead of shell commands
-- [x] missing translation
-- [ ] improved LQIP for jpeg files
+- [x] Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
+- [x] Missing translation
 - [x] Access-Control-Allow-Origin is always '*'
 - [x] Create links to resources that expire after a given time
-- [ ] Missed cache lead to performance issue when parse critical css returns an empty string
+- [x] \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
  
 ## 2.6.1
  

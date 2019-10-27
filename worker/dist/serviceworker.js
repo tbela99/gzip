@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "bc5bbcd",
+			value: "4d9fb4e",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-10-10 23:00:46-04:00",
+			value: "2019-10-27 10:24:09-04:00",
 			enumerable: true
 		},
 		/**
@@ -2178,6 +2178,19 @@
 		route.registerRoute(router);
 	}
 
+	/*
+	// implement encrypted file support as well as expiry date?
+	router = new ExpressRouter(
+		scope + "{ROUTE}/e/",
+		entry[1]
+	);
+	*/
+	if (caching) {
+
+		router.addPlugin(new CacheExpiration(defaultCacheSettings));
+	}
+
+	route.registerRoute(router);
 
 	// register strategies routers
 	for (entry of strategies) {
