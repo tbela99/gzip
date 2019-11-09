@@ -7,7 +7,6 @@
     "terser-config": "./node_modules/rollup/dist/bin/rollup ./config/terser/terser.js -f iife --name=terserConfig > ./terser.config.js"
   },
   "devDependencies": {
-    "docsify-cli": "^4.3.0",
     "rollup": "^1.25.1",
     "terser": "^4.3.9"
   },
