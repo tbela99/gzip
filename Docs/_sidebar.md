@@ -1,0 +1,18 @@
+<!-- docs/_sidebar.md -->
+
+- [Summary](/)
+- [Installing](installing/README.md)
+- [General Settings](settings/README.md)
+- [HTTP Settings](http/README.md)
+- [CDN Settings](cdn/README.md)
+- [Images Settings](img/README.md)
+- [Javascript Settings](javascript/README.md)
+- [CSS Settings](css/README.md)
+- [Critical CSS Settings](critical-css/README.md)
+- [Service Worker Settings](service-worker/README.md)
+- [Web Share Target Settings](web-share-target/README.md)
+- [Cache Settings](cache/README.md)
+- [Background Sync Settings](sync/README.md)
+- [Web Push Settings](web-push/README.md)
+- [Security Settings](security/README.md)
+- [Content Security Policy Settings](csp/README.md)
