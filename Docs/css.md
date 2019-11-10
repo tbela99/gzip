@@ -2,7 +2,7 @@
 
 Configure CSS settings.
 
-![CSS settings](../images/css-settings.PNG)
+![CSS settings](./img/css-settings.PNG)
 
 ## Process CSS
 

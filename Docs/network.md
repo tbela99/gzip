@@ -2,7 +2,7 @@
 
 Configure the service worker network strategies. You can customize different network strategies for different resource types
 
-![Network settings](../images/network-settings.PNG)
+![Network settings](./img/network-settings.PNG)
 
 Network strategies define how the service worker should handle network requests. Implemented strategies are
 

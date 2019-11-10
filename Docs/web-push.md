@@ -2,7 +2,7 @@
 
 Configure web push settings using One Signal SDK
 
-![Background sync settings](../images/background-sync-settings.PNG)
+![Background sync settings](./img/background-sync-settings.PNG)
 
 ## Enable
 

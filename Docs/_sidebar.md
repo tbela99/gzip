@@ -5,7 +5,7 @@
 - [General Settings](/settings.md)
 - [HTTP Settings](/http.md)
 - [CDN Settings](/cdn.md)
-- [Images Settings](/img.md)
+- [Images Settings](/images.md)
 - [Javascript Settings](/javascript.md)
 - [CSS Settings](/css.md)
 - [Critical CSS Settings](/critical-css.md)

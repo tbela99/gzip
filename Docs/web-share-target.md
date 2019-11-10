@@ -3,7 +3,7 @@
 Configure your app to be a target for app data sharing.
 This plugin implements Web Share Target Level 2
 
-![Web Share Target settings](../images/web-share-target-settings.PNG)
+![Web Share Target settings](./img/web-share-target-settings.PNG)
 
 ## Enable Web Share Target
 

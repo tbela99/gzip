@@ -2,7 +2,7 @@
 
 Configure HTTP settings
 
-![HTTP settings](../images/http-settings.PNG)
+![HTTP settings](./img/http-settings.PNG)
 
 ## Enable Save-Data support
 
@@ -18,7 +18,7 @@ If yes, when the client sends Save-Data headers, optimizations are enforced rega
 Send HTTP Server Timing headers. They can be viewed in the google chrome network panel. Click on the network panel -> Click on your web page -> Click on the timing tab on the right. It should be turned off on production.
 ps: this helped me spot a [regression in the image processing](https://github.com/tbela99/gzip/issues/38) that has since been fixed
 
-![Server Timing](../images/Server-Timing.PNG)
+![Server Timing](./images/Server-Timing.PNG)
 
 ## DNS Prefetch
 
