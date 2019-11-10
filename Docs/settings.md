@@ -2,7 +2,7 @@
 
 Configure general settings
 
-![General Settings](../images/general-settings.PNG)
+![General Settings](./img/general-settings.PNG)
 
 ## Debug
 

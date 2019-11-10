@@ -2,7 +2,7 @@
 
 Configure the service worker cache settings
 
-![Cache settings](../images/cache-settings.PNG)
+![Cache settings](./img/cache-settings.PNG)
 
 ## Manage Cache Expiry
 

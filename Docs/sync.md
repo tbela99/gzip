@@ -2,7 +2,7 @@
 
 Configure the service worker cache settings
 
-![Background sync settings](../images/background-sync-settings.PNG)
+![Background sync settings](./img/background-sync-settings.PNG)
 
 ## Background Sync
 

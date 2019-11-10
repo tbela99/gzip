@@ -2,7 +2,7 @@
 
 Configure Content Security Policy Level 3 features
 
-![Content security policy settings](../images/content-security-policy-settings.PNG)
+![Content security policy settings](./img/content-security-policy-settings.PNG)
 
 ## Enable CSP
 

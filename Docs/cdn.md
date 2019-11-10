@@ -4,7 +4,7 @@ Configure CDN settings.
 
 This feature allow you to serve files from a different cookieless domain on your server. You create a different domain that point to the same root as your web site.
 
-![CDN settings](../images/cdn-settings.PNG)
+![CDN settings](./img/cdn-settings.PNG)
 
 ## Enable CDN
 

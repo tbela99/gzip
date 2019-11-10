@@ -2,7 +2,7 @@
 
 Configure security features
 
-![Security settings](../images/security-settings.PNG)
+![Security settings](./img/security-settings.PNG)
 
 Configure security settings such as XSS protection or HSTS
 

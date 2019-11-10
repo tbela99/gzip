@@ -2,7 +2,7 @@
 
 Configure Javascript settings.
 
-![Javascript settings](../images/javascript-settings.PNG)
+![Javascript settings](./img/javascript-settings.PNG)
 
 ## Process Javascript
 

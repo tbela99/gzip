@@ -2,7 +2,7 @@
 
 Configure Critical CSS path.
 
-![Critical CSS settings](../images/critical-css-settings.PNG)
+![Critical CSS settings](./img/critical-css-settings.PNG)
 
 ## Parse Critical CSS
 

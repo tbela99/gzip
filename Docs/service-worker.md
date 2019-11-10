@@ -2,7 +2,7 @@
 
 Configure progressive web application settings
 
-![Service Worker settings](../images/service-worker-settings.PNG)
+![Service Worker settings](./img/service-worker-settings.PNG)
 
 ## Enable Service Worker
 
