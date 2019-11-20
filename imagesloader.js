@@ -21,36 +21,36 @@ LIB.ready((function(e) {
             preload(e, t) {
                 const r = !("currentSrc" in e);
                 r ? t.insertAdjacentHTML("beforebegin", '<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg ><image xlink:href="' + (e.currentSrc || e.src) + '" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />"') : t.insertAdjacentHTML("beforebegin", "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=\"background-image:url('" + (e.currentSrc || e.src) + "')\">");
-                const s = t.previousElementSibling;
+                const n = t.previousElementSibling;
                 if (r) {
                     if ("function" != typeof window.CustomEvent) {
                         window.Event.prototype;
                     }
-                    const t = s.querySelector("svg");
+                    const t = n.querySelector("svg");
                     //   const svgImage = container.querySelector('svg image');
-                                        function i() {
+                                        function s() {
                         const e = this.height, r = this.width;
                         t.setAttribute("height", e), t.setAttribute("width", r);
                     }
-                    e.addEventListener("sourcechange", i), e.addEventListener("load", i);
+                    e.addEventListener("sourcechange", s), e.addEventListener("load", s);
                 }
                 t.classList.remove("image-placeholder", "image-placeholder-lqip", "image-placeholder-svg"), 
-                s.insertBefore(t, s.firstElementChild);
+                n.insertBefore(t, n.firstElementChild);
             },
             load: r,
-            error(e, t, s) {
-                r(t, s);
+            error(e, t, n) {
+                r(t, n);
             }
         });
     }
-    function r(t, r) {
-        r.dataset.src && (r.src = r.dataset.src), r.dataset.srcset && (r.srcset = r.dataset.srcset), 
+    function r(e, t) {
+        t.dataset.src && (t.src = t.dataset.src), t.dataset.srcset && (t.srcset = t.dataset.srcset), 
         setTimeout((function() {
-            let t = r;
-            for (r.removeAttribute("data-srcset"), r.removeAttribute("data-src"), r.classList.add("image-placeholder-complete"); t != e && !t.classList.contains("image-placeholder-wrapper"); ) t = t.parentElement;
+            let e = t;
+            for (t.removeAttribute("data-srcset"), t.removeAttribute("data-src"), t.classList.add("image-placeholder-complete"); e instanceof HTMLElement && !e.classList.contains("image-placeholder-wrapper"); ) e = e.parentElement;
             //	container.classList.add("image-placeholder-complete");
-                        t.parentElement.insertBefore(r, t), setTimeout((function() {
-                r.classList.remove("image-placeholder-complete"), t.parentElement.removeChild(t);
+                        e && e.parentElement.insertBefore(t, e), setTimeout((function() {
+                t.classList.remove("image-placeholder-complete"), e && e.parentElement.removeChild(e);
             }), 10);
         }), 10);
     }

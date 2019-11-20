@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "rollup": "^1.25.1",
-    "terser": "^4.3.9"
+    "terser": "^4.4.0"
   },
   "license": "MIT OR LGPL-3.0",
   "repository": "github:tbela99/gzip",

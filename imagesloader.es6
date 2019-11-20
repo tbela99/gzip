@@ -129,19 +129,24 @@ LIB.ready(function (undef) {
 			oldImage.classList.add('image-placeholder-complete');
 
 			while (
-				container != undef &&
+				container instanceof HTMLElement &&
 				!container.classList.contains("image-placeholder-wrapper")
 			) {
 				container = container.parentElement;
 			}
 
 			//	container.classList.add("image-placeholder-complete");
-			container.parentElement.insertBefore(oldImage, container);
+			if (container) {
+
+				container.parentElement.insertBefore(oldImage, container);
+			}
 
 			setTimeout(function () {
 
 				oldImage.classList.remove('image-placeholder-complete');
-				container.parentElement.removeChild(container);
+				if (container) {
+					container.parentElement.removeChild(container);
+				}
 			}, 10);
 		}, 10);
 	}

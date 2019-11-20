@@ -396,7 +396,7 @@ class SecureHeadersHelper {
 			$marks[] = (object) array(
 				'time'   => $mark->time,
 				//	'memory' => $mark->memory,
-				'tip'    => $mark->label
+				'tip'    => \str_ireplace('processHTML', '', $mark->label)
 			);
 		}
 		return [

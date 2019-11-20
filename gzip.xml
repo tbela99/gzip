@@ -19,8 +19,7 @@
         <folder>language</folder>
         <folder>worker/dist</folder>
         <folder>worker/css</folder>
-        <folder>Docs/dist</folder>
-        <folder>Docs/images</folder>
+        <folder>Docs/</folder>
         <folder>push</folder>
         <filename>autoload.php</filename>
         <filename>responder.php</filename>
