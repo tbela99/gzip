@@ -2,9 +2,11 @@
 
 ![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fv.next%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download%20from-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
-![logo](./logo.svg)
+![logo](./Docs/logo.svg)
 
-This document explains how to configure the Joomla GZip plugin. it provides:
+\*_Make your website blazing fast_.\*
+
+![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
 Here are some features provided by this plugin
 
@@ -60,4 +62,5 @@ Here are some features provided by this plugin
 - XSS-PROTECTION header configuration
 - X-Frames-Options configuration
 
-There are a lot more settings to help you fine tune your website.
+The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/Docs/)
+and the [change log](./CHANGELOG.md)
