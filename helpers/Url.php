@@ -14,6 +14,7 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
+use JUri;
 
 class UrlHelper {
 
@@ -59,7 +60,7 @@ class UrlHelper {
 		$pushed = [];
 		$types = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && isset($options['h2push']) ? array_flip($options['h2push']) : [];
 
-		$base = \JUri::root(true) . '/';
+		$base = JUri::root(true) . '/';
 
 		$hashmap = array(
 			'style' => 0,
@@ -148,7 +149,7 @@ class UrlHelper {
 
 								$checkSumData = GZipHelper::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
 
-								$file = GZipHelper::getHost(\JURI::root(true).'/'.GZipHelper::$route.GZipHelper::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
+								$file = GZipHelper::getHost(JURI::root(true).'/'.GZipHelper::$route.GZipHelper::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
 
 								if (!empty($push_data)) {
 

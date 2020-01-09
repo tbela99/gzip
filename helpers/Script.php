@@ -154,7 +154,6 @@ class ScriptHelper {
 		if (!empty($options['minifyjs'])) {
 
 			// compress all js files
-			$replace = [];
 
 			if (!empty($sources['files'])) {
 

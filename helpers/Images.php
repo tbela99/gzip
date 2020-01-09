@@ -197,6 +197,7 @@ class ImagesHelper {
 						//    $image = null;
 						$resource = null;
 
+						/** @var string[] $images */
 						$images = array_map(function ($size) use($file, $hash, $short_name, $path) {
 
 							return $path.$hash.'-'.$short_name.'-'.$size.'-'.basename($file);

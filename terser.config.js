@@ -36,6 +36,15 @@
     comments: true
   };
 
+  const imagesOverride = {
+
+    compress: {
+
+      ...compress,
+      toplevel: false
+    }
+  };
+
   const minify = {
 
     ecma: 8, // specify one of: 5, 6, 7 or 8
@@ -99,6 +108,7 @@
     output: "./js/dist//lib.ready.min.js",
     config: {
       ...minify,
+      ...imagesOverride,
       ecma: 5
     }
   };
@@ -108,6 +118,7 @@
     output: "./js/dist//lib.images.min.js",
     config: {
       ...minify,
+      ...imagesOverride,
       ecma: 5
     }
   };

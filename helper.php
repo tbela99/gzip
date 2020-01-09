@@ -15,26 +15,18 @@ namespace Gzip;
 
 defined('JPATH_PLATFORM') or die;
 
-use function array_unshift;
+use JProfiler as JProfiler;
+use Patchwork\JSqueeze as JSqueeze;
 use function base64_encode;
 use function file_get_contents;
-use function getimagesize;
 use function str_replace;
 use function strtolower;
-use \DateTime as DateTime;
-use \JProfiler as JProfiler;
-use Patchwork\JSqueeze as JSqueeze;
-use Patchwork\CSSmin as CSSMin;
-use Sabberworm\CSS\Rule\Rule;
-use \Sabberworm\CSS\RuleSet\AtRuleSet as AtRuleSet;
-use \Sabberworm\CSS\CSSList\AtRuleBlockList as AtRuleBlockList;
-use \Sabberworm\CSS\RuleSet\DeclarationBlock as DeclarationBlock;
 
 define('WEBP', function_exists('imagewebp') && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
 class GZipHelper {
 
-    // match empty attributes <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
+    // match empty attributes like <script async src="https://www.googletagmanager.com/gtag/js?id=UA-111790917-1" data-position="head">
     const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
     const regexUrl = '#url\(([^)]+)\)#';
 
@@ -42,24 +34,11 @@ class GZipHelper {
 	
 	static $route = '';
 
-  //  static $uri = '';
-
-	// static $url = '';
-
     static $options = [];
 
     static $hosts = [];
 
     static $static_types = [];
-
-    /*
-    static $images = array(
-        "gif" => array('as' => 'image'),
-        "jpg" => array('as' => 'image'),
-    //    "jpeg" => array('as' => 'image'),
-        "png" => array('as' => 'image'),
-        "webp" => array('as' => 'image')
-    );*/
 
     static $pushed = array(
         "gif" => array('as' => 'image'),

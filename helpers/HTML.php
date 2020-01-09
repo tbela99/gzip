@@ -13,7 +13,7 @@
 
 namespace Gzip\Helpers;
 
-use Gzip\GZipHelper;
+use JURI;
 
 class HTMLHelper {
 
@@ -48,10 +48,7 @@ class HTMLHelper {
 
 		if (!empty($options['instant_loading_enabled'])) {
 
-			$hasScript = true;
 			$script .= file_get_contents(__DIR__.'/../worker/dist/browser.prefetch'.$debug.'.js');
-
-			$attributes = [];
 
 			$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/config.php';
 
@@ -108,7 +105,7 @@ class HTMLHelper {
 			'input'
 		];
 
-		$html = str_replace(\JURI::getInstance()->getScheme().'://', '//', $html);
+		$html = str_replace(JURI::getInstance()->getScheme().'://', '//', $html);
 		$html = preg_replace_callback('#<html(\s[^>]+)?>(.*?)</head>#si', function ($matches) {
 
 			return '<html'.$matches[1].'>'. preg_replace('#>[\r\n\t ]+<#s', '><', $matches[2]).'</head>';

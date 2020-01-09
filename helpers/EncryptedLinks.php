@@ -61,6 +61,7 @@ class EncryptedLinksHelper {
 
 					if(GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
 
+						$attributes['data-o-'.$value] = $fName;
 						$attributes[$value] = $this->encrypt($fName, $options);
 					}
 				}

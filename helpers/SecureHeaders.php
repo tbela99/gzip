@@ -13,7 +13,11 @@
 
 namespace Gzip\Helpers;
 
+use Exception;
 use Gzip\GZipHelper;
+use JProfiler;
+use function bin2hex;
+use function str_ireplace;
 
 class SecureHeadersHelper {
 
@@ -113,10 +117,9 @@ class SecureHeadersHelper {
 
 			if (!empty($tags)) {
 
-				$scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
 				$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 
-				$html = preg_replace_callback('#<((' . implode(')|(', $tags) . '))(\s([^>]*))?>#is', function ($matches) use ($tags, $options, &$links, $url_attr, $scheme) {
+				$html = preg_replace_callback('#<((' . implode(')|(', $tags) . '))(\s([^>]*))?>#is', function ($matches) use ($tags, $options, &$links, $url_attr) {
 
 					$tag = strtolower($matches[1]);
 
@@ -277,10 +280,10 @@ class SecureHeadersHelper {
 
 			foreach ($data['marks'] as $k => $mark) {
 
-				$header[] = substr('00' . ($k + 1), -3) . '-' . preg_replace('#[^A-Za-z0-9]#', '', $mark->tip) . ';dur=' . $mark->time; //.';memory='.$mark->memory;
+				$header[] = substr('0' . ($k + 1), -2) . '-' . preg_replace('#[^A-Za-z0-9]#', '', $mark->tip) . ';dur=' . floatval($mark->time); //.';memory='.$mark->memory;
 			}
 
-			$header[] = 'total;dur=' . $data['totalTime']; //.';memory='.$data['totalMemory'];
+			$header[] = 'total;dur=' . $data['totalTime'];
 			$headers['Server-Timing'] = implode(',', $header);
 		}
 
@@ -370,7 +373,12 @@ class SecureHeadersHelper {
 
 		if (is_null($nonce)) {
 
-			$nonce = \bin2hex(random_bytes(16));
+			try {
+				$nonce = bin2hex(random_bytes(16));
+			}
+
+			catch (Exception $e) {
+			}
 		}
 
 		return $nonce;
@@ -380,28 +388,25 @@ class SecureHeadersHelper {
 	/**
 	 * Display profile information.
 	 *
-	 * @return  string
+	 * @return array
 	 *
 	 * @since   2.5
 	 */
 	protected function getTimingData()
 	{
 		$totalTime = 0;
-		//	$totalMem  = 0;
-		$marks     = array();
-		foreach (\JProfiler::getInstance('Application')->getMarks() as $mark)
+		$marks     = [];
+		foreach (JProfiler::getInstance('Application')->getMarks() as $mark)
 		{
 			$totalTime += $mark->time;
-			//	$totalMem  += (float) $mark->memory;
 			$marks[] = (object) array(
 				'time'   => $mark->time,
-				//	'memory' => $mark->memory,
-				'tip'    => \str_ireplace('processHTML', '', $mark->label)
+				'tip'    => str_ireplace('processHTML', '', $mark->label)
 			);
 		}
+
 		return [
 			'totalTime' => $totalTime,
-			//'totalMemory' => $totalMem,
 			'marks' => $marks
 		];
 	}
