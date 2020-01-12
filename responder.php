@@ -39,7 +39,7 @@ if (!ini_get('zlib.output_compression')) {
 
 			if (preg_replace('#(https?:)?//([^/]+).*#', '$2', $host) == $_SERVER['SERVER_NAME']) {
 
-				$cdn_access_control_origin = \JURI::getScheme().'://'.$_SERVER['SERVER_NAME'];
+				$cdn_access_control_origin = JURI::getScheme().'://'.$_SERVER['SERVER_NAME'];
 
 				// delete cookies
 				if (isset($_SERVER['HTTP_COOKIE'])) {
@@ -139,7 +139,7 @@ if (!ini_get('zlib.output_compression')) {
 	}
 
 	$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-	$accepted = array_merge(\Gzip\GZipHelper::accepted(), \Gzip\GZipHelper::$static_types);
+	$accepted = array_merge(GZipHelper::accepted(), GZipHelper::$static_types);
 
 	if(!isset($accepted[$ext])) {
 

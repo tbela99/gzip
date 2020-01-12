@@ -57,7 +57,7 @@ Here are some features provided by this plugin
 ## Security
 
 - Sub Resource Integrity
-- Content Security Policy Level 3: control execution of scripts, css, frames, workers
+- Content Security Policy Level 3: control execution of scripts, css, frames, workers in every web page
 - HSTS header configuration
 - XSS-PROTECTION header configuration
 - X-Frames-Options configuration

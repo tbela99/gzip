@@ -36,7 +36,7 @@
         <fields name="params">
             <fieldset name="basic">
                 <fields name="gzip">
-                    <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="list" default="0">
+                    <field name="debug" label="PLG_GZIP_FIELD_DEBUG_LABEL" description="PLG_GZIP_FIELD_DEBUG_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -60,12 +60,8 @@
                         </field>
                         <field name="duration" label="PLG_GZIP_FIELD_DURATION_LABEL" description="PLG_GZIP_FIELD_DURATION_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="4hours" />
                         <field name="file_type" class="no-checkboxes" type="checkboxes" label="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_LABEL" checked="" description="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_DESCRIPTION" />
-                        <!--
-                             enabled
-                            secret_key
-                            expiry
-                            filetype
-                        -->
+                        <field name="mimetypes_expiring_links" label="PLG_GZIP_FIELD_MIMETYPES_EXPIRING_LINKS_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_EXPIRING_LINKS_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_EXPIRING_LINKS_DESCRIPTION" type="textarea" />
+
                     </fields>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="PLG_GZIP_FIELDSET_INSTANT_LOADING" />

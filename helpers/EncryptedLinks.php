@@ -23,6 +23,14 @@ class EncryptedLinksHelper
 	public function postProcessHTML($html, array $options = [])
 	{
 
+		if (!empty($options['expiring_links']['mimetypes_expiring_links'])) {
+
+			if (preg_match_all('#^\s*(\S+)#ms', $options['expiring_links']['mimetypes_expiring_links'], $matches)) {
+
+				array_splice($options['expiring_links']['file_type'], count($options['expiring_links']['file_type']), 0, $matches[1]);
+			}
+		}
+
 		return preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#is', function ($matches) use($options) {
 
 			$tag = $matches[1];
@@ -55,7 +63,6 @@ class EncryptedLinksHelper
 							if (count($data) == 2) {
 
 								$fName = GZipHelper::getName($data[0]);
-								$attributes['data-file'] = $fName;
 
 								if (GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
 

@@ -409,9 +409,21 @@ class PlgSystemGzip extends JPlugin
 				}
 			}
 
+			$types = '';
+
 			if (!empty($this->options['cdntypes_custom'])) {
 
-				foreach (explode("\n", $this->options['cdntypes_custom']) as $option) {
+				$types = $this->options['cdntypes_custom'];
+			}
+
+			if (!empty($this->options['expiring_links']['mimetypes_expiring_links'])) {
+
+				$types .= "\n".$this->options['expiring_links']['mimetypes_expiring_links'];
+			}
+
+			if (trim($types) !== '') {
+
+				foreach (explode("\n", $types) as $option) {
 
 					$option = trim($option);
 
