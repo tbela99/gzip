@@ -14,6 +14,8 @@
 LIB.ready(function (undef) {
 	// intersection-observer.min.js
 
+	console.log()
+
 	if (!("srcset" in new Image())) {
 		//    try {
 

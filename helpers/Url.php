@@ -56,7 +56,6 @@ class UrlHelper {
 			return $matches[1].$hash.'</style>';
 		}, $html);
 
-		// TODO: parse url() in styles
 		$pushed = [];
 		$types = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && isset($options['h2push']) ? array_flip($options['h2push']) : [];
 
@@ -179,7 +178,6 @@ class UrlHelper {
 
 							$domains[$domain[1].$domain[2]] = $domain[1].$domain[2];
 						}
-
 					}
 				}
 			}
@@ -194,10 +192,6 @@ class UrlHelper {
 			return $result .'>';
 
 		}, $html);
-
-		//    $profiler->mark('end parse urls');
-
-		//    $profiler->mark('push urls');
 
 		if (!empty($pushed)) {
 

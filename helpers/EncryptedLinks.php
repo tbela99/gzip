@@ -13,87 +13,102 @@
 
 namespace Gzip\Helpers;
 
+use DateTime;
 use Gzip\GZipHelper;
+use JURI;
 
-class EncryptedLinksHelper {
+class EncryptedLinksHelper
+{
 
-	public function processHTMLAttributes ($attributes, array $options = []) {
+	public function postProcessHTML($html, array $options = [])
+	{
 
-		$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
+		return preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#is', function ($matches) use($options) {
 
-		foreach ($url_attr as $value) {
+			$tag = $matches[1];
+			$attributes = [];
 
-			if (!empty($attributes[$value])) {
+			if (preg_match_all(GZipHelper::regexAttr, $matches[2], $attrib)) {
 
-				if ($value == 'srcset' || $value == 'data-srcset') {
+				foreach ($attrib[2] as $key => $value) {
 
-					$values = explode(',', $attributes[$value]);
+					$attributes[$value] = $attrib[6][$key];
+				}
+			}
 
-					$isSupported = false;
+			$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 
-					foreach ($values as $key => $val) {
+			foreach ($url_attr as $value) {
 
-						$data = explode (' ', $val, 2);
+				if (!empty($attributes[$value])) {
 
-						if (count ($data) == 2) {
+					if ($value == 'srcset' || $value == 'data-srcset') {
 
-							$fName = GZipHelper::getName($data[0]);
+						$values = explode(',', $attributes[$value]);
 
-							if(GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
+						$isSupported = false;
 
-								$data[0] = $this->encrypt($fName, $options);
-								$values[$key] = implode(' ', $data);
+						foreach ($values as $key => $val) {
 
-								$isSupported = true;
+							$data = explode(' ', $val, 2);
+
+							if (count($data) == 2) {
+
+								$fName = GZipHelper::getName($data[0]);
+								$attributes['data-file'] = $fName;
+
+								if (GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
+
+									$data[0] = $this->encrypt($fName, $options);
+									$values[$key] = implode(' ', $data);
+
+									$isSupported = true;
+								}
 							}
 						}
-					}
 
-					if ($isSupported) {
+						if ($isSupported) {
 
-						$attributes[$value] = implode(',', $values);
-					}
-				}
+							$attributes[$value] = implode(',', $values);
+						}
+					} else {
 
-				else {
+						$fName = GZipHelper::getName($attributes[$value]);
 
-					$fName = GZipHelper::getName($attributes[$value]);
+						if (GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
 
-					if(GZipHelper::isFile($fName) && in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
-
-						$attributes['data-o-'.$value] = $fName;
-						$attributes[$value] = $this->encrypt($fName, $options);
+							$attributes[$value] = $this->encrypt($fName, $options);
+						}
 					}
 				}
 			}
 
-		}
+			$html = '<'.$tag;
 
-		return $attributes;
+			foreach ($attributes as $key => $attribute) {
+
+				$html .= ' '.$key.'="'.$attribute.'"';
+			}
+
+			return $html.'>';
+		}, $html);
 	}
 
-	protected  function encrypt($file, array $options = []) {
+	protected function encrypt($file, array $options = [])
+	{
 
-	//	if(GZipHelper::isFile($fName)) {
+		$dt = new DateTime();
 
-	//		if (in_array(strtolower(pathinfo($fName, PATHINFO_EXTENSION)), $options['expiring_links']['file_type'])) {
+		$dt->modify($options['expiring_links']['duration']);
 
-				$dt = new \DateTime();
+		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
-				$dt->modify($options['expiring_links']['duration']);
+		$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
+				'method' => $options['expiring_links']['method'],
+				'path' => $file,
+				'duration' => $dt->getTimestamp()
+			]), $nonce, hex2bin($options['expiring_links']['secret'])));
 
-				$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-
-				$secret = bin2hex($nonce.sodium_crypto_secretbox(json_encode([
-						'method' => $options['expiring_links']['method'],
-						'path' => $file,
-						'duration' => $dt->getTimestamp()
-					]), $nonce, hex2bin($options['expiring_links']['secret'])));
-
-				return GZipHelper::getHost(\JURI::root(true).'/'.GZipHelper::$route.GZipHelper::$pwa_network_strategy.'e/'.$secret.'/' . basename($file));
-	//		}
-	//	}
-
-		return $file;
+		return GZipHelper::getHost(JURI::root(true) . '/' . GZipHelper::$route . GZipHelper::$pwa_network_strategy . 'e/' . $secret . '/' . basename($file));
 	}
 }

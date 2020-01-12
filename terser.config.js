@@ -25,7 +25,7 @@
   };
 
   const mangle = {
-    keep_fnames: true
+  //  keep_fnames: true
   };
 
   const output = {
@@ -204,27 +204,26 @@
     }
   };
 
-  var config = /*#__PURE__*/Object.freeze({
+  const config = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    imageLoader: imageLoader,
-    intersectionObserver: intersectionObserver,
-    imageLoaderMin: imageLoaderMin,
-    loaderMin: loaderMin,
-    libReadyMin: libReadyMin,
-    libImageMin: libImageMin,
-    intersectionObserverMin: intersectionObserverMin,
-    syncMin: syncMin,
-    browserPrefetchMin: browserPrefetchMin,
-    serviceWorkerMin: serviceWorkerMin,
-    serviceWorkerAdminMin: serviceWorkerAdminMin,
-    browserMin: browserMin,
-    browserAdminMin: browserAdminMin,
-    browserSyncMin: browserSyncMin,
-    browserUninstallMin: browserUninstallMin
+    imageLoader,
+    intersectionObserver,
+    imageLoaderMin,
+    loaderMin,
+    libReadyMin,
+    libImageMin,
+    intersectionObserverMin,
+    syncMin,
+    browserPrefetchMin,
+    serviceWorkerMin,
+    serviceWorkerAdminMin,
+    browserMin,
+    browserAdminMin,
+    browserSyncMin,
+    browserUninstallMin
   });
 
   // @ts-check
-
   const fs = require("fs");
   const Terser = require("terser");
 
@@ -239,14 +238,8 @@
         );
 
         fs.writeFileSync(config.output, result.code);
-
-     //   console.log({
-     //     name,
-      //    config: JSON.stringify(config.config),
-      //    result: result.code.substring(0, 350) + ' ...'
-      //  });
       } catch (error) {
-        console.log({
+        console.error({
           name,
           error
         });

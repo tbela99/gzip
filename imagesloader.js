@@ -56,7 +56,7 @@ LIB.ready((function(e) {
     }
     if (
     // intersection-observer.min.js
-    "srcset" in new Image || 
+    console.log(), "srcset" in new Image || 
     //    try {
     document.body.insertAdjacentHTML("beforeend", "<svg xmlns=http://www.w3.org/2000/svg width=1 height=1><defs><filter id=blur-lqip width=100% height=100% ><feGaussianBlur stdDeviation=20 /></filter></defs></svg>"), 
     "IntersectionObserver" in window && "IntersectionObserverEntry" in window && "intersectionRatio" in IntersectionObserverEntry.prototype) "isIntersecting" in IntersectionObserverEntry.prototype || Object.defineProperty(IntersectionObserverEntry.prototype, "isIntersecting", {

@@ -21,6 +21,7 @@ use function base64_encode;
 use function file_get_contents;
 use function str_replace;
 use function strtolower;
+use function ucwords;
 
 define('WEBP', function_exists('imagewebp') && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
@@ -128,7 +129,7 @@ class GZipHelper {
 
 			if (!empty (static::$callbacks)) {
 
-				return preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($options, $event) {
+				$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($options, $event, $profiler) {
 
 					$tag = $matches[1];
 					$attributes = [];
@@ -145,6 +146,7 @@ class GZipHelper {
 							if (is_callable([$callback[0], $event])) {
 
 								$attributes = call_user_func_array([$callback[0], $event], [$attributes, $options, $tag]);
+								$profiler->mark($callback[1]. ucwords($event));
 							}
 						}
 					}
@@ -159,8 +161,6 @@ class GZipHelper {
 					return $result .'>';
 
 				}, $html);
-
-				$profiler->mark($callback[1].\ucwords($event));
 			}
 		}
 
@@ -171,7 +171,7 @@ class GZipHelper {
 				if (is_callable([$callback[0], $event])) {
 
 					$html = call_user_func_array([$callback[0], $event], [$html, $options]);
-					$profiler->mark($callback[1].\ucwords($event));
+					$profiler->mark($callback[1]. ucwords($event));
 				}
 			}
 		}
@@ -198,8 +198,7 @@ class GZipHelper {
         }
 
         $checksum = [
-            'hash' => $hash, //
-            //    'crossorigin' => 'anonymous',
+            'hash' => $hash,
             'algo' => $algo,
             'integrity' => empty($algo) || $algo == 'none' || empty($integrity) ? '' : $algo . "-" . base64_encode(hash_file($algo, $file, true))
         ];
