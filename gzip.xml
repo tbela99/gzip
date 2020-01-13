@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.7.0-dev</version>
+    <version>2.7.0</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>
@@ -113,7 +113,7 @@
                         <option value="off">JOPTION_DNS_PREFETCH_OFF</option>
                     </field>
                     <field type="spacer" hr="true" />
-                    <field type="spacer" label="HTTP Push" />
+                    <field type="spacer" label="HTTP Push Settings" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
                         <option value="css">PLG_GZIP_FIELD_H2PUSH_OPTION_CSS</option>
@@ -135,7 +135,7 @@
                     <field name="cache_key" label="PLG_GZIP_FIELD_CACHE_KEY_LABEL" description="PLG_GZIP_FIELD_CACHE_KEY_DESCRIPTION" type="text" default="" size="5" pattern="[a-zA-Z0-9@_]+" maxlength="5" class="form-control" />
                     <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="2months" />
                     <field type="spacer" hr="true" />
-                    <field type="spacer" label="Misc" />
+                    <field type="spacer" label="Misc Settings" />
                     <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>

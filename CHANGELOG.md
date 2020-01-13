@@ -1,16 +1,21 @@
 # Change History
 
-## 2.7.0-dev
+## 2.7.0
 
-- [x] Better detect character encoding when manually editing the offline page HTML
-- [x] Implement instant page loading
-- [ ] Implement backgroundFetch API
-- [x] Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
-- [x] Missing translation
-- [x] Access-Control-Allow-Origin is always '*'
-- [x] Create links to resources that expire after a given time
-- [x] \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
- 
+- new documentation using docsify
+- better character encoding detection of the offline HTML page
+- javascript files are now built using terser instead of uglifyjs
+- instant page loading
+- missing translation added
+- hotlink protection
+- better detect character encoding when manually editing the offline page HTML
+- Implement instant page loading
+- Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
+- missing translation added
+- Access-Control-Allow-Origin is always set to '*'
+- Create links to resources that expire after a given time
+- \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
+  
 ## 2.6.1
  
 - Add documentation
