@@ -62,5 +62,10 @@ Here are some features provided by this plugin
 - XSS-PROTECTION header configuration
 - X-Frames-Options configuration
 
+## Hotlink Protection
+
+- configure file type that use hotlink protection
+- configure link lifetime
+
 The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/)
 and the [change log](./CHANGELOG.md)
