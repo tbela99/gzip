@@ -22,7 +22,7 @@
   
 ## 2.6.0
 
-- partly cache security support
+- partly cache security
 - add csp level 3 headers
 - add nonce or hash to support inline script and style
 - fix a regression with images lazy loading in google chrome
