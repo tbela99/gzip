@@ -1,5 +1,9 @@
 # Change History
 
+## 2.7.1
+
+- fix case in folder name that prevent the plugin installation on Linux
+
 ## 2.7.0
 
 - new documentation using docsify
