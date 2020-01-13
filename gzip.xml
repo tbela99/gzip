@@ -7,19 +7,19 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.6.1</version>
+    <version>2.7.0</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>css</folder>
         <folder>fields</folder>
+        <folder>helpers</folder>
         <folder>js/lib</folder>
         <folder>js/dist</folder>
         <folder>lib</folder>
         <folder>language</folder>
         <folder>worker/dist</folder>
         <folder>worker/css</folder>
-        <folder>Docs/dist</folder>
-        <folder>Docs/images</folder>
+        <folder>Docs/</folder>
         <folder>push</folder>
         <filename>autoload.php</filename>
         <filename>responder.php</filename>
@@ -40,10 +40,59 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field type="spacer" hr="true" />
                     <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_EXPIRING_LINKS" />
+                    <field name="expiring_links_enabled" label="PLG_GZIP_FIELD_EXPIRING_LINKS_ENABLED_LABEL" description="PLG_GZIP_FIELD_EXPIRING_LINKS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <fields name="expiring_links">
+                        <field name="secret" label="PLG_GZIP_FIELD_EXPIRING_LINKS_SECRET_LABEL" description="PLG_GZIP_EXPIRING_LINKS_SECRET_DESCRIPTION" type="soduimsecret" readonly="readonly" />
+                        <field name="method" label="PLG_GZIP_FIELD_EXPIRING_LINKS_METHOD_LABEL" description="PLG_GZIP_FIELD_EXPIRING_LINKS_METHOD_DESCRIPTION" type="list" default="">
+                            <option value="">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_ANY</option>
+                            <option value="GET">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_GET</option>
+                            <option value="POST">PLG_GZIP_FIELD_EXPIRING_LINKS_OPTION_POST</option>
+                        </field>
+                        <field name="duration" label="PLG_GZIP_FIELD_DURATION_LABEL" description="PLG_GZIP_FIELD_DURATION_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="4hours" />
+                        <field name="file_type" class="no-checkboxes" type="checkboxes" label="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_LABEL" checked="" description="PLG_GZIP_FIELD_FILE_TYPE_DEFAULT_DESCRIPTION" />
+                        <field name="mimetypes_expiring_links" label="PLG_GZIP_FIELD_MIMETYPES_EXPIRING_LINKS_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_EXPIRING_LINKS_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_EXPIRING_LINKS_DESCRIPTION" type="textarea" />
+
+                    </fields>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_INSTANT_LOADING" />
+                    <field name="instant_loading_enabled" label="PLG_GZIP_FIELD_INSTANT_LOADING_ENABLED_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <fields name="instantloading">
+                        <field name="trigger" label="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_DESCRIPTION" type="list" default="mouseover">
+                            <option value="mouseover">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEOVER</option>
+                            <option value="mousedown">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN</option>
+                            <option value="mousedown-only">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN_ONLY</option>
+                        </field>
+                        <field name="intensity" label="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_DESCRIPTION" type="integer" first="65" last="150" step="1" default="">
+                        </field>
+                        <field name="allow-query-string" label="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_LABEL" description="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_DESCRIPTION" type="radio" class="btn-group" default="0">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field name="allow-external-links" label="PLG_GZIP_FIELD_INSTANT_ALLOW_EXTERNAL_LINKS_LABEL" description="PLG_GZIP_FIELD_INSTANT_ALLOW_EXTERNAL_LINKS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field name="filter-type" label="PLG_GZIP_FIELD_INSTANT_FILTER_TYPE_LINKS_LABEL" description="PLG_GZIP_FIELD_INSTANT_FILTER_TYPE_DESCRIPTION" type="list" default="0">
+                            <option value="1">JOPTION_INSTANT_LOADING_FILTER_WHITELIST</option>
+                            <option value="2">JOPTION_INSTANT_LOADING_FILTER_BLACKLIST</option>
+                        </field>
+                        <field name="filters" label="PLG_GZIP_FIELD_INSTANT_FILTERS_LABEL" description="PLG_GZIP_FIELD_INSTANT_FILTERS_DESCRIPTION" type="textarea">
+
+                        </field>
+                    </fields>
                 </fields>
             </fieldset>
             <fieldset name="http_cache" label="HTTP" addfieldpath="/plugins/system/gzip/fields">
@@ -62,10 +111,9 @@
                         <option value="">JOPTION_DNS_PREFETCH_IGNORE</option>
                         <option value="on">JOPTION_DNS_PREFETCH_ON</option>
                         <option value="off">JOPTION_DNS_PREFETCH_OFF</option>
-
                     </field>
                     <field type="spacer" hr="true" />
-                    <field type="spacer" label="HTTP Push" />
+                    <field type="spacer" label="HTTP Push Settings" />
                     <field name="h2push" label="PLG_GZIP_FIELD_H2PUSH_LABEL" description="PLG_GZIP_FIELD_H2PUSH_DESCRIPTION" type="list" default="" multiple="true">
                         <option value="all">PLG_GZIP_FIELD_H2PUSH_OPTION_ALL</option>
                         <option value="css">PLG_GZIP_FIELD_H2PUSH_OPTION_CSS</option>
@@ -87,17 +135,16 @@
                     <field name="cache_key" label="PLG_GZIP_FIELD_CACHE_KEY_LABEL" description="PLG_GZIP_FIELD_CACHE_KEY_DESCRIPTION" type="text" default="" size="5" pattern="[a-zA-Z0-9@_]+" maxlength="5" class="form-control" />
                     <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="2months" />
                     <field type="spacer" hr="true" />
-                    <field type="spacer" label="Misc" />
+                    <field type="spacer" label="Misc Settings" />
                     <field name="cdn_cors" label="PLG_GZIP_FIELD_CDN_CORS_LABEL" description="PLG_GZIP_FIELD_CDN_CORS_DESCRIPTION" type="radio" default="1" class="btn-group">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-
                     <field name="mimetypes_custom" label="PLG_GZIP_FIELD_MIMETYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_MIMETYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="parse_url_attr" type="textarea" label="PLG_GZIP_FIELD_PARSE_URL_ATTR_LABEL" description="PLG_GZIP_FIELD_PARSE_URL_ATTR_DESCRIPTION" hint="PLG_GZIP_FIELD_PARSE_URL_ATTR_HINT" />
                 </fields>
             </fieldset>
-            <fieldset name="cdn" label="CDN">
+            <fieldset name="cdn" label="CDN" addfieldpath="/plugins/system/gzip/fields">
                 <field type="spacer" label="PLG_GZIP_FIELDSET_CDN" />
                 <field type="spacer" hr="true" />
                 <fields name="gzip">
@@ -114,10 +161,9 @@
                         <field name="2" label="PLG_GZIP_FIELD_CDN_1_LABEL" description="PLG_GZIP_FIELD_CDN_1_DESCRIPTION" type="text" />
                         <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
                     </fields>
-
                     <field type="spacer" hr="true" />
                     <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
-                    <field name="cdn_types" type="checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
+                    <field name="cdn_types" type="checkboxes" class="no-checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
@@ -271,7 +317,7 @@
                         <option value="GET">JOPTION_PWA_OFFLINE_METHOD_GET</option>
                         <option value="POST">JOPTION_PWA_OFFLINE_METHOD_POST</option>
                     </field>
-                    <field name="pwa_offline_pref" label="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_DESCRIPTION" type="radio" default="html" class="btn-group">
+                    <field name="pwa_offline_pref" label="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PREF_DESCRIPTION" type="list" default="html">
                         <option value="url">JOPTION_PWA_OFFLINE_PREF_URL</option>
                         <option value="html">JOPTION_PWA_OFFLINE_PREF_HTML</option>
                     </field>

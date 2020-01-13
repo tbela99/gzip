@@ -60,11 +60,6 @@ var LIB = (function (exports) {
 
 	// @ts-check
 
-	const requestAnimationFrame$1 =
-		window.requestAnimationFrame || window.webkitRequestAnimationFrame;
-	const cancelAnimationFrame =
-		window.cancelAnimationFrame || window.webkitCancelAnimationFrame;
-
 	function extendArgs(fn) {
 		return function (key) {
 			if (typeof key == "object") {

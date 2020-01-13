@@ -10,13 +10,13 @@
  * @license     MIT License
  */
 // @ts-check
-// build 5be4004 2019-08-31 10:22:46-04:00
+// build c6be1db 2020-01-09 16:33:55-05:00
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.getRegistration().then(function(registration) {
-        registration.unregister().then(function(result) {
+    navigator.serviceWorker.getRegistration().then((function(registration) {
+        registration.unregister().then((function(result) {
             if (result) {
                 console.info("The service worker has been successfully removed 😭");
             }
-        });
-    });
+        }));
+    }));
 }

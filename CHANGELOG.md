@@ -1,22 +1,28 @@
 # Change History
 
-## 2.7.0-dev
+## 2.7.0
 
-- [ ] modify service worker cache and network fallback and cache only behavior
-- [ ] Better detect character encoding when manually editing the offline page HTML
-- [ ] Implement instant page loading
-- [ ] Implement backgroundFetch API
-- [ ] use configuration files to build scripts instead of shell commands
-- [ ] missing translation bug good first issue
-- [ ] improved LQIP for jpeg files
- 
-## 2.6.1-dev
+- new documentation using docsify
+- better character encoding detection of the offline HTML page
+- javascript files are now built using terser instead of uglifyjs
+- instant page loading
+- missing translation added
+- hotlink protection
+- better detect character encoding when manually editing the offline page HTML
+- Implement instant page loading
+- Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
+- missing translation added
+- Access-Control-Allow-Origin is always set to '*'
+- Create links to resources that expire after a given time
+- \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
+  
+## 2.6.1
  
 - Add documentation
   
 ## 2.6.0
 
-- partly cache security headers
+- partly cache security support
 - add csp level 3 headers
 - add nonce or hash to support inline script and style
 - fix a regression with images lazy loading in google chrome

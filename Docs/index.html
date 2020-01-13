@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>CSS</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/docsify/lib/themes/vue.css">
+  <style>
+    img {
+      box-shadow: 0 0 3px rgba(0, 0, 0, .75);
+    }
+    .anchor span {
+      color: unset;
+    }
+    .markdown-section code, .markdown-section pre, .markdown-section pre > code {
+      background-color: #f6f8fa;
+      color: #24292e;
+    }
+    .markdown-section pre {
+      box-shadow: 0 0 3px 0 #0000002b;
+    }
+    .sidebar>h1 {
+      margin-left: 15px;
+      margin-right: 15px;
+      width: 64px;
+    }
+    .sidebar-nav ul,
+    .sidebar-nav ul li {
+      margin: 0;
+    }
+    .sidebar-nav>ul>li>a:before {
+      position: absolute;
+      font-size: 10px;
+      transform: translateX(-15px) rotateZ(90deg);
+      content: "\3009";
+      transition: all .2s;
+    }
+    .sidebar-nav>ul>li.active:not(.collapse)>a:before {
+      content: "\3009";
+      transform: translateX(-15px) rotateZ(0);
+    }
+    .sidebar-nav>ul>li>a {
+      padding-left: 20px;
+    }
+    .sidebar-nav li>a {
+      padding-left: 10px;
+    }
+    .sidebar ul li .app-sub-sidebar {
+      padding-left: 10px;
+    }
+    .sidebar-nav li li a {
+      padding-left: 15px;
+    }
+    .sidebar ul li.active > a,
+    .sidebar-nav ul li>a:hover {
+      background-color: #dbb7b717;
+      text-decoration: none;
+    }
+    .app-sub-sidebar li>a:before {
+      content: "-";
+      margin-right: 5px;
+    }
+    .app-sub-sidebar li:before {
+      content: "";
+    }
+    footer {
+      margin-top: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #d0d0d0;
+    }
+    .markdown-section footer ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    footer ul li {
+      display: inline-block;
+      padding: 0 15px 0 0;
+    }
+  </style>
+</head>
+
+<body>
+<div id="app"></div>
+<script>
+  window.$docsify = {
+    name: 'GZip',
+    search: [
+      '/',
+      '/parser',
+      '/compiler'
+    ],
+    auto2top: true,
+    logo: './logo.svg',
+    //  routerMode: 'history',
+    repo: 'https://github.com/tbela99/gzip',
+    loadSidebar: true,
+    subMaxLevel:3,
+    alias: {
+      '/.*/_sidebar.md': './_sidebar.md'
+    },
+    plugins: [
+      function (hook, vm) {
+        hook.beforeEach(function (html) {
+          let url;
+          if (/githubusercontent\.com/.test(vm.route.file)) {
+            url = vm.route.file
+                    .replace('raw.githubusercontent.com', 'github.com')
+                    .replace(/\/master/, '/blob/master')
+          } else {
+            url = $docsify.repo + '/blob/master/docs/' + vm.route.file
+          }
+          const editHTML = '[:memo: Edit Document](' + url + ')\n';
+          const footer =
+                  '<footer><ul><li>[![Github](https://icongram.jgog.in/simple/github.svg?color=808080&size=16)](https://github.com/tbela99/css) <li> \
+                        [![Twitter](https://icongram.jgog.in/simple/twitter.svg?colored&size=16)](http://twitter.com/tbela99)'
+          return editHTML + html +
+                  '<br>' +
+                  footer;
+        })
+      }
+    ]
+  }
+</script>
+<script src="https://unpkg.com/docsify/lib/docsify.min.js"></script>
+<script src="https://unpkg.com/docsify/lib/plugins/search.min.js"></script>
+</body>
+
+</html>

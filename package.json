@@ -1,16 +1,14 @@
 {
   "name": "gzip",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "scripts": {
     "build": "sh ./build.sh",
-    "docs": "jsdoc -c jsdoc.json",
-    "build-all": "sh ./build.sh && jsdoc -c jsdoc.json"
+    "rollup-config": "./node_modules/rollup/dist/bin/rollup ./config/rollup/rollup.js -f iife --name=rollupConfig > ./rollup.config.js",
+    "terser-config": "./node_modules/rollup/dist/bin/rollup ./config/terser/terser.js -f iife --name=terserConfig > ./terser.config.js"
   },
   "devDependencies": {
-    "docdash": "github:clenemt/docdash",
-    "jsdoc": "^3.5.5",
-    "rollup": "^1.16.2",
-    "uglify-es": "^3.3.9"
+    "rollup": "^1.25.1",
+    "terser": "^4.4.0"
   },
   "license": "MIT OR LGPL-3.0",
   "repository": "github:tbela99/gzip",

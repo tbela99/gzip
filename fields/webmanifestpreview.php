@@ -37,7 +37,7 @@ class JFormFieldWebManifestPreview extends JFormFieldTextArea
 		
 		$html = parent::getInput();
 
-		$html .= '<br><button type="button" class="btn btn-default" onclick="this.form.task.value=\'\';const body = new FormData(this.form);body.append(\'manifest_preview\',1);fetch(\'index.php?option=com_plugins&view=plugin&_=\' + Date.now(), {method: \'post\', body: body}).then(function (e) { e.json().then(function (e) { document.getElementById(\''.$this->id.'\').value=JSON.stringify(e,\'\\t\', 1);}) }).catch (function (e) { }); return false">'.JText::_('PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_BUTTON_LABEL').'</button>';
+		$html .= '<br><button type="button" class="btn btn-success" onclick="this.form.task.value=\'\';const body = new FormData(this.form);body.append(\'manifest_preview\',1);fetch(\'index.php?option=com_plugins&view=plugin&_=\' + Date.now(), {method: \'post\', body: body}).then(function (e) { e.json().then(function (e) { document.getElementById(\''.$this->id.'\').value=JSON.stringify(e,\'\\t\', 1);}) }).catch (function (e) { }); return false">'.JText::_('PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_BUTTON_LABEL').'</button>';
 
         return $html;
 	}

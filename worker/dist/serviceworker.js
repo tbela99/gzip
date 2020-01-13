@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "5be4004",
+			value: "c6be1db",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2019-08-31 10:22:43-04:00",
+			value: "2020-01-09 16:33:53-05:00",
 			enumerable: true
 		},
 		/**
@@ -1497,7 +1497,7 @@
 			}
 
 			return networkResponse;
-		}).catch(error => {
+		}).catch(( /*error*/ ) => {
 
 			// cache update failed
 			/* console.error("😭", error) */
@@ -2082,7 +2082,7 @@
 
 	                return new Response(SW.app.offline.body, {
 	                    headers: new Headers({
-	                        'Content-Type': 'text/html; charset=utf-8'
+	                        'Content-Type': 'text/html; charset="{offline_charset}"'
 	                    })
 	                });
 	            }
@@ -2178,6 +2178,19 @@
 		route.registerRoute(router);
 	}
 
+	/*
+	// implement encrypted file support as well as expiry date?
+	router = new ExpressRouter(
+		scope + "{ROUTE}/e/",
+		entry[1]
+	);
+	*/
+	if (caching) {
+
+		router.addPlugin(new CacheExpiration(defaultCacheSettings));
+	}
+
+	route.registerRoute(router);
 
 	// register strategies routers
 	for (entry of strategies) {

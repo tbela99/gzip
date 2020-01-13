@@ -24,14 +24,22 @@ if (!ini_get('zlib.output_compression')) {
 	 * @license     MIT License
 	 */
 
-	// cookieless domain?
-	if (!empty(\Gzip\GZipHelper::$hosts)) {
+/**
+ * @var $app;
+ */
 
-		foreach (\Gzip\GZipHelper::$hosts as $host) {
+	use \Gzip\GZipHelper;
+
+	$cdn_access_control_origin = isset($this->options['cdn_access_control_origin']) ? $this->options['cdn_access_control_origin'] : '*';
+
+	// cookieless domain?
+	if (!empty(GZipHelper::$hosts)) {
+
+		foreach (GZipHelper::$hosts as $host) {
 
 			if (preg_replace('#(https?:)?//([^/]+).*#', '$2', $host) == $_SERVER['SERVER_NAME']) {
 
-				header('Access-Control-Allow-Origin: *');
+				$cdn_access_control_origin = JURI::getScheme().'://'.$_SERVER['SERVER_NAME'];
 
 				// delete cookies
 				if (isset($_SERVER['HTTP_COOKIE'])) {
@@ -57,7 +65,7 @@ if (!ini_get('zlib.output_compression')) {
 
 	if (!empty($this->options['cdn_cors'])) {
 		
-		header('Access-Control-Allow-Origin: *', true);
+		header('Access-Control-Allow-Origin: '.$cdn_access_control_origin);
 		header('Access-Control-Expose-Headers: Date');
 	}
 
@@ -74,21 +82,64 @@ if (!ini_get('zlib.output_compression')) {
 	$file = preg_replace('~[#|?].*$~', '', end($uri));
 	$file = strpos($file, '%20') === false ? $file : urldecode($file);
 
+	$encrypted = preg_match('#\/e\/([^/]+)\/([^/]+)#', $_SERVER['REQUEST_URI'], $matches);
+	$encrypted_data = null;
+
+	if ($encrypted && !empty($this->options['expiring_links']['secret']) && !empty($matches)) {
+
+		$raw_message = hex2bin($matches[1]);
+		$nonce2 = substr($raw_message, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$encrypted_message2 = substr($raw_message, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$decrypted_message = sodium_crypto_secretbox_open($encrypted_message2, $nonce2, hex2bin($this->options['expiring_links']['secret']));
+
+		$encrypted_data = json_decode($decrypted_message, JSON_OBJECT_AS_ARRAY);
+
+		$badRequest = !is_array($encrypted_data) ||
+			!isset($encrypted_data['path']) ||
+			!isset($encrypted_data['duration']) ||
+			!isset($encrypted_data['method']);
+
+		if (!$badRequest && !empty($encrypted_data['method'])) {
+
+			$badRequest = $_SERVER['REQUEST_METHOD'] != $encrypted_data['method'];
+		}
+
+		if($badRequest) {
+
+			header("HTTP/1.1 400 Bad Request");
+			$app->close();
+		}
+
+		if (+$encrypted_data['duration'] < time()) {
+
+			header("HTTP/1.1 410 Gone");
+			$app->close();
+		}
+
+		if (!GZipHelper::isFile($encrypted_data['path'])) {
+
+			header("HTTP/1.1 404 Not Found");
+			$app->close();
+		}
+
+		$file = $encrypted_data['path'];
+	}
+
 	$utf8_file = utf8_decode($file);
 
-	if (is_file($utf8_file)) {
+	if (GZipHelper::isFile($utf8_file)) {
 
 		$file = $utf8_file;
 	}
 
-	else if(!is_file($file)) {
+	else if(!GZipHelper::isFile($file)) {
 
 		header("HTTP/1.1 404 Not Found");
 		exit;
 	}
 
 	$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-	$accepted = array_merge(\Gzip\GZipHelper::accepted(), \Gzip\GZipHelper::$static_types);
+	$accepted = array_merge(GZipHelper::accepted(), GZipHelper::$static_types);
 
 	if(!isset($accepted[$ext])) {
 
@@ -186,17 +237,28 @@ if (!ini_get('zlib.output_compression')) {
 
 	$now = $dt->getTimestamp();
 
-	$maxage = $this->params->get('gzip.pwa_cache.'.$ext);
+	$maxage = 0;
 
-	// -1 - ignore
-	//  0 - unset
-	if (intval($maxage) <= 0) {
+	if (!empty($encrypted_data['duration'])) {
 
-		$maxage = $this->params->get('gzip.maxage', '2months');
+		$maxage = $encrypted_data['duration'] - time();
 	}
 
-	$dt->modify('+'.$maxage);
-	$maxage = $dt->getTimestamp() - $now;
+	else {
+
+		$maxage = $this->params->get('gzip.pwa_cache.'.$ext);
+
+		// -1 - ignore
+		//  0 - unset
+		if (intval($maxage) <= 0) {
+
+			$maxage = $this->params->get('gzip.maxage', '2months');
+		}
+
+		$dt->modify('+'.$maxage);
+		$maxage = $dt->getTimestamp() - $now;
+	}
+
 
 	header('Accept-Ranges: bytes');
 	header('Cache-Control: public, max-age='.$maxage.', stale-while-revalidate='.(2 * $maxage).', immutable');

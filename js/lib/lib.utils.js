@@ -16,7 +16,7 @@
 //"use strict;";
 
 import {
-	LIB,
+	//	LIB,
 	undef
 } from "./lib.js"
 
