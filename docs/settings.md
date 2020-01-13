@@ -42,7 +42,7 @@ Enable hotlink protected for the selected file types
 
 ### Custom File Type
 
-Extend the list of files that support hotlink protection with your own type.
+Extend the list of files that support hotlink protection with your own type. If you want to generate links for _rar_ and _zip_ files, you will add this
 
 ```txt
 zip application/zip
