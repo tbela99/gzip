@@ -63,4 +63,4 @@ Here are some features provided by this plugin
 - X-Frames-Options configuration
 
 The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/)
-and the [change log](./CHANGELOG.md)
+and the [change log](https://github.com/tbela99/gzip/blob/master/CHANGELOG.md)
