@@ -62,5 +62,5 @@ Here are some features provided by this plugin
 - XSS-PROTECTION header configuration
 - X-Frames-Options configuration
 
-The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/Docs/)
+The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/)
 and the [change log](./CHANGELOG.md)
