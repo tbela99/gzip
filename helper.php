@@ -16,9 +16,19 @@ namespace Gzip;
 defined('JPATH_PLATFORM') or die;
 
 use JProfiler as JProfiler;
+use JUri;
 use Patchwork\JSqueeze as JSqueeze;
 use function base64_encode;
+use function curl_close;
+use function curl_exec;
+use function curl_getinfo;
+use function curl_init;
+use function curl_setopt;
+use function curl_setopt_array;
+use function error_log;
 use function file_get_contents;
+use function json_encode;
+use function pathinfo;
 use function str_replace;
 use function strtolower;
 use function ucwords;
@@ -207,11 +217,6 @@ class GZipHelper {
         return $checksum;
 	}
 
-    public static function accepted() {
-
-        return static::$accepted;
-    }
-
     public static function canPush($file, $ext = null) {
 
         $name = static::getName($file);
@@ -233,52 +238,55 @@ class GZipHelper {
         return false;
     }
 
+    public static function getName($name) {
+
+        return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
+    }
+
 	/**
-	 * @param array $options
-	 *
-	 * @return \Closure
-	 *
-	 * @since 1.0
+	 * minify css files
 	 */
-    public static function getHashMethod($options = []) {
+    public static function js($file, $remote_service = true) {
 
-        $scheme = \JUri::getInstance()->getScheme();
+        static $jsShrink;
 
-		static $hash;
+        $content = '';
 
-        if (is_null($hash)) {
+        if (preg_match('#^(https?:)?//#', $file)) {
 
-			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
-			$salt.= static::$route;
+            if (strpos($file, '//') === 0) {
 
-            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
+                $file = 'http:' . $file;
+            }
 
-                if (!static::isFile($file)) {
+            $content = static::getContent($file);
 
-                    return static::shorten(crc32($scheme. $salt. $file));
-                }
+            if ($content === false) {
 
-                return static::shorten(crc32($scheme. $salt. filemtime($file)));
+                return false;
+            }
 
-            } : function ($file) use($scheme, $salt) {
+        } else if (is_file($file)) {
 
-                if (!static::isFile($file)) {
+            $content = file_get_contents($file);
+        } else {
 
-                    return static::shorten(crc32($scheme. $salt . $file));
-                }
-
-                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
-            };
+            return false;
         }
 
-        return $hash;
+        if (is_null($jsShrink)) {
+
+            $jsShrink = new JSqueeze;
+        }
+
+        return trim($jsShrink->squeeze($content, false, false), ';');
     }
 
     public static function getContent($url, $options = [], $curlOptions = []) {
 
         if (strpos($url, '//') === 0) {
 
-            $url = \JUri::getInstance()->getScheme() . ':' . $url;
+            $url = JUri::getInstance()->getScheme() . ':' . $url;
         }
 
         $ch = curl_init($url);
@@ -327,69 +335,30 @@ class GZipHelper {
         return $result;
     }
 
-	/**
-	 * minify css files
-	 */
-    public static function js($file, $remote_service = true) {
-
-        static $jsShrink;
-
-        $content = '';
-
-        if (preg_match('#^(https?:)?//#', $file)) {
-
-            if (strpos($file, '//') === 0) {
-
-                $file = 'http:' . $file;
-            }
-
-            $content = static::getContent($file);
-
-            if ($content === false) {
-
-                return false;
-            }
-            
-        } else if (is_file($file)) {
-
-            $content = file_get_contents($file);
-        } else {
-
-            return false;
-        }
-
-        if (is_null($jsShrink)) {
-
-            $jsShrink = new JSqueeze;
-        }
-
-        return trim($jsShrink->squeeze($content, false, false), ';');
-    }
-
     public static function url($file) {
 
 		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
 		$hash = isset($hash[2]) ? $hash[1].$hash[2]: '';
 
 		$name = static::getName($file);
-		
+
         if (strpos($name, 'data:') === 0) {
 
             return $file;
 		}
-		
+
         if (static::isFile($name)) {
 
             if (strpos($name, static::$route) !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 				$accepted = static::accepted();
-				
+
                 if (isset($accepted[$ext])) {
 
                     $hashFile = static::getHashMethod();
 
-                    return static::getHost(\JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
+                    return static::getHost(JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
                 }
             }
 
@@ -399,43 +368,62 @@ class GZipHelper {
         return $file;
     }
 
-    public static function getHost($file) {
+    public static function isFile($name) {
 
-		if (preg_match('#^([a-z]+:)?//#i', $file)) {
+        $name = static::getName($name);
 
-			return $file;
-		}
+        if (preg_match('#^(https?:)?//#i', $name)) {
 
-	    $count = count(static::$hosts);
+            return false;
+        }
 
-	    if ($count > 0) {
+        return is_file($name) || is_file(utf8_decode($name));
+    }
 
-		    $ext = \pathinfo(static::getName($file), PATHINFO_EXTENSION);
+    public static function accepted() {
 
-		    if (isset(static::$static_types[strtolower($ext)])) {
+        return static::$accepted;
+    }
 
-			    if ($count == 1) {
+	/**
+	 * @param array $options
+	 *
+	 * @return \Closure
+	 *
+	 * @since 1.0
+	 */
+    public static function getHashMethod($options = []) {
 
-				    return static::$hosts[0].$file;
-			    }
+        $scheme = JUri::getInstance()->getScheme();
 
-			    $host = crc32($file) % $count;
+		static $hash;
 
-			    if ($host < 0) {
+        if (is_null($hash)) {
 
-				    $host += $count;
-			    }
+			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+			$salt.= static::$route;
 
-			    return static::$hosts[$host].$file;
-		    }
-	    }
+            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
-	    return $file;
-	}
+                if (!static::isFile($file)) {
 
-    public static function getName($name) {
+                    return static::shorten(crc32($scheme. $salt. $file));
+                }
 
-        return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
+                return static::shorten(crc32($scheme. $salt. filemtime($file)));
+
+            } : function ($file) use($scheme, $salt) {
+
+                if (!static::isFile($file)) {
+
+                    return static::shorten(crc32($scheme. $salt . $file));
+                }
+
+                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
+            };
+        }
+
+        return $hash;
     }
 
     public static function shorten($value, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
@@ -459,17 +447,39 @@ class GZipHelper {
         return $response;
     }
 
-    public static function isFile($name) {
+    public static function getHost($file) {
 
-        $name = static::getName($name);
+		if (preg_match('#^([a-z]+:)?//#i', $file)) {
 
-        if (preg_match('#^(https?:)?//#i', $name)) {
+			return $file;
+		}
 
-            return false;
-        }
+	    $count = count(static::$hosts);
 
-        return is_file($name) || is_file(utf8_decode($name));
-    }
+	    if ($count > 0) {
+
+		    $ext = pathinfo(static::getName($file), PATHINFO_EXTENSION);
+
+		    if (isset(static::$static_types[strtolower($ext)])) {
+
+			    if ($count == 1) {
+
+				    return static::$hosts[0].$file;
+			    }
+
+			    $host = crc32($file) % $count;
+
+			    if ($host < 0) {
+
+				    $host += $count;
+			    }
+
+			    return static::$hosts[$host].$file;
+		    }
+	    }
+
+	    return $file;
+	}
 
 	public static function parseUrl($url) {
 
