@@ -978,12 +978,7 @@ class PlgSystemGzip extends JPlugin
 	{
 
 		$headers = [];
-
-		if (!empty($options['upgrade_insecure_requests'])) {
-
-			$headers['Upgrade-Insecure-Requests'] = [$options['upgrade_insecure_requests'], true];
-		}
-
+		
 		if (!empty($options['dns_prefetch'])) {
 
 			$headers['X-DNS-Prefetch-Control'] = [$options['dns_prefetch'], true];
@@ -1062,10 +1057,6 @@ class PlgSystemGzip extends JPlugin
 					break;
 			}
 		}
-
-		//    file_put_contents($path.'headers.php', '<?php'."\n".
-		//	"defined('JPATH_PLATFORM') or die;\n\n".
-		//	"\$headers = ".var_export($headers, true).';');
 
 		return $headers;
 	}

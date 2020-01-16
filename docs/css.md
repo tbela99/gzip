@@ -22,16 +22,16 @@ Enable or disable merging css files together
 
 ## Load CSS Async
 
-Asyncronously load css so that page rendering is not blocked while css files are loading. CSS files will be moved at the bottom of the page. We should configure critical css in order to avoid FOUC
+Asynchronously load css so that page rendering is not blocked while css files are loading. CSS files will be moved at the bottom of the page. We should configure critical css in order to avoid FOUC
 
 ## Merge CSS
 
 Enable or disable merging css files together
 
-## Ignored Javacript files
+## Ignored CSS files
 
 If you want to exclude a css file from processing add a pattern that match that file here.
 
-## Removed Javacript Files
+## Removed CSS Files
 
 Remove a css file from the page. Any file that matches the pattern provided is removed from the page

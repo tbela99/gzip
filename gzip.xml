@@ -162,8 +162,8 @@
                         <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
                     </fields>
                     <field type="spacer" hr="true" />
-                    <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="cdn_types" type="checkboxes" class="no-checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
+                    <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
@@ -557,11 +557,6 @@
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
-                    <!--<field type="spacer" label="Upgrade-Insecure-Requests" />-->
-                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
-                        <option value="1">JYes</option>
-                        <option value="">JNo</option>
-                    </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Strict-Transport-Security" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
@@ -619,6 +614,10 @@
                         <option value="0">JOPTION_CSP_DISPOSITION_DISABLED</option>
                         <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
                         <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
+                    </field>
+                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
+                        <option value="1">JYes</option>
+                        <option value="">JNo</option>
                     </field>
                     <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
                     <field name="csp_baseuri" label="PLG_GZIP_FIELD_CSP_BASE_URI_LABEL" description="PLG_GZIP_FIELD_CSP_BASE_URI_DESCRIPTION" type="list" class="btn-group" default="">
