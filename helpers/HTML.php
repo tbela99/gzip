@@ -30,7 +30,7 @@ class HTMLHelper {
 		if ($hasScript || !empty($options['imagesvgplaceholder'])) {
 
 			$script .= file_get_contents(__DIR__.'/../js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
-			$script .= file_get_contents(__DIR__.'/../loader'.$debug.'.js"');
+			$script .= file_get_contents(__DIR__.'/../loader'.$debug.'.js');
 
 			if (!empty($options['imagesvgplaceholder'])) {
 
