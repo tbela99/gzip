@@ -51,7 +51,7 @@ Here are some features provided by this plugin
 - enable service worker
 - offline first support
 - background sync
-- web share target
+- web share target level 2
 - web push notifications using One Signal
 
 ## Security

@@ -1,6 +1,6 @@
 # Cache
 
-Configure the service worker cache settings
+Configure the service worker cache settings.
 
 ![Cache settings](./img/cache-settings.PNG)
 
@@ -14,11 +14,11 @@ The maximum number of files allowed in the cache. _0_ means no limit
 
 ## Max File Size
 
-The maximum size of a cacheable file
+The maximum size of a cacheable response
 
 ## Default Cache Retention
 
-The maximum caching duration for a file
+The maximum lifetime for a cached response
 
 ## Image
 

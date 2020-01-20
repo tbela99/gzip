@@ -1,6 +1,6 @@
 # Critical CSS
 
-Configure Critical CSS path.
+Configure Critical CSS path. Critical CSS enable instant rendering of your web page.
 
 ![Critical CSS settings](./img/critical-css-settings.PNG)
 
@@ -10,7 +10,7 @@ Enable or disable Critical CSS processing
 
 ## Critical Css Rules
 
-Add CSS that will be included with the extracted critical css. In general the classes you add there should not contain absolute measures but percentage. Otherwise responsive design might be broken.
+Manually provided critical CSS. Add CSS that will be included with the generated critical CSS. In general the classes you add there should not contain absolute measures but only percentage. Otherwise responsive design might be broken.
 Example
 
 ```css
@@ -24,10 +24,10 @@ Example
 
 ## Critical CSS Selectors
 
-List of css selectors that will be extracted from the page in order to build the critical css.
+Automatically extracted CSS selectors. the list of css selectors that you provide here will be extracted from the page in order to build the critical css.
 Example
 
 ```css
-.nav
+.nav,
 header
 ```
