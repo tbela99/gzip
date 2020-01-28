@@ -12,6 +12,10 @@ Configure CSP policies. Values are
 - Report Only: CSP settings are not enforced but any violation is sent to the url configured with _Report URL_ setting
 - Enforce: apply the CSP settings
 
+### Upgrade-Insecure-Requests
+
+Force HTTP to HTTPS redirection. Enabling this will break your website if you are not using HTTPS
+
 ## Report URL
 
 CSP violation reports are sent to this url

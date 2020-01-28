@@ -48,10 +48,6 @@ Allow your website to be embedded from this a specific URI. X-Frame-Options valu
 
 ## Other HTTP headers
 
-### Upgrade-Insecure-Requests
-
-Tell the client it should use https instead of http
-
 ### X-Content-Type-Options
 
 Configure X-Content-Type-Options header. Values are

@@ -1,5 +1,11 @@
 # Change History
 
+## 2.7.3
+
+- change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header
+- update the documentation
+- add CHANGELOG.md, LICENSE.md and docs folder to the installer
+
 ## 2.7.2
 
 - remove extra quote at the end of filename
