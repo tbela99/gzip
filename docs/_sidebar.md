@@ -16,4 +16,4 @@
 - [Background Sync](./sync.md)
 - [Web Push](./web-push.md)
 - [Security](./security.md)
-- [Content Security Policy](./csp.md)
+- [Content Security Policy \(CSP\)](./csp.md)

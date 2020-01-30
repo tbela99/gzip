@@ -14,7 +14,13 @@ Configure CSP policies. Values are
 
 ### Upgrade-Insecure-Requests
 
-Force HTTP to HTTPS redirection. Enabling this will break your website if you are not using HTTPS
+upgrade-insecure-requests tells the user agent to load all resource using HTTPS. This helps fix mixed content warning.
+The browser will load this link using HTTPS instead of HTTP.
+
+```html
+<img src="http://example.com/picture.jpg">
+
+```
 
 ## Report URL
 

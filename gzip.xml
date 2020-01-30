@@ -634,13 +634,13 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="csp_inlinescript" label="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_DESCRIPTION" type="list" class="btn-group" default="1">
-                        <option value="0">JNo</option>
+                        <option value="0">JOPTION_CSP_IGNORE</option>
                         <option value="1">JYes</option>
                         <option value="legacy">JOPTION_CSP_INLINESCRIPT_LEGACY</option>
                     </field>
                     <field name="csp_inlinestyle" label="PLG_GZIP_FIELD_CSP_INLINE_STYLE_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_STYLE_DESCRIPTION" type="list" class="btn-group" default="1">
+                        <option value="0">JOPTION_CSP_IGNORE</option>
                         <option value="1">JYes</option>
-                        <option value="0">JNo</option>
                         <option value="legacy">JOPTION_CSP_INLINESTYLE_LEGACY</option>
                     </field>
                     <field type="spacer" hr="true" />
