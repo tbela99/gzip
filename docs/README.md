@@ -1,6 +1,6 @@
 # Joomla Website Optimizer Plugin
 
-![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fv.next%2Fgzip.xml) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download%20from-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
+![Current version](https://img.shields.io/badge/dynamic/xml?color=green&label=current%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml) [![Documentation](https://img.shields.io/badge/dynamic/xml?color=green&label=documentation%20version&query=%2Fextension%2Fversion&url=https%3A%2F%2Fraw.githubusercontent.com%2Ftbela99%2Fgzip%2Fmaster%2Fgzip.xml)](https://tbela99.github.io/gzip/) [![Known Vulnerabilities](https://snyk.io/test/github/tbela99/gzip/badge.svg)](https://snyk.io/test/github/tbela99/gzip) [![download from JED](https://img.shields.io/badge/download%20from-JED-blueviolet.svg)](https://extensions.joomla.org/extensions/extension/core-enhancements/performance/gzip/)
 
 ![logo](./logo.svg)
 
@@ -53,6 +53,15 @@ Here are some features provided by this plugin
 - background sync
 - web share target level 2
 - web push notifications using One Signal
+
+## Content Security Policy (CSP)
+
+Configure almost every csp level 3 settings to your liking:
+
+- disable inline scripts and css
+- block css, js, workers, frames, etc.
+- allow css and js from specific origin only
+- dynamic csp rules generation from the page content
 
 ## Security
 
