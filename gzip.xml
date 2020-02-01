@@ -561,8 +561,7 @@
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
-                    <field type="spacer" hr="true" />
-                    <field type="spacer" label="Strict-Transport-Security" />
+                    <field type="spacer" label="HTTP Strict-Transport-Security" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
                         <option value="">JNone</option>
                     </field>
