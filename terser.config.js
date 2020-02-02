@@ -25,7 +25,7 @@
   };
 
   const mangle = {
-  //  keep_fnames: true
+    keep_fnames: true
   };
 
   const output = {
@@ -34,15 +34,6 @@
     beautify: true,
     //  ecma: 5, // specify one of: 5, 6, 7 or 8
     comments: true
-  };
-
-  const imagesOverride = {
-
-    compress: {
-
-      ...compress,
-      toplevel: false
-    }
   };
 
   const minify = {
@@ -58,6 +49,15 @@
       beautify: false,
       //  ecma: 5, // specify one of: 5, 6, 7 or 8
       comments: false
+    }
+  };
+
+  const imagesOverride = {
+
+    compress: {
+
+      ...compress,
+      toplevel: false
     }
   };
 
@@ -204,26 +204,27 @@
     }
   };
 
-  const config = /*#__PURE__*/Object.freeze({
+  var config = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    imageLoader,
-    intersectionObserver,
-    imageLoaderMin,
-    loaderMin,
-    libReadyMin,
-    libImageMin,
-    intersectionObserverMin,
-    syncMin,
-    browserPrefetchMin,
-    serviceWorkerMin,
-    serviceWorkerAdminMin,
-    browserMin,
-    browserAdminMin,
-    browserSyncMin,
-    browserUninstallMin
+    imageLoader: imageLoader,
+    intersectionObserver: intersectionObserver,
+    imageLoaderMin: imageLoaderMin,
+    loaderMin: loaderMin,
+    libReadyMin: libReadyMin,
+    libImageMin: libImageMin,
+    intersectionObserverMin: intersectionObserverMin,
+    syncMin: syncMin,
+    browserPrefetchMin: browserPrefetchMin,
+    serviceWorkerMin: serviceWorkerMin,
+    serviceWorkerAdminMin: serviceWorkerAdminMin,
+    browserMin: browserMin,
+    browserAdminMin: browserAdminMin,
+    browserSyncMin: browserSyncMin,
+    browserUninstallMin: browserUninstallMin
   });
 
   // @ts-check
+
   const fs = require("fs");
   const Terser = require("terser");
 
@@ -231,15 +232,16 @@
     (async function (config, name) {
       try {
         // create a bundle
-        console.log('build ' + name.replace(/[A-Z]/g, function (all) { return '.' + all.toLocaleLowerCase()}) + '.js' + ' ...');
+        console.log('build ' + config.input + ' > ' + config.output + ' ...');
         const result = Terser.minify(
           fs.readFileSync(config.input, "utf8"),
           Object.assign({}, config.config)
         );
 
         fs.writeFileSync(config.output, result.code);
+
       } catch (error) {
-        console.error({
+        console.log({
           name,
           error
         });

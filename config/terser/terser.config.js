@@ -49,6 +49,15 @@ const minify = {
   }
 };
 
+const imagesOverride = {
+
+  compress: {
+
+    ...compress,
+    toplevel: false
+  }
+};
+
 export const imageLoader = {
   input: "./imagesloader.es6",
   output: "./imagesloader.js",
@@ -96,6 +105,7 @@ export const libReadyMin = {
   output: "./js/dist//lib.ready.min.js",
   config: {
     ...minify,
+    ...imagesOverride,
     ecma: 5
   }
 };
@@ -105,6 +115,7 @@ export const libImageMin = {
   output: "./js/dist//lib.images.min.js",
   config: {
     ...minify,
+    ...imagesOverride,
     ecma: 5
   }
 };
