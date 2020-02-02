@@ -126,64 +126,95 @@ class GZipHelper {
 		return static::$headers;
 	}
 
-	public static function register ($callback) {
+	public static function setTimingHeaders($options = []) {
 
-		static::$callbacks[] = [$callback, ucwords(str_replace(['Helpers', 'Helper', 'Gzip'], '', get_class($callback)))];
+		if (!empty($options['servertiming'])) {
+
+			$data = static::getTimingData();
+			$header = [];
+
+			foreach ($data['marks'] as $k => $mark) {
+
+				$header[] = substr('0' . ($k + 1), -2) . '-' . preg_replace('#[^A-Za-z0-9]#', '', $mark->tip) . ';desc="'.$mark->tip.'";dur=' . floatval($mark->time); //.';memory='.$mark->memory;
+			}
+
+			$header[] = 'total;dur=' . $data['totalTime'];
+
+			static::setHeader('Server-Timing', implode(',', $header));
+		}
 	}
 
-	public static function trigger ($event, $html, $options = [], $parseAttributes = false) {
+	/**
+	 * Display profile information.
+	 *
+	 * @return array
+	 *
+	 * @since   2.5
+	 */
+	public static function getTimingData()
+	{
+		$totalTime = 0;
+		$marks = [];
+		foreach (JProfiler::getInstance('Application')->getMarks() as $mark) {
+			$totalTime += $mark->time;
+			$marks[] = (object)array(
+				'time' => $mark->time,
+				'tip' => $mark->label
+			);
+		}
+
+		return [
+			'totalTime' => $totalTime,
+			'marks' => $marks
+		];
+	}
+
+	public static function register ($callback) {
+
+		static::$callbacks[] = [$callback, ucwords(str_replace(['Helpers', 'Helper', 'Gzip', '\\'], '', get_class($callback)))];
+	}
+
+	public static function trigger ($event, $html, $options = [], $escape = false) {
+
+		$replace = [];
+
+		if ($escape) {
+
+			$tags = ['script', 'style', 'pre'];
+
+			$html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
+
+				$hash = '<!-- ht' . crc32($matches[0]) . 'ht -->';
+				$replace[$hash] = $matches[0];
+
+				return $hash;
+
+			}, $html);
+
+			$html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$replace, $tags) {
+
+				$match = $matches[count($tags) + 3];
+				$hash = '--***-' . crc32($match) . '-***--';
+				$replace[$hash] = $match;
+				return $matches[1] . $hash . '</'.$matches[2].'>';
+
+			}, $html);
+		}
 
 		$profiler = JProfiler::getInstance('Application');
 
-		if ($parseAttributes) {
+		foreach (static::$callbacks as $callback) {
 
-			if (!empty (static::$callbacks)) {
+			if (is_callable([$callback[0], $event])) {
 
-				$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($options, $event, $profiler) {
-
-					$tag = $matches[1];
-					$attributes = [];
-
-					if (preg_match_all(static::regexAttr, $matches[2],$attrib)) {
-
-						foreach ($attrib[2] as $key => $value) {
-
-							$attributes[$value] = $attrib[6][$key];
-						}
-
-						foreach (static::$callbacks as  $callback) {
-
-							if (is_callable([$callback[0], $event])) {
-
-								$attributes = call_user_func_array([$callback[0], $event], [$attributes, $options, $tag]);
-								$profiler->mark($callback[1]. ucwords($event));
-							}
-						}
-					}
-
-					$result = '<'.$tag;
-
-					foreach ($attributes as $key => $value) {
-
-						$result .= ' '.$key.($value === '' ? '' : '="'.$value.'"');
-					}
-
-					return $result .'>';
-
-				}, $html);
+				$html = call_user_func_array([$callback[0], $event], [$html, $options]);
+				$profiler->mark($callback[1]. ucwords($event));
 			}
 		}
 
-		else {
+		if (!empty($replace)) {
 
-			foreach (static::$callbacks as $callback) {
-
-				if (is_callable([$callback[0], $event])) {
-
-					$html = call_user_func_array([$callback[0], $event], [$html, $options]);
-					$profiler->mark($callback[1]. ucwords($event));
-				}
-			}
+			return str_replace(array_keys($replace), array_values($replace), $html);
 		}
 
 		return $html;
@@ -245,6 +276,10 @@ class GZipHelper {
 
 	/**
 	 * minify css files
+	 *
+	 * @param string $file
+	 * @param bool $remote_service
+	 * @return bool|string
 	 */
     public static function js($file, $remote_service = true) {
 
@@ -282,6 +317,12 @@ class GZipHelper {
         return trim($jsShrink->squeeze($content, false, false), ';');
     }
 
+	/**
+	 * @param $url
+	 * @param array $options
+	 * @param array $curlOptions
+	 * @return bool|string
+	 */
     public static function getContent($url, $options = [], $curlOptions = []) {
 
         if (strpos($url, '//') === 0) {
@@ -335,6 +376,10 @@ class GZipHelper {
         return $result;
     }
 
+	/**
+	 * @param $file
+	 * @return string
+	 */
     public static function url($file) {
 
 		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
@@ -368,6 +413,10 @@ class GZipHelper {
         return $file;
     }
 
+	/**
+	 * @param $name
+	 * @return bool
+	 */
     public static function isFile($name) {
 
         $name = static::getName($name);

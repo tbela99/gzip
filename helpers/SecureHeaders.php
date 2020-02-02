@@ -17,9 +17,9 @@ use Exception;
 use Gzip\GZipHelper;
 use JProfiler;
 use function bin2hex;
-use function str_ireplace;
 
-class SecureHeadersHelper {
+class SecureHeadersHelper
+{
 
 	/**
 	 * perform url rewriting, distribute resources across cdn domains, generate HTTP push headers
@@ -28,7 +28,7 @@ class SecureHeadersHelper {
 	 * @return string
 	 * @since 1.0
 	 */
-	public function postProcessHTML ($html, array $options = [])
+	public function postProcessHTML($html, array $options = [])
 	{
 
 		$headers = [];
@@ -278,20 +278,6 @@ class SecureHeadersHelper {
 			}
 		}
 
-		if (!empty($options['servertiming'])) {
-
-			$data = $this->getTimingData();
-			$header = [];
-
-			foreach ($data['marks'] as $k => $mark) {
-
-				$header[] = substr('0' . ($k + 1), -2) . '-' . preg_replace('#[^A-Za-z0-9]#', '', $mark->tip) . ';dur=' . floatval($mark->time); //.';memory='.$mark->memory;
-			}
-
-			$header[] = 'total;dur=' . $data['totalTime'];
-			$headers['Server-Timing'] = implode(',', $header);
-		}
-
 		foreach ($headers as $name => $value) {
 
 			GZipHelper::setHeader($name, $value);
@@ -300,11 +286,12 @@ class SecureHeadersHelper {
 		return $html;
 	}
 
-	protected function parseCSPData($section, $directive, $custom_rules, $links = [], $options = []) {
+	protected function parseCSPData($section, $directive, $custom_rules, $links = [], $options = [])
+	{
 
 		$value = '';
 
-		switch($directive) {
+		switch ($directive) {
 
 			case 'ignore':
 
@@ -315,43 +302,43 @@ class SecureHeadersHelper {
 
 				if (!empty($links)) {
 
-					$value .= ' '.implode(' ', $links);
+					$value .= ' ' . implode(' ', $links);
 				}
 
 				if ($directive == 'mixed' && !empty($custom_rules)) {
 
-					$value .= ' '.$custom_rules;
+					$value .= ' ' . $custom_rules;
 				}
 
 				break;
 
 			case 'none':
 
-				return $section."-src 'none'";
+				return $section . "-src 'none'";
 
 			case 'custom':
 
 				if (!empty($custom_rules)) {
 
-					$value .= ' '.$custom_rules;
+					$value .= ' ' . $custom_rules;
 				}
 
 				break;
 		}
 
-		if (!empty($options['csp_inline'.$section])) {
+		if (!empty($options['csp_inline' . $section])) {
 
 			if ($section == 'script') {
 
 				$value .= " 'strict-dynamic'";
 			}
 
-			if ($options['csp_inline'.$section] == 'legacy') {
+			if ($options['csp_inline' . $section] == 'legacy') {
 
 				$value .= " 'unsafe-inline'";
 			}
 
-			$value .= " 'nonce-".$this->nonce()."'";
+			$value .= " 'nonce-" . $this->nonce() . "'";
 		}
 
 		if ($section == 'script') {
@@ -369,10 +356,11 @@ class SecureHeadersHelper {
 
 		$value = explode(' ', trim($value));
 
-		return $section.'-src '.implode(' ', array_unique($value));
+		return $section . '-src ' . implode(' ', array_unique($value));
 	}
 
-	protected function nonce () {
+	protected function nonce()
+	{
 
 		static $nonce = null;
 
@@ -380,39 +368,10 @@ class SecureHeadersHelper {
 
 			try {
 				$nonce = bin2hex(random_bytes(16));
-			}
-
-			catch (Exception $e) {
+			} catch (Exception $e) {
 			}
 		}
 
 		return $nonce;
-	}
-
-
-	/**
-	 * Display profile information.
-	 *
-	 * @return array
-	 *
-	 * @since   2.5
-	 */
-	protected function getTimingData()
-	{
-		$totalTime = 0;
-		$marks     = [];
-		foreach (JProfiler::getInstance('Application')->getMarks() as $mark)
-		{
-			$totalTime += $mark->time;
-			$marks[] = (object) array(
-				'time'   => $mark->time,
-				'tip'    => str_ireplace('processHTML', '', $mark->label)
-			);
-		}
-
-		return [
-			'totalTime' => $totalTime,
-			'marks' => $marks
-		];
 	}
 }

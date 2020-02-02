@@ -14,15 +14,44 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
+use Image\Image;
+use JURI;
+use function getimagesize;
+use function imagecreatefromgif;
+use function imagecreatefromjpeg;
+use function imagecreatefrompng;
+use function imagewebp;
+use function is_file;
 
 class ImagesHelper {
 
-	public function processHTMLAttributes ($attributes, array $options = [], $tag) {
+	public function postProcessHTML ($html, array $options = []) {
 
-		if (strtolower($tag) != 'img') {
+		return preg_replace_callback('#<img (.*?)/?>#si', function ($matches) use ($options) {
 
-			return $attributes;
-		}
+			$attributes = [];
+
+			if (preg_match_all(GZipHelper::regexAttr, $matches[1],$attrib)) {
+
+				foreach ($attrib[2] as $key => $value) {
+
+					$attributes[$value] = $attrib[6][$key];
+				}
+			}
+
+			$result = '<img';
+
+			foreach ($this->processHTMLAttributes($attributes, $options) as $key => $value) {
+
+				$result .= ' '.$key.'="'.$value.'"';
+			}
+
+			return $result.'>';
+
+		}, $html);
+	}
+
+	public function processHTMLAttributes ($attributes, array $options = []) {
 
 		$path = $options['img_path'];
 		$ignored_image = !empty($options['imageignore']) ? $options['imageignore'] : [];
@@ -56,7 +85,7 @@ class ImagesHelper {
 
 					if (strpos($name, '//') === 0) {
 
-						$name = \JURI::getInstance()->getScheme() . ':' . $name;
+						$name = JURI::getInstance()->getScheme() . ':' . $name;
 					}
 
 					$local = $path . sha1($name) . '.' . $pathinfo;
@@ -87,7 +116,7 @@ class ImagesHelper {
 					return $attributes;
 				}
 
-				$sizes = \getimagesize($file);
+				$sizes = getimagesize($file);
 
 				$maxwidth = $sizes[0];
 				$img = null;
@@ -112,29 +141,29 @@ class ImagesHelper {
 
 							case 'gif':
 
-								$img = \imagecreatefromgif($file);
+								$img = imagecreatefromgif($file);
 								break;
 
 							case 'png':
 
-								$img = \imagecreatefrompng($file);
+								$img = imagecreatefrompng($file);
 								break;
 
 							case 'jpg':
 
-								$img = \imagecreatefromjpeg($file);
+								$img = imagecreatefromjpeg($file);
 								break;
 						}
 					}
 
 					if ($img) {
 
-						\imagewebp($img, $newFile);
+						imagewebp($img, $newFile);
 					}
 
-					if (\is_file($newFile)) {
+					if (is_file($newFile)) {
 
-						$attributes['src'] = $newFile;
+						$attributes['src'] = JURI::root(true).'/'.$newFile;
 						$file = $newFile;
 					}
 				}
@@ -145,7 +174,7 @@ class ImagesHelper {
 				$short_name = strtolower(str_replace('CROP_', '', $method));
 				//   $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
-				$image = $sizes === false ? null : new \Image\Image($file);
+				$image = $sizes === false ? null : new Image($file);
 
 				$src = '';
 
@@ -213,7 +242,7 @@ class ImagesHelper {
 
 						foreach ($images as $k => $img) {
 
-							if (!\is_file($img)) {
+							if (!is_file($img)) {
 
 								$cloneImg = clone $image;
 								$cloneImg->resizeAndCrop($mq[$k], null, $method)->save($img);
@@ -275,12 +304,11 @@ class ImagesHelper {
 			}
 		}
 
-
 		return $attributes;
 	}
 
 	/**
-	 * @param \Image\Image $image
+	 * @param Image $image
 	 * @param string $file
 	 * @param array $options
 	 * @param string  $path
@@ -320,7 +348,7 @@ class ImagesHelper {
     }
 
 	/**
-	 * @param \Image\Image $image
+	 * @param Image $image
 	 * @param string $file
 	 * @param array $options
 	 * @param string  $path

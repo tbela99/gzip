@@ -724,11 +724,11 @@ class PlgSystemGzip extends JPlugin
 			$options['cssremove'] = [];
 		}
 
-		foreach (['js', 'css', 'img', 'ch'] as $key) {
+		foreach (['js', 'css', 'img', 'ch', 'e'] as $key) {
 
 			$path = $_SERVER['SERVER_NAME'] . '/' . $key . '/';
 
-			if (isset($options['hashfiles']) && $options['hashfiles'] == 'content') {
+			if (isset($options['hashfiles']) && $options['hashfiles'] == 'content' && $key != 'e') {
 
 				$path .= '1/';
 			}
@@ -803,20 +803,22 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::register(new Gzip\Helpers\UrlHelper());
 		}
 
-		if (!empty($options['cspenabled'])) {
+		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+
+	//	if (!empty($options['cspenabled'])) {
 
 			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
-		}
-
-		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+	//	}
 
 		$profiler = JProfiler::getInstance('Application');
 
 		$profiler->mark('afterRenderStart');
 
 		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
-		$body = GZipHelper::trigger('processHTMLAttributes', $body, $options, true);
-		$body = GZipHelper::trigger('postProcessHTML', $body, $options);
+		$body = GZipHelper::trigger('processHTML', $body, $options);
+		$body = GZipHelper::trigger('postProcessHTML', $body, $options, true);
+
+		GZipHelper::setTimingHeaders($options);
 
 		foreach (GZipHelper::getHeaders() as $key => $rule) {
 
