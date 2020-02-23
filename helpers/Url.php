@@ -31,30 +31,6 @@ class UrlHelper {
 		$hashFile = GZipHelper::getHashMethod($options);
 
 		$replace = [];
-		$html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
-
-			$hash = '--ht' . crc32($matches[0]) . 'ht--';
-			$replace[$hash] = $matches[0];
-
-			return $hash;
-
-		}, $html);
-
-		$html = preg_replace_callback('#(<script(\s[^>]*)?>)(.*?)</script>#s', function ($matches) use(&$replace) {
-
-			$hash = '--ht' . crc32($matches[3]) . 'ht--';
-			$replace[$hash] = $matches[3];
-
-			return $matches[1].$hash.'</script>';
-		}, $html);
-
-		$html = preg_replace_callback('#(<style(\s[^>]*)?>)(.*?)</style>#s', function ($matches) use(&$replace) {
-
-			$hash = '--ht' . crc32($matches[3]) . 'ht--';
-			$replace[$hash] = $matches[3];
-
-			return $matches[1].$hash.'</style>';
-		}, $html);
 
 		$pushed = [];
 		$types = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && isset($options['h2push']) ? array_flip($options['h2push']) : [];
@@ -71,7 +47,7 @@ class UrlHelper {
 
 		$domains = [];
 
-		$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
+		$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>(?!["\'])#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
 			$tag = $matches[1];
 			$attributes = [];
@@ -232,7 +208,7 @@ class UrlHelper {
 
 			if (!empty($domains)) {
 
-				$replace['<head>'] = '<head><link rel="preconnect" crossorigin href="'.implode('"><link rel="preconnect" crossorigin href="', $domains).'">';
+				$replace['<head>'] = '<head><link rel="preconnect" crossorigin href="'.implode('"><link rel="preconnect" crossorigin href="', $domains).'">'."\n";
 			}
 		}
 

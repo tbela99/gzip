@@ -15,10 +15,21 @@ namespace Gzip;
 
 defined('JPATH_PLATFORM') or die;
 
+use Exception;
 use JProfiler as JProfiler;
+use JUri;
 use Patchwork\JSqueeze as JSqueeze;
 use function base64_encode;
+use function curl_close;
+use function curl_exec;
+use function curl_getinfo;
+use function curl_init;
+use function curl_setopt;
+use function curl_setopt_array;
+use function error_log;
 use function file_get_contents;
+use function json_encode;
+use function pathinfo;
 use function str_replace;
 use function strtolower;
 use function ucwords;
@@ -116,64 +127,95 @@ class GZipHelper {
 		return static::$headers;
 	}
 
-	public static function register ($callback) {
+	public static function setTimingHeaders($options = []) {
 
-		static::$callbacks[] = [$callback, ucwords(str_replace(['Helpers', 'Helper', 'Gzip'], '', get_class($callback)))];
+		if (!empty($options['servertiming'])) {
+
+			$data = static::getTimingData();
+			$header = [];
+
+			foreach ($data['marks'] as $k => $mark) {
+
+				$header[] = substr('0' . ($k + 1), -2) . '-' . preg_replace('#[^A-Za-z0-9]#', '', $mark->tip) . ';desc="'.$mark->tip.'";dur=' . floatval($mark->time); //.';memory='.$mark->memory;
+			}
+
+			$header[] = 'total;dur=' . $data['totalTime'];
+
+			static::setHeader('Server-Timing', implode(',', $header));
+		}
 	}
 
-	public static function trigger ($event, $html, $options = [], $parseAttributes = false) {
+	/**
+	 * Display profile information.
+	 *
+	 * @return array
+	 *
+	 * @since   2.5
+	 */
+	public static function getTimingData()
+	{
+		$totalTime = 0;
+		$marks = [];
+		foreach (JProfiler::getInstance('Application')->getMarks() as $mark) {
+			$totalTime += $mark->time;
+			$marks[] = (object)array(
+				'time' => $mark->time,
+				'tip' => $mark->label
+			);
+		}
+
+		return [
+			'totalTime' => $totalTime,
+			'marks' => $marks
+		];
+	}
+
+	public static function register ($callback) {
+
+		static::$callbacks[] = [$callback, ucwords(str_replace(['Helpers', 'Helper', 'Gzip', '\\'], '', get_class($callback)))];
+	}
+
+	public static function trigger ($event, $html, $options = [], $escape = false) {
+
+		$replace = [];
+
+		if ($escape) {
+
+			$tags = ['script', 'style', 'pre'];
+
+			$html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
+
+				$hash = '<!-- ht' . crc32($matches[0]) . 'ht -->';
+				$replace[$hash] = $matches[0];
+
+				return $hash;
+
+			}, $html);
+
+			$html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$replace, $tags) {
+
+				$match = $matches[count($tags) + 3];
+				$hash = '--***-' . crc32($match) . '-***--';
+				$replace[$hash] = $match;
+				return $matches[1] . $hash . '</'.$matches[2].'>';
+
+			}, $html);
+		}
 
 		$profiler = JProfiler::getInstance('Application');
 
-		if ($parseAttributes) {
+		foreach (static::$callbacks as $callback) {
 
-			if (!empty (static::$callbacks)) {
+			if (is_callable([$callback[0], $event])) {
 
-				$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($options, $event, $profiler) {
-
-					$tag = $matches[1];
-					$attributes = [];
-
-					if (preg_match_all(static::regexAttr, $matches[2],$attrib)) {
-
-						foreach ($attrib[2] as $key => $value) {
-
-							$attributes[$value] = $attrib[6][$key];
-						}
-
-						foreach (static::$callbacks as  $callback) {
-
-							if (is_callable([$callback[0], $event])) {
-
-								$attributes = call_user_func_array([$callback[0], $event], [$attributes, $options, $tag]);
-								$profiler->mark($callback[1]. ucwords($event));
-							}
-						}
-					}
-
-					$result = '<'.$tag;
-
-					foreach ($attributes as $key => $value) {
-
-						$result .= ' '.$key.($value === '' ? '' : '="'.$value.'"');
-					}
-
-					return $result .'>';
-
-				}, $html);
+				$html = call_user_func_array([$callback[0], $event], [$html, $options]);
+				$profiler->mark($callback[1]. ucwords($event));
 			}
 		}
 
-		else {
+		if (!empty($replace)) {
 
-			foreach (static::$callbacks as $callback) {
-
-				if (is_callable([$callback[0], $event])) {
-
-					$html = call_user_func_array([$callback[0], $event], [$html, $options]);
-					$profiler->mark($callback[1]. ucwords($event));
-				}
-			}
+			return str_replace(array_keys($replace), array_values($replace), $html);
 		}
 
 		return $html;
@@ -207,11 +249,6 @@ class GZipHelper {
         return $checksum;
 	}
 
-    public static function accepted() {
-
-        return static::$accepted;
-    }
-
     public static function canPush($file, $ext = null) {
 
         $name = static::getName($file);
@@ -233,52 +270,65 @@ class GZipHelper {
         return false;
     }
 
-	/**
-	 * @param array $options
-	 *
-	 * @return \Closure
-	 *
-	 * @since 1.0
-	 */
-    public static function getHashMethod($options = []) {
+    public static function getName($name) {
 
-        $scheme = \JUri::getInstance()->getScheme();
-
-		static $hash;
-
-        if (is_null($hash)) {
-
-			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
-			$salt.= static::$route;
-
-            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
-
-                if (!static::isFile($file)) {
-
-                    return static::shorten(crc32($scheme. $salt. $file));
-                }
-
-                return static::shorten(crc32($scheme. $salt. filemtime($file)));
-
-            } : function ($file) use($scheme, $salt) {
-
-                if (!static::isFile($file)) {
-
-                    return static::shorten(crc32($scheme. $salt . $file));
-                }
-
-                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
-            };
-        }
-
-        return $hash;
+        return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
     }
 
+	/**
+	 * minify css files
+	 *
+	 * @param string $file
+	 * @param bool $remote_service
+	 * @return bool|string
+	 */
+    public static function js($file, $remote_service = true) {
+
+        static $jsShrink;
+
+        $content = '';
+
+        if (preg_match('#^(https?:)?//#', $file)) {
+
+            if (strpos($file, '//') === 0) {
+
+                $file = 'http:' . $file;
+            }
+
+            $content = static::getContent($file);
+
+            if ($content === false) {
+
+                return false;
+            }
+
+        } else if (is_file($file)) {
+
+            $content = file_get_contents($file);
+        } else {
+
+            return false;
+        }
+
+        if (is_null($jsShrink)) {
+
+            $jsShrink = new JSqueeze;
+        }
+
+        return trim($jsShrink->squeeze($content, false, false), ';');
+    }
+
+	/**
+	 * @param $url
+	 * @param array $options
+	 * @param array $curlOptions
+	 * @return bool|string
+	 */
     public static function getContent($url, $options = [], $curlOptions = []) {
 
         if (strpos($url, '//') === 0) {
 
-            $url = \JUri::getInstance()->getScheme() . ':' . $url;
+            $url = JUri::getInstance()->getScheme() . ':' . $url;
         }
 
         $ch = curl_init($url);
@@ -303,22 +353,17 @@ class GZipHelper {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($options));
         }
 
-        // 1 second for a connection timeout with curl
-        //    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        // Try using this instead of the php set_time_limit function call
-        //    curl_setopt($curl, CURLOPT_TIMEOUT, 60);
         // Causes curl to return the result on success which should help us avoid using the writeback option
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
         $result = curl_exec($ch);
 
-        //    if(curl_errno($ch)) {
-        //    }
-
         if (curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
 
-            error_log('curl error :: ' . $url . ' #' . curl_errno($ch) . ' :: ' . curl_error($ch));
-            curl_close($ch);
+            $ex = new Exception('curl error :: ' . $url . ' #' . curl_errno($ch) . ' :: ' . curl_error($ch));
+			error_log($ex."\n".$ex->getTraceAsString());
+
+			curl_close($ch);
             return false;
         }
 
@@ -328,68 +373,33 @@ class GZipHelper {
     }
 
 	/**
-	 * minify css files
+	 * @param $file
+	 * @return string
 	 */
-    public static function js($file, $remote_service = true) {
-
-        static $jsShrink;
-
-        $content = '';
-
-        if (preg_match('#^(https?:)?//#', $file)) {
-
-            if (strpos($file, '//') === 0) {
-
-                $file = 'http:' . $file;
-            }
-
-            $content = static::getContent($file);
-
-            if ($content === false) {
-
-                return false;
-            }
-            
-        } else if (is_file($file)) {
-
-            $content = file_get_contents($file);
-        } else {
-
-            return false;
-        }
-
-        if (is_null($jsShrink)) {
-
-            $jsShrink = new JSqueeze;
-        }
-
-        return trim($jsShrink->squeeze($content, false, false), ';');
-    }
-
     public static function url($file) {
 
 		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
 		$hash = isset($hash[2]) ? $hash[1].$hash[2]: '';
 
 		$name = static::getName($file);
-		
+
         if (strpos($name, 'data:') === 0) {
 
             return $file;
 		}
-		
+
         if (static::isFile($name)) {
 
             if (strpos($name, static::$route) !== 0) {
 
                 $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 				$accepted = static::accepted();
-				
+
                 if (isset($accepted[$ext])) {
 
                     $hashFile = static::getHashMethod();
 
-                    return static::getHost(\JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
+                    return static::getHost(JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
                 }
             }
 
@@ -399,43 +409,66 @@ class GZipHelper {
         return $file;
     }
 
-    public static function getHost($file) {
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+    public static function isFile($name) {
 
-		if (preg_match('#^([a-z]+:)?//#i', $file)) {
+        $name = static::getName($name);
 
-			return $file;
-		}
+        if (preg_match('#^(https?:)?//#i', $name)) {
 
-	    $count = count(static::$hosts);
+            return false;
+        }
 
-	    if ($count > 0) {
+        return is_file($name) || is_file(utf8_decode($name));
+    }
 
-		    $ext = \pathinfo(static::getName($file), PATHINFO_EXTENSION);
+    public static function accepted() {
 
-		    if (isset(static::$static_types[strtolower($ext)])) {
+        return static::$accepted;
+    }
 
-			    if ($count == 1) {
+	/**
+	 * @param array $options
+	 *
+	 * @return \Closure
+	 *
+	 * @since 1.0
+	 */
+    public static function getHashMethod($options = []) {
 
-				    return static::$hosts[0].$file;
-			    }
+        $scheme = JUri::getInstance()->getScheme();
 
-			    $host = crc32($file) % $count;
+		static $hash;
 
-			    if ($host < 0) {
+        if (is_null($hash)) {
 
-				    $host += $count;
-			    }
+			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
+			$salt.= static::$route;
 
-			    return static::$hosts[$host].$file;
-		    }
-	    }
+            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
 
-	    return $file;
-	}
+                if (!static::isFile($file)) {
 
-    public static function getName($name) {
+                    return static::shorten(crc32($scheme. $salt. $file));
+                }
 
-        return preg_replace(static::$regReduce, '', preg_replace('~(#|\?).*$~', '', $name));
+                return static::shorten(crc32($scheme. $salt. filemtime(static::getName($file))));
+
+            } : function ($file) use($scheme, $salt) {
+
+                if (!static::isFile($file)) {
+
+                    return static::shorten(crc32($scheme. $salt . $file));
+                }
+
+                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', static::getName($file))));
+            };
+        }
+
+        return $hash;
     }
 
     public static function shorten($value, $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-@') {
@@ -459,17 +492,39 @@ class GZipHelper {
         return $response;
     }
 
-    public static function isFile($name) {
+    public static function getHost($file) {
 
-        $name = static::getName($name);
+		if (preg_match('#^([a-z]+:)?//#i', $file)) {
 
-        if (preg_match('#^(https?:)?//#i', $name)) {
+			return $file;
+		}
 
-            return false;
-        }
+	    $count = count(static::$hosts);
 
-        return is_file($name) || is_file(utf8_decode($name));
-    }
+	    if ($count > 0) {
+
+		    $ext = pathinfo(static::getName($file), PATHINFO_EXTENSION);
+
+		    if (isset(static::$static_types[strtolower($ext)])) {
+
+			    if ($count == 1) {
+
+				    return static::$hosts[0].$file;
+			    }
+
+			    $host = crc32($file) % $count;
+
+			    if ($host < 0) {
+
+				    $host += $count;
+			    }
+
+			    return static::$hosts[$host].$file;
+		    }
+	    }
+
+	    return $file;
+	}
 
 	public static function parseUrl($url) {
 

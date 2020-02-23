@@ -31,7 +31,9 @@ class EncryptedLinksHelper
 			}
 		}
 
-		return preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#is', function ($matches) use($options) {
+		$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset', 'data-src', 'data-srcset'];
+
+		return preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#is', function ($matches) use($options, $url_attr) {
 
 			$tag = $matches[1];
 			$attributes = [];
@@ -43,8 +45,6 @@ class EncryptedLinksHelper
 					$attributes[$value] = $attrib[6][$key];
 				}
 			}
-
-			$url_attr = isset($options['parse_url_attr']) ? array_keys($options['parse_url_attr']) : ['href', 'src', 'srcset'];
 
 			foreach ($url_attr as $value) {
 
@@ -78,6 +78,7 @@ class EncryptedLinksHelper
 
 							$attributes[$value] = implode(',', $values);
 						}
+
 					} else {
 
 						$fName = GZipHelper::getName($attributes[$value]);
@@ -104,17 +105,53 @@ class EncryptedLinksHelper
 	protected function encrypt($file, array $options = [])
 	{
 
+		$cache = $options['e_path'].'e'.crc32($file).'.php';
+
+		$secret = '';
+		$hash = sha1(hex2bin($options['expiring_links']['secret']));
+
 		$dt = new DateTime();
 
-		$dt->modify($options['expiring_links']['duration']);
+		if (is_file($cache)) {
 
-		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+			require $cache;
 
-		$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
-				'method' => $options['expiring_links']['method'],
-				'path' => $file,
-				'duration' => $dt->getTimestamp()
-			]), $nonce, hex2bin($options['expiring_links']['secret'])));
+			// renew when $data reaches 80% of its lifetime
+			if (isset($data['duration']) &&
+				isset($data['renew']) &&
+				isset($data['hash']) &&
+				$dt->getTimestamp() < $data['renew'] &&
+				$data['duration'] == $options['expiring_links']['duration'] &&
+				$data['hash'] == $hash) {
+
+				$secret = $data['secret'];
+			}
+		}
+
+		if (empty($secret)) {
+
+			$dt->modify($options['expiring_links']['duration']);
+
+			$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+
+			$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
+					'method' => $options['expiring_links']['method'],
+					'path' => $file,
+					'duration' => $dt->getTimestamp()
+				]), $nonce, hex2bin($options['expiring_links']['secret'])));
+
+			$data = [
+
+				'renew' => intval($dt->getTimestamp() + ($dt->getTimestamp() - time()) * .2),
+				'duration' => $options['expiring_links']['duration'],
+				'secret' => $secret,
+				'hash' => $hash
+			];
+
+			file_put_contents($cache, '<?php'."\n
+defined('_JEXEC') or die;
+\$data = ".var_export($data, true).";");
+		}
 
 		return GZipHelper::getHost(JURI::root(true) . '/' . GZipHelper::$route . GZipHelper::$pwa_network_strategy . 'e/' . $secret . '/' . basename($file));
 	}

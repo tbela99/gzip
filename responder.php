@@ -80,7 +80,7 @@ if (!ini_get('zlib.output_compression')) {
 	$uri = explode('/', $uri, $useEtag ? 3 : 2);
 
 	$file = preg_replace('~[#|?].*$~', '', end($uri));
-	$file = strpos($file, '%20') === false ? $file : urldecode($file);
+	$file = urldecode($file);
 
 	$encrypted = preg_match('#\/e\/([^/]+)\/([^/]+)#', $_SERVER['REQUEST_URI'], $matches);
 	$encrypted_data = null;

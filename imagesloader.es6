@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * lazy image laoder
+ * lazy image loader
  * @package     GZip Plugin
  * @copyright   Copyright (C) 2005 - 2018 Thierry Bela.
  *
@@ -13,8 +13,6 @@
 
 LIB.ready(function (undef) {
 	// intersection-observer.min.js
-
-	console.log()
 
 	if (!("srcset" in new Image())) {
 		//    try {
@@ -44,17 +42,17 @@ LIB.ready(function (undef) {
 				if (!legacy) {
 					oldImage.insertAdjacentHTML(
 						"beforebegin",
-						"<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=\"background-image:url('" +
+						'<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=background-image:url(' +
 						(img.currentSrc || img.src) +
-						"')\">"
+						')>'
 					);
 				} else {
 					oldImage.insertAdjacentHTML(
 						"beforebegin",
-						"<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg >" +
+						'<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg >' +
 						'<image xlink:href="' +
 						(img.currentSrc || img.src) +
-						'" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />"'
+						'" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />'
 					);
 				}
 

@@ -1,6 +1,6 @@
 # Background Sync
 
-Configure the service worker cache settings
+Configure the background sync settings.
 
 ![Background sync settings](./img/background-sync-settings.PNG)
 
@@ -14,7 +14,7 @@ Configure background sync feature
 
 ## Sync Methods
 
-Sync requets that match the selected methods
+Sync requests that match the selected methods
 
 - GET: sync GET requests
 - POST: sync POST requests
@@ -22,3 +22,8 @@ Sync requets that match the selected methods
 ## URL Patterns
 
 If _Background Sync_ is set to _Custom_ then sync the requests that match the provided settings
+
+```text
+/blog
+/contact
+```

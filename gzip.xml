@@ -7,9 +7,10 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.7.2</version>
+    <version>2.7.3</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
+        <folder>docs</folder>
         <folder>css</folder>
         <folder>fields</folder>
         <folder>helpers</folder>
@@ -30,6 +31,9 @@
         <filename>imagesloader.js</filename>
         <filename>imagesloader.min.js</filename>
         <filename>worker_version</filename>
+        <filename>CHANGELOG.md</filename>
+        <filename>LICENSE.md</filename>
+        <filename>README.md</filename>
         <filename plugin="gzip">gzip.php</filename>
     </files>
     <config>
@@ -162,8 +166,8 @@
                         <field name="3" label="PLG_GZIP_FIELD_CDN_2_LABEL" description="PLG_GZIP_FIELD_CDN_2_DESCRIPTION" type="text" />
                     </fields>
                     <field type="spacer" hr="true" />
-                    <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                     <field name="cdn_types" type="checkboxes" class="no-checkboxes" label="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_LABEL" checked="js,css,eot,otf,ttf,woff,woff2" description="PLG_GZIP_FIELD_CDN_TYPES_DEFAULT_DESCRIPTION" />
+                    <field name="cdntypes_custom" label="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_LABEL" hint="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_HINT" description="PLG_GZIP_FIELD_CDN_TYPES_CUSTOM_DESCRIPTION" type="textarea" />
                 </fields>
             </fieldset>
             <fieldset name="images" label="Images">
@@ -494,7 +498,7 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="pwa_cache_max_file_count" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_COUNT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_COUNT_DESCRIPTION" type="numeric" default="0" />
-                    <field name="pwa_cache_max_file_size" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_DESCRIPTION" type="filesize" default="0">
+                    <field name="pwa_cache_max_file_size" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_DESCRIPTION" type="filesize" default="0Mb">
                         <unit value="b">JOPTION_MAX_FILE_SIZE_B</unit>
                         <unit value="Kb">JOPTION_MAX_FILE_SIZE_KB</unit>
                         <unit value="Mb">JOPTION_MAX_FILE_SIZE_MB</unit>
@@ -557,13 +561,7 @@
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
-                    <!--<field type="spacer" label="Upgrade-Insecure-Requests" />-->
-                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
-                        <option value="1">JYes</option>
-                        <option value="">JNo</option>
-                    </field>
-                    <field type="spacer" hr="true" />
-                    <field type="spacer" label="Strict-Transport-Security" />
+                    <field type="spacer" label="HTTP Strict-Transport-Security (HSTS)" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
                         <option value="">JNone</option>
                     </field>
@@ -620,6 +618,10 @@
                         <option value="report">JOPTION_CSP_DISPOSITION_REPORT_ONLY</option>
                         <option value="enforce">JOPTION_CSP_DISPOSITION_ENFORCE</option>
                     </field>
+                    <field name="upgrade_insecure_requests" label="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_LABEL" description="PLG_GZIP_FIELD_UPGRADE_INSECURE_RESQUESTS_DESCRIPTION" type="radio" class="btn-group" default="">
+                        <option value="1">JYes</option>
+                        <option value="">JNo</option>
+                    </field>
                     <field name="csp_report_uri" label="PLG_GZIP_FIELD_CSP_REPORT_URI_LABEL" description="PLG_GZIP_FIELD_CSP_REPORT_URI_DESCRIPTION" hint="PLG_GZIP_FIELD_CSP_REPORT_URI_HINT" type="text" default="" />
                     <field name="csp_baseuri" label="PLG_GZIP_FIELD_CSP_BASE_URI_LABEL" description="PLG_GZIP_FIELD_CSP_BASE_URI_DESCRIPTION" type="list" class="btn-group" default="">
                         <option value="">JOPION_CSP_BASE_URI_IGNORE</option>
@@ -631,13 +633,13 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="csp_inlinescript" label="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_SCRIPTS_DESCRIPTION" type="list" class="btn-group" default="1">
-                        <option value="0">JNo</option>
+                        <option value="0">JOPTION_CSP_IGNORE</option>
                         <option value="1">JYes</option>
                         <option value="legacy">JOPTION_CSP_INLINESCRIPT_LEGACY</option>
                     </field>
                     <field name="csp_inlinestyle" label="PLG_GZIP_FIELD_CSP_INLINE_STYLE_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSP_INLINE_STYLE_DESCRIPTION" type="list" class="btn-group" default="1">
+                        <option value="0">JOPTION_CSP_IGNORE</option>
                         <option value="1">JYes</option>
-                        <option value="0">JNo</option>
                         <option value="legacy">JOPTION_CSP_INLINESTYLE_LEGACY</option>
                     </field>
                     <field type="spacer" hr="true" />

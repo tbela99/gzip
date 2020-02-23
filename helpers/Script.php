@@ -18,7 +18,7 @@ use Patchwork\JSqueeze as JSqueeze;
 
 class ScriptHelper {
 
-	public function postProcessHTML ($html, array $options = []) {
+	public function processHTML ($html, array $options = []) {
 
 		$path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
 
@@ -71,7 +71,7 @@ class ScriptHelper {
 				unset($attributes['data-ignore']);
 				unset($attributes['data-position']);
 
-				$script = '<script';
+				$script = "\n".'<script';
 
 				foreach($attributes as $name => $value) {
 
@@ -140,7 +140,7 @@ class ScriptHelper {
 				}
 
 				$sources['files'][$position][$name] = $name;
-				$sources['scripts'][$position][$name] = '<script' . $matches[1] . '></script>';
+				$sources['scripts'][$position][$name] = "\n".'<script' . $matches[1] . '></script>';
 			}
 
 			return '';
@@ -283,11 +283,11 @@ class ScriptHelper {
 					$async = true;
 				}
 
-				$script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
+				$script[$position] .= "\n".'<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
 
 				if ($hasScript) {
 
-					$script[$position] .= '<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
+					$script[$position] .= "\n".'<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
 					unset($sources['inline'][$position]);
 				}
 			}
@@ -309,18 +309,18 @@ class ScriptHelper {
 							$async = true;
 						}
 
-						$script[$position] .= '<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
+						$script[$position] .= "\n".'<script data-async async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
 
 						if ($hasScript) {
 
-							$script[$position] .= '<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
+							$script[$position] .= "\n".'<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
 							unset($sources['inline'][$position]);
 						}
 					}
 
 					else {
 
-						$script[$position] = '<script src="' . implode('"></script><script src="', $fileList) . '"></script>';
+						$script[$position] = "\n".'<script src="' . implode('"></script>'."\n".'<script src="', $fileList) . '"></script>';
 					}
 				}
 			}
@@ -332,7 +332,7 @@ class ScriptHelper {
 
 				if (!empty($content)) {
 
-					$script[$position] .= '<script>' . trim(implode(';', $content), ';') . '</script>';
+					$script[$position] .= "\n".'<script>' . trim(implode(';'."\n", $content), ';') . '</script>';
 				}
 			}
 		}

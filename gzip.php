@@ -239,7 +239,7 @@ class PlgSystemGzip extends JPlugin
 			if (empty($data['params']['gzip']['cache_key'])) {
 
 				$shouldUpdate = true;
-				$data['params']['gzip']['cache_key'] = GZipHelper::shorten(filemtime(__FILE__));
+				$data['params']['gzip']['cache_key'] = substr(GZipHelper::shorten(filemtime(__FILE__)), 0, 3);
 			}
 
 			if (empty($data['params']['gzip']['expiring_links']['secret'])) {
@@ -724,11 +724,11 @@ class PlgSystemGzip extends JPlugin
 			$options['cssremove'] = [];
 		}
 
-		foreach (['js', 'css', 'img', 'ch'] as $key) {
+		foreach (['js', 'css', 'img', 'ch', 'e'] as $key) {
 
 			$path = $_SERVER['SERVER_NAME'] . '/' . $key . '/';
 
-			if (isset($options['hashfiles']) && $options['hashfiles'] == 'content') {
+			if (isset($options['hashfiles']) && $options['hashfiles'] == 'content' && $key != 'e') {
 
 				$path .= '1/';
 			}
@@ -803,20 +803,22 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::register(new Gzip\Helpers\UrlHelper());
 		}
 
-		if (!empty($options['cspenabled'])) {
+		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+
+	//	if (!empty($options['cspenabled'])) {
 
 			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
-		}
-
-		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+	//	}
 
 		$profiler = JProfiler::getInstance('Application');
 
 		$profiler->mark('afterRenderStart');
 
 		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
-		$body = GZipHelper::trigger('processHTMLAttributes', $body, $options, true);
-		$body = GZipHelper::trigger('postProcessHTML', $body, $options);
+		$body = GZipHelper::trigger('processHTML', $body, $options);
+		$body = GZipHelper::trigger('postProcessHTML', $body, $options, true);
+
+		GZipHelper::setTimingHeaders($options);
 
 		foreach (GZipHelper::getHeaders() as $key => $rule) {
 
@@ -825,7 +827,7 @@ class PlgSystemGzip extends JPlugin
 				$app->setHeader($key, $rule[0], $rule[1]);
 			} else {
 
-				$app->setHeader($key, $rule);
+				$app->setHeader($key, $rule, true);
 			}
 		}
 
@@ -978,12 +980,7 @@ class PlgSystemGzip extends JPlugin
 	{
 
 		$headers = [];
-
-		if (!empty($options['upgrade_insecure_requests'])) {
-
-			$headers['Upgrade-Insecure-Requests'] = [$options['upgrade_insecure_requests'], true];
-		}
-
+		
 		if (!empty($options['dns_prefetch'])) {
 
 			$headers['X-DNS-Prefetch-Control'] = [$options['dns_prefetch'], true];
@@ -1062,10 +1059,6 @@ class PlgSystemGzip extends JPlugin
 					break;
 			}
 		}
-
-		//    file_put_contents($path.'headers.php', '<?php'."\n".
-		//	"defined('JPATH_PLATFORM') or die;\n\n".
-		//	"\$headers = ".var_export($headers, true).';');
 
 		return $headers;
 	}

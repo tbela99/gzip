@@ -35,7 +35,7 @@ for (let name in config) {
   (async function (config, name) {
     try {
       // create a bundle
-      console.log('build ' + name.replace(/[A-Z]/g, function (all) { return '.' + all.toLocaleLowerCase()}) + '.js' + ' ...');
+      console.log('build ' + config.input + ' > ' + config.output + ' ...');
       const result = Terser.minify(
         fs.readFileSync(config.input, "utf8"),
         Object.assign({}, config.config)
@@ -43,11 +43,6 @@ for (let name in config) {
 
       fs.writeFileSync(config.output, result.code);
 
-   //   console.log({
-   //     name,
-    //    config: JSON.stringify(config.config),
-    //    result: result.code.substring(0, 350) + ' ...'
-    //  });
     } catch (error) {
       console.log({
         name,

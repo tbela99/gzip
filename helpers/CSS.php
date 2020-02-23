@@ -14,13 +14,21 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
+use Image\Image;
+use JURI;
 use Patchwork\CSSmin;
+use Sabberworm\CSS\CSSList\AtRuleBlockList;
+use Sabberworm\CSS\Parser;
+use Sabberworm\CSS\Rule\Rule;
+use Sabberworm\CSS\RuleSet\AtRuleSet;
+use Sabberworm\CSS\RuleSet\DeclarationBlock;
+use function file_get_contents;
+use function file_put_contents;
+use function getimagesize;
 
 class CSSHelper {
 
-//	static $cssBackgrounds = [];
-
-	public function postProcessHTML ($html, array $options = []) {
+	public function processHTML ($html, array $options = []) {
 
 		$path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
 
@@ -74,11 +82,11 @@ class CSSHelper {
 
 					if ($fetch_remote && preg_match('#^(https?:)?//#', $name)) {
 
-						$remote = $name;
+						$remote = $attributes['href'];
 
 						if (strpos($name, '//') === 0) {
 
-							$remote = \JURI::getInstance()->getScheme() . ':' . $name;
+							$remote = JURI::getInstance()->getScheme() . ':' . $name;
 						}
 
 						$local = $path . preg_replace(array('#([.-]min)|(\.css)#', '#[^a-z0-9]+#i'), array('', '-'), $remote) . '.css';
@@ -114,10 +122,6 @@ class CSSHelper {
 			return $matches[0];
 		}, $html);
 
-	//	$profiler = \JProfiler::getInstance('Application');
-	//	$profiler->mark('ParseLinks');
-
-		//    $profiler->mark("done parse <link>");
 		$hashFile = GZipHelper::getHashMethod($options);
 
 		$minify = !empty($options['minifycss']);
@@ -361,7 +365,7 @@ class CSSHelper {
 
 								$content = file_get_contents($fname);
 
-								$oCssParser = new \Sabberworm\CSS\Parser($content);
+								$oCssParser = new Parser($content);
 								$oCssDocument = $oCssParser->parse();
 
 								$css_background = '';
@@ -406,7 +410,7 @@ class CSSHelper {
 
 								if (!isset($oCssParser)) {
 
-									$oCssParser = new \Sabberworm\CSS\Parser($content);
+									$oCssParser = new Parser($content);
 								}
 
 								if (!isset($oCssDocument)) {
@@ -435,8 +439,8 @@ class CSSHelper {
 									$local_css = $this->expandCss($local_css, dirname($css_file));
 								}
 
-								\file_put_contents($css_file, $local_css);
-								\file_put_contents($css_hash, $hashValue);
+								file_put_contents($css_file, $local_css);
+								file_put_contents($css_hash, $hashValue);
 							}
 
 							else {
@@ -461,11 +465,11 @@ class CSSHelper {
 
 				if (!is_file($background_css_file) || file_get_contents($background_css_hash) != $hash) {
 
-					\file_put_contents($background_css_file, GZipHelper::buildCssBackground($background_css_path, $options));
-					\file_put_contents($background_css_hash, $hash);
+					file_put_contents($background_css_file, $this->buildCssBackground($background_css_path, $options));
+					file_put_contents($background_css_hash, $hash);
 				}
 
-				$background_css_path = \file_get_contents($background_css_file);
+				$background_css_path = file_get_contents($background_css_file);
 			}
 
 			$critical_path = $background_css_path.$critical_path;
@@ -682,7 +686,7 @@ class CSSHelper {
 
                 	if (!empty($options['fontdisplay']) && !empty($block->getRules('src'))) {
 
-                		$rule = new \Sabberworm\CSS\Rule\Rule('font-display');
+                		$rule = new Rule('font-display');
 
                 		$rule->setValue($options['fontdisplay']);
                 		$block->addRule($rule);
@@ -758,9 +762,11 @@ class CSSHelper {
 
                 foreach($matches[1] as $file) {
 
-                    if (GZipHelper::isFile($file) && preg_match('#\.(png)|(jpg)#i', $file)) {
+                	$name = GZipHelper::getName($file);
 
-                        $size = \getimagesize($file);
+                    if (GZipHelper::isFile($name) && preg_match('#\.(png)|(jpg)#i', $name)) {
+
+                        $size = getimagesize($name);
 
                         reset($options['css_sizes']);
 
@@ -768,13 +774,13 @@ class CSSHelper {
 
                             if ($size[0] > $s) {
 
-                                $files[$s][] = ['file' => $file, 'width' => $s];
+                                $files[$s][] = ['file' => $name, 'width' => $s];
                             }
                         }
                     }
                 }
 
-                $image = new \Image\Image();
+                $image = new Image();
                 
                 $path = $options['img_path'];
                 $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
@@ -810,7 +816,7 @@ class CSSHelper {
 
                     if (!empty($replace)) {
 
-                        $oCssParser = new \Sabberworm\CSS\Parser(str_replace(array_keys($replace), array_values($replace), $css));
+                        $oCssParser = new Parser(str_replace(array_keys($replace), array_values($replace), $css));
                         $oCssDocument = $oCssParser->parse();
 
                         $css_background = '';
@@ -847,7 +853,7 @@ class CSSHelper {
 
                     if (GZipHelper::isFile($file)) {
 
-                        $file = \Juri::root(true).'/'.$file;
+                        $file = Juri::root(true).'/'.$file;
                     }
                 }
 
@@ -900,7 +906,7 @@ class CSSHelper {
 
                                 if (!is_null($matchSize)) {
 
-                                    $size = \getimagesize($fileName);
+                                    $size = getimagesize($fileName);
 
                                     $isValid = $size[0] == $matchSize;
                                 }
@@ -1050,63 +1056,39 @@ class CSSHelper {
                 $file = $this->resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
             }
 
-        //    else {
+            else {
 
-                if (preg_match('#^(https?:)?//#', $file)) {
+            	$content = false;
 
-                    $content = GZipHelper::getContent($file);
+				if (preg_match('#^(https?:)?//#', $file)) {
 
-                    if ($content !== false) {
-
-                        preg_match('~(.*?)([#?].*)?$~', $file, $match);
-
-                        $file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
-
-                        if (!is_file($file)) {
-
-                            file_put_contents($file, $content);
-                        }
-
-                        if (isset($match[2])) {
-
-                            $file .= $match[2];
-                        }
-                    }
+					$content = GZipHelper::getContent($file);
 				}
-				
-			//	else {
 
-					if(preg_match('#^([a-z]+:)?//#', $path)) {
+				else if (preg_match('#^([a-z]+:)?//#', $path)) {
 
-						$content = GZipHelper::getContent($path.substr($file, 1));
+					$content = GZipHelper::getContent($path . ($file[0] == '/' ? substr($file, 1) : $file));
+				}
 
-						if ($content !== false) {
+				if ($content !== false) {
 
-							preg_match('~(.*?)([#?].*)?$~', $file, $match);
-	
-							$file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
-	
-							if (!is_file($file)) {
-	
-								file_put_contents($file, $content);
-							}
-	
-							if (isset($match[2])) {
-	
-								$file .= $match[2];
-							}
-						}
+					preg_match('~(.*?)([#?].*)?$~', $file, $match);
+
+					$file = 'cache/z/' . GZipHelper::$pwa_network_strategy . $_SERVER['SERVER_NAME'] . '/css/' . GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
+
+					if (!is_file($file)) {
+
+						file_put_contents($file, $content);
 					}
 
-					else {
-							
-						if ($file[0] == '/') {
+					if (isset($match[2])) {
 
-							return 'url(' . GZipHelper::getHost($file).')';
-						}
+						$file .= $match[2];
 					}
+				}
+			}
 
-					return 'url(' . GZipHelper::url($file).')';
+			return 'url(' . GZipHelper::url($file) . ')';
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {

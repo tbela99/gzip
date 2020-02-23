@@ -72,7 +72,7 @@ class HTMLHelper {
 	}
 
 	/**
-	 * perform url rewriting, distribute resources across cdn domains, generate HTTP push headers
+	 * html minification
 	 * @param string $html
 	 * @param array $options
 	 * @return string
@@ -86,15 +86,6 @@ class HTMLHelper {
 		}
 
 		$scripts = [];
-		$tags = ['script', 'link', 'style', 'pre'];
-		$html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$scripts, $tags) {
-
-			$match = $matches[count($tags) + 3];
-			$hash = '--***-' . crc32($match) . '-***--';
-			$scripts[$hash] = $match;
-			return $matches[1] . $hash . '</'.$matches[2].'>';
-
-		}, $html);
 
 		$self = [
 

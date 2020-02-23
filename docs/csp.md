@@ -12,6 +12,16 @@ Configure CSP policies. Values are
 - Report Only: CSP settings are not enforced but any violation is sent to the url configured with _Report URL_ setting
 - Enforce: apply the CSP settings
 
+### Upgrade-Insecure-Requests
+
+upgrade-insecure-requests tells the user agent to load all resource using HTTPS. This helps fix mixed content warning.
+The browser will load this link using HTTPS instead of HTTP.
+
+```html
+<img src="http://example.com/picture.jpg">
+
+```
+
 ## Report URL
 
 CSP violation reports are sent to this url
@@ -24,17 +34,55 @@ Restricts the urls which can be used in a document's \<base\> element. Values ar
 - 'Self': set the value to 'Self'
 - None: set the value to _'none'_
 
-## Allow Javascript 'eval'
+## CSP Script Settings
+
+### Allow Javascript 'eval'
 
 Enable or disable javascript _'eval'_ function
 
-## Allow Inline Scripts
+### Allow Inline Scripts
 
 Control inline scripts execution. Values are
 
 - None: block all inline scripts
 - Yes: this will allow any script with the _'nonce'_ attribute, every other scripts will be blocked
 - Yes, Backward Compatible: compatibility mode. this will enable all the scripts
+
+### Scripts
+
+Configure _script-src_ directive. Values are
+
+- Ignore: ignore the directive
+- Dynamic: parse the page and add links to the whitelist
+- Block: block scripts
+- Custom: use whatever is provided in _Custom Script Settings_
+- Mixed: append the value in _Custom Script Settings_ to this setting
+
+### Custom Script Settings
+
+Configure additional settings for _script-src_
+
+### Worker Directive
+
+Configure _worker-src_ directive. Values are
+
+- Ignore: ignore the directive
+- Block: block workers by default
+- Custom: use whatever is provided in _Custom Worker Settings_
+
+### Custom Worker Settings
+
+Configure additional settings for _worker-src_
+
+## Manifest Directive
+
+Configure _manifest-src_ directive. Values are
+
+- Ignore: ignore the directive
+- Block: block manifest files by default
+- Custom: use whatever is provided in _Custom Manifest Settings_
+
+## Custom Manifest Settings
 
 ## Allow inline CSS
 
@@ -55,20 +103,6 @@ Configure _default-src_ directive. Values are
 ## Custom Settings
 
 Configure additional settings for _default-src_
-
-## Scripts
-
-Configure _script-src_ directive. Values are
-
-- Ignore: ignore the directive
-- Dynamic: parse the page and add links to the whitelist
-- Block: block scripts
-- Custom: use whatever is provided in _Custom Script Settings_
-- Mixed: append the value in _Custom Script Settings_ to this setting
-
-## Custom Script Settings
-
-Configure additional settings for _script-src_
 
 ## Styles
 
@@ -111,28 +145,6 @@ Configure _img-src_ directive. Values are
 ## Custom Image Settings
 
 Configure additional settings for _worker-src_
-
-## Worker Directive
-
-Configure _worker-src_ directive. Values are
-
-- Ignore: ignore the directive
-- Block: block workers by default
-- Custom: use whatever is provided in _Custom Worker Settings_
-
-## Custom Worker Settings
-
-Configure additional settings for _worker-src_
-
-## Manifest Directive
-
-Configure _manifest-src_ directive. Values are
-
-- Ignore: ignore the directive
-- Block: block manifest files by default
-- Custom: use whatever is provided in _Custom Manifest Settings_
-
-## Custom Manifest Settings
 
 Configure additional settings for _manifest-src_
 

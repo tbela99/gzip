@@ -1,5 +1,16 @@
 # Change History
 
+## 2.7.3
+
+- change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header
+- update the documentation
+- add CHANGELOG.md, LICENSE.md and docs folder to the installer
+- fix invalid HTML caused by unescaped characters in Joomla print button
+- fix incorrectly handled utf8 file names
+- fix terser config to preserve global vars
+- improve hotlink protection performance by caching data
+- more accurate server timing headers
+
 ## 2.7.2
 
 - remove extra quote at the end of filename
