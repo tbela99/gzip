@@ -498,7 +498,7 @@
                         <option value="0">JNo</option>
                     </field>
                     <field name="pwa_cache_max_file_count" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_COUNT_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_COUNT_DESCRIPTION" type="numeric" default="0" />
-                    <field name="pwa_cache_max_file_size" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_DESCRIPTION" type="filesize" default="0">
+                    <field name="pwa_cache_max_file_size" label="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MAX_FILE_SIZE_DESCRIPTION" type="filesize" default="0Mb">
                         <unit value="b">JOPTION_MAX_FILE_SIZE_B</unit>
                         <unit value="Kb">JOPTION_MAX_FILE_SIZE_KB</unit>
                         <unit value="Mb">JOPTION_MAX_FILE_SIZE_MB</unit>
@@ -561,7 +561,7 @@
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
-                    <field type="spacer" label="HTTP Strict-Transport-Security" />
+                    <field type="spacer" label="HTTP Strict-Transport-Security (HSTS)" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
                         <option value="">JNone</option>
                     </field>

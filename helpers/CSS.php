@@ -1056,63 +1056,39 @@ class CSSHelper {
                 $file = $this->resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
             }
 
-        //    else {
+            else {
 
-                if (preg_match('#^(https?:)?//#', $file)) {
+            	$content = false;
 
-                    $content = GZipHelper::getContent($file);
+				if (preg_match('#^(https?:)?//#', $file)) {
 
-                    if ($content !== false) {
-
-                        preg_match('~(.*?)([#?].*)?$~', $file, $match);
-
-                        $file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
-
-                        if (!is_file($file)) {
-
-                            file_put_contents($file, $content);
-                        }
-
-                        if (isset($match[2])) {
-
-                            $file .= $match[2];
-                        }
-                    }
+					$content = GZipHelper::getContent($file);
 				}
-				
-			//	else {
 
-					if(preg_match('#^([a-z]+:)?//#', $path)) {
+				else if (preg_match('#^([a-z]+:)?//#', $path)) {
 
-						$content = GZipHelper::getContent($path.substr($file, 1));
+					$content = GZipHelper::getContent($path . ($file[0] == '/' ? substr($file, 1) : $file));
+				}
 
-						if ($content !== false) {
+				if ($content !== false) {
 
-							preg_match('~(.*?)([#?].*)?$~', $file, $match);
-	
-							$file = 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/'. GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
-	
-							if (!is_file($file)) {
-	
-								file_put_contents($file, $content);
-							}
-	
-							if (isset($match[2])) {
-	
-								$file .= $match[2];
-							}
-						}
+					preg_match('~(.*?)([#?].*)?$~', $file, $match);
+
+					$file = 'cache/z/' . GZipHelper::$pwa_network_strategy . $_SERVER['SERVER_NAME'] . '/css/' . GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
+
+					if (!is_file($file)) {
+
+						file_put_contents($file, $content);
 					}
 
-					else {
-							
-						if ($file[0] == '/') {
+					if (isset($match[2])) {
 
-							return 'url(' . GZipHelper::getHost($file).')';
-						}
+						$file .= $match[2];
 					}
+				}
+			}
 
-					return 'url(' . GZipHelper::url($file).')';
+			return 'url(' . GZipHelper::url($file) . ')';
         },
             //resolve import directive, note import directive in imported css will NOT be processed
             preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {

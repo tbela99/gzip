@@ -239,7 +239,7 @@ class PlgSystemGzip extends JPlugin
 			if (empty($data['params']['gzip']['cache_key'])) {
 
 				$shouldUpdate = true;
-				$data['params']['gzip']['cache_key'] = GZipHelper::shorten(filemtime(__FILE__));
+				$data['params']['gzip']['cache_key'] = substr(GZipHelper::shorten(filemtime(__FILE__)), 0, 3);
 			}
 
 			if (empty($data['params']['gzip']['expiring_links']['secret'])) {
@@ -827,7 +827,7 @@ class PlgSystemGzip extends JPlugin
 				$app->setHeader($key, $rule[0], $rule[1]);
 			} else {
 
-				$app->setHeader($key, $rule);
+				$app->setHeader($key, $rule, true);
 			}
 		}
 

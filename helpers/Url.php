@@ -47,7 +47,7 @@ class UrlHelper {
 
 		$domains = [];
 
-		$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
+		$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>(?!["\'])#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
 
 			$tag = $matches[1];
 			$attributes = [];

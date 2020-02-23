@@ -15,6 +15,7 @@ namespace Gzip;
 
 defined('JPATH_PLATFORM') or die;
 
+use Exception;
 use JProfiler as JProfiler;
 use JUri;
 use Patchwork\JSqueeze as JSqueeze;
@@ -352,22 +353,17 @@ class GZipHelper {
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($options));
         }
 
-        // 1 second for a connection timeout with curl
-        //    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        // Try using this instead of the php set_time_limit function call
-        //    curl_setopt($curl, CURLOPT_TIMEOUT, 60);
         // Causes curl to return the result on success which should help us avoid using the writeback option
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
         $result = curl_exec($ch);
 
-        //    if(curl_errno($ch)) {
-        //    }
-
         if (curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
 
-            error_log('curl error :: ' . $url . ' #' . curl_errno($ch) . ' :: ' . curl_error($ch));
-            curl_close($ch);
+            $ex = new Exception('curl error :: ' . $url . ' #' . curl_errno($ch) . ' :: ' . curl_error($ch));
+			error_log($ex."\n".$ex->getTraceAsString());
+
+			curl_close($ch);
             return false;
         }
 
@@ -459,7 +455,7 @@ class GZipHelper {
                     return static::shorten(crc32($scheme. $salt. $file));
                 }
 
-                return static::shorten(crc32($scheme. $salt. filemtime($file)));
+                return static::shorten(crc32($scheme. $salt. filemtime(static::getName($file))));
 
             } : function ($file) use($scheme, $salt) {
 
@@ -468,7 +464,7 @@ class GZipHelper {
                     return static::shorten(crc32($scheme. $salt . $file));
                 }
 
-                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', $file)));
+                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', static::getName($file))));
             };
         }
 
