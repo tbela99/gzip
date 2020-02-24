@@ -778,7 +778,7 @@ class PlgSystemGzip extends JPlugin
 
 		GZipHelper::$options = $options;
 
-		if (!empty($options['imageenabled'])) {
+		if (!empty($options['imageenabled']) && extension_loaded('gd')) {
 
 			GZipHelper::register(new Gzip\Helpers\ImagesHelper());
 		}
