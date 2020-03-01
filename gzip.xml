@@ -561,6 +561,12 @@
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
                     <field type="spacer" hr="true" />
+                    <field type="spacer" label="New Window" />
+                    <field name="link_rel" multiple="multiple" label="PLG_GZIP_FIELD_LINK_REL_LABEL" description="PLG_GZIP_FIELD_LINK_REL_DESCRIPTION" class="no-checkboxes" type="checkboxes" checked="">
+                        <option value="noopener">JOPTION_REL_NOOPENER</option>
+                        <option value="noreferrer">JOPTION_REL_NOREFERRER</option>
+                    </field>
+                    <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Strict-Transport-Security (HSTS)" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">
                         <option value="">JNone</option>

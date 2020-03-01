@@ -798,17 +798,13 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
 		}
 
-		if (!empty($options['cachefiles'])) {
+		if (!empty($options['cachefiles']) || !empty($options['link_rel'])) {
 
 			GZipHelper::register(new Gzip\Helpers\UrlHelper());
 		}
 
 		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
-
-	//	if (!empty($options['cspenabled'])) {
-
-			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
-	//	}
+		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
 
 		$profiler = JProfiler::getInstance('Application');
 
