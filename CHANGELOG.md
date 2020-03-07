@@ -1,5 +1,9 @@
 # Change History
 
+## 2.8.0-dev
+
+- #91 fix security and performance issues induced by links with _target=\_blank_ attribute
+
 ## 2.7.3
 
 - change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header
@@ -31,14 +35,14 @@
 - Implement instant page loading
 - Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
 - missing translation added
-- Access-Control-Allow-Origin is always set to '*'
+- Access-Control-Allow-Origin is always set to '\*'
 - Create links to resources that expire after a given time
 - \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
-  
+
 ## 2.6.1
- 
+
 - Add documentation
-  
+
 ## 2.6.0
 
 - partly cache security

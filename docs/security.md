@@ -6,14 +6,13 @@ Configure security features
 
 Configure security settings such as XSS protection or HSTS
 
-## Subresource Integrity Checksum (SRI)
+## New Window
 
-Prevent script and css tampering by adding a signature to the HTML tag. Values are
+Attempt to fix security issues associated with _target=\_blank_
 
-- None: do not set the SRI
-- SHA256: compute SRI using SHA256
-- SHA384: compute SRI using SHA384
-- SHA512: compute SRI using SHA512
+### Fix Links with target=\_blank
+
+Automatically fix security and performance issues induced by target=\_blank by adding _rel="opener"_ or _rel="noreferrer"_ or both values
 
 ## HSTS (HTTP Strict-Transport-Security)
 
@@ -64,6 +63,15 @@ Configure XSS-Protection header. Values are
 - Filter: enable XSS-Protection filtering. The browser will sanitize the page
 - Block: enable XSS-Protection filtering. The browser will block page rendering if anattack is detected
 - Block and Report: enable XSS-Protection filtering. The browser will sanitize the page and report the violation to the URI configured with _XSS Report URL_ setting
+
+## Subresource Integrity Checksum (SRI)
+
+Prevent script and css tampering by adding a signature to the HTML tag. Values are
+
+- None: do not set the SRI
+- SHA256: compute SRI using SHA256
+- SHA384: compute SRI using SHA384
+- SHA512: compute SRI using SHA512
 
 ## Misc
 
