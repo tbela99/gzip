@@ -42,9 +42,11 @@ Here are some features provided by this plugin
 
 ## Performance
 
+- configurable HTTP caching headers
 - optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
 - dns prefetch
 - profile plugin performance using HTTP server timing headers
+- precompressed cached files using brotli or gzip. brotli compression requires brotli php extension
 
 ## Service Worker
 

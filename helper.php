@@ -431,6 +431,36 @@ class GZipHelper {
     }
 
 	/**
+	 * Convert file size to int. Ex '1Mb' -> 1 * 1024 * 1024
+	 * @param $value
+	 *
+	 * @return int
+	 *
+	 * @since version
+	 */
+    public static function file_size ($value) {
+
+    	return +preg_replace_callback('#(\d+)(.*+)#', function ($matches) {
+
+			switch ($matches[2]) {
+
+				case 'Kb':
+
+					return $matches[1] * 1024;
+				case 'Mb':
+
+					return $matches[1] * 1024 * 1024;
+				case 'Gb':
+
+					return $matches[1] * 1024 * 1024 * 1024;
+			}
+
+			return $matches[1];
+
+		}, $value);
+	}
+
+	/**
 	 * @param array $options
 	 *
 	 * @return \Closure
@@ -441,30 +471,43 @@ class GZipHelper {
 
         $scheme = JUri::getInstance()->getScheme();
 
-		static $hash;
+		static $hash, $cache = [];
 
         if (is_null($hash)) {
 
 			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
 			$salt.= static::$route;
 
-            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt) {
+            $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt, $cache) {
+
+            	if (isset($cache[$file])) {
+
+            		return $cache[$file];
+				}
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme. $salt. $file));
+					$cache[$file] = static::shorten(crc32($scheme. $salt. $file));
                 }
+				else {
+					$cache[$file] = static::shorten(crc32($scheme. $salt. filemtime(static::getName($file))));
+				}
 
-                return static::shorten(crc32($scheme. $salt. filemtime(static::getName($file))));
+				return $cache[$file];
 
-            } : function ($file) use($scheme, $salt) {
+            } : function ($file) use($scheme, $salt, $cache) {
 
                 if (!static::isFile($file)) {
 
-                    return static::shorten(crc32($scheme. $salt . $file));
+					$cache[$file] =  static::shorten(crc32($scheme. $salt . $file));
                 }
 
-                return static::shorten(crc32($scheme. $salt . hash_file('crc32b', static::getName($file))));
+                else {
+
+					$cache[$file] = static::shorten(crc32($scheme. $salt . hash_file('crc32b', static::getName($file))));
+				}
+
+                return $cache[$file];
             };
         }
 

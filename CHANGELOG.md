@@ -1,5 +1,9 @@
 # Change History
 
+## 2.8.0
+
+- #89 compress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension 
+
 ## 2.7.3
 
 - change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header

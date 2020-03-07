@@ -34,6 +34,20 @@ Enable or disable DNS prefetch
 
 Choose which resource type will be pushed to the browser using HTTP push. Your web server need to use HTTP/2 for this feature to work properly.
 
+## HTTP Compression Settings
+
+### Precompress Files
+
+If Yes store a compressed copy of the file in the cache. This will improve performance because files are compressed once and reused. Supported compressed algorithms are GZIP and Brotli. Brotli support requires the PHP Brotli extension. Brotli is only available with HTTPS by design
+
+### Minimum File Size
+
+Will not attempt to compress and store copy of files smaller than the given size. Set to _0_ to ignore this setting
+
+### Maximum File Size
+
+Will not attempt to compress and store copy of files larger than the given size. Set to _0_ to ignore this setting
+
 ## HTTP Cache Settings
 
 ### Cache File

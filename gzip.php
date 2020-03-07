@@ -371,6 +371,41 @@ class PlgSystemGzip extends JPlugin
 
 			GZipHelper::$route = $this->route;
 
+			// segregate http and https cache
+			$prefix = 'cache/z/' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
+
+			if (!empty($this->options['pwaenabled'])) {
+
+				if (empty($this->options['pwa_network_strategy']) || $this->options['pwa_network_strategy'] == 'un') {
+
+					$this->options['pwa_network_strategy'] = 'no';
+				}
+
+				$prefix .= $this->options['pwa_network_strategy'] . '/';
+				GZipHelper::$pwa_network_strategy = $this->options['pwa_network_strategy'] . '/';
+			}
+
+			foreach (['js', 'css', 'img', 'ch', 'e', 'c'] as $key) {
+
+				$path = $_SERVER['SERVER_NAME'] . '/' . $key . '/';
+
+				if (isset($this->options['hashfiles']) && $this->options['hashfiles'] == 'content' && $key != 'e') {
+
+					$path .= '1/';
+				}
+
+				if (!is_dir($prefix . $path)) {
+
+					$old_mask = umask();
+
+					umask(022);
+					mkdir($prefix . $path, 0755, true);
+					umask($old_mask);
+				}
+
+				$this->options[$key . '_path'] = $prefix . $path;
+			}
+
 			if (!empty($this->options['cdn'])) {
 
 				$this->options['cdn'] = array_filter(array_values($this->options['cdn']));
@@ -392,7 +427,7 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::$regReduce = ['#^((' . implode(')|(', array_filter(array_merge(array_map(function ($host) {
 					return $host . '/';
 				}, $this->options['cdn']),
-					[\JUri::root(), \JURI::root(true) . '/']))) . '))#', '#^(' . \JURI::root(true) . '/)?' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
+					[JUri::root(), JUri::root(true) . '/']))) . '))#', '#^(' . JUri::root(true) . '/)?' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
 			if (!isset($this->options['cdn_types'])) {
 
@@ -444,7 +479,7 @@ class PlgSystemGzip extends JPlugin
 				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option) ?: $this->options['scheme'] . '://') . $option;
 			}
 
-			GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $this->options['cdn'];
+			GZipHelper::$hosts = empty($this->options['cnd_enabled']) ? [] : $this->options['cdn'];
 			GZipHelper::$static_types = $this->options['static_types'];
 
 			// do not render blank js file when service worker is disabled
@@ -670,20 +705,6 @@ class PlgSystemGzip extends JPlugin
 
 		$options = $this->options;
 
-		// segregate http and https cache
-		$prefix = 'cache/z/' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
-
-		if (!empty($options['pwaenabled'])) {
-
-			if (empty($options['pwa_network_strategy']) || $options['pwa_network_strategy'] == 'un') {
-
-				$options['pwa_network_strategy'] = 'no';
-			}
-
-			$prefix .= $options['pwa_network_strategy'] . '/';
-			GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'] . '/';
-		}
-
 		if (!empty($options['jsignore'])) {
 
 			$options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
@@ -722,27 +743,6 @@ class PlgSystemGzip extends JPlugin
 		if (empty($options['cssremove'])) {
 
 			$options['cssremove'] = [];
-		}
-
-		foreach (['js', 'css', 'img', 'ch', 'e'] as $key) {
-
-			$path = $_SERVER['SERVER_NAME'] . '/' . $key . '/';
-
-			if (isset($options['hashfiles']) && $options['hashfiles'] == 'content' && $key != 'e') {
-
-				$path .= '1/';
-			}
-
-			if (!is_dir($prefix . $path)) {
-
-				$old_mask = umask();
-
-				umask(022);
-				mkdir($prefix . $path, 0755, true);
-				umask($old_mask);
-			}
-
-			$options[$key . '_path'] = $prefix . $path;
 		}
 
 		// Save-Data header enforce some settings
@@ -1136,7 +1136,7 @@ class PlgSystemGzip extends JPlugin
 			$defaultNetworkStrategy = 'no';
 		}
 
-		// additional routing startegies
+		// additional routing strategies
 		$strategies = [];
 
 		if (!isset($options['pwa_cache'])) {
@@ -1144,24 +1144,7 @@ class PlgSystemGzip extends JPlugin
 			$options['pwa_cache'] = [];
 		}
 
-		$maxFileSize = +preg_replace_callback('#(\d+)(.*+)#', function ($matches) {
-
-			switch ($matches[2]) {
-
-				case 'Kb':
-
-					return $matches[1] * 1024;
-				case 'Mb':
-
-					return $matches[1] * 1024 * 1024;
-				case 'Gb':
-
-					return $matches[1] * 1024 * 1024 * 1024;
-			}
-
-			return $matches[1];
-
-		}, $options['pwa_cache_max_file_size']);
+		$maxFileSize = GZipHelper::file_size($options['pwa_cache_max_file_size']);
 
 		$cache_settings = [
 			'caching' => (bool)$options['pwa_cache_enabled'],
