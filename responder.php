@@ -38,7 +38,7 @@ function enable_compression () {
 
 		else {
 
-			ini_set('brotli.output_compression', 'On');
+			ini_set('zlib.output_compression', 'On');
 		}
 	}
 }
