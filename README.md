@@ -55,6 +55,7 @@ Here are some features provided by this plugin
 - background sync
 - web share target level 2
 - web push notifications using One Signal
+- immediately update the service worker when the manifest settings change
 
 ## Content Security Policy (CSP)
 
