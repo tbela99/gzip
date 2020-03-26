@@ -203,8 +203,13 @@ class HTMLHelper {
 			return $result.$matches[5];
 		}, $html);
 
-		$html = preg_replace(['#<([^>]+)([^/])\s+>#s', '#<!DOCTYPE ([^>]+)>[\n\s]+#si'], ['<$1$2>', '<!DOCTYPE $1>'], $html, 1);
+		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
 		$html = preg_replace(array_keys($replace), array_values($replace), $html);
+
+		$html = preg_replace_callback('#<([^>]+)>#s', function ($matches) {
+
+			return '<'.rtrim($matches[1]).'>';
+		}, $html);
 
 		if (!empty($scripts)) {
 			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
