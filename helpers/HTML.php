@@ -180,13 +180,30 @@ class HTMLHelper {
 			//remove leading and trailing spaces
 			'/(^([\t ])+)|(([\t ])+$)/m' => '',
 			//remove empty lines (sequence of line-end and white-space characters)
-			'/[\r\n]+([\t ]?[\r\n]+)+/s' => '',
-			//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
-			'~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~' => '$1$2=$4$5', //$1 and $4 insert first white-space character found before/after attribute
-			// <p > => <p>
-			'#<([^>]+)([^/])\s+>#s' => '<$1$2>'
+			'/[\r\n]+([\t ]?[\r\n]+)+/s' => ''
 		];
-		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
+
+		$root = JURI::root(true).'/';
+
+		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
+		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
+
+			$result = $matches[1].$matches[2].'=';
+
+			if (!empty($options['parse_url_attr']) && array_key_exists($matches[2], $options['parse_url_attr']) && !preg_match('#^([a-z]+:)?//#', $matches[4]) && is_file($matches[4])) {
+
+				$result .= $root.$matches[4];
+			}
+
+			else {
+
+				$result .= $matches[4];
+			}
+
+			return $result.$matches[5];
+		}, $html);
+
+		$html = preg_replace(['#<([^>]+)([^/])\s+>#s', '#<!DOCTYPE ([^>]+)>[\n\s]+#si'], ['<$1$2>', '<!DOCTYPE $1>'], $html, 1);
 		$html = preg_replace(array_keys($replace), array_values($replace), $html);
 
 		if (!empty($scripts)) {
