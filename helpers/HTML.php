@@ -23,6 +23,49 @@ class HTMLHelper {
 
 		$debug = empty($options['debug']) ? '.min' : '';
 
+		if (!empty($options['fix_invalid_html'])) {
+
+			/*
+			 * attempt to fix invalidHTML - missing space between attributes -  before minifying
+			 * <div id="foo"class="bar"> => <div id="foo" class="bar">
+			 */
+			$html = preg_replace_callback('#<(\S+)([^>]+)>#s', function ($matches) {
+
+				$result = '<'.$matches[1];
+
+				if (trim($matches[2]) !== '') {
+
+					$in_str = false;
+					$quote = '';
+
+					$j = strlen($matches[2]);
+
+					for ($i = 0; $i < $j; $i++) {
+
+						$result .= $matches[2][$i];
+
+						if ($in_str) {
+
+							if ($matches[2][$i] == $quote) {
+
+								$in_str = false;
+								$result .= ' ';
+								$quote = '';
+							}
+						}
+
+						else if (in_array($matches[2][$i], ['"', "'"])) {
+
+							$in_str = true;
+							$quote = $matches[2][$i];
+						}
+					}
+				}
+
+				return rtrim($result).'>';
+			}, $html);
+		}
+
 		// quick test
 		$hasScript = stripos($html, '<script') !== false || stripos($html, '<link ') !== false;
 
@@ -125,51 +168,10 @@ class HTMLHelper {
 
 		$html = str_ireplace($remove, '', $html);
 
-		/*
-		 * attempt to fix invalidHTML - missing space between attributes -  before minifying
-		 * <div id="foo"class="bar"> => <div id="foo" class="bar">
-		 */
-		$html = preg_replace_callback('#<(\S+)([^>]+)>#s', function ($matches) {
-
-			$result = '<'.$matches[1];
-
-			if (trim($matches[2]) !== '') {
-
-				$in_str = false;
-				$quote = '';
-
-				$j = strlen($matches[2]);
-
-				for ($i = 0; $i < $j; $i++) {
-
-					$result .= $matches[2][$i];
-
-					if ($in_str) {
-
-						if ($matches[2][$i] == $quote) {
-
-							$in_str = false;
-							$result .= ' ';
-							$quote = '';
-						}
-					}
-
-					else if (in_array($matches[2][$i], ['"', "'"])) {
-
-						$in_str = true;
-						$quote = $matches[2][$i];
-					}
-				}
-			}
-
-			return $result.'>';
-		}, $html);
-		
 		// minify html
 		//remove redundant (white-space) characters
 		$replace = [
 
-			//    '#<!DOCTYPE ([^>]+)>[\n\s]+#si' => '<!DOCTYPE $1>',
 			'#<(('.implode(')|(', $self).'))(\s[^>]*?)?/>#si' => '<$1$'.(count($self) + 2).'>',
 			//remove tabs before and after HTML tags
 			'#<!--.*?-->#s' => '',
@@ -206,14 +208,14 @@ class HTMLHelper {
 		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
 		$html = preg_replace(array_keys($replace), array_values($replace), $html);
 
+		if (!empty($scripts)) {
+			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
+		}
+
 		$html = preg_replace_callback('#<([^>]+)>#s', function ($matches) {
 
 			return '<'.rtrim($matches[1]).'>';
 		}, $html);
-
-		if (!empty($scripts)) {
-			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
-		}
 
 		return $html;
 	}

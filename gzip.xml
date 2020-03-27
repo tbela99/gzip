@@ -45,7 +45,12 @@
                         <option value="0">JNo</option>
                     </field>
                     <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_HTML" />
                     <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="fix_invalid_html" label="PLG_GZIP_FIELD_FIX_INVALID_HTML_LABEL" description="PLG_GZIP_FIELD_FIX_INVALID_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
