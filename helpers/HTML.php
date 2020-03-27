@@ -19,7 +19,7 @@ use function strlen;
 
 class HTMLHelper {
 
-	public function preprocessHTML($html, array $options = []) {
+	public function preProcessHTML($html, array $options = []) {
 
 		$debug = empty($options['debug']) ? '.min' : '';
 

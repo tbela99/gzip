@@ -179,6 +179,7 @@ class GZipHelper {
 
 		$replace = [];
 
+		/*
 		if ($escape) {
 
 			$tags = ['script', 'style', 'pre'];
@@ -201,6 +202,7 @@ class GZipHelper {
 
 			}, $html);
 		}
+		*/
 
 		$profiler = JProfiler::getInstance('Application');
 
@@ -213,10 +215,12 @@ class GZipHelper {
 			}
 		}
 
+		/*
 		if (!empty($replace)) {
 
 			return str_replace(array_keys($replace), array_values($replace), $html);
 		}
+		*/
 
 		return $html;
 	}
@@ -378,6 +382,16 @@ class GZipHelper {
 	 */
     public static function url($file) {
 
+    	if (empty(static::$options['cachefiles'])) {
+
+    		if ($file[0] == '/' || preg_match('#^(https?:)?//#')) {
+
+				return $file;
+			}
+
+    		return JUri::root(true).'/'.$file;
+		}
+
 		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
 		$hash = isset($hash[2]) ? $hash[1].$hash[2]: '';
 
@@ -477,6 +491,7 @@ class GZipHelper {
 
 			$salt = empty(static::$hosts) ? '' : json_encode(static::$hosts);
 			$salt.= static::$route;
+			$salt.= json_encode(static::$options);
 
             $hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use($scheme, $salt, $cache) {
 

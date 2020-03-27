@@ -427,7 +427,7 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::$regReduce = ['#^((' . implode(')|(', array_filter(array_merge(array_map(function ($host) {
 					return $host . '/';
 				}, $this->options['cdn']),
-					[JUri::root(), JUri::root(true) . '/']))) . '))#', '#^(' . JUri::root(true) . '/)?' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
+					[JUri::root(), JUri::root(true) . '/(?!/)']))) . '))#', '#^(' . JUri::root(true) . '/)?' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
 			if (!isset($this->options['cdn_types'])) {
 
@@ -780,31 +780,31 @@ class PlgSystemGzip extends JPlugin
 
 		if (!empty($options['imageenabled']) && extension_loaded('gd')) {
 
-			GZipHelper::register(new Gzip\Helpers\ImagesHelper());
+			GZipHelper::register(new Gzip\Helpers\ImagesHelper($options));
 		}
 
 		if (!empty($options['cssenabled'])) {
 
-			GZipHelper::register(new Gzip\Helpers\CSSHelper());
+			GZipHelper::register(new Gzip\Helpers\CSSHelper($options));
 		}
 
 		if (!empty($options['jsenabled'])) {
 
-			GZipHelper::register(new Gzip\Helpers\ScriptHelper());
+			GZipHelper::register(new Gzip\Helpers\ScriptHelper($options));
 		}
 
 		if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
 
-			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
+			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper($options));
 		}
 
 		if (!empty($options['cachefiles']) || !empty($options['link_rel'])) {
 
-			GZipHelper::register(new Gzip\Helpers\UrlHelper());
+			GZipHelper::register(new Gzip\Helpers\UrlHelper($options));
 		}
 
-		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
-		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
+		GZipHelper::register(new Gzip\Helpers\HTMLHelper($options));
+		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper($options));
 
 		$profiler = JProfiler::getInstance('Application');
 
@@ -812,7 +812,7 @@ class PlgSystemGzip extends JPlugin
 
 		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
 		$body = GZipHelper::trigger('processHTML', $body, $options);
-		$body = GZipHelper::trigger('postProcessHTML', $body, $options, true);
+		$body = GZipHelper::trigger('postProcessHTML', $body, $options/*, true*/);
 
 		GZipHelper::setTimingHeaders($options);
 
