@@ -2,7 +2,8 @@
 
 ## 2.8.0-dev
 
-- #88 [bug] the minification produced invalid HTML when the HTML provided had mssing space between attributes
+- #88 preserve IE comments
+- #88 [bug] the minification produced invalid HTML when the HTML provided had missing space between attributes
 - #89 compress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension
 - #91 fix security and performance issues induced by links with _target=\_blank_ attribute
 

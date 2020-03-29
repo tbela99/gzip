@@ -50,6 +50,10 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="preserve_ie_comments" label="PLG_GZIP_FIELD_PRESERVE_IE_COMMENTS_LABEL" description="PLG_GZIP_FIELD_PRESERVE_IE_COMMENTS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="fix_invalid_html" label="PLG_GZIP_FIELD_FIX_INVALID_HTML_LABEL" description="PLG_GZIP_FIELD_FIX_INVALID_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>

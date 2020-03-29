@@ -13,7 +13,6 @@
 
 namespace Gzip\Helpers;
 
-use JURI;
 use function preg_replace_callback;
 use function strlen;
 
@@ -22,49 +21,6 @@ class HTMLHelper {
 	public function preProcessHTML($html, array $options = []) {
 
 		$debug = empty($options['debug']) ? '.min' : '';
-
-		if (!empty($options['fix_invalid_html'])) {
-
-			/*
-			 * attempt to fix invalidHTML - missing space between attributes -  before minifying
-			 * <div id="foo"class="bar"> => <div id="foo" class="bar">
-			 */
-			$html = preg_replace_callback('#<(\S+)([^>]+)>#s', function ($matches) {
-
-				$result = '<'.$matches[1];
-
-				if (trim($matches[2]) !== '') {
-
-					$in_str = false;
-					$quote = '';
-
-					$j = strlen($matches[2]);
-
-					for ($i = 0; $i < $j; $i++) {
-
-						$result .= $matches[2][$i];
-
-						if ($in_str) {
-
-							if ($matches[2][$i] == $quote) {
-
-								$in_str = false;
-								$result .= ' ';
-								$quote = '';
-							}
-						}
-
-						else if (in_array($matches[2][$i], ['"', "'"])) {
-
-							$in_str = true;
-							$quote = $matches[2][$i];
-						}
-					}
-				}
-
-				return rtrim($result).'>';
-			}, $html);
-		}
 
 		// quick test
 		$hasScript = stripos($html, '<script') !== false || stripos($html, '<link ') !== false;
@@ -125,6 +81,49 @@ class HTMLHelper {
 	 */
 	public function postProcessHTML ($html, array $options = []) {
 
+		if (!empty($options['fix_invalid_html'])) {
+
+			/*
+			 * attempt to fix invalidHTML - missing space between attributes -  before minifying
+			 * <div id="foo"class="bar"> => <div id="foo" class="bar">
+			 */
+			$html = preg_replace_callback('#<(\S+)([^>]+)>#s', function ($matches) {
+
+				$result = '<'.$matches[1];
+
+				if (trim($matches[2]) !== '') {
+
+					$in_str = false;
+					$quote = '';
+
+					$j = strlen($matches[2]);
+
+					for ($i = 0; $i < $j; $i++) {
+
+						$result .= $matches[2][$i];
+
+						if ($in_str) {
+
+							if ($matches[2][$i] == $quote) {
+
+								$in_str = false;
+								$result .= ' ';
+								$quote = '';
+							}
+						}
+
+						else if (in_array($matches[2][$i], ['"', "'"])) {
+
+							$in_str = true;
+							$quote = $matches[2][$i];
+						}
+					}
+				}
+
+				return rtrim($result).'>';
+			}, $html);
+		}
+
 		if (empty($options['minifyhtml'])) {
 
 			return $html;
@@ -141,7 +140,27 @@ class HTMLHelper {
 			'input'
 		];
 
-		$html = str_replace(JURI::getInstance()->getScheme().'://', '//', $html);
+		if (!empty($options['preserve_ie_comments'])) {
+
+			$html = preg_replace_callback('#(<!--\[if .*?\]>)(.*?)<!\[endif\]\s*-->#s', function ($matches) use (&$scripts) {
+
+				$key = '~~!'.md5($matches[0]).'!~~';
+				$scripts[$key] = $matches[1].trim($matches[2]).'<![endif]-->';
+
+				return $key;
+
+			}, $html);
+		}
+
+		$html = preg_replace('#<!--.*?-->#s', '', $html);
+
+		if (!empty($scripts)) {
+
+			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
+			$scripts = [];
+		}
+
+		$html = str_replace($options['scheme'].'://', '//', $html);
 		$html = preg_replace_callback('#<html(\s[^>]+)?>(.*?)</head>#si', function ($matches) {
 
 			return '<html'.$matches[1].'>'. preg_replace('#>[\r\n\t ]+<#s', '><', $matches[2]).'</head>';
@@ -173,8 +192,6 @@ class HTMLHelper {
 		$replace = [
 
 			'#<(('.implode(')|(', $self).'))(\s[^>]*?)?/>#si' => '<$1$'.(count($self) + 2).'>',
-			//remove tabs before and after HTML tags
-			'#<!--.*?-->#s' => '',
 			'/\>[^\S ]+/s' => '>',
 			'/[^\S ]+\</s' => '<',
 			//shorten multiple whitespace sequences; keep new-line characters because they matter in JS!!!
@@ -185,7 +202,7 @@ class HTMLHelper {
 			'/[\r\n]+([\t ]?[\r\n]+)+/s' => ''
 		];
 
-		$root = JURI::root(true).'/';
+		$root = $options['webroot'];
 
 		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
 		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
@@ -202,7 +219,12 @@ class HTMLHelper {
 				$result .= $matches[4];
 			}
 
-			return $result.$matches[5];
+			if (isset($matches[5])) {
+
+				return $result.$matches[5];
+			}
+
+			return $result;
 		}, $html);
 
 		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);

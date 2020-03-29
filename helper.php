@@ -179,11 +179,11 @@ class GZipHelper {
 
 		$replace = [];
 
-		/*
 		if ($escape) {
 
 			$tags = ['script', 'style', 'pre'];
 
+			/*
 			$html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
 
 				$hash = '<!-- ht' . crc32($matches[0]) . 'ht -->';
@@ -192,6 +192,7 @@ class GZipHelper {
 				return $hash;
 
 			}, $html);
+			*/
 
 			$html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$replace, $tags) {
 
@@ -202,7 +203,6 @@ class GZipHelper {
 
 			}, $html);
 		}
-		*/
 
 		$profiler = JProfiler::getInstance('Application');
 
@@ -215,12 +215,10 @@ class GZipHelper {
 			}
 		}
 
-		/*
 		if (!empty($replace)) {
 
 			return str_replace(array_keys($replace), array_values($replace), $html);
 		}
-		*/
 
 		return $html;
 	}

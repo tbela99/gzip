@@ -3,3 +3,4 @@ jasmine/
 node_modules/
 package-lock.json
 test/
+excluded.lst
