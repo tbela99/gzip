@@ -705,6 +705,9 @@ class PlgSystemGzip extends JPlugin
 
 		$options = $this->options;
 
+		$options['webroot'] = JURI::root(true).'/';
+		$options['scheme'] = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ? 'https' : 'http';
+
 		if (!empty($options['jsignore'])) {
 
 			$options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
@@ -780,31 +783,31 @@ class PlgSystemGzip extends JPlugin
 
 		if (!empty($options['imageenabled']) && extension_loaded('gd')) {
 
-			GZipHelper::register(new Gzip\Helpers\ImagesHelper($options));
+			GZipHelper::register(new Gzip\Helpers\ImagesHelper());
 		}
 
 		if (!empty($options['cssenabled'])) {
 
-			GZipHelper::register(new Gzip\Helpers\CSSHelper($options));
+			GZipHelper::register(new Gzip\Helpers\CSSHelper());
 		}
 
 		if (!empty($options['jsenabled'])) {
 
-			GZipHelper::register(new Gzip\Helpers\ScriptHelper($options));
+			GZipHelper::register(new Gzip\Helpers\ScriptHelper());
 		}
 
 		if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
 
-			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper($options));
+			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
 		}
 
 		if (!empty($options['cachefiles']) || !empty($options['link_rel'])) {
 
-			GZipHelper::register(new Gzip\Helpers\UrlHelper($options));
+			GZipHelper::register(new Gzip\Helpers\UrlHelper());
 		}
 
-		GZipHelper::register(new Gzip\Helpers\HTMLHelper($options));
-		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper($options));
+		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
 
 		$profiler = JProfiler::getInstance('Application');
 
@@ -812,7 +815,7 @@ class PlgSystemGzip extends JPlugin
 
 		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
 		$body = GZipHelper::trigger('processHTML', $body, $options);
-		$body = GZipHelper::trigger('postProcessHTML', $body, $options/*, true*/);
+		$body = GZipHelper::trigger('postProcessHTML', $body, $options, true);
 
 		GZipHelper::setTimingHeaders($options);
 

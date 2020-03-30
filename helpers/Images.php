@@ -15,7 +15,7 @@ namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
 use Image\Image;
-use JURI;
+// use JURI;
 use function getimagesize;
 use function imagecreatefromgif;
 use function imagecreatefromjpeg;
@@ -85,7 +85,7 @@ class ImagesHelper {
 
 					if (strpos($name, '//') === 0) {
 
-						$name = JURI::getInstance()->getScheme() . ':' . $name;
+						$name = $options['scheme'] . ':' . $name;
 					}
 
 					$local = $path . sha1($name) . '.' . $pathinfo;
@@ -163,7 +163,7 @@ class ImagesHelper {
 
 					if (is_file($newFile)) {
 
-						$attributes['src'] = JURI::root(true).'/'.$newFile;
+						$attributes['src'] = $options['webroot'].$newFile;
 						$file = $newFile;
 					}
 				}

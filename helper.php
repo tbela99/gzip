@@ -387,7 +387,7 @@ class GZipHelper {
 				return $file;
 			}
 
-    		return JUri::root(true).'/'.$file;
+    		return static::$options['webroot'].$file;
 		}
 
 		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
@@ -411,7 +411,7 @@ class GZipHelper {
 
                     $hashFile = static::getHashMethod();
 
-                    return static::getHost(JURI::root(true).'/'.static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $file.$hash);
+                    return static::getHost(static::$options['webroot'].static::$route.static::$pwa_network_strategy . $hashFile($name) . '/' . $name.$hash);
                 }
             }
 

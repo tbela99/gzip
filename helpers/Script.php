@@ -20,7 +20,7 @@ class ScriptHelper {
 
 	public function processHTML ($html, array $options = []) {
 
-		$path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
+		$path = $options['js_path'];
 
 		$comments = [];
 
