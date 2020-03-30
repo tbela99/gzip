@@ -15,7 +15,6 @@ namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
 use Image\Image;
-// use JURI;
 use Patchwork\CSSmin;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
 use Sabberworm\CSS\Parser;

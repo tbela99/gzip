@@ -8,9 +8,19 @@ Configure general settings
 
 If yes, load plugin's unminified css and javascript files, otherwise load minified versions.
 
-## Minify HTML
+## HTML Settings
+
+### Minify HTML
 
 Enable or disable HTML minification.
+
+### IE Conditional Comments
+
+Do not remove IE Conditional Comments
+
+### Force Space Between Attributes
+
+Fix invalid HTML by forcing space between HTML attributes
 
 ## Hotlink Protection
 

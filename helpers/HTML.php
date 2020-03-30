@@ -51,7 +51,7 @@ class HTMLHelper {
 
 			$script .= file_get_contents(__DIR__.'/../worker/dist/browser.prefetch'.$debug.'.js');
 
-			$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/config.php';
+			$path = $options['app_path'].'config.php';
 
 			if (is_file($path)) {
 
@@ -142,22 +142,30 @@ class HTMLHelper {
 
 		if (!empty($options['preserve_ie_comments'])) {
 
-			$html = preg_replace_callback('#(<!--\[if .*?\]>)(.*?)<!\[endif\]\s*-->#s', function ($matches) use (&$scripts) {
+			$html = preg_replace_callback('#<!--(.*?)-->#s', function ($matches) use (&$scripts) {
 
-				$key = '~~!'.md5($matches[0]).'!~~';
-				$scripts[$key] = $matches[1].trim($matches[2]).'<![endif]-->';
+				if (preg_match('#(\[if .*?\]>)(.*?)<!\[endif\]\s*#s', $matches[1], $m)) {
 
-				return $key;
+						$key = '~~!'.md5($m[0]).'!~~';
+						$scripts[$key] = '<!--'.$m[1].trim($m[2]).'<![endif]-->';
+
+						return $key;
+				}
+
+				return '';
 
 			}, $html);
+
+			if (!empty($scripts)) {
+
+				$html = str_replace(array_keys($scripts), array_values($scripts), $html);
+				$scripts = [];
+			}
 		}
 
-		$html = preg_replace('#<!--.*?-->#s', '', $html);
+		else {
 
-		if (!empty($scripts)) {
-
-			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
-			$scripts = [];
+			$html = preg_replace('#<!--.*?-->#s', '', $html);
 		}
 
 		$html = str_replace($options['scheme'].'://', '//', $html);
@@ -205,7 +213,18 @@ class HTMLHelper {
 		$root = $options['webroot'];
 
 		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
-		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
+		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]*)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
+
+			if ($matches[2] == 'style') {
+
+				// remove empty style attributes which are invalid
+				if (trim($matches[4]) === '') {
+
+					return ' ';
+				}
+
+				return $matches[0];
+			}
 
 			$result = $matches[1].$matches[2].'=';
 
@@ -226,6 +245,7 @@ class HTMLHelper {
 
 			return $result;
 		}, $html);
+
 
 		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
 		$html = preg_replace(array_keys($replace), array_values($replace), $html);

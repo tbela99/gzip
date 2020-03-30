@@ -183,17 +183,6 @@ class GZipHelper {
 
 			$tags = ['script', 'style', 'pre'];
 
-			/*
-			$html = preg_replace_callback('#<!--.*?-->#s', function ($matches) use(&$replace) {
-
-				$hash = '<!-- ht' . crc32($matches[0]) . 'ht -->';
-				$replace[$hash] = $matches[0];
-
-				return $hash;
-
-			}, $html);
-			*/
-
 			$html = preg_replace_callback('#(<(('.implode(')|(', $tags).'))[^>]*>)(.*?)</\2>#si', function ($matches) use(&$replace, $tags) {
 
 				$match = $matches[count($tags) + 3];
