@@ -28,6 +28,14 @@ use function preg_replace_callback;
 
 class CSSHelper {
 
+	/**
+	 * @param string $html
+	 * @param array $options
+	 *
+	 * @return string
+	 *
+	 * @since version
+	 */
 	public function processHTML ($html, array $options = []) {
 
 		$path = $options['css_path'];
@@ -628,7 +636,16 @@ class CSSHelper {
 
 		return $html;
 	}
-	
+
+	/**
+	 * @param $block
+	 * @param array $options
+	 *
+	 * @return string
+	 * @ignore
+	 *
+	 * @since version
+	 */
     public function extractFontFace($block, $options = []) {
 
         $content = '';
@@ -674,6 +691,15 @@ class CSSHelper {
         return $content;
     }
 
+	/**
+	 * @param $block
+	 * @param $regexp
+	 *
+	 * @return string
+	 * @ignore
+	 *
+	 * @since version
+	 */
     public function extractCssRules($block, $regexp) {
 
         if ($block instanceof DeclarationBlock) {
@@ -723,6 +749,15 @@ class CSSHelper {
         return '';
     }
 
+	/**
+	 * @param $css
+	 * @param array $options
+	 *
+	 * @return string
+	 *
+	 * @throws \Exception
+	 * @since version
+	 */
     public function buildCssBackground($css, array $options = []) {
 
 		$result = '';
@@ -840,6 +875,15 @@ class CSSHelper {
         return $result;
     }
 
+	/**
+	 * @param $block
+	 * @param string|null $matchSize
+	 * @param string|null $prefix
+	 *
+	 * @return string
+	 *
+	 * @since version
+	 */
     public function extractCssBackground($block, $matchSize = null, $prefix = null) {
 
         if ($block instanceof DeclarationBlock) {
@@ -931,114 +975,14 @@ class CSSHelper {
     }
 
 	/**
+	 * resolve path
+	 *
 	 * @param string $path
-	 * @param string|null $reference
-	 *
-	 *  /a, /b => /a
-	 * /a/b/c, /a -> b/c
-	 * images/gold/plates.png, images/ -> gold/plates.png
-	 *
 	 * @return string
-	 * @since 2.8.0
+	 *
+	 * @since 0.1
 	 */
-	public function relativePath($path, $reference) {
-
-		$ref0 = substr($reference, 0, 1);
-
-		if ($reference == '/') {
-
-			if ($path[0] == '/') {
-
-				return substr($path, 1);
-			}
-		}
-
-		if ($path[0] == '/' && $ref0 != '/') {
-
-			return $path;
-		}
-
-		$result = [];
-
-		$paths = explode('/', rtrim($path, '/'));
-		$refs = explode('/', rtrim($reference, '/'));
-
-		$i = count($refs);
-
-		while($i--) {
-
-			if ($refs[$i] == '.') {
-
-				array_splice($refs, $i, 1);
-			}
-
-			else if ($refs[$i] == '..') {
-
-				if ($i > 0) {
-
-					array_splice($refs, $i - 1, 2);
-				}
-				else {
-
-					// $refs[$i] = dirname current working directory?
-					// unknown edge case
-					array_splice($refs, $i, 1);
-				}
-			}
-		}
-
-		while ($refs) {
-
-			if (empty($paths)) {
-
-				break;
-			}
-
-			$r = array_shift($refs);
-
-			$v = current($paths);
-
-			if ($v !== $r) {
-
-				$result[] = '..';
-
-				while ($refs) {
-
-					$result[] = '..';
-					array_shift($refs);
-				}
-			}
-
-			else if ($v === $r) {
-
-				array_shift($paths);
-			}
-		}
-
-		array_splice($result, count($result), 0, $paths);
-
-		$i = $j = count($result);
-
-		while ($i--) {
-
-			if ($result[$i] == '.') {
-
-				array_splice($result, $i, 1);
-			}
-
-			else if ($result[$i] == '..' && $i < $j && $result[$i + 1] != '..') {
-
-				if ($i == 0 && $ref0 == '/' && $path[0] == '/') {
-
-					$result[$i] = '';
-				}
-			}
-		}
-
-		return implode ('/', $result);
-	}
-
-    public function resolvePath($path) {
+	public function resolvePath($path) {
 
         if (strpos($path, '../') !== false) {
 
@@ -1065,6 +1009,17 @@ class CSSHelper {
     }
 
     // parse @import
+
+	/**
+	 * flatten @import css
+	 * @param string $css
+	 * @param string|null $path
+	 * @param array $options
+	 *
+	 * @return string|string[]|null
+	 *
+	 * @since 0.1
+	 */
     public function expandCss($css, $path = null, array $options = []) {
 
         if (!is_null($path)) {

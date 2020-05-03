@@ -13,6 +13,7 @@ Here are some features provided by this plugin
 ## HTML
 
 - HTML minification
+- preserve IE conditional comments
 
 ## Javascript
 

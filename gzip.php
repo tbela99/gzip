@@ -385,6 +385,7 @@ class PlgSystemGzip extends JPlugin
 				GZipHelper::$pwa_network_strategy = $this->options['pwa_network_strategy'] . '/';
 			}
 
+			$this->options['config_path'] = 'cache/z/app/'. $_SERVER['SERVER_NAME'].'/';
 			$this->options['app_path'] = $prefix . $_SERVER['SERVER_NAME'].'/';
 
 			foreach (['js', 'css', 'img', 'ch', 'e', 'c'] as $key) {

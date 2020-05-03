@@ -51,7 +51,7 @@ class HTMLHelper {
 
 			$script .= file_get_contents(__DIR__.'/../worker/dist/browser.prefetch'.$debug.'.js');
 
-			$path = $options['app_path'].'config.php';
+			$path = $options['config_path'].'config.php';
 
 			if (is_file($path)) {
 

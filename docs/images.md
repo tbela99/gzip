@@ -33,16 +33,31 @@ Images that match any pattern you specify here will be ignored. Example: ignore 
 
 ### Convert Images to Webp
 
-Convert images to Webp. Webp produce smaller images than jpg or png.
+Convert images to Webp when this format is supported by the browser. Webp produce smaller images than jpg or png. The browser must advertise webp support through the Accept http header.
+Firefox will send this header
+
+```http
+Accept: image/webp,*/*
+```
 
 ### Crop Method
 
-Algorithm used when resizing images. Values are
+Algorithm used when resizing images. Values are:
 
-- Default
-- Center
-- Entropy
-- Face Detection
+#### Default
+.
+
+#### Center
+
+ Crop the image from its center
+ 
+#### Entropy
+
+.
+
+#### Face Detection
+
+try to crop the region captured by the face detection algorithm
 
 ### Image Placeholder
 
