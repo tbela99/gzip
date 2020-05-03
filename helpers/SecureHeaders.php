@@ -35,7 +35,7 @@ class SecureHeadersHelper
 
 		if (!empty($options['cspenabled'])) {
 
-			$path = $options['app_path']. 'config.php';
+			$path = $options['config_path']. 'config.php';
 
 			if (is_file($path)) {
 
