@@ -168,7 +168,7 @@ class HTMLHelper {
 			$html = preg_replace('#<!--.*?-->#s', '', $html);
 		}
 
-		$html = str_replace($options['scheme'].'://', '//', $html);
+	//	$html = str_replace($options['scheme'].'://', '//', $html);
 		$html = preg_replace_callback('#<html(\s[^>]+)?>(.*?)</head>#si', function ($matches) {
 
 			return '<html'.$matches[1].'>'. preg_replace('#>[\r\n\t ]+<#s', '><', $matches[2]).'</head>';
@@ -228,9 +228,10 @@ class HTMLHelper {
 
 			$result = $matches[1].$matches[2].'=';
 
-			if (!empty($options['parse_url_attr']) && array_key_exists($matches[2], $options['parse_url_attr']) && !preg_match('#^([a-z]+:)?//#', $matches[4]) && is_file($matches[4])) {
+			if (!empty($options['parse_url_attr']) && array_key_exists($matches[2], $options['parse_url_attr'])) {
 
-				$result .= $root.$matches[4];
+				$value = (!preg_match('#^([a-z]+:)?//#', $matches[4]) && is_file($matches[4]) ? $root : '').$matches[4];
+				$result .= str_replace($options['scheme'].'://', '//', $value);
 			}
 
 			else {

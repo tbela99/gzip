@@ -22,6 +22,7 @@
         <folder>worker/css</folder>
         <folder>docs/</folder>
         <folder>push</folder>
+        <folder>vendor</folder>
         <filename>autoload.php</filename>
         <filename>responder.php</filename>
         <filename>helper.php</filename>
@@ -384,7 +385,7 @@
                     <field name="pwa_app_start_url" hint="PLG_GZIP_FIELD_PWA_APP_URL_HINT" class="form-control" label="PLG_GZIP_FIELD_PWA_APP_URL_LABEL" description="PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_bg_color" label="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_DESCRIPTION" type="color" />
                     <field name="pwa_app_theme_color" label="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_DESCRIPTION" type="color" />
-                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="browser">
+                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="standalone">
                         <option value="standalone">JFIELD_OPTION_PWA_APP_DISPLAY_STANDALONE</option>
                         <option value="fullscreen">JFIELD_OPTION_PWA_APP_DISPLAY_FULLSCREEN</option>
                         <option value="minimal-ui">JFIELD_OPTION_PWA_APP_DISPLAY_MINIMAL_UI</option>
@@ -393,6 +394,12 @@
                     <field name="pwa_app_cache_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_cache_exclude_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_icons_path" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist" />
+                    <field name="pwa_app_icons_purpose" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PURPOSE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PURPOSE_DESCRIPTION" type="list" default="any">
+                        <option value="any">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_ANY</option>
+                        <option value="badge">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_BADGE</option>
+                        <option value="maskable">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_MASKABLE</option>
+                    </field>
+                    <field name="pwa_app_screenshots_path" label="PLG_GZIP_FIELD_PWA_APP_SCREENSHOTS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SCREENSHOTS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Native apps deep linking" />
                     <field name="pwa_app_native" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -403,7 +410,7 @@
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Preview the changes to the manifest file" />
-                    <field name="webmanifestpreview" label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL" description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION" readonly="readonly" hiddenLabel="true" class="input-block2" row="15" type="webmanifestpreview" default="" />
+                    <field name="webmanifestpreview" filter="unset" label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL" description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION" readonly="readonly" hiddenLabel="true" class="input-block2" row="15" type="webmanifestpreview" default="" />
                 </fields>
             </fieldset>
             <fieldset name="pwa_web_share_target" label="Web Share Target">

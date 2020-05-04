@@ -4,3 +4,5 @@ node_modules/
 package-lock.json
 test/
 excluded.lst
+/composer.phar
+/composer.lock

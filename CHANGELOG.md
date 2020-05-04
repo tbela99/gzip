@@ -7,6 +7,11 @@
 - \[bug\] the minification produced invalid HTML when the HTML provided had missing space between attributes #88
 - compress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension #89
 - fix security and performance issues induced by links with _target=\_blank_ attribute #91
+- change default pwa display to _standalone_ #78 
+- \[bug\] fix invalid configuration path #94
+- \[performance\] compress cached files using brotli or gzip
+- Add \.ico as a supported PWA icon format #78
+- \[bug\] the protocol is removed in the HTML content instead of href|src attributes only
 
 ## 2.7.3
 
