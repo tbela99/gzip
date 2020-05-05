@@ -7,7 +7,7 @@ composer.phar export-ignore
 build.sh export-ignore
 imagesloader.es6 export-ignore
 jsdoc.json export-ignore
-rollup.config.jsexport-ignore
+rollup.config.js export-ignore
 terser.config.js export-ignore
 .eslintrc.js export-ignore
 .editorconfig export-ignore
