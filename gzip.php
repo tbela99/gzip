@@ -949,28 +949,34 @@ class PlgSystemGzip extends JPlugin
 
 						if ($match[1] == 'ico') {
 
-							//
-							$loader = new IcoFileService();
+							try {
 
-							$icon = $loader->fromFile($file->getPathname());
+								//
+								$loader = new IcoFileService();
 
-							$sizes = '';
+								$icon = $loader->fromFile($file->getPathname());
 
-							foreach ($icon as $image) {
+								$sizes = '';
 
-								$sizes .= $image->width . 'x' . $image->height . ' ';
+								foreach ($icon as $image) {
+
+									$sizes .= $image->width . 'x' . $image->height . ' ';
+								}
+
+								// the type is optional
+								$img = [
+
+									'src' => JUri::root(true) . '/images/' . $options['pwa_app_icons_path'] . '/' . $file,
+									'sizes' => rtrim($sizes),
+									//	'type' => 'image/x-icon',
+								];
 							}
 
-							// the type is optional
-							$img = [
+							catch (Exception $e) {
 
-								'src' => JUri::root(true) . '/images/' . $options['pwa_app_icons_path'] . '/' . $file,
-								'sizes' => rtrim($sizes),
-								//	'type' => 'image/x-icon',
-							];
-						}
-
-						else {
+								continue;
+							}
+						} else {
 
 							$size = getimagesize($file->getPathName());
 
@@ -979,7 +985,7 @@ class PlgSystemGzip extends JPlugin
 
 								'src' => JUri::root(true) . '/images/' . $options['pwa_app_icons_path'] . '/' . $file,
 								'sizes' => $size[0] . 'x' . $size[1],
-							//	'type' => image_type_to_mime_type($size[2]),
+								//	'type' => image_type_to_mime_type($size[2]),
 							];
 						}
 
@@ -1004,15 +1010,15 @@ class PlgSystemGzip extends JPlugin
 
 					if ($file->isFile() && preg_match('#\.((jpg)|(png)|(webp))$#i', $file, $match)) {
 
-							$size = getimagesize($file->getPathName());
+						$size = getimagesize($file->getPathName());
 
-							// the type is optional
-							$manifest['screenshots'][] = [
+						// the type is optional
+						$manifest['screenshots'][] = [
 
-								'src' => JUri::root(true) . '/images/' . $options['pwa_app_screenshots_path'] . '/' . $file,
-								'sizes' => $size[0] . 'x' . $size[1],
-								'type' => image_type_to_mime_type($size[2]),
-							];
+							'src' => JUri::root(true) . '/images/' . $options['pwa_app_screenshots_path'] . '/' . $file,
+							'sizes' => $size[0] . 'x' . $size[1],
+							'type' => image_type_to_mime_type($size[2]),
+						];
 					}
 				}
 			}
@@ -1038,8 +1044,7 @@ class PlgSystemGzip extends JPlugin
 		return json_encode($manifest);
 	}
 
-	protected
-	function updateSecurityHeaders($options)
+	protected function updateSecurityHeaders($options)
 	{
 
 		$headers = [];
@@ -1126,8 +1131,7 @@ class PlgSystemGzip extends JPlugin
 		return $headers;
 	}
 
-	protected
-	function updateManifest($options)
+	protected function updateManifest($options)
 	{
 
 		if (empty($options['pwa_app_manifest'])) {
@@ -1150,8 +1154,7 @@ class PlgSystemGzip extends JPlugin
 		file_put_contents($path . 'manifest_version', hash_file('sha1', $path . 'manifest.json'));
 	}
 
-	protected
-	function updateServiceWorker($options)
+	protected function updateServiceWorker($options)
 	{
 
 		if (is_object($options)) {
@@ -1452,8 +1455,7 @@ class PlgSystemGzip extends JPlugin
 		file_put_contents($path . 'browser.min.js', str_replace($search, $replace_min, $data));
 	}
 
-	protected
-	function cleanCache()
+	protected function cleanCache()
 	{
 
 		//

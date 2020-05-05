@@ -11,6 +11,7 @@
 - \[bug\] fix invalid configuration path #94
 - \[performance\] compress cached files using brotli or gzip
 - Add \.ico as a supported PWA icon format #78
+- Add purpose property to the PWA icons  configuration options #78
 - \[bug\] the protocol is removed in the HTML content instead of href|src attributes only
 
 ## 2.7.3
