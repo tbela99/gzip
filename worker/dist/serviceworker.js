@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "c6be1db",
+			value: "build-id",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2020-01-09 16:33:53-05:00",
+			value: "build-date",
 			enumerable: true
 		},
 		/**
@@ -2184,13 +2184,13 @@
 		scope + "{ROUTE}/e/",
 		entry[1]
 	);
-	*/
 	if (caching) {
 
 		router.addPlugin(new CacheExpiration(defaultCacheSettings));
 	}
 
 	route.registerRoute(router);
+	*/
 
 	// register strategies routers
 	for (entry of strategies) {

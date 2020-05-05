@@ -201,13 +201,13 @@ router = new ExpressRouter(
 	scope + "{ROUTE}/e/",
 	entry[1]
 );
-*/
 if (caching) {
 
 	router.addPlugin(new CacheExpiration(defaultCacheSettings));
 }
 
 route.registerRoute(router);
+*/
 
 // register strategies routers
 for (entry of strategies) {

@@ -379,7 +379,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" maxlength="12" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text" />
+                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text" />
                     <field name="pwa_app_name" hint="PLG_GZIP_FIELD_PWA_APP_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NAME_DESCRIPTION" type="text" />
                     <field name="pwa_app_description" hint="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_HINT" label="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_DESCRIPTION" type="text" />
                     <field name="pwa_app_start_url" hint="PLG_GZIP_FIELD_PWA_APP_URL_HINT" class="form-control" label="PLG_GZIP_FIELD_PWA_APP_URL_LABEL" description="PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION" type="textarea" />

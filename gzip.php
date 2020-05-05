@@ -130,6 +130,9 @@ class PlgSystemGzip extends JPlugin
 
 		$app = JFactory::$application;
 
+		/**
+		 * @var JDocumentHtml $document
+		 */
 		$document = JFactory::getDocument();
 		$docType = $document->getType();
 
@@ -205,7 +208,7 @@ class PlgSystemGzip extends JPlugin
 
 				if (!empty($script)) {
 
-					$document->addScriptDeclaration($script);
+					$document->addCustomTag('<script data-ignore="true" defer>'.$script.'</script>');
 				}
 			}
 		}
@@ -637,7 +640,6 @@ class PlgSystemGzip extends JPlugin
 					$url = $this->options['pwa_app_native_ios'];
 
 					$document->addHeadLink($url, 'external', 'rel', ['data-app' => 'ios']);
-					//$id = preg_replace('#.*?/id(\d+).*#', '$1', $this->options['pwa_app_native_ios']);
 				}
 			}
 
@@ -863,7 +865,7 @@ class PlgSystemGzip extends JPlugin
 
 		$manifest = [
 			'scope' => JURI::root(true) . '/',
-			'short_name' => substr($short_name, 0, 12),
+			'short_name' => $short_name,
 			'name' => $name,
 			'description' => $description,
 			'start_url' => $start_url,
