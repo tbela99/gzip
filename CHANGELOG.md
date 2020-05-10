@@ -1,17 +1,15 @@
 # Change History
 
-## 2.8.0-dev
+## 2.8.0
 
-- remove duplicated path the file name #88
-- preserve IE conditional comments #88
-- remove the length restriction of the manifest short_name #78
-- compress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension #89
-- fix security and performance issues induced by links with _target=\_blank_ attribute #91
-- change default pwa display to _standalone_ #78 
-- \[performance\] compress cached files using brotli or gzip
 - Add \.ico as a supported PWA icon format #78
 - Add purpose property to the PWA manifest options #78
-- Add screenshots property to the PWA manifest options #78
+- Add screenshots property to the PWA manifest options #78- remove duplicated path the file name #88
+- change default pwa display to _standalone_ #78
+- \[performance\] precompress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension #89
+- optionally preserve IE conditional comments #88
+- remove the length restriction of the manifest short_name #78
+- fix security and performance issues induced by links with _target=\_blank_ attribute #91
 - asynchronously initialize the service worker using \<script defer\> #78
 - \[bug\] fix invalid configuration path #94
 - \[bug\] the minification produced invalid HTML when the HTML provided had missing space between attributes #88
@@ -19,6 +17,7 @@
 - \[bug\] fix an uncaught javascript error in the service worker js #78
 - \[bug\] fix 404 error when Hotlink protection is ON and cache files is OFF #78i
 - \[bug\] fix ignored javascript are removed from the page #96
+
 ## 2.7.3
 
 - change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header
