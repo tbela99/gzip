@@ -15,9 +15,9 @@
 - Add screenshots property to the PWA manifest options #78
 - asynchronously initialize the service worker using \<script defer\> #78
 - \[bug\] the protocol is removed in the HTML content instead of href|src attributes only
-- fix an uncaught javascript error in the service worker js #78
+- \[bug\] fix an uncaught javascript error in the service worker js #78
+- \[bug\] fix 404 error when Hotlink protection is ON and cache files is OFF #78
 - remove the length restriction of the manifest short_name #78
-
 ## 2.7.3
 
 - change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header

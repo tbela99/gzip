@@ -107,7 +107,16 @@ Configure the app display mode
 
 ### Apps Icons Directory
 
-Select the directory that contains your app icons. The directory must be located under the /images folder of your Joomla website
+Select the directory that contains your app icons. The directory must be located under the /images folder of your Joomla website.
+Supported formats are ICO JPG PNG and WEBP
+
+### Apps Icons Purpose
+
+The app icon purpose. see [MDN](https://developer.mozilla.org/en-US/docs/Web/Manifest/icons#Values)
+
+### Apps Screenshots
+
+The app screenshots folder. see [MDN](https://developer.mozilla.org/en-US/docs/Web/Manifest/screenshots)
 
 ### Prefer Native Apps
 
