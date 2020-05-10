@@ -1278,13 +1278,6 @@ class PlgSystemGzip extends JPlugin
 				$cache_duration_type = $this->params->get('gzip.maxage', '2months');
 			}
 
-			//	$strategies[$key]['value'] = $value;
-			//	$strategies[$key]['cache'] = $dt->getTimestamp() - $now;
-			//	$strategies[$key]['key'] = $key;
-
-			//	$strategies[$key]['network'][] = $ext;
-			//	$strategies[$key]['mime'][] = $mime_type;
-
 			$cache_settings['settings'][$key] = [
 				//	'type' => $key,
 				//	'cacheName' => 'gzip_sw_worker_expiration_cache_'.$key.'_private',
@@ -1334,7 +1327,8 @@ class PlgSystemGzip extends JPlugin
 				'{scope}',
 				'"{exclude_urls}"',
 				'"{preloaded_urls}"',
-				'"{pwa_cache_max_file_count}"'
+				'"{pwa_cache_max_file_count}"',
+				'"{pwa_custom_cache_settings}"'
 			];
 
 		$replace = [];
@@ -1363,11 +1357,7 @@ class PlgSystemGzip extends JPlugin
 		) {
 
 			$offline_data['methods'] = empty($options['pwa_offline_method']) ? ['GET'] : $options['pwa_offline_method'];
-
 			$offline_data['type'] = 'url';
-			//	}
-
-			//	else {
 
 			if (isset($options['pwa_offline_pref']) && $options['pwa_offline_pref'] == 'html') {
 
@@ -1409,13 +1399,29 @@ class PlgSystemGzip extends JPlugin
 			}, array_keys($strategies))), $json_debug),
 			'v_' . $hash,
 			$this->params->get('gzip.cache_key'),
-			//	json_encode($cacheExpiryStrategy, $json_debug),
-			//	json_decode($defaultNetworkStrategy, $json_debug),
 			JUri::root(true) . '/',
 			json_encode($exclude_urls, $json_debug),
 			json_encode($preloaded_urls, $json_debug),
 			+$options['pwa_cache_max_file_count']
 		]);
+
+		// "pwa_custom_cache_settings"
+		$custom_network_settings = [];
+
+		if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
+
+			$custom_network_settings[] = [
+				'prefix' => 'e',
+				'strategy' => isset($options['pwa_network_strategy']) ? $options['pwa_network_strategy'] : 'cn',
+				'ext' => '*',
+				'mime' => array_values($options['expiring_links']['file_type']),
+				'maxAge' => $options['expiring_links']['duration'],
+				'maxFileSize' => $maxFileSize,
+				'limit' => +$options['pwa_cache_max_file_count']
+			];
+		}
+
+		$replace[] = json_encode($custom_network_settings);
 
 		$data = str_replace($search, $replace, file_get_contents(__DIR__ . '/worker/dist/serviceworker.min.js'));
 

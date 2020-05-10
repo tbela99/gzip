@@ -52,6 +52,11 @@ export class CacheExpiration {
 		this.setOptions(options);
 	}
 
+	/**
+	 *
+	 * @param {String} url
+	 * @returns {string|null}
+	 */
 	getRouteTag(url) {
 		const route = SW.app.route;
 		let host;
@@ -65,6 +70,11 @@ export class CacheExpiration {
 		return undef;
 	}
 
+	/**
+	 *
+	 * @param options
+	 * @returns {Promise<void>}
+	 */
 	async setOptions(options) {
 
 		const date = new Date;
@@ -118,6 +128,11 @@ export class CacheExpiration {
 		);
 	}
 
+	/**
+	 *
+	 * @param {FetchEvent} event
+	 * @returns {Promise<Response|boolean>}
+	 */
 	async precheck(event) {
 		try {
 			if (this.db == undef || this.maxAge == 0) {

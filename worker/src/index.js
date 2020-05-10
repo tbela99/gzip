@@ -156,8 +156,6 @@ const defaultCacheSettings = {
 	maxFileSize
 };
 
-//let option;
-
 // excluded urls fallback on network only
 for (entry of "{exclude_urls}") {
 	route.registerRoute(
@@ -167,7 +165,6 @@ for (entry of "{exclude_urls}") {
 
 // excluded urls fallback on network only
 //const network_strategies = "{network_strategies}";
-
 for (entry of networkSettings.settings) {
 
 	router = new RegExpRouter(
@@ -195,20 +192,6 @@ for (entry of networkSettings.settings) {
 	route.registerRoute(router);
 }
 
-/*
-// implement encrypted file support as well as expiry date?
-router = new ExpressRouter(
-	scope + "{ROUTE}/e/",
-	entry[1]
-);
-if (caching) {
-
-	router.addPlugin(new CacheExpiration(defaultCacheSettings));
-}
-
-route.registerRoute(router);
-*/
-
 // register strategies routers
 for (entry of strategies) {
 
@@ -223,6 +206,26 @@ for (entry of strategies) {
 	}
 
 	route.registerRoute(router);
+
+	// implement encrypted file path support as well as expiry date?
+	SW.app.customNetwork.forEach(setting => {
+
+		let sc = scope + "{ROUTE}/" + entry[0] + '/' + setting.prefix + '/';
+
+		delete setting.prefix;
+
+		let router = new ExpressRouter(
+			sc,
+			setting
+		);
+
+//	if (caching) {
+
+		router.addPlugin(new CacheExpiration(setting));
+//	}
+
+		route.registerRoute(router);
+	})
 }
 
 router = new ExpressRouter(scope, strategies.get(networkSettings.strategy));

@@ -89,13 +89,17 @@ $uri = $_SERVER['REQUEST_URI'];
 $matches = preg_split('#/' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?#', $uri, -1, PREG_SPLIT_NO_EMPTY);
 
 $uri = end($matches);
+$file = $uri;
 
 $useEtag = strpos($uri, '1/') === 0;
 
-$uri = explode('/', $uri, $useEtag ? 3 : 2);
+if (!empty($this->options['cachefiles'])) {
 
-$file = preg_replace('~[#|?].*$~', '', end($uri));
-$file = urldecode($file);
+	$uri = explode('/', $uri, $useEtag ? 3 : 2);
+	$file = end($uri);
+}
+
+$file = urldecode( preg_replace('~[#|?].*$~', '', $file));
 
 $encrypted = preg_match('#\/e\/([^/]+)\/([^/]+)#', $_SERVER['REQUEST_URI'], $matches);
 $encrypted_data = null;

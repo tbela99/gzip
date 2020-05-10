@@ -887,14 +887,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "f1846bc",
+			value: "7a759d4",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2020-05-05 00:38:31-04:00",
+			value: "2020-05-05 19:32:39-04:00",
 			enumerable: true
 		},
 		/**
@@ -922,6 +922,10 @@
 		 */
 		network: {
 			value: "{pwa_cache_settings}"
+		},
+		customNetwork: {
+
+			value: "{pwa_custom_cache_settings}"
 		},
 		/**
 		 * precached resources
@@ -2139,8 +2143,6 @@
 		maxFileSize
 	};
 
-	//let option;
-
 	// excluded urls fallback on network only
 	for (entry of "{exclude_urls}") {
 		route.registerRoute(
@@ -2150,7 +2152,6 @@
 
 	// excluded urls fallback on network only
 	//const network_strategies = "{network_strategies}";
-
 	for (entry of networkSettings.settings) {
 
 		router = new RegExpRouter(
@@ -2179,19 +2180,7 @@
 	}
 
 	/*
-	// implement encrypted file support as well as expiry date?
-	router = new ExpressRouter(
-		scope + "{ROUTE}/e/",
-		entry[1]
-	);
-	if (caching) {
-
-		router.addPlugin(new CacheExpiration(defaultCacheSettings));
-	}
-
-	route.registerRoute(router);
 	*/
-
 	// register strategies routers
 	for (entry of strategies) {
 
@@ -2206,6 +2195,27 @@
 		}
 
 		route.registerRoute(router);
+
+	// implement encrypted file support as well as expiry date?
+		SW.app.customNetwork.forEach(setting => {
+
+			let sc = scope + "{ROUTE}/" + entry[0] + '/' + setting.prefix + '/';
+
+			delete setting.prefix;
+
+			let router = new ExpressRouter(
+				sc,
+				setting
+			);
+
+	//	if (caching) {
+
+			router.addPlugin(new CacheExpiration(setting));
+	//	}
+
+			route.registerRoute(router);
+		});
+
 	}
 
 	router = new ExpressRouter(scope, strategies.get(networkSettings.strategy));
