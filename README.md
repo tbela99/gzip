@@ -14,6 +14,7 @@ Here are some features provided by this plugin
 
 - HTML minification
 - preserve IE conditional comments
+- precompress assets using brotli or gzip
 
 ## Javascript
 

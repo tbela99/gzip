@@ -13,6 +13,8 @@ Here are some features provided by this plugin
 ## HTML
 
 - HTML minification
+- preserve IE conditional comments
+- precompress assets using brotli or gzip
 
 ## Javascript
 
@@ -42,9 +44,11 @@ Here are some features provided by this plugin
 
 ## Performance
 
+- configurable HTTP caching headers
 - optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
 - dns prefetch
 - profile plugin performance using HTTP server timing headers
+- precompressed cached files using brotli or gzip.
 
 ## Service Worker
 
@@ -53,6 +57,7 @@ Here are some features provided by this plugin
 - background sync
 - web share target level 2
 - web push notifications using One Signal
+- immediately update the service worker when the manifest settings change
 
 ## Content Security Policy (CSP)
 
@@ -66,7 +71,6 @@ Configure almost every csp level 3 settings to your liking:
 ## Security
 
 - Sub Resource Integrity
-- Content Security Policy Level 3: control execution of scripts, css, frames, workers in every web page
 - HSTS header configuration
 - XSS-PROTECTION header configuration
 - X-Frames-Options configuration
@@ -77,4 +81,4 @@ Configure almost every csp level 3 settings to your liking:
 - configure link lifetime
 
 The complete list of features is available in the [online documentation](https://tbela99.github.io/gzip/)
-and the [change log](https://github.com/tbela99/gzip/blob/master/CHANGELOG.md)
+and the [change log](./CHANGELOG.md)
