@@ -6,7 +6,7 @@ Configure general settings
 
 ## Debug
 
-If yes, load plugin's unminified css and javascript files, otherwise load minified versions.
+If yes, load plugin's unminified plugin css and javascript files, otherwise load minified versions.
 
 ## HTML Settings
 
@@ -20,7 +20,7 @@ Do not remove IE Conditional Comments
 
 ### Force Space Between Attributes
 
-Fix invalid HTML by forcing space between HTML attributes
+Fix invalid HTML by forcing space between HTML attributes before minifying
 
 ## Hotlink Protection
 

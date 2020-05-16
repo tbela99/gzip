@@ -1,5 +1,6 @@
 /*! instant.page v2.0.0 - (C) 2019 Alexandre Dieulot - https://instant.page/license */
-
+// @ts-check
+// build-id build-date
 import {
     ready
 } from '../utils/ready.js';
@@ -11,38 +12,41 @@ const allowQueryString = 'instantAllowQueryString' in document.body.dataset
 const allowExternalLinks = 'instantAllowExternalLinks' in document.body.dataset
 const filterMode = document.body.dataset.instantFilterType;
 const filters = JSON.parse(document.body.dataset.instantFilters);
+const preloadedUrls = new Set;
+
+// preload urls only once
+preloadedUrls.add('' + window.location);
 
 ready(function () {
 
-    let mouseoverTimer
-    let lastTouchTimestamp
+    let mouseoverTimer;
+    let lastTouchTimestamp;
 
-    const isSupported = prefetcher.relList && prefetcher.relList.supports && prefetcher.relList.supports('prefetch')
-    const isDataSaverEnabled = navigator.connection && navigator.connection.saveData
+    const isSupported = prefetcher.relList && prefetcher.relList.supports && prefetcher.relList.supports('prefetch');
+    const isDataSaverEnabled = navigator.connection && navigator.connection.saveData;
 
-    let delayOnHover = +document.body.dataset.instantIntensity || 65
-    let useMousedown = document.body.dataset.instantTrigger.indexOf('mousedown') == 0;
-    let useMousedownOnly = document.body.dataset.instantTrigger == 'mousedown-only';
+    let delayOnHover = +document.body.dataset.instantIntensity || 65;
+    let trigger = document.body.dataset.instantTrigger;
 
-    if (isSupported && !isDataSaverEnabled) {
-        prefetcher.rel = 'prefetch'
-        document.head.appendChild(prefetcher)
+    if (!isSupported || isDataSaverEnabled) {
 
-        const eventListenersOptions = {
-            capture: true,
-            passive: true,
-        }
-
-        if (!useMousedownOnly) {
-            document.addEventListener('touchstart', touchstartListener, eventListenersOptions)
-        }
-
-        if (!useMousedown) {
-            document.addEventListener('mouseover', mouseoverListener, eventListenersOptions)
-        } else {
-            document.addEventListener('mousedown', mousedownListener, eventListenersOptions)
-        }
+        return
     }
+
+    prefetcher.rel = 'prefetch';
+    document.head.appendChild(prefetcher);
+
+    const eventListenersOptions = {
+        capture: true,
+        passive: true,
+    }
+
+    if (!('mousedown' in document.documentElement) && ('ontouchstart' in document.documentElement)) {
+
+        trigger = 'touchstart';
+    }
+
+    document.addEventListener(trigger, trigger === 'touchstart' ? touchstartListener : (trigger === 'mousedown' ? mousedownListener : mouseoverListener), eventListenersOptions);
 
     function touchstartListener(event) {
         /* Chrome on Android calls mouseover before touchcancel so `lastTouchTimestamp`
@@ -111,7 +115,7 @@ ready(function () {
     }
 
     function mouseoutListener(event) {
-        if (event.relatedTarget && event.target.closest('a') == event.relatedTarget.closest('a')) {
+        if (event.relatedTarget && event.target.closest('a') === event.relatedTarget.closest('a')) {
             return
         }
 
@@ -124,35 +128,18 @@ ready(function () {
 
         stopPreloading()
     }
-
 });
 
 export function isPreloadable(linkElement) {
-    if (!linkElement || !linkElement.href) {
-        return false;
-    }
-
-    if (urlToPreload == linkElement.href) {
-        return false;
-    }
-
-    if (!allowExternalLinks && linkElement.origin != location.origin) {
-        return false;
-    }
-
-    if (!['http:', 'https:'].includes(linkElement.protocol)) {
-        return false;
-    }
-
-    if (linkElement.protocol == 'http:' && location.protocol == 'https:') {
-        return false;
-    }
-
-    if (!allowQueryString && linkElement.search && !('instant' in linkElement.dataset)) {
-        return false;
-    }
-
-    if (linkElement.hash && linkElement.pathname + linkElement.search == location.pathname + location.search) {
+    if (!linkElement ||
+        !linkElement.href ||
+        urlToPreload == linkElement.href ||
+        preloadedUrls.has(linkElement.href) ||
+        (!allowExternalLinks && linkElement.origin != location.origin) ||
+        (!['http:', 'https:'].includes(linkElement.protocol)) ||
+        (linkElement.protocol == 'http:' && location.protocol == 'https:') ||
+        (!allowQueryString && linkElement.search && !('instant' in linkElement.dataset))
+    ) {
         return false;
     }
 
@@ -173,8 +160,15 @@ export function isPreloadable(linkElement) {
     return true;
 }
 
+// preload only once
 export function preload(url) {
-    prefetcher.href = url;
+
+    if (!preloadedUrls.has(url)) {
+
+        prefetcher.href = url;
+    }
+
+    preloadedUrls.add(url);
 }
 
 export function stopPreloading() {

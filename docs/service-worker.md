@@ -26,7 +26,7 @@ Enable or disable debug mode in the service worker.
 
 ### Cache URLs
 
-Provide a list of urls available offline.
+The list of urls available offline. These urls will be cached when the service worker is installed, making them available offline
 
 ```text
 /
@@ -44,15 +44,15 @@ Provide a list of urls that will never be cached by the service worker
 
 ## Offline Page Settings
 
-The offline page is shown whenever the browser cannot load the page. Offline page appearance can be customized with tge settings below.
- 
+The offline page is shown whenever the browser cannot load the page. Offline page appearance can be customized with the settings below.
+
 ### Enable Offline Page
 
 Enable or disable offline page support.
 
 ### Offline Method
 
-Configure which requests methods are intercepted by the service worker. You can configure the service worker to intercept GET, POST or any method that return the offline page whenever the request fails.
+Configure which requests methods are intercepted by the service worker. You can configure the service worker to intercept GET, POST or ANY method. it will return the offline page whenever a request fails.
 
 ### Preferred Offline Page
 

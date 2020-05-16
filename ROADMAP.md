@@ -3,9 +3,9 @@
 ## High priority list
 
 1. implement backgroundFetch API
-2. font-display css property is set only when parse critical css is enabled. it should be set independantly
-3. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
-4. lower the priority of the service worker initialization script
+2. make the custom pwa prompt optional and configurable. the user may choose to use the browser defaults.
+3. font-display css property is set only when parse critical css is enabled. it should be set independantly
+4. merge javascript and css files using groups in order to leverage cache. for example we can merge common libraries in one bundle and other files which depend on the current page in another bundle
 5. implement new manifest file [properties](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 6. customize image quality settings (jpeg image quality, jpeg optimization method)
 7. improved LQIP for [jpeg files](https://www.smashingmagazine.com/2019/08/faster-image-loading-embedded-previews/)

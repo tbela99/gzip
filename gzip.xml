@@ -87,7 +87,6 @@
                         <field name="trigger" label="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_DESCRIPTION" type="list" default="mouseover">
                             <option value="mouseover">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEOVER</option>
                             <option value="mousedown">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN</option>
-                            <option value="mousedown-only">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN_ONLY</option>
                         </field>
                         <field name="intensity" label="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_DESCRIPTION" type="integer" first="65" last="150" step="1" default=""></field>
                         <field name="allow-query-string" label="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_LABEL" description="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_DESCRIPTION" type="radio" class="btn-group" default="0">
