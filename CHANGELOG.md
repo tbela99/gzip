@@ -11,6 +11,7 @@
 - remove the length restriction of the manifest short_name #78
 - fix security and performance issues induced by links with _target=\_blank_ attribute #91
 - asynchronously initialize the service worker using \<script defer\> #78
+- Link preloading : preload only once #99
 - \[bug\] fix invalid configuration path #94
 - \[bug\] the minification produced invalid HTML when the HTML provided had missing space between attributes #88
 - \[bug\] the protocol is removed in the HTML content instead of href|src attributes only
