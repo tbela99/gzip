@@ -1,5 +1,24 @@
 # Change History
 
+## 2.8.0
+
+- Add \.ico as a supported PWA icon format #78
+- Add purpose property to the PWA manifest options #78
+- Add screenshots property to the PWA manifest options #78- remove duplicated path the file name #88
+- change default pwa display to _standalone_ #78
+- \[performance\] precompress cache files. If the client advertises compression support, then send the compressed file. Brotli support requires the brotli extension #89
+- optionally preserve IE conditional comments #88
+- remove the length restriction of the manifest short_name #78
+- fix security and performance issues induced by links with _target=\_blank_ attribute #91
+- asynchronously initialize the service worker using \<script defer\> #78
+- Link preloading : preload only once #99
+- \[bug\] fix invalid configuration path #94
+- \[bug\] the minification produced invalid HTML when the HTML provided had missing space between attributes #88
+- \[bug\] the protocol is removed in the HTML content instead of href|src attributes only
+- \[bug\] fix an uncaught javascript error in the service worker js #78
+- \[bug\] fix 404 error when Hotlink protection is ON and cache files is OFF #78i
+- \[bug\] fix ignored javascript are removed from the page #96
+
 ## 2.7.3
 
 - change Upgrade-Insecure-Requests to be used as a CSP setting instead of an HTTP header
@@ -31,14 +50,14 @@
 - Implement instant page loading
 - Replace ugify-es with terser. Use configuration files to build scripts instead of shell commands
 - missing translation added
-- Access-Control-Allow-Origin is always set to '*'
+- Access-Control-Allow-Origin is always set to '\*'
 - Create links to resources that expire after a given time
 - \[Bug\] Missed cache lead to performance issue when parse critical css returns an empty string
-  
+
 ## 2.6.1
- 
+
 - Add documentation
-  
+
 ## 2.6.0
 
 - partly cache security

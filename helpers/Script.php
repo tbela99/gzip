@@ -20,7 +20,7 @@ class ScriptHelper {
 
 	public function processHTML ($html, array $options = []) {
 
-		$path = isset($options['js_path']) ? $options['js_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/js/';
+		$path = $options['js_path'];
 
 		$comments = [];
 
@@ -66,6 +66,29 @@ class ScriptHelper {
 				return $matches[0];
 			}
 
+			// ignore custom type
+			if (isset($attributes['src'])) {
+
+				$name = GZipHelper::getName($attributes['src']);
+
+				foreach ($remove as $r) {
+
+					if (strpos($name, $r) !== false) {
+
+						return '';
+					}
+				}
+
+				foreach ($ignore as $i) {
+
+					if (strpos($name, $i) !== false) {
+
+						$attributes['data-ignore'] = 'true';
+						break;
+					}
+				}
+			}
+
 			if (isset($attributes['data-ignore'])) {
 
 				unset($attributes['data-ignore']);
@@ -91,25 +114,6 @@ class ScriptHelper {
 
 			// ignore custom type
 			if (isset($attributes['src'])) {
-
-				$name = GZipHelper::getName($attributes['src']);
-
-				foreach ($remove as $r) {
-
-					if (strpos($name, $r) !== false) {
-
-						return '';
-					}
-				}
-
-				foreach ($ignore as $i) {
-
-					if (strpos($name, $i) !== false) {
-
-						$sources['ignored'][$position][$name] = $attributes['src'];
-						return '';
-					}
-				}
 
 				if ($fetch_remote && preg_match('#^(https?:)?//#', $name)) {
 
@@ -146,8 +150,6 @@ class ScriptHelper {
 			return '';
 
 		}, $html);
-
-		//      $profiler->mark('done parse <script>');
 
 		$hashFile = GZipHelper::getHashMethod($options);
 
@@ -251,14 +253,11 @@ class ScriptHelper {
 
 					$data = implode(';', $js);
 
-					//    foreach($js as $key => $data) {
-
 					if (!empty($data)) {
 
 						$jSqueeze = new JSqueeze();
 						$sources['inline'][$position] = [trim($jSqueeze->squeeze($data), ';')];
 					}
-					//    }
 				}
 			}
 		}
@@ -270,28 +269,6 @@ class ScriptHelper {
 		];
 
 		$async = false;
-
-		if (!empty($sources['ignored'])) {
-
-			foreach ($sources['ignored'] as $position => $fileList) {
-
-				$attr = '';
-				$hasScript = !empty($sources['inline'][$position]) && empty($files[$position]);
-
-				if ($hasScript) {
-
-					$async = true;
-				}
-
-				$script[$position] .= "\n".'<script async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
-
-				if ($hasScript) {
-
-					$script[$position] .= "\n".'<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
-					unset($sources['inline'][$position]);
-				}
-			}
-		}
 
 		if (!empty($sources['files'])) {
 

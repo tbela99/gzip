@@ -1,0 +1,13 @@
+test/ export-ignore
+docs/ export-ignore
+config/ export-ignore
+composer.lock export-ignore
+composer.phar export-ignore
+.gitignore export-ignore
+build.sh export-ignore
+imagesloader.es6 export-ignore
+jsdoc.json export-ignore
+rollup.config.js export-ignore
+terser.config.js export-ignore
+.eslintrc.js export-ignore
+.editorconfig export-ignore

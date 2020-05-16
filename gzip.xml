@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <extension version="3.5" type="plugin" group="system" method="upgrade">
     <name>plg_system_gzip</name>
     <author>Thierry Bela</author>
@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.7.3</version>
+    <version>2.8.0</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>docs</folder>
@@ -22,6 +22,7 @@
         <folder>worker/css</folder>
         <folder>docs/</folder>
         <folder>push</folder>
+        <folder>vendor</folder>
         <filename>autoload.php</filename>
         <filename>responder.php</filename>
         <filename>helper.php</filename>
@@ -45,7 +46,16 @@
                         <option value="0">JNo</option>
                     </field>
                     <field type="spacer" hr="true" />
+                    <field type="spacer" label="PLG_GZIP_FIELDSET_HTML" />
                     <field name="minifyhtml" label="PLG_GZIP_FIELD_MINIFY_HTML_LABEL" description="PLG_GZIP_FIELD_MINIFY_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="preserve_ie_comments" label="PLG_GZIP_FIELD_PRESERVE_IE_COMMENTS_LABEL" description="PLG_GZIP_FIELD_PRESERVE_IE_COMMENTS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="fix_invalid_html" label="PLG_GZIP_FIELD_FIX_INVALID_HTML_LABEL" description="PLG_GZIP_FIELD_FIX_INVALID_HTML_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -77,10 +87,8 @@
                         <field name="trigger" label="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_TRIGGER_DESCRIPTION" type="list" default="mouseover">
                             <option value="mouseover">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEOVER</option>
                             <option value="mousedown">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN</option>
-                            <option value="mousedown-only">JOPTION_INSTANT_LOADING_INTENSITY_MOUSEDOWN_ONLY</option>
                         </field>
-                        <field name="intensity" label="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_DESCRIPTION" type="integer" first="65" last="150" step="1" default="">
-                        </field>
+                        <field name="intensity" label="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_LABEL" description="PLG_GZIP_FIELD_INSTANT_LOADING_INTENSITY_DESCRIPTION" type="integer" first="65" last="150" step="1" default=""></field>
                         <field name="allow-query-string" label="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_LABEL" description="PLG_GZIP_FIELD_INSTANT_ALLOW_QUERY_STRING_DESCRIPTION" type="radio" class="btn-group" default="0">
                             <option value="1">JYes</option>
                             <option value="0">JNo</option>
@@ -93,9 +101,7 @@
                             <option value="1">JOPTION_INSTANT_LOADING_FILTER_WHITELIST</option>
                             <option value="2">JOPTION_INSTANT_LOADING_FILTER_BLACKLIST</option>
                         </field>
-                        <field name="filters" label="PLG_GZIP_FIELD_INSTANT_FILTERS_LABEL" description="PLG_GZIP_FIELD_INSTANT_FILTERS_DESCRIPTION" type="textarea">
-
-                        </field>
+                        <field name="filters" label="PLG_GZIP_FIELD_INSTANT_FILTERS_LABEL" description="PLG_GZIP_FIELD_INSTANT_FILTERS_DESCRIPTION" type="textarea"></field>
                     </fields>
                 </fields>
             </fieldset>
@@ -125,6 +131,24 @@
                         <option value="image">PLG_GZIP_FIELD_H2PUSH_OPTION_IMAGE</option>
                         <option value="fonts">PLG_GZIP_FIELD_H2PUSH_OPTION_FONT</option>
                         <option value="media">PLG_GZIP_FIELD_H2PUSH_OPTION_MEDIA</option>
+                    </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="HTTP Compression" />
+                    <field name="precompressfiles" label="PLG_GZIP_FIELD_PRECOMPRESSFILES_LABEL" description="PLG_GZIP_FIELD_PRECOMPRESSFILES_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="precompressfiles_min_file_size" label="PLG_GZIP_FIELD_PWA_CACHE_MIN_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PWA_CACHE_MIN_FILE_SIZE_DESCRIPTION" type="filesize" default="0Mb">
+                        <unit value="b">JOPTION_MAX_FILE_SIZE_B</unit>
+                        <unit value="Kb">JOPTION_MAX_FILE_SIZE_KB</unit>
+                        <unit value="Mb">JOPTION_MAX_FILE_SIZE_MB</unit>
+                        <unit value="Gb">JOPTION_MAX_FILE_SIZE_GB</unit>
+                    </field>
+                    <field name="precompressfiles_max_file_size" label="PLG_GZIP_FIELD_PRECOMPRESSFILES_MAX_FILE_SIZE_LABEL" description="PLG_GZIP_FIELD_PPRECOMPRESSFILES_MAX_FILE_SIZE_DESCRIPTION" type="filesize" default="0Mb">
+                        <unit value="b">JOPTION_MAX_FILE_SIZE_B</unit>
+                        <unit value="Kb">JOPTION_MAX_FILE_SIZE_KB</unit>
+                        <unit value="Mb">JOPTION_MAX_FILE_SIZE_MB</unit>
+                        <unit value="Gb">JOPTION_MAX_FILE_SIZE_GB</unit>
                     </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Cache" />
@@ -354,13 +378,13 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" maxlength="12" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text" />
+                    <field name="pwa_app_short_name" hint="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SHORT_NAME_DESCRIPTION" type="text" />
                     <field name="pwa_app_name" hint="PLG_GZIP_FIELD_PWA_APP_NAME_HINT" label="PLG_GZIP_FIELD_PWA_APP_NAME_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NAME_DESCRIPTION" type="text" />
                     <field name="pwa_app_description" hint="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_HINT" label="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DESCRIPTION_DESCRIPTION" type="text" />
                     <field name="pwa_app_start_url" hint="PLG_GZIP_FIELD_PWA_APP_URL_HINT" class="form-control" label="PLG_GZIP_FIELD_PWA_APP_URL_LABEL" description="PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_bg_color" label="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_BG_COLOR_DESCRIPTION" type="color" />
                     <field name="pwa_app_theme_color" label="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_LABEL" description="PLG_GZIP_FIELD_PWA_APP_THEME_COLOR_DESCRIPTION" type="color" />
-                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="browser">
+                    <field name="pwa_app_display" label="PLG_GZIP_FIELD_PWA_APP_DISPLAY_LABEL" description="PLG_GZIP_FIELD_PWA_APP_DISPLAY_DESCRIPTION" type="list" default="standalone">
                         <option value="standalone">JFIELD_OPTION_PWA_APP_DISPLAY_STANDALONE</option>
                         <option value="fullscreen">JFIELD_OPTION_PWA_APP_DISPLAY_FULLSCREEN</option>
                         <option value="minimal-ui">JFIELD_OPTION_PWA_APP_DISPLAY_MINIMAL_UI</option>
@@ -369,6 +393,12 @@
                     <field name="pwa_app_cache_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_URLS_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_cache_exclude_urls" hint="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_HINT" label="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_CACHE_EXCLUDE_URLS_DESCRIPTION" type="textarea" />
                     <field name="pwa_app_icons_path" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist" />
+                    <field name="pwa_app_icons_purpose" label="PLG_GZIP_FIELD_PWA_APP_ICONS_PURPOSE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_ICONS_PURPOSE_DESCRIPTION" type="list" default="any">
+                        <option value="any">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_ANY</option>
+                        <option value="badge">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_BADGE</option>
+                        <option value="maskable">JFIELD_OPTION_PWA_APP_ICONS_PURPOSE_MASKABLE</option>
+                    </field>
+                    <field name="pwa_app_screenshots_path" label="PLG_GZIP_FIELD_PWA_APP_SCREENSHOTS_PATH_LABEL" description="PLG_GZIP_FIELD_PWA_APP_SCREENSHOTS_PATH_DESCRIPTION" directory="images" hide_none="hide_none" recursive="recursive" type="folderlist" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Native apps deep linking" />
                     <field name="pwa_app_native" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_DESCRIPTION" type="radio" class="btn-group" default="0">
@@ -379,7 +409,7 @@
                     <field name="pwa_app_native_ios" hint="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_HINT" label="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_LABEL" description="PLG_GZIP_FIELD_PWA_APP_NATIVE_IOS_DESCRIPTION" type="text" />
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="Preview the changes to the manifest file" />
-                    <field name="webmanifestpreview" label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL" description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION" readonly="readonly" hiddenLabel="true" class="input-block2" row="15" type="webmanifestpreview" default="" />
+                    <field name="webmanifestpreview" filter="unset" label="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_LABEL" description="PLG_GZIP_FIELD_WEBMANIFESTPREVIEW_DESCRIPTION" readonly="readonly" hiddenLabel="true" class="input-block2" row="15" type="webmanifestpreview" default="" />
                 </fields>
             </fieldset>
             <fieldset name="pwa_web_share_target" label="Web Share Target">
@@ -560,6 +590,12 @@
             <fieldset name="security" label="Security">
                 <field type="spacer" label="Configure security features" />
                 <fields name="gzip">
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="New Window" />
+                    <field name="link_rel" multiple="multiple" label="PLG_GZIP_FIELD_LINK_REL_LABEL" description="PLG_GZIP_FIELD_LINK_REL_DESCRIPTION" class="no-checkboxes" type="checkboxes" checked="">
+                        <option value="noopener">JOPTION_REL_NOOPENER</option>
+                        <option value="noreferrer">JOPTION_REL_NOREFERRER</option>
+                    </field>
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="HTTP Strict-Transport-Security (HSTS)" />
                     <field name="hsts_maxage" label="PLG_GZIP_FIELD_HSTS_MAXAGE_LABEL" description="PLG_GZIP_FIELD_HSTS_MAXAGE_DESCRIPTION" type="maxage" default="">

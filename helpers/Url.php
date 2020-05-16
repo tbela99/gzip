@@ -19,7 +19,7 @@ use JUri;
 class UrlHelper {
 
 	/**
-	 * perform url rewriting, distribute resources across cdn domains, generate HTTP push headers
+	 * perform url rewriting, distribute resources across cdn domains, generate HTTP push headers, replace rel="_blank" with rel="noopener noreferrer"
 	 * @param string $html
 	 * @param array $options
 	 * @return string
@@ -79,7 +79,25 @@ class UrlHelper {
 						$attributes[$attr] = implode(',', $return);
 					}
 
-					if (isset($attributes[$attr]) && isset($options['parse_url_attr'][$attr])) {
+					// fix target=_blank #
+					if (!empty($options['link_rel']) && strtolower($tag) == 'a') {
+
+						if (isset($attributes['target']) && $attributes['target'] == '_blank') {
+
+							if (!isset($attributes['rel'])) {
+
+								$attributes['rel'] = implode(' ', $options['link_rel']);
+							}
+
+							else {
+
+								$values = array_merge($options['link_rel'], explode(' ', $attributes['rel']));
+								$attributes['rel'] = implode(' ', array_unique($values));
+							}
+						}
+					}
+
+					if (!empty($options['cachefiles']) && isset($attributes[$attr]) && isset($options['parse_url_attr'][$attr])) {
 
 						$file = GZipHelper::getName($attributes[$attr]);
 

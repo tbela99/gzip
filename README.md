@@ -13,6 +13,7 @@ Here are some features provided by this plugin
 ## HTML
 
 - HTML minification
+- preserve IE conditional comments
 
 ## Javascript
 
@@ -42,9 +43,11 @@ Here are some features provided by this plugin
 
 ## Performance
 
+- configurable HTTP caching headers
 - optimizations are enforced when the client sends [Save-Data HTTP header](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/save-data/)
 - dns prefetch
 - profile plugin performance using HTTP server timing headers
+- precompressed cached files using brotli or gzip.
 
 ## Service Worker
 
@@ -53,6 +56,7 @@ Here are some features provided by this plugin
 - background sync
 - web share target level 2
 - web push notifications using One Signal
+- immediately update the service worker when the manifest settings change
 
 ## Content Security Policy (CSP)
 

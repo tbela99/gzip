@@ -15,7 +15,6 @@ namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
 use Image\Image;
-use JURI;
 use Patchwork\CSSmin;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
 use Sabberworm\CSS\Parser;
@@ -25,15 +24,23 @@ use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use function file_get_contents;
 use function file_put_contents;
 use function getimagesize;
+use function preg_replace_callback;
 
 class CSSHelper {
 
+	/**
+	 * @param string $html
+	 * @param array $options
+	 *
+	 * @return string
+	 *
+	 * @since version
+	 */
 	public function processHTML ($html, array $options = []) {
 
-		$path = isset($options['css_path']) ? $options['css_path'] : 'cache/z/'.GZipHelper::$pwa_network_strategy.$_SERVER['SERVER_NAME'].'/css/';
+		$path = $options['css_path'];
 
 		$fetch_remote = !empty($options['fetchcss']);
-		$remote_service = !empty($options['minifycssservice']);
 
 		$links = [];
 		$ignore = !empty($options['cssignore']) ? $options['cssignore'] : [];
@@ -41,7 +48,7 @@ class CSSHelper {
 
 		$async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
-		$html = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path) {
+		$html = preg_replace_callback('#<link([^>]*)>#', function ($matches) use(&$links, $ignore, $remove, $fetch_remote, $path, $options) {
 
 			$attributes = [];
 
@@ -80,16 +87,16 @@ class CSSHelper {
 						}
 					}
 
-					if ($fetch_remote && preg_match('#^(https?:)?//#', $name)) {
+					if ($fetch_remote && preg_match('#^((https?:)?)//#', $name)) {
 
 						$remote = $attributes['href'];
 
 						if (strpos($name, '//') === 0) {
 
-							$remote = JURI::getInstance()->getScheme() . ':' . $name;
+							$remote = $options['scheme'] . ':' . $name;
 						}
 
-						$local = $path . preg_replace(array('#([.-]min)|(\.css)#', '#[^a-z0-9]+#i'), array('', '-'), $remote) . '.css';
+						$local = $path . preg_replace(array('#([.-]min)|(\.css)#', '#[^a-z0-9]+#i'), array('', '-'), $remote) .(empty($options['minifycss']) ? '' : '.min'). '.css';
 
 						if (!is_file($local)) {
 
@@ -97,7 +104,7 @@ class CSSHelper {
 
 							if ($content != false) {
 
-								file_put_contents($local, $this->expandCss($content, dirname($remote), $path));
+								file_put_contents($local, $this->expandCss($content, dirname($remote), $options));
 							}
 						}
 
@@ -151,7 +158,7 @@ class CSSHelper {
 
 						if (!is_file($css_file) || !is_file($hash_file) || file_get_contents($hash_file) != $hash) {
 
-							$content = $this->css($name, $remote_service, $path);
+							$content = $this->css($name, $options);
 
 							if ($content != false) {
 
@@ -168,8 +175,6 @@ class CSSHelper {
 				}
 			}
 		}
-
-	//	$profiler->mark('afterMinifyLinks');
 
 		if (!empty($options['mergecss'])) {
 
@@ -220,11 +225,7 @@ class CSSHelper {
 									$css .= $media;
 								}
 
-								//    $profiler->mark("merge expand " . $name . " ");
-
-								$css .= $this->expandCss(file_get_contents($name), dirname($name), $path);
-
-								//     $profiler->mark("done merge expand " . $attr['href'] . " ");
+								$css .= $this->expandCss(file_get_contents($name), dirname($name), $options);
 
 								if (!is_null($media)) {
 
@@ -246,18 +247,16 @@ class CSSHelper {
 
 					if (is_file($css_file) && is_file($css_hash) && file_get_contents($css_hash) == $hash) {
 
-						$links[$position]['links'] = array(
+						$links[$position]['links'] = [
 							[
 								'href' => $css_file,
 								'rel' => 'stylesheet'
 							]
-						);
+						];
 					}
 				}
 			}
 		}
-
-	//	$profiler->mark('afterMergeLinks');
 
 		$minifier = null;
 
@@ -290,15 +289,10 @@ class CSSHelper {
 			return '';
 		}, $html);
 
-
-	//	$profiler->mark('ParseStyles');
-
 		$parseCritical = !empty($options['criticalcssenabled']);
 		$parseCssResize = !empty($options['imagecssresize']);
 
 		if ($parseCritical || $parseCssResize) {
-
-			//     $profiler->mark("critical path css lookup");
 
 			$critical_path = isset($options['criticalcssclass']) ? $options['criticalcssclass'] : '';
 			$background_css_path = '';
@@ -349,7 +343,6 @@ class CSSHelper {
 						$hashValue = $hashFile($fname);
 
 						$name = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-crit';
-					//	$bgname = $info['dirname'] . '/' . $info['filename'] . '-'. $hash . '-bg';
 
 						$css_file = $name . '.css';
 						$css_hash = $name . '.php';
@@ -384,7 +377,6 @@ class CSSHelper {
 									}
 								}
 
-								//	$css_background = GZipHelper::expandCss($css_background, dirname($css_bg_file));
 								$background_css_path .= $css_background;
 
 								file_put_contents($css_bg_file, $css_background);
@@ -395,8 +387,6 @@ class CSSHelper {
 
 								$background_css_path .= file_get_contents($css_bg_file);
 							}
-
-					//		$profiler->mark('ParseCssBGResize '.__LINE__);
 						}
 
 						if ($parseCritical) {
@@ -447,13 +437,9 @@ class CSSHelper {
 
 								$critical_path .= file_get_contents($css_file);
 							}
-
-					//		$profiler->mark('ParseCssBGResize '.__LINE__);
 						}
 					}
 				}
-
-			//	$profiler->mark('ParseCssBGResize '.__LINE__);
 			}
 
 			if ($background_css_path !== '') {
@@ -480,11 +466,6 @@ class CSSHelper {
 				$links['head']['critical'] = empty($minifier) ? $critical_path : $minifier->minify($critical_path);
 			}
 		}
-
-	//	$profiler->mark('ParseCriticalCss');
-
-		// extract web fonts
-		//   $profiler->mark("extract web fonts");
 
 		$css = '';
 		$web_fonts = '';
@@ -655,7 +636,16 @@ class CSSHelper {
 
 		return $html;
 	}
-	
+
+	/**
+	 * @param $block
+	 * @param array $options
+	 *
+	 * @return string
+	 * @ignore
+	 *
+	 * @since version
+	 */
     public function extractFontFace($block, $options = []) {
 
         $content = '';
@@ -701,6 +691,15 @@ class CSSHelper {
         return $content;
     }
 
+	/**
+	 * @param $block
+	 * @param $regexp
+	 *
+	 * @return string
+	 * @ignore
+	 *
+	 * @since version
+	 */
     public function extractCssRules($block, $regexp) {
 
         if ($block instanceof DeclarationBlock) {
@@ -750,6 +749,15 @@ class CSSHelper {
         return '';
     }
 
+	/**
+	 * @param $css
+	 * @param array $options
+	 *
+	 * @return string
+	 *
+	 * @throws \Exception
+	 * @since version
+	 */
     public function buildCssBackground($css, array $options = []) {
 
 		$result = '';
@@ -797,7 +805,7 @@ class CSSHelper {
                         
                         // generate resized file & replace in css
                         $hash = sha1($file);
-                        $crop =  $path.$hash.'-'. $short_name.'-'.$size.'-'.basename($file);
+                        $crop = $path.$hash.'-'. $short_name.'-'.$size.'-'.basename($file);
 
                         if (!is_file($crop)) {
 
@@ -808,7 +816,7 @@ class CSSHelper {
                                 $image->setSize(1200);
                             }
                             
-                            $image->resizeAndCrop($size, null, $method)->save($crop);
+                            $image->resizeAndCrop($size, null, $const)->save($crop);
                         }
 
                         $replace[$file] = GZipHelper::url($crop, $options);
@@ -840,10 +848,10 @@ class CSSHelper {
 
             $cachefiles = !empty($options['cachefiles']);
         
-            return \preg_replace_callback('#url\(([^)]+)\)#s', function ($matches) use($cachefiles) {
+            return preg_replace_callback('#url\(([^)]+)\)#s', function ($matches) use($cachefiles, $options) {
 
                 $file = $matches[1];
-                
+
                 if ($cachefiles) {
                     
                     $file = GZipHelper::url($file);
@@ -851,10 +859,12 @@ class CSSHelper {
 
                 else {
 
-                    if (GZipHelper::isFile($file)) {
+					$name = GZipHelper::getName($file);
 
-                        $file = Juri::root(true).'/'.$file;
-                    }
+					if (GZipHelper::isFile($name)) {
+
+						$file = $options['webroot'].$name;
+					}
                 }
 
                 return 'url('.$file.')';
@@ -865,6 +875,15 @@ class CSSHelper {
         return $result;
     }
 
+	/**
+	 * @param $block
+	 * @param string|null $matchSize
+	 * @param string|null $prefix
+	 *
+	 * @return string
+	 *
+	 * @since version
+	 */
     public function extractCssBackground($block, $matchSize = null, $prefix = null) {
 
         if ($block instanceof DeclarationBlock) {
@@ -955,55 +974,15 @@ class CSSHelper {
         return '';
     }
 
-    public function removeEmptyRulesets($block) {
-
-        if ($block instanceof AtRuleBlockList) {
-
-            $content = '';
-
-            foreach ($block->getContents() as $b) {
-
-                $content .= $this->removeEmptyRulesets($b);
-            }
-
-            if ($content !== '') {
-
-                $content = '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() . '{' . $content . '}';
-            }
-
-            return $content;
-        }
-
-        else if ($block instanceof AtRuleSet) {
-
-        //    $block->createShorthands();
-            $rules = $block->getRules();
-
-            if(empty($rules)) {
-
-                return '';
-            }
-
-            return '@' . $block->atRuleName() . ' ' . $block->atRuleArgs() .'{' . implode('', $rules) . '}';
-        }
-
-        else if ($block instanceof DeclarationBlock) {
-
-            $block->createShorthands();
-            $rules = $block->getRules();
-
-            if(empty($rules)) {
-
-                return '';
-            }
-
-            return implode(', ', $block->getSelectors()) . '{' . implode('', $rules) . '}';
-        }
-
-        return '';
-	}
-	
-    public function resolvePath($path) {
+	/**
+	 * resolve path
+	 *
+	 * @param string $path
+	 * @return string
+	 *
+	 * @since 0.1
+	 */
+	public function resolvePath($path) {
 
         if (strpos($path, '../') !== false) {
 
@@ -1030,7 +1009,18 @@ class CSSHelper {
     }
 
     // parse @import
-    public function expandCss($css, $path = null) {
+
+	/**
+	 * flatten @import css
+	 * @param string $css
+	 * @param string|null $path
+	 * @param array $options
+	 *
+	 * @return string|string[]|null
+	 *
+	 * @since 0.1
+	 */
+    public function expandCss($css, $path = null, array $options = []) {
 
         if (!is_null($path)) {
 
@@ -1040,7 +1030,7 @@ class CSSHelper {
             }
 		}
 		
-        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path) {
+        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use($path, $options) {
 
             $file = trim(str_replace(array("'", '"'), "", $matches[1]));
 
@@ -1048,50 +1038,63 @@ class CSSHelper {
 
                 return $matches[0];
 			}
-			
-		//	$name = GZipHelper::getName($file);
 
             if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
 
                 $file = $this->resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
             }
 
-            else {
+        //    else {
 
-            	$content = false;
+				preg_match('~(.*?)([#?].*)?$~', $file, $match);
 
-				if (preg_match('#^(https?:)?//#', $file)) {
+            	$local = $options['css_path'] . GZipHelper::shorten(crc32($file)) . '-' . preg_replace('~[?#].*$~', '', basename($file));
 
-					$content = GZipHelper::getContent($file);
-				}
+            //	var_dump(['$loc' => $local]);
 
-				else if (preg_match('#^([a-z]+:)?//#', $path)) {
+            	if (!is_file($local)) {
 
-					$content = GZipHelper::getContent($path . ($file[0] == '/' ? substr($file, 1) : $file));
-				}
+					$content = false;
 
-				if ($content !== false) {
+					if (substr($file, 0, 2) == '//') {
 
-					preg_match('~(.*?)([#?].*)?$~', $file, $match);
-
-					$file = 'cache/z/' . GZipHelper::$pwa_network_strategy . $_SERVER['SERVER_NAME'] . '/css/' . GZipHelper::shorten(crc32($file)) . '-' . basename($match[1]);
-
-					if (!is_file($file)) {
-
-						file_put_contents($file, $content);
+						$file = $options['scheme'].$file;
 					}
+
+					if (preg_match('#^(https?:)?//#', $file)) {
+
+						$content = GZipHelper::getContent($file);
+					}
+
+					else if (preg_match('#^([a-z]+:)?//#', $path)) {
+
+						$content = GZipHelper::getContent($path . ($file[0] == '/' ? substr($file, 1) : $file));
+					}
+
+					if ($content !== false) {
+
+						if (!is_file($local)) {
+
+							file_put_contents($local, $content);
+						}
+					}
+				}
+
+            	if (is_file($local)) {
 
 					if (isset($match[2])) {
 
-						$file .= $match[2];
+						$local .= $match[2];
 					}
+
+					// basename instead of GZipHelper::url()?
+					return 'url(' . basename($local) . ')';
 				}
-			}
 
 			return 'url(' . GZipHelper::url($file) . ')';
         },
             //resolve import directive, note import directive in imported css will NOT be processed
-            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path) {
+            preg_replace_callback('#@import([^;]+);#s', function ($matches) use($path, $options) {
 
                 $file = trim($matches[1]);
 
@@ -1112,17 +1115,23 @@ class CSSHelper {
                 return "\n" .
 	            //    '/* @ import ' . $file . ' ' . dirname($file) . ' */' .
 	            //    "\n" .
-	                $this->expandCss($isFile ? file_get_contents($file) : GZipHelper::getContent($file), dirname($file), $path);
+	                $this->expandCss($isFile ? file_get_contents($file) : GZipHelper::getContent($file), dirname($file), $options);
             }, preg_replace(['#/\*.*?\*/#s', '#@charset [^;]+;#si'], '', $css))
         );
 
         return $css;
 	}
-	
+
 	/**
 	 * minify css
+	 * @param string $file
+	 * @param array $options
+	 *
+	 * @return bool|string
+	 *
+	 * @since 0.1
 	 */
-    public function css($file, $remote_service = true, $path = null) {
+    public function css($file, array $options = []) {
 
         static $minifier;
 
@@ -1143,7 +1152,7 @@ class CSSHelper {
 
         else if (is_file($file)) {
 
-            $content = $this->expandCss(file_get_contents($file), dirname($file));
+            $content = $this->expandCss(file_get_contents($file), dirname($file), $options);
         }
 
         else {

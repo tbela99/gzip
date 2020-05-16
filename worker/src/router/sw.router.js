@@ -223,13 +223,6 @@ export class Router {
 
 				if (response instanceof Response) {
 
-					/*
-					console.log({
-						response: response.url,
-						plugins: self.plugins
-					});
-					*/
-
 					for (plugin of self.plugins) {
 
 						try {
@@ -255,6 +248,11 @@ export class Router {
 
 		return this;
 	}
+
+	/**
+	 * @param {FetchEvent}
+	 * @param {Response}
+	 */
 	match(event, response) {
 
 		return true;
@@ -333,6 +331,7 @@ export class CallbackRouter extends Router {
 	/**
 	 *
 	 * @param {FetchEvent} event
+	 * @param {Response}
 	 */
 	match(event, response) {
 		return this.path(event.request.url, event) ||
@@ -340,7 +339,3 @@ export class CallbackRouter extends Router {
 			(response != undef && this.options.mime.includes(response.headers.get('Content-Type')));
 	}
 }
-
-//Router.RegExpRouter = RegExpRouter;
-//Router.ExpressRouter = ExpressRouter;
-//Router.CallbackRouter = CallbackRouter;

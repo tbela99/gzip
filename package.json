@@ -1,8 +1,8 @@
 {
   "name": "gzip",
-  "version": "2.7.3",
+  "version": "2.8.0",
   "scripts": {
-    "build": "sh ./build.sh",
+    "build": "./build.sh",
     "rollup-config": "./node_modules/rollup/dist/bin/rollup ./config/rollup/rollup.js -f iife --name=rollupConfig > ./rollup.config.js",
     "terser-config": "./node_modules/rollup/dist/bin/rollup ./config/terser/terser.js -f iife --name=terserConfig > ./terser.config.js"
   },
@@ -15,5 +15,6 @@
   "bugs": {
     "url": "https://github.com/tbela99/gzip/issues"
   },
-  "homepage": "https://github.com/tbela99/gzip#readme"
+  "homepage": "https://github.com/tbela99/gzip#readme",
+  "dependencies": {}
 }

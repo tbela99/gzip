@@ -35,7 +35,7 @@ class SecureHeadersHelper
 
 		if (!empty($options['cspenabled'])) {
 
-			$path = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php';
+			$path = $options['config_path']. 'config.php';
 
 			if (is_file($path)) {
 

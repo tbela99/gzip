@@ -13,11 +13,12 @@
 
 namespace Gzip\Helpers;
 
-use JURI;
+use function preg_replace_callback;
+use function strlen;
 
 class HTMLHelper {
 
-	public function preprocessHTML($html, array $options = []) {
+	public function preProcessHTML($html, array $options = []) {
 
 		$debug = empty($options['debug']) ? '.min' : '';
 
@@ -50,7 +51,7 @@ class HTMLHelper {
 
 			$script .= file_get_contents(__DIR__.'/../worker/dist/browser.prefetch'.$debug.'.js');
 
-			$path = JPATH_SITE.'/cache/z/app/'.$_SERVER['SERVER_NAME'].'/config.php';
+			$path = $options['config_path'].'config.php';
 
 			if (is_file($path)) {
 
@@ -80,6 +81,49 @@ class HTMLHelper {
 	 */
 	public function postProcessHTML ($html, array $options = []) {
 
+		if (!empty($options['fix_invalid_html'])) {
+
+			/*
+			 * attempt to fix invalidHTML - missing space between attributes -  before minifying
+			 * <div id="foo"class="bar"> => <div id="foo" class="bar">
+			 */
+			$html = preg_replace_callback('#<(\S+)([^>]+)>#s', function ($matches) {
+
+				$result = '<'.$matches[1];
+
+				if (trim($matches[2]) !== '') {
+
+					$in_str = false;
+					$quote = '';
+
+					$j = strlen($matches[2]);
+
+					for ($i = 0; $i < $j; $i++) {
+
+						$result .= $matches[2][$i];
+
+						if ($in_str) {
+
+							if ($matches[2][$i] == $quote) {
+
+								$in_str = false;
+								$result .= ' ';
+								$quote = '';
+							}
+						}
+
+						else if (in_array($matches[2][$i], ['"', "'"])) {
+
+							$in_str = true;
+							$quote = $matches[2][$i];
+						}
+					}
+				}
+
+				return rtrim($result).'>';
+			}, $html);
+		}
+
 		if (empty($options['minifyhtml'])) {
 
 			return $html;
@@ -96,7 +140,35 @@ class HTMLHelper {
 			'input'
 		];
 
-		$html = str_replace(JURI::getInstance()->getScheme().'://', '//', $html);
+		if (!empty($options['preserve_ie_comments'])) {
+
+			$html = preg_replace_callback('#<!--(.*?)-->#s', function ($matches) use (&$scripts) {
+
+				if (preg_match('#(\[if .*?\]>)(.*?)<!\[endif\]\s*#s', $matches[1], $m)) {
+
+						$key = '~~!'.md5($m[0]).'!~~';
+						$scripts[$key] = '<!--'.$m[1].trim($m[2]).'<![endif]-->';
+
+						return $key;
+				}
+
+				return '';
+
+			}, $html);
+
+			if (!empty($scripts)) {
+
+				$html = str_replace(array_keys($scripts), array_values($scripts), $html);
+				$scripts = [];
+			}
+		}
+
+		else {
+
+			$html = preg_replace('#<!--.*?-->#s', '', $html);
+		}
+
+	//	$html = str_replace($options['scheme'].'://', '//', $html);
 		$html = preg_replace_callback('#<html(\s[^>]+)?>(.*?)</head>#si', function ($matches) {
 
 			return '<html'.$matches[1].'>'. preg_replace('#>[\r\n\t ]+<#s', '><', $matches[2]).'</head>';
@@ -104,8 +176,8 @@ class HTMLHelper {
 
 		//remove optional ending tags (see http://www.w3.org/TR/html5/syntax.html#syntax-tag-omission )
 		$remove = [
-			'</rt>', '</caption>',
-			'</option>', '</li>', '</dt>', '</dd>', '</tr>', '</th>', '</td>', '</thead>', '</tbody>', '</tfoot>', '</colgroup>'
+			'</rt>', '</rp>', '</caption>',
+			'</option>', '</optgroup>', '</li>', '</dt>', '</dd>', '</tr>', '</th>', '</td>', '</thead>', '</tbody>', '</tfoot>', '</colgroup>'
 		];
 
 		if(stripos($html, '<!DOCTYPE html>') !== false) {
@@ -122,14 +194,12 @@ class HTMLHelper {
 		}
 
 		$html = str_ireplace($remove, '', $html);
+
 		// minify html
 		//remove redundant (white-space) characters
 		$replace = [
 
-			//    '#<!DOCTYPE ([^>]+)>[\n\s]+#si' => '<!DOCTYPE $1>',
 			'#<(('.implode(')|(', $self).'))(\s[^>]*?)?/>#si' => '<$1$'.(count($self) + 2).'>',
-			//remove tabs before and after HTML tags
-			'#<!--.*?-->#s' => '',
 			'/\>[^\S ]+/s' => '>',
 			'/[^\S ]+\</s' => '<',
 			//shorten multiple whitespace sequences; keep new-line characters because they matter in JS!!!
@@ -137,18 +207,58 @@ class HTMLHelper {
 			//remove leading and trailing spaces
 			'/(^([\t ])+)|(([\t ])+$)/m' => '',
 			//remove empty lines (sequence of line-end and white-space characters)
-			'/[\r\n]+([\t ]?[\r\n]+)+/s' => '',
-			//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
-			'~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]+)\3([\r\n\t ])?~' => '$1$2=$4$5', //$1 and $4 insert first white-space character found before/after attribute
-			// <p > => <p>
-			'#<([^>]+)([^/])\s+>#s' => '<$1$2>'
+			'/[\r\n]+([\t ]?[\r\n]+)+/s' => ''
 		];
+
+		$root = $options['webroot'];
+
+		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
+		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]*)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
+
+			if ($matches[2] == 'style') {
+
+				// remove empty style attributes which are invalid
+				if (trim($matches[4]) === '') {
+
+					return ' ';
+				}
+
+				return $matches[0];
+			}
+
+			$result = $matches[1].$matches[2].'=';
+
+			if (!empty($options['parse_url_attr']) && array_key_exists($matches[2], $options['parse_url_attr'])) {
+
+				$value = (!preg_match('#^([a-z]+:)?//#', $matches[4]) && is_file($matches[4]) ? $root : '').$matches[4];
+				$result .= str_replace($options['scheme'].'://', '//', $value);
+			}
+
+			else {
+
+				$result .= $matches[4];
+			}
+
+			if (isset($matches[5])) {
+
+				return $result.$matches[5];
+			}
+
+			return $result;
+		}, $html);
+
+
 		$html = preg_replace('#<!DOCTYPE ([^>]+)>[\n\s]+#si', '<!DOCTYPE $1>', $html, 1);
 		$html = preg_replace(array_keys($replace), array_values($replace), $html);
 
 		if (!empty($scripts)) {
 			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
 		}
+
+		$html = preg_replace_callback('#<([^>]+)>#s', function ($matches) {
+
+			return '<'.rtrim($matches[1]).'>';
+		}, $html);
 
 		return $html;
 	}

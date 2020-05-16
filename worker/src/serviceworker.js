@@ -141,6 +141,10 @@ Object.defineProperties(SW.app, {
 	network: {
 		value: "{pwa_cache_settings}"
 	},
+	customNetwork: {
+
+		value: "{pwa_custom_cache_settings}"
+	},
 	/**
 	 * precached resources
 	 */
