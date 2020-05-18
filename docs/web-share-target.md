@@ -1,6 +1,6 @@
 # Web Share Target
 
-Web Share Target Level 2 is the web standard that allow your app to receive data shared by other apps.
+Web Share Target Level 2 is the web standard that allow your pwa app to receive data shared by other apps on android/ios platforms.
 
 ![Web Share Target](./img/web-share-target.jpg)
 

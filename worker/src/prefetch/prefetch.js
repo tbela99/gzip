@@ -136,8 +136,8 @@ export function isPreloadable(linkElement) {
         urlToPreload == linkElement.href ||
         preloadedUrls.has(linkElement.href) ||
         (!allowExternalLinks && linkElement.origin != location.origin) ||
-        (!['http:', 'https:'].includes(linkElement.protocol)) ||
-        (linkElement.protocol == 'http:' && location.protocol == 'https:') ||
+        !['http:', 'https:'].includes(linkElement.protocol) ||
+        linkElement.protocol != location.protocol ||
         (!allowQueryString && linkElement.search && !('instant' in linkElement.dataset))
     ) {
         return false;
