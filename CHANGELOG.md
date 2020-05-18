@@ -1,5 +1,9 @@
 # Change History
 
+## 2.8.1
+
+- fix empty service worker files #102
+
 ## 2.8.0
 
 - Add \.ico as a supported PWA icon format #78

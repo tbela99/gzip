@@ -15,10 +15,27 @@ If yes, when the client sends Save-Data headers, optimizations are enforced rega
 
 ### HTTP Server Timing
 
-Send HTTP Server Timing headers. They can be viewed in the google chrome network panel. Click on the network panel -> Click on your web page -> Click on the timing tab on the right. It should be turned off on production.
-ps: this helped me spot a [regression in the image processing](https://github.com/tbela99/gzip/issues/38) that has since been fixed
+Use the global Joomla profiler to profile you code
 
-![Server Timing](./images/Server-Timing.PNG)
+```php
+# sample code
+    $profiler = JProfiler::getInstance('Application');
+
+    // profile sections of your code    
+    $profiler->mark('afterParseImages');
+    $body = Gzip\GZipHelper::parseCss($body, $options);
+
+    $profiler->mark('afterParseCss');
+    $body = Gzip\GZipHelper::parseScripts($body, $options);
+    
+    $profiler->mark('afterParseScripts');
+    $body = Gzip\GZipHelper::parseURLs($body, $options);
+
+    $profiler->mark('afterParseURLs');    
+```
+Open the google chrome console and navigate to the network tab. Click on your page request. Click the timing tab. You will see the result.
+
+![Server Timing](./img/Server-Timing.PNG)
 
 ### DNS Prefetch
 
