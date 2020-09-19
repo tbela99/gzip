@@ -299,6 +299,10 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="parseinlinecss" label="PLG_GZIP_FIELD_PARSE_INLINE_CSS_LABEL" description="PLG_GZIP_FIELD_PARSE_INLINE_CSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <fields name="css_parser">
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Parser Options" />
