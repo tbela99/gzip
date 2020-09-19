@@ -20,6 +20,7 @@ use TBela\CSS\Element;
 use TBela\CSS\Element\Stylesheet;
 use TBela\CSS\Parser;
 use TBela\CSS\Renderer;
+use TBela\CSS\Value;
 use function file_get_contents;
 use function file_put_contents;
 use function getimagesize;
@@ -56,6 +57,8 @@ class CSSHelper
 
 		$hashFile = GZipHelper::getHashMethod($options);
 		$cssParser = new Parser();
+		$cssRenderer = new Renderer($css_options);
+		$headStyle = new Stylesheet();
 
 		$parseUrls = function ($html) use($path, $root) {
 
@@ -98,16 +101,46 @@ class CSSHelper
 			}, $html);
 		};
 
-		$html = preg_replace_callback('#<link([^>]*)>#', function ($matches) use ($parseUrls, &$links, $ignore, $remove, $cssParser, $path, $fetch_remote, $options) {
+		$html = preg_replace_callback('#<('.(empty($options['parseinlinecss']) ? 'link' : '[^\s>]+').')([^>]*)>#', function ($matches) use ($css_options, $cssRenderer, $parseUrls, &$links, $ignore, $remove, $cssParser, $path, $fetch_remote, $options) {
 
 			$attributes = [];
 
-			if (preg_match_all(GZipHelper::regexAttr, $matches[1], $attr)) {
+			if (preg_match_all(GZipHelper::regexAttr, $matches[2], $attr)) {
 
 				foreach ($attr[2] as $k => $att) {
 
 					$attributes[$att] = $attr[6][$k];
 				}
+			}
+
+			if ($matches[1] != 'link') {
+
+				if (!empty($options['parseinlinecss']) && !empty($attributes['style'])) {
+
+					$attributes['style'] = str_replace("\n", '', trim(preg_replace('~^\.foo\s*\{([^}]+)\}~s', '$1', $cssRenderer->render((new Parser('.foo { '.preg_replace_callback('~url\(([^)]+)\)~', function ($matches) {
+
+						$name = preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($matches[1]));
+
+						if (strpos($matches[0], 'data:') !== false || !GZipHelper::isFile($name)) {
+
+							return $matches[0];
+						}
+
+						return 'url('.GZipHelper::url($name).')';
+
+					}, $attributes['style']).' }', $css_options))->parse()))));
+
+					$result = '<'.$matches[1].' ';
+
+					foreach ($attributes as $key => $value) {
+
+						$result .= $key.'="'.$value.'" ';
+					}
+
+					return rtrim($result).'>';
+				}
+
+				return $matches[0];
 			}
 
 			if (!empty($attributes)) {
@@ -199,7 +232,7 @@ class CSSHelper
 							$cssParser->append($attr['href']);
 						}
 
-						file_put_contents($file, $parseUrls((new Renderer($css_options))->render($cssParser->parse())));
+						file_put_contents($file, $parseUrls($cssRenderer->render($cssParser->parse())));
 					}
 
 					$links[$position]['links'] = [
@@ -231,7 +264,7 @@ class CSSHelper
 						if (!is_file($file)) {
 
 							$cssParser->load($attr['href']);
-							file_put_contents($file, $parseUrls((new Renderer($css_options))->render($cssParser->parse())));
+							file_put_contents($file, $parseUrls($cssRenderer->render($cssParser->parse())));
 						}
 					}
 
@@ -292,9 +325,6 @@ class CSSHelper
 		$criticalCss = null;
 		$cssResize = null;
 		$webFont = null;
-
-		$headStyle = new Stylesheet();
-		$cssRenderer = new Renderer($css_options);
 
 		if ($parseWebFonts || $parseCritical || $parseCssResize) {
 
@@ -367,23 +397,42 @@ class CSSHelper
 					foreach ($headStyle->query('[@name="background"]|[@name="background-image"]') as $property) {
 
 						$images = [];
+						$property->getValue()->map(function ($value) use(&$images) {
 
-						foreach ($property->getValue() as $value) {
+							/**
+							 * @var Value $value
+							 */
 
 							if ($value->type == 'css-url') {
 
 								$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
 
-								if (GZipHelper::isFile($name) && in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
+								if (GZipHelper::isFile($name)) {
 
-									$images[] = [
+									if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
 
-										'file' => $name,
-										'size' => getimagesize($name)
-									];
+										$images[] = [
+
+											'file' => $name,
+											'size' => getimagesize($name)
+										];
+									}
+
+									return Value::getInstance((object) [
+										'name' => 'url',
+										'type' => 'css-url',
+										'arguments' => new Value\Set([
+											Value::getInstance((object) [
+												'type' => 'css-string',
+												'value' => GZipHelper::url($name)
+											])
+										])
+									]);
 								}
 							}
-						}
+
+							return $value;
+						});
 
 						// ignore multiple backgrounds
 						if (count($images) == 1) {
@@ -465,7 +514,7 @@ class CSSHelper
 		if ($headStyle->hasChildren()) {
 
 			$headStyle->deduplicate();
-			$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>';
+			$head_string .= '<style>' . $parseUrls($cssRenderer->render($headStyle)) . '</style>';
 		}
 
 		foreach ($links as $position => $blob) {
