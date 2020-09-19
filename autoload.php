@@ -32,10 +32,10 @@ spl_autoload_register(function ($name) {
             require __DIR__.'/lib/JSqueeze.php';
             break;
 
-        case 'patchwork/cssmin':
-
-            require __DIR__.'/lib/cssmin.php';
-            break;
+//        case 'patchwork/cssmin':
+//
+//            require __DIR__.'/lib/cssmin.php';
+//            break;
 
         case 'gzip/gziphelper':
 

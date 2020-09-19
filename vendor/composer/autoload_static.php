@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34
 {
     public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'TBela\\CSS\\' => 10,
+        ),
         'E' => 
         array (
             'Elphin\\IcoFileLoader\\' => 21,
@@ -14,6 +18,10 @@ class ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34
     );
 
     public static $prefixDirsPsr4 = array (
+        'TBela\\CSS\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tbela99/css/src/TBela/CSS',
+        ),
         'Elphin\\IcoFileLoader\\' => 
         array (
             0 => __DIR__ . '/..' . '/lordelph/icofileloader/src',

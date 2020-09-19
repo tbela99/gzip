@@ -8,6 +8,8 @@
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
+- It includes a new Css parser
+
 Here are some features provided by this plugin
 
 ## HTML
