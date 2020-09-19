@@ -50,5 +50,53 @@
             "icon",
             "load"
         ]
+    },
+    {
+        "name": "tbela99/css",
+        "version": "dev-php56-backport",
+        "version_normalized": "dev-php56-backport",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/tbela99/css.git",
+            "reference": "7f2d1f9c917709ba8452c31f26b1beba9778ac2c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/tbela99/css/zipball/7f2d1f9c917709ba8452c31f26b1beba9778ac2c",
+            "reference": "7f2d1f9c917709ba8452c31f26b1beba9778ac2c",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.6"
+        },
+        "time": "2020-09-19T05:43:06+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "TBela\\CSS\\": "src/TBela/CSS"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Thierry Bela",
+                "homepage": "https://tbela.net",
+                "role": "Developer"
+            }
+        ],
+        "description": "A CSS parser and minifier written in PHP",
+        "homepage": "https://github.com/tbela99/css",
+        "keywords": [
+            "ast",
+            "beautifier",
+            "css",
+            "minifier",
+            "parser",
+            "php"
+        ]
     }
 ]

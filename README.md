@@ -8,6 +8,12 @@
 
 ![screenshot](https://raw.githubusercontent.com/tbela99/gzip/master/Capture.PNG)
 
+This version requires PHP 7.4 or greater
+
+- It includes a new Css parser tbela/Css
+- a new Javascript ES6+ compliant parser
+- performance improvement by using threads to handle javascript and css parsing operations
+
 Here are some features provided by this plugin
 
 ## HTML

@@ -755,6 +755,13 @@ class PlgSystemGzip extends JPlugin
 			$options['cssremove'] = [];
 		}
 
+		$options['uri_root'] = JUri::root(true);
+
+		if ($options['uri_root'] === '') {
+
+			$options['uri_root']  = '/';
+		}
+
 		// Save-Data header enforce some settings
 		if (isset($_SERVER["HTTP_SAVE_DATA"]) && $this->params->get('gzip.savedata', true) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
 

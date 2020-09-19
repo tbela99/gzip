@@ -23,6 +23,11 @@ import {
 self.addEventListener("fetch", (event) => {
 	event.respondWith((async function () {
 
+		if (!event.url) {
+
+			return fetch(event.request);
+		}
+
 		let response;
 
 		const router = SW.routes.getRouter(event);
