@@ -77,6 +77,8 @@ class GZipHelper
 	// can use http cache / url rewriting
 	static $accepted = array(
 		"js" => "text/javascript",
+		"json" => "application/json",
+		"map" => "application/json",
 		"css" => "text/css",
 		"eot" => "application/vnd.ms-fontobject",
 		"otf" => "application/x-font-otf",
