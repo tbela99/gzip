@@ -56,11 +56,11 @@ class HTMLHelper {
 			if (is_file($path)) {
 
 				include $path;
-			}
 
-			if (!empty($php_config['instantloading'])) {
+				if (!empty($php_config['instantloading'])) {
 
-				$html = str_replace('<body', '<body data-instant-'.implode(' data-instant-', $php_config['instantloading']), $html);
+					$html = str_replace('<body', '<body data-instant-'.implode(' data-instant-', $php_config['instantloading']), $html);
+				}
 			}
 		}
 
