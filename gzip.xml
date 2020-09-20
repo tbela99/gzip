@@ -214,6 +214,10 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="inlineimageconvert" label="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_LABEL" description="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_DESCRIPTION" hint="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_HINT" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
                     <field name="imagesresizestrategy" label="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_LABEL" description="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_DESCRIPTION" type="list" default="CROP_CENTER">
                         <option value="CROP_DEFAULT">JOPTION_IMAGE_RESIZE_CROP_DEFAULT</option>
