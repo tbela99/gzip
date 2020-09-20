@@ -27,16 +27,49 @@ class ImagesHelper {
 
 	public function postProcessHTML ($html, array $options = []) {
 
-		return preg_replace_callback('#<img (.*?)/?>#si', function ($matches) use ($options) {
+		return preg_replace_callback('#<([^\s>]+) (.*?)/?>#si', function ($matches) use ($options) {
 
 			$attributes = [];
 
-			if (preg_match_all(GZipHelper::regexAttr, $matches[1],$attrib)) {
+			if (preg_match_all(GZipHelper::regexAttr, $matches[2],$attrib)) {
 
 				foreach ($attrib[2] as $key => $value) {
 
 					$attributes[$value] = $attrib[6][$key];
 				}
+			}
+
+			if (!empty($attributes['style'])) {
+
+				$attributes['style'] = preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use($options) {
+
+					$name = preg_replace('~^(["\']?)([^\1]+)\1$~', '$2', trim($matches[1]));
+
+					if (GZipHelper::isFile($name)) {
+
+						return 'url('.GZipHelper::url($this->convert(GZipHelper::getName($name), $options)).')';
+					}
+
+					return $matches[0];
+
+				}, $attributes['style']);
+			}
+
+			if ($matches[1] != 'img') {
+
+				if (isset($attributes['style'])) {
+
+					$result = '<'.$matches[1];
+
+					foreach ($this->processHTMLAttributes($attributes, $options) as $key => $value) {
+
+						$result .= ' '.$key.'="'.$value.'"';
+					}
+
+					return $result.'>';
+				}
+
+				return $matches[0];
 			}
 
 			$result = '<img';
@@ -51,7 +84,7 @@ class ImagesHelper {
 		}, $html);
 	}
 
-	public function processHTMLAttributes ($attributes, array $options = []) {
+	public function processHTMLAttributes (array $attributes, array $options = []) {
 
 		$path = $options['img_path'];
 		$ignored_image = !empty($options['imageignore']) ? $options['imageignore'] : [];
@@ -131,42 +164,7 @@ class ImagesHelper {
 					}
 				}
 
-				if (!empty($options['imageconvert']) && WEBP && $pathinfo != 'webp') {
-
-					$newFile = $path.sha1($file).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
-
-					if (!is_file($newFile)) {
-
-						switch ($pathinfo) {
-
-							case 'gif':
-
-								$img = imagecreatefromgif($file);
-								break;
-
-							case 'png':
-
-								$img = imagecreatefrompng($file);
-								break;
-
-							case 'jpg':
-
-								$img = imagecreatefromjpeg($file);
-								break;
-						}
-					}
-
-					if ($img) {
-
-						imagewebp($img, $newFile);
-					}
-
-					if (is_file($newFile)) {
-
-						$attributes['src'] = $options['webroot'].$newFile;
-						$file = $newFile;
-					}
-				}
+				$file = $this->convert($file, $options);
 
 				$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
 				//    $const = constant('\Image\Image::'.$method);
@@ -305,6 +303,53 @@ class ImagesHelper {
 		}
 
 		return $attributes;
+	}
+
+	public function convert($file, array $options = []) {
+
+		$basename = preg_replace('/(#|\?).*$/', '', basename($file));
+		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+
+		if (!empty($options['imageconvert']) && WEBP && $pathinfo != 'webp') {
+
+			$img = null;
+			$path = $options['img_path'];
+			$newFile = $path.GZipHelper::shorten(crc32($file)).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
+
+			if (!is_file($newFile)) {
+
+				switch ($pathinfo) {
+
+					case 'gif':
+
+						$img = imagecreatefromgif($file);
+						break;
+
+					case 'png':
+
+						$img = imagecreatefrompng($file);
+						break;
+
+					case 'jpg':
+
+						$img = imagecreatefromjpeg($file);
+						break;
+				}
+			}
+
+			if ($img) {
+
+				imagewebp($img, $newFile);
+			}
+
+			if (is_file($newFile)) {
+
+				$attributes['src'] = $options['webroot'].$newFile;
+				$file = $newFile;
+			}
+		}
+
+		return $file;
 	}
 
 	/**
