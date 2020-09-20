@@ -39,7 +39,7 @@ class ImagesHelper {
 				}
 			}
 
-			if (!empty($attributes['style'])) {
+			if (!empty($options['inlineimageconvert']) && !empty($attributes['style'])) {
 
 				$attributes['style'] = preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use($options) {
 
