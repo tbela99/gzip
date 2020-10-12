@@ -147,8 +147,8 @@ LIB.ready(function (undef) {
 				if (container) {
 					container.parentElement.removeChild(container);
 				}
-			}, 10);
-		}, 10);
+			}, 5);
+		}, 5);
 	}
 
 	if (

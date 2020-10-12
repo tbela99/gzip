@@ -35,6 +35,8 @@ class CSSHelper
 	 *
 	 * @return string
 	 *
+	 * @throws Parser\SyntaxError
+	 * @throws \Exception
 	 * @since version
 	 */
 	public function processHTML($html, array $options = [])
@@ -45,7 +47,7 @@ class CSSHelper
 		$fetch_remote = !empty($options['fetchcss']);
 
 		$links = [];
-		$root = $options['uri_root'];
+//		$root = $options['uri_root'];
 		$ignore = !empty($options['cssignore']) ? $options['cssignore'] : [];
 		$remove = !empty($options['cssremove']) ? $options['cssremove'] : [];
 
@@ -60,9 +62,9 @@ class CSSHelper
 		$cssRenderer = new Renderer($css_options);
 		$headStyle = new Stylesheet();
 
-		$parseUrls = function ($html) use($path, $root) {
+		$parseUrls = function ($html) use($path) {
 
-			return preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use($path, $root) {
+			return preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use($path) {
 
 				$url = preg_replace('~^(["\'])?([^\1]+)\1~', '$2', trim($matches[1]));
 
@@ -88,13 +90,13 @@ class CSSHelper
 
 					if (is_file($localName)) {
 
-						return 'url('.$root.$localName.')';
+						return 'url('.GZipHelper::url($localName).')';
 					}
 				}
 
 				if (substr($url, 0, 1) != '/') {
 
-					return 'url('.$root.$url.')';
+					return 'url('.GZipHelper::url($url).')';
 				}
 
 				return $matches[0];
@@ -232,7 +234,7 @@ class CSSHelper
 							$cssParser->append($attr['href']);
 						}
 
-						file_put_contents($file, $parseUrls($cssRenderer->render($cssParser->parse())));
+						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()))));
 					}
 
 					$links[$position]['links'] = [
@@ -264,7 +266,7 @@ class CSSHelper
 						if (!is_file($file)) {
 
 							$cssParser->load($attr['href']);
-							file_put_contents($file, $parseUrls($cssRenderer->render($cssParser->parse())));
+							file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse(), $options))));
 						}
 					}
 
@@ -383,103 +385,19 @@ class CSSHelper
 					}
 				}
 
-				if ($parseCssResize) {
+//				if ($parseCssResize) {
 
-					$img_path = $options['img_path'];
-					$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-					$const = constant('\Image\Image::'.$method);
-					$short_name = strtolower(str_replace('CROP_', '', $method));
+//					$img_path = $options['img_path'];
+//					$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+//					$const = constant('\Image\Image::'.$method);
+//					$short_name = strtolower(str_replace('CROP_', '', $method));
 
-					/**
-					 * @var Element $property
-					 */
 					// all fonts with an src attribute
-					foreach ($headStyle->query('[@name="background"]|[@name="background-image"]') as $property) {
-
-						$images = [];
-						$property->getValue()->map(function ($value) use(&$images) {
-
-							/**
-							 * @var Value $value
-							 */
-
-							if ($value->type == 'css-url') {
-
-								$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
-
-								if (GZipHelper::isFile($name)) {
-
-									if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
-
-										$images[] = [
-
-											'file' => $name,
-											'size' => getimagesize($name)
-										];
-									}
-
-									return Value::getInstance((object) [
-										'name' => 'url',
-										'type' => 'css-url',
-										'arguments' => new Value\Set([
-											Value::getInstance((object) [
-												'type' => 'css-string',
-												'value' => GZipHelper::url($name)
-											])
-										])
-									]);
-								}
-							}
-
-							return $value;
-						});
-
-						// ignore multiple backgrounds
-						if (count($images) == 1) {
-
-							foreach ($images as $settings) {
-
-								$img = null;
-								$hash = GZipHelper::shorten(crc32($settings['file']));
-
-								foreach ($options['css_sizes'] as $size) {
-
-									if ($size < $settings['size'][0]) {
-
-										$crop = $img_path.$hash.'-'. $short_name.'-'.$size.'-'.basename($settings['file']);
-
-										if (!is_file($crop)) {
-
-											if (is_null($img)) {
-
-												$img = new Image($settings['file']);
-
-												if ($img->getWidth() > 1200) {
-
-													$img->setSize(1200);
-												}
-											}
-
-											$img->resizeAndCrop($size, null, $const)->save($crop);
-										}
-
-										if (is_file($crop)) {
-
-												$property = $property->copy();
-												$property->setName('background-image');
-												$property->setValue('url('.GZipHelper::url($crop).')');
-
-												$headStyle->addAtRule('media', '(max-width:'.$size.'px)')->append($property->getRoot());
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+//					$this->parseBackgroundImages($headStyle, $options);
+//				}
 
 				$headStyle->deduplicate();
-				file_put_contents($css_hash, $cssRenderer->render($headStyle));
+				file_put_contents($css_hash, $parseUrls($cssRenderer->render($headStyle)));
 			}
 
 			if (is_file($css_hash)) {
@@ -620,5 +538,107 @@ class CSSHelper
 		}
 
 		return $html;
+	}
+
+	public function parseBackgroundImages(Element $headStyle, array $options = []) {
+
+		if (empty($options['imagecssresize']) || empty($options['css_sizes'])) {
+
+			return $headStyle;
+		}
+
+		$img_path = $options['img_path'];
+		$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+		$const = constant('\Image\Image::'.$method);
+		$short_name = strtolower(str_replace('CROP_', '', $method));
+
+		$stylesheet = new Stylesheet();
+
+		foreach ($headStyle->query('[@name="background"]|[@name="background-image"]') as $property) {
+
+			$images = [];
+			$property->getValue()->map(function ($value) use(&$images) {
+
+				/**
+				 * @var Value $value
+				 */
+
+				if ($value->type == 'css-url') {
+
+					$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
+
+					if (GZipHelper::isFile($name)) {
+
+						if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
+
+							$images[] = [
+
+								'file' => $name,
+								'size' => getimagesize($name)
+							];
+						}
+
+						return Value::getInstance((object) [
+							'name' => 'url',
+							'type' => 'css-url',
+							'arguments' => new Value\Set([
+								Value::getInstance((object) [
+									'type' => 'css-string',
+									'value' => GZipHelper::url($name)
+								])
+							])
+						]);
+					}
+				}
+
+				return $value;
+			});
+
+			// ignore multiple backgrounds
+			if (count($images) == 1) {
+
+				foreach ($images as $settings) {
+
+					$img = null;
+					$hash = GZipHelper::shorten(crc32($settings['file']));
+
+					foreach ($options['css_sizes'] as $size) {
+
+						if ($size < $settings['size'][0]) {
+
+							$crop = $img_path.$hash.'-'. $short_name.'-'.$size.'-'.basename($settings['file']);
+
+							if (!is_file($crop)) {
+
+								if (is_null($img)) {
+
+									$img = new Image($settings['file']);
+
+									if ($img->getWidth() > 1200) {
+
+										$img->setSize(1200);
+									}
+								}
+
+								$img->resizeAndCrop($size, null, $const)->save($crop);
+							}
+
+							if (is_file($crop)) {
+
+								$property = $property->copy();
+								$property->setName('background-image');
+								$property->setValue('url('.GZipHelper::url($crop).')');
+
+								$stylesheet->addAtRule('media', '(max-width:'.$size.'px)')->append($property->getRoot());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$headStyle->insert($stylesheet, 0);
+
+		return $headStyle;
 	}
 }

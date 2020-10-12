@@ -19,6 +19,18 @@
 const queue = [];
 let fired = document.readyState != 'loading';
 
+function domReady() {
+
+	document.removeEventListener('DOMContentLoaded', domReady);
+	document.removeEventListener('readystatechange', readystatechange);
+	fired = true;
+
+	while (queue.length > 0) {
+
+		requestAnimationFrame(queue.shift());
+	}
+}
+
 function readystatechange() {
 
 	switch (document.readyState) {
@@ -29,18 +41,12 @@ function readystatechange() {
 		case 'interactive':
 		default:
 
-			fired = true;
-
-			while (queue.length > 0) {
-
-				requestAnimationFrame(queue.shift());
-			}
-
-			document.removeEventListener('readystatechange', readystatechange);
+			domReady();
 			break;
 	}
 }
 
+document.addEventListener('DOMContentLoaded', domReady);
 document.addEventListener('readystatechange', readystatechange);
 
 export function ready(cb) {

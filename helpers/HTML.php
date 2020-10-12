@@ -42,7 +42,7 @@ class HTMLHelper {
 
 		if(!empty($script)) {
 
-			$html = str_replace('</head>', $css.'<script data-position="head">'.$script.'</script></head>', $html);
+			$html = str_replace('</head>', $css.'<script data-ignore="true">'.$script.'</script></head>', $html);
 		}
 
 		$script = '';
