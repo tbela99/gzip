@@ -51,8 +51,8 @@ LIB.ready((function(e) {
             //	container.classList.add("image-placeholder-complete");
                         e && e.parentElement.insertBefore(t, e), setTimeout((function() {
                 t.classList.remove("image-placeholder-complete"), e && e.parentElement.removeChild(e);
-            }), 10);
-        }), 10);
+            }), 5);
+        }), 5);
     }
     if (
     // intersection-observer.min.js

@@ -43,8 +43,16 @@ class GZipHelper
 	const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
 	const regexUrl = '#url\(([^)]+)\)#';
 
+	/**
+	 * @var string regex
+	 * @since version
+	 */
 	static $regReduce = '';
 
+	/**
+	 * @var string route prefix
+	 * @since version
+	 */
 	static $route = '';
 
 	static $options = [];
