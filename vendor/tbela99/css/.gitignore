@@ -1,0 +1,14 @@
+composer.phar
+*.dat
+composer.lock
+phpunit.phar
+phpunit
+phpdocumentor.sh
+benchmark/
+vendor/
+test/debug.txt
+.idea/
+.phpunit.result.cache
+xpath.txt
+test/color.php
+test/*.json

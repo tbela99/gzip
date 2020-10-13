@@ -1,0 +1,102 @@
+[
+    {
+        "name": "lordelph/icofileloader",
+        "version": "2.0.1",
+        "version_normalized": "2.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/lordelph/icofileloader.git",
+            "reference": "97fa83f23d3b155b08923629377a8a34327f6930"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/lordelph/icofileloader/zipball/97fa83f23d3b155b08923629377a8a34327f6930",
+            "reference": "97fa83f23d3b155b08923629377a8a34327f6930",
+            "shasum": ""
+        },
+        "require": {
+            "ext-gd": "*",
+            "php": ">=5.6.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~5",
+            "squizlabs/php_codesniffer": "^2.3"
+        },
+        "time": "2017-06-01T10:50:53+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Elphin\\IcoFileLoader\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Paul Dixon",
+                "email": "paul@elphin.com"
+            }
+        ],
+        "description": "High quality PHP package for reading and converting any .ico icon file, particularly website favicons",
+        "homepage": "http://icofileloader.dixo.net/",
+        "keywords": [
+            "convert",
+            "extract",
+            "favicon",
+            "ico",
+            "icon",
+            "load"
+        ]
+    },
+    {
+        "name": "tbela99/css",
+        "version": "dev-php56-backport",
+        "version_normalized": "dev-php56-backport",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/tbela99/css.git",
+            "reference": "60c0cb5afceffa05d89c96b8b12bb3856698b962"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/tbela99/css/zipball/60c0cb5afceffa05d89c96b8b12bb3856698b962",
+            "reference": "60c0cb5afceffa05d89c96b8b12bb3856698b962",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.6"
+        },
+        "time": "2020-10-07T22:44:44+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "TBela\\CSS\\": "src/TBela/CSS"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Thierry Bela",
+                "homepage": "https://tbela.net",
+                "role": "Developer"
+            }
+        ],
+        "description": "A CSS parser and minifier written in PHP",
+        "homepage": "https://github.com/tbela99/css",
+        "keywords": [
+            "ast",
+            "beautifier",
+            "css",
+            "minifier",
+            "parser",
+            "php"
+        ]
+    }
+]
