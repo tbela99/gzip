@@ -1,0 +1,40 @@
+{
+  "name": "tbela99/css",
+  "description": "A CSS parser and minifier written in PHP",
+  "version": "0.1.8",
+  "type": "library",
+  "keywords": [
+    "CSS",
+    "parser",
+    "minifier",
+    "beautifier",
+    "AST",
+    "PHP"
+  ],
+  "homepage": "https://github.com/tbela99/css",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thierry Bela",
+      "homepage": "https://tbela.net",
+      "role": "Developer"
+    }
+  ],
+  "archive": {
+    "exclude": [
+      "*.sh",
+      "*.phar",
+      "test/",
+      "tool/",
+      "docs/"
+    ]
+  },
+  "autoload": {
+    "psr-4": {
+      "TBela\\CSS\\": "src/TBela/CSS"
+    }
+  },
+  "require": {
+    "php": ">=5.6"
+  }
+}

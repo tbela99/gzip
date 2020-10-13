@@ -291,25 +291,29 @@ class PlgSystemGzip extends JPlugin
 
 		$options = (array)$this->params->get('gzip');
 
-		if (!empty($options)) {
+		if ($app->isClient('site')) {
 
-			$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
+			if (!empty($options)) {
+
+				$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
+			}
+
+			if (!is_file($file)) {
+
+				$this->updateServiceWorker($this->options);
+			}
+
+			if (!is_file(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php')) {
+
+				$this->updateConfig($this->options);
+			}
+
+			if (is_file($file)) {
+
+				$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
+			}
 		}
 
-		if (!is_file($file)) {
-
-			$this->updateServiceWorker($this->options);
-		}
-
-		if (!is_file(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php')) {
-
-			$this->updateConfig($this->options);
-		}
-
-		if (is_file($file)) {
-
-			$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
-		}
 
 		$dirname = JURI::base(true) . '/';
 
@@ -1187,6 +1191,8 @@ class PlgSystemGzip extends JPlugin
 
 		$path = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
 
+		$manifest = is_file($path.'manifest.json') ? json_decode(file_get_contents($path.'manifest.json'), true) : [];
+
 		if (!is_dir($path)) {
 
 			$old_mask = umask();
@@ -1202,9 +1208,14 @@ class PlgSystemGzip extends JPlugin
 		$exclude_urls[] = JUri::root(true) . '/administrator/';
 		$exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
 
-		if (!empty($options['pwa_offline_page'])) {
+		if (!empty($manifest['start_url'])) {
 
-			$preloaded_urls[] = $options['pwa_offline_page'];
+			$preloaded_urls[] = $manifest['start_url'];
+		}
+
+		if (!empty($start_url)) {
+
+			$preloaded_urls[] = $start_url;
 		}
 
 		$preloaded_urls = array_values(array_unique($preloaded_urls));

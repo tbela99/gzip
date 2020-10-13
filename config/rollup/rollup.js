@@ -36,6 +36,8 @@ for (let name in config) {
         name,
         error
       });
+
+      throw error;
     }
   })(config[name], name);
 }
