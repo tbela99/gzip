@@ -100,6 +100,8 @@
           name,
           error
         });
+
+        throw error;
       }
     })(config[name], name);
   }
