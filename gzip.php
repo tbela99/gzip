@@ -1213,11 +1213,6 @@ class PlgSystemGzip extends JPlugin
 			$preloaded_urls[] = $manifest['start_url'];
 		}
 
-		if (!empty($start_url)) {
-
-			$preloaded_urls[] = $start_url;
-		}
-
 		$preloaded_urls = array_values(array_unique($preloaded_urls));
 
 		$import_scripts = '';

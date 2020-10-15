@@ -62,6 +62,27 @@ class CSSHelper
 		$cssRenderer = new Renderer($css_options);
 		$headStyle = new Stylesheet();
 
+		$fetchFonts = function ($node) use($options, $headStyle) {
+
+		if ((string) $node['name'] == 'font-face') {
+
+			/**
+			 * @var Element\AtRule $node
+			 */
+			$node->addDeclaration('font-display', $options['fontdisplay']);
+
+			$query = $node->query('./[@name=src]');
+
+			if ($query) {
+
+				// copy only the src property of the font-face => the font will not block page loading
+				// @font-face {
+				//  src: url(...);
+				// }
+				$headStyle->append(end($query)->copy()->getRoot());
+			}
+		}
+	};
 		$parseUrls = function ($html) use($path) {
 
 			return preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use($path) {
@@ -234,7 +255,7 @@ class CSSHelper
 							$cssParser->append($attr['href']);
 						}
 
-						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()))));
+						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter')))));
 					}
 
 					$links[$position]['links'] = [
@@ -266,7 +287,7 @@ class CSSHelper
 						if (!is_file($file)) {
 
 							$cssParser->load($attr['href']);
-							file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse(), $options))));
+							file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter'), $options))));
 						}
 					}
 
@@ -366,7 +387,7 @@ class CSSHelper
 				if ($parseWebFonts) {
 
 					// all fonts with an src attribute
-					$query[] = '@font-face/src/..';
+//					$query[] = '@font-face/src/..';
 				}
 
 				if ($parseCritical && !empty($options['criticalcss'])) {

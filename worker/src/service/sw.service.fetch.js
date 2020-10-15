@@ -21,12 +21,13 @@ import {
  */
 
 self.addEventListener("fetch", (event) => {
+
+	if (!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin')) {
+
+		return;
+	}
+
 	event.respondWith((async function () {
-
-		if (!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin')) {
-
-			return fetch(event.request);
-		}
 
 		let response;
 
