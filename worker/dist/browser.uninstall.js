@@ -1,4 +1,3 @@
-/* do not edit! */
 /**
  * Service worker browser client uninstall
  * @package     GZip Plugin
@@ -10,13 +9,18 @@
  * @license     MIT License
  */
 // @ts-check
-// build d108aa3 2020-10-12 20:38:26-04:00
+
+// build 77ad4d7 2020-10-14 21:54:44-04:00
+
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.getRegistration().then((function(registration) {
-        registration.unregister().then((function(result) {
-            if (result) {
-                console.info("The service worker has been successfully removed 😭");
-            }
-        }));
-    }));
+	navigator.serviceWorker.getRegistration().then(function (registration) {
+
+		registration.unregister().then(function (result) {
+
+			if (result) {
+
+				console.info('The service worker has been successfully removed 😭');
+			}
+		});
+	});
 }
