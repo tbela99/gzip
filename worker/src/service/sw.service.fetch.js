@@ -22,12 +22,7 @@ import {
 
 self.addEventListener("fetch", (event) => {
 
-	if (!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin')) {
-
-		return;
-	}
-
-	event.respondWith((async function () {
+	event.respondWith(!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') ? fetch(event.request) : (async function () {
 
 		let response;
 
@@ -55,7 +50,7 @@ self.addEventListener("fetch", (event) => {
 				// offline page should be returned from the previous loop
 			} catch (error) {
 
-				console.error("😭", error);
+				console.error("😭", error, error.stack);
 			}
 		}
 

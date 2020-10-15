@@ -881,14 +881,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "8fb8103",
+			value: "6795f42",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2020-10-14 23:07:21-04:00",
+			value: "2020-10-15 07:47:03-04:00",
 			enumerable: true
 		},
 		/**
@@ -1658,12 +1658,7 @@
 
 	self.addEventListener("fetch", (event) => {
 
-		if (!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin')) {
-
-			return;
-		}
-
-		event.respondWith((async function () {
+		event.respondWith(!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') ? fetch(event.request) : (async function () {
 
 			let response;
 
@@ -1691,7 +1686,7 @@
 					// offline page should be returned from the previous loop
 				} catch (error) {
 
-					console.error("😭", error);
+					console.error("😭", error, error.stack);
 				}
 			}
 
