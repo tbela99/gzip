@@ -79,6 +79,38 @@ class CSSHelper
 				// @font-face {
 				//  src: url(...);
 				// }
+
+				foreach ($query as $q) {
+
+					$q->getValue()->map(function ($value)  {
+
+						/**
+						 * @var Value $value
+						 */
+
+						if ($value->type == 'css-url') {
+
+							$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
+
+							if (GZipHelper::isFile($name)) {
+
+								return Value::getInstance((object) [
+									'name' => 'url',
+									'type' => 'css-url',
+									'arguments' => new Value\Set([
+										Value::getInstance((object) [
+											'type' => 'css-string',
+											'value' => GZipHelper::url($name)
+										])
+									])
+								]);
+							}
+						}
+
+						return $value;
+					});
+				}
+
 				$headStyle->append(end($query)->copy()->getRoot());
 			}
 		}

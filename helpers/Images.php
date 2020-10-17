@@ -25,6 +25,13 @@ use function is_file;
 
 class ImagesHelper {
 
+	/**
+	 * @since 2.9.0
+	 * supported extensions
+	 */
+	const EXTENSIONS = ['png', 'gif', 'jpg', 'jpeg', 'webp'];
+	const CONVERT_TO = 'webp';
+
 	public function postProcessHTML ($html, array $options = []) {
 
 		return preg_replace_callback('#<([^\s>]+) (.*?)/?>#si', function ($matches) use ($options) {
@@ -144,13 +151,12 @@ class ImagesHelper {
 			if (GZipHelper::isFile($file)) {
 
 				$file = GZipHelper::getName($file);
-				if (!in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'gif', 'jpg', 'jpeg'])) {
+				if (!in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), static::EXTENSIONS)) {
 
 					return $attributes;
 				}
 
 				$sizes = getimagesize($file);
-
 				$maxwidth = $sizes[0];
 				$img = null;
 
@@ -260,8 +266,6 @@ class ImagesHelper {
 							array_unshift($mq, $sizes[0]);
 						}
 
-						//    $mq[] = '(min-width: '.$maxwidth.'px)';
-
 						$j = count($mq);
 
 						for ($i = 0; $i < $j; $i++) {
@@ -309,6 +313,11 @@ class ImagesHelper {
 
 		$basename = preg_replace('/(#|\?).*$/', '', basename($file));
 		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+
+		if ($pathinfo == static::CONVERT_TO) {
+
+			return $file;
+		}
 
 		if (!empty($options['imageconvert']) && WEBP && $pathinfo != 'webp') {
 

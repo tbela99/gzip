@@ -881,14 +881,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "6795f42",
+			value: "52a3f58",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2020-10-15 07:47:03-04:00",
+			value: "2020-10-15 07:59:13-04:00",
 			enumerable: true
 		},
 		/**
@@ -1686,7 +1686,7 @@
 					// offline page should be returned from the previous loop
 				} catch (error) {
 
-					console.error("😭", error, error.stack);
+					console.error("😭", error);
 				}
 			}
 

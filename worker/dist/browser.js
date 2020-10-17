@@ -11,7 +11,7 @@
 
 // @ts-check
 
-// build 6795f42 2020-10-15 07:47:03-04:00
+// build 52a3f58 2020-10-15 07:59:13-04:00
 
 if ("serviceWorker" in navigator) {
 	navigator.serviceWorker.

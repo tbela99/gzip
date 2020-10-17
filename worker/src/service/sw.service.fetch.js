@@ -50,7 +50,7 @@ self.addEventListener("fetch", (event) => {
 				// offline page should be returned from the previous loop
 			} catch (error) {
 
-				console.error("😭", error, error.stack);
+				console.error("😭", error);
 			}
 		}
 

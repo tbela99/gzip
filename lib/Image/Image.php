@@ -327,9 +327,11 @@ class Image {
 	
     public function resizeAndCrop($width, $height = null, $method = Image::CROP_DEFAULT, $x0 = 0, $y0 = 0, $options = array()) {
 
+    	// if height is null then resize according to the width, no need to crop
         if (\is_null($height)) {
 
-            $height = $this->getHeight() * $width / $this->getWidth();
+            $this->setSize($width, $height, $options);
+            return $this;
         }
 
         switch ($method) {
@@ -677,9 +679,12 @@ class Image {
      * @return resource immagine
      */
     private function cropImageEntropy($image, $width, $height, $options) {
+
         $clone = $this->cloneImage($image);
+
         imagefilter($clone, IMG_FILTER_EDGEDETECT);
         imagefilter($clone, IMG_FILTER_GRAYSCALE);
+
         $this->blackThresholdImage($clone, 30, 30, 30);
         imagefilter($clone,  IMG_FILTER_SELECTIVE_BLUR);
         $left_x = $this->slice($image, $width, 'h');
@@ -749,6 +754,7 @@ class Image {
         $long_size = $axis == 'h' ? imagesy($image) : imagesx($image);
 
         if($original_size == $target_size) {
+
             return 0;
         }
 
