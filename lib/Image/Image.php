@@ -12,6 +12,10 @@
 
  namespace Image;
 
+ use Exception;
+ use InvalidArgumentException;
+ use Potracio\Potracio;
+
  defined('_JEXEC') or die;
 
  // php 7.1
@@ -30,8 +34,6 @@ class Image {
 
     private $_abspath;
     private $_image = null;
- //   private $_width;
-  //  private $_height;
     private $_image_type;
 	
 	const CROP_DEFAULT = 1;
@@ -43,6 +45,7 @@ class Image {
      * @brief Costruttore
      * @param string $abspath percorso assoluto del file
      */
+
     public function __construct($abspath = null) {
 
         if(!is_null($abspath)) {
@@ -65,20 +68,18 @@ class Image {
      * Load image
      *
      * @param string $file
-     * @return \Image\Image this instance
+     * @return Image this instance
 	 * @throw \InvalidArgumentException
      */
 	public function load ($file) {
 
         if(!is_file($file)) {
 
-            throw new \Exception('File doesn\'t exists', 404);
+            throw new Exception('File doesn\'t exists', 404);
         }		
 		
         $image_info = getimagesize($file);
         $this->_abspath = $file;
-    //    $this->_width = $image_info[0];
-    //    $this->_height = $image_info[1];
         $this->_image_type = $image_info[2];
 		
         if($this->_image_type == IMAGETYPE_JPEG) {
@@ -101,7 +102,7 @@ class Image {
 			
 			if (!$this->_image) {
 				
-            	throw new \InvalidArgumentException ('Unsupported image type: '.$file, 400);
+            	throw new InvalidArgumentException ('Unsupported image type: '.$file, 400);
 			}
 
 			$image_size = getimagesizefromstring($image_string);
@@ -213,7 +214,7 @@ class Image {
 
         else {
 
-	        throw new \InvalidArgumentException('Unsupported file type '.$extension, 400);
+	        throw new InvalidArgumentException('Unsupported file type '.$extension, 400);
         }
 
         return $this;
@@ -236,8 +237,6 @@ class Image {
 
 		imagefilter($image,IMG_FILTER_GAUSSIAN_BLUR);
 		$destination = imagecreatetruecolor($width, $height);
-
-	//	imagecolortransparent ($destination, imagecolorallocate($destination, 255, 255, 255));
 
 				// looping through ALL pixels!!
 		for($x=1;$x<$width-1;$x++){
@@ -317,7 +316,7 @@ class Image {
 
 	public function toSvg() {
 
-		$svg =  new \Potracio\Potracio(['fill' => $this->toHexColor($this->getDominantColor($this->_image))]);
+		$svg =  new Potracio(['fill' => $this->toHexColor($this->getDominantColor($this->_image))]);
 
 		$svg->loadImageFromResource($this->_image);
 		$svg->process();
@@ -372,16 +371,16 @@ class Image {
     public function crop($width, $height, $x0, $y0, $options = array()) {
 		
 		
-		$size = $this->getBestFit($width, $height, $width, $height);
+		$size = $this->getBestFit($width, $height);
 				
 		$x0 = max(0, $x0 - $size['width'] / 2);
 		$y0 = max(0, $y0 - $size['height'] / 2);
 				
 		$x0 = min($x0, $this->getWidth() - $size['width']);
 		$y0 = min($y0, $this->getHeight() - $size['width']);
-			
+
         $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
-        return $this->setSize($width, $height, $options );
+        return $this->setSize($width, $height, $options);
         
     }
 
@@ -394,153 +393,141 @@ class Image {
      */
     public function cropCenter($width, $height, $options = array()) {
 		
-		$size = $this->getBestFit($width, $height, $width, $height);
+		$size = $this->getBestFit($width, $height);
 						
         $x0 = ($this->getWidth() - $size['width'])/2;
         $y0 = ($this->getHeight() - $size['height'])/2;
 				
         $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
-		return $this->setSize($width, $height, $options );
+		return $this->setSize($width, $height, $options);
     }
 	
-	public function getBestFit($width, $height, $regionWidth, $regionHeight) {
-	
-			 // ($this->faceRects);
-			
+	public function getBestFit($width, $height) {
+
 			// get best crop size 
 			$scale = $width > $height ? $height / $width : $width / $height;
 			
 		//	if ($crX != $crY) {
 			$side = min($this->getWidth(), $this->getHeight()); // * $scale;
-				
+
 				// crop the image with our region inside
 			$newWidth = $width > $height ? $side : $side * $scale;
 			$newHeight = $width > $height ? $side * $scale : $side;
-//			/ max($rect['x'], $rect['y']);
-		//	}
-		
-			$scale = min($newWidth, $newHeight) / max($regionWidth, $regionHeight);
-			
+
 			return ['width' => $newWidth, 'height' => $newHeight];
 }
 
-	public function cropFace($width, $height, $options = array()) {
-		
+	public function cropFace($width, $height) {
+
 		$this->detectFaces();
-		
+
 		if (empty($this->faceRects)) {
-			
-			$this->_image = $this->cropImageEntropy($this->_image, $width, $height, $options);
+
+			$this->_image = $this->cropImageEntropy($this->_image, $width, $height);
 		}
-		
+
 		else {
-            
+
             // x, y width, height
 			$x0 = null;
 			$y0 = null;
 			$x1 = null;
 			$y1 = null;
-			
+
 			foreach($this->faceRects as $rect) {
-				
+
 				if (is_null($x0) || $x0 > $rect['x']) {
-					
+
 					$x0 = $rect['x'];
 				}
-				
+
 				if (is_null($y0) || $y0 > $rect['y']) {
-					
+
 					$y0 = $rect['y'];
 				}
-				
+
 				if (is_null($x1) || $x1 < $rect['x'] + $rect['width']) {
-					
+
 					$x1 = $rect['x'] + $rect['width'];
 				}
-				
+
 				if (is_null($y1) || $y1 < $rect['y'] + $rect['height']) {
-					
+
 					$y1 = $rect['y'] + $rect['height'];
 				}
 			}
-			
-			
+
+
             $rect = ['x' => $x0, 'width' => $x1 - $x0, 'y' => $y0, 'height' => $y1 - $y0];
-			
+
 			if ($rect['y'] > 500) {
-				
+
 				$rect['y'] -= 500;
 			//	$rect['width'] += 200;
 			}
-					
+
 			if ($rect['y'] > 300) {
-				
+
 				$rect['y'] -= 300;
 			//	$rect['width'] += 200;
 			}
-					
+
 			else if ($rect['y'] > 200) {
-				
+
 				$rect['y'] -= 200;
 			//	$rect['width'] += 200;
 			}
 			else {
-				
+
 				$rect['y'] = 0;
 			//	$rect['width'] += 200;
 			}
-						
-			
-			$size = $this->getBestFit($width, $height, $rect['width'], $rect['width']);
-						
+
+
+			$size = $this->getBestFit($width, $height);
+
 			$x0 = max(0, $rect['x'] + ($rect['width'] - $size['width']) / 2);
 			$y0 = max(0, $rect['y'] + ($rect['height'] - $size['height']) / 2);
-			
+
 			$x0 = min($x0, $this->getWidth() - $size['width']);
 			$y0 = min($y0, $this->getHeight() - $size['width']);
-			
-		//	$r1 = $rect['width'] / $rect['height'];
-		//	$r2 = $width / $height;
-			
-			// make this rect feat into a scaled rectangle with width / height dimensions
-			
+
             // crop and resize
-            $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0, $options);
+            $this->_image = $this->cropImage($this->_image, $size['width'], $size['height'], $x0, $y0);
 			// compute rect that contains all the faces
 		}
-		
-		return $this->setSize($width, $height, $options );
+
+		return $this->setSize($width, $height);
 	}
 
-    /**
-     * @brief Crop dell'immagine con larghezza e altezza dati nella zona a massima entropia
-     * @param int $width Larghezza crop
-     * @param int $height Altezza crop
-     * @param array $options Opzioni.
-     * @return void
-     */
-    public function cropEntropy($width, $height, $options = array()) {
-        $this->_image = $this->cropImageEntropy($this->_image, $width, $height, $options);
-		return $this->setSize($width, $height, $options );
+	/**
+	 * @brief Crop dell'immagine con larghezza e altezza dati nella zona a massima entropia
+	 * @param int $width Larghezza crop
+	 * @param int $height Altezza crop
+	 * @return void
+	 */
+    public function cropEntropy($width, $height) {
+        $this->_image = $this->cropImageEntropy($this->_image, $width, $height);
+		return $this->setSize($width, $height);
     }
-	
+
 	protected function detectFaces() {
-		
+
 		if (empty($this->stages)) {
-		
+
 			$this->initClassifier();
 		}
-		
+
 		$this->faceRects = [];
-		
+
 		$width = $this->getWidth();
 		$height = $this->getHeight();
-		
+
 		$maxScale = min($width/$this->classifierSize[0], $height/$this->classifierSize[1]);
 		$grayImage = array_fill(0, $width, array_fill(0, $height, null));
 		$img = array_fill(0, $width, array_fill(0, $height, null));
 		$squares = array_fill(0, $width, array_fill(0, $height, null));
-		
+
 		for($i = 0; $i < $width; $i++)
 		{
 			$col=0;
@@ -548,7 +535,7 @@ class Image {
 			for($j = 0; $j < $height; $j++)
 			{
 				$colors = imagecolorsforindex($this->_image, imagecolorat($this->_image, $i, $j));
-		
+
 				$value = (30*$colors['red'] +59*$colors['green'] +11*$colors['blue'])/100;
 				$img[$i][$j] = $value;
 				$grayImage[$i][$j] = ($i > 0 ? $grayImage[$i-1][$j] : 0) + $col + $value;
@@ -557,17 +544,17 @@ class Image {
 				$col2 += $value*$value;
 			}
 		}
-		
+
 		$baseScale = 2;
 		$scale_inc = 1.25;
 		$increment = 0.1;
-		$min_neighbors = 3;
-		
+//		$min_neighbors = 3;
+
 		for($scale = $baseScale; $scale < $maxScale; $scale *= $scale_inc)
 		{
 			$step = (int)($scale*24*$increment);
 			$size = (int)($scale*24);
-			
+
 			for($i = 0; $i < $width-$size; $i += $step)
 			{
 				for($j = 0; $j < $height-$size; $j += $step)
@@ -576,7 +563,7 @@ class Image {
 					$k = 0;
 					foreach($this->stages as $s)
 					{
-						
+
 						if(!$s->pass($grayImage, $squares, $i, $j, $scale))
 						{
 							$pass = false;
@@ -625,20 +612,14 @@ class Image {
 		}		
 	}
 
-    /**
-     * @brief Resize dell'immagine alle dimensioni fornite
-     * @param resource $image resource dell'immagine
-     * @param int $width Larghezza della thumb
-     * @param int $height Altezza della thumb
-     * @param array $options Opzioni.
-     * @return resource immagine ridimensionata
-     */
-    public function resizeImage($image, $width, $height, $options = array()) {
-
-    //    $allow_enlarge = false; //gOpt('allow_enlarge', $options, true);
-    //    if(/*!$allow_enlarge and*/ ($width > imagesx($image) or $height > imagesy($image))) {
-    //        return $image;
-    //    }
+	/**
+	 * @brief Resize dell'immagine alle dimensioni fornite
+	 * @param resource $image resource dell'immagine
+	 * @param int $width Larghezza della thumb
+	 * @param int $height Altezza della thumb
+	 * @return resource immagine ridimensionata
+	 */
+    public function resizeImage($image, $width, $height) {
 
         $new_image = imagecreatetruecolor($width, $height);
         imagecopyresampled($new_image, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
@@ -646,15 +627,13 @@ class Image {
         return $new_image;
     }
 
-    /**
-     * @brief Resize dell'immagine alle dimensioni fornite
-     * @param resource $image resource dell'immagine
-     * @param int $width Larghezza della thumb
-     * @param int $height Altezza della thumb
-     * @param array $options Opzioni.
-     * @return resource immagine ridimensionata
-     */
-    public function setSize($width, $height = null, $options = array()) {
+	/**
+	 * @brief Resize dell'immagine alle dimensioni fornite
+	 * @param int $width Larghezza della thumb
+	 * @param int $height Altezza della thumb
+	 * @return Image immagine ridimensionata
+	 */
+    public function setSize($width, $height = null) {
 
         if (is_null($height)) {
 
@@ -666,7 +645,7 @@ class Image {
             return $this;
         }
  
-        $this->_image = $this->resizeImage($this->_image, $width, $height, $options);
+        $this->_image = $this->resizeImage($this->_image, $width, $height);
         return $this;
     }
 
@@ -678,7 +657,7 @@ class Image {
      * @param array $options Opzioni.
      * @return resource immagine
      */
-    private function cropImageEntropy($image, $width, $height, $options) {
+    private function cropImageEntropy($image, $width, $height) {
 
         $clone = $this->cloneImage($image);
 
@@ -690,18 +669,20 @@ class Image {
         $left_x = $this->slice($image, $width, 'h');
         $top_y = $this->slice($image, $height, 'v');
 
-		$size = $this->getBestFit($width, $height, $width, $height);
-				
+		$size = $this->getBestFit($width, $height);
+
 		$left_x = max(0, $left_x - $size['width'] / 2);
 		$top_y = max(0, $top_y - $size['height'] / 2);
-						
-		$left_x = min($left_x, $this->getWidth() - $size['width']);
-		$top_y = min($top_y, $this->getHeight() - $size['width']);
-			
-						
-        $new_image = $this->cropImage($image, $size['width'], $size['height'], $left_x, $top_y, $options);
 
-        return $new_image;
+		if ($top_y + $size['height'] > $this->getHeight()) {
+
+			$top_y = $this->getHeight() - $size['height'];
+		}
+
+		$crop = imagecreatetruecolor($size['width'], $size['height']);
+		imagecopy($crop, $image, 0, 0, $left_x, $top_y, $size['width'], $size['height']);
+
+		return $crop;
     }
 
     /**
@@ -805,7 +786,7 @@ class Image {
      * @param array $options Opzioni.
      * @return resource immagine croppata
      */
-    private function cropImage($image, $width, $height, $x0, $y0, $options = array()) {
+    private function cropImage($image, $width, $height, $x0, $y0) {
         $crop = imagecreatetruecolor($width, $height);
         imagecopy($crop, $image, 0, 0, $x0, $y0, $width, $height);
         return $crop;
@@ -854,7 +835,7 @@ class Image {
      */
     private function getEntropy($histogram, $area) {
         $value = 0.0;
-        $colors = count($histogram);
+//        $colors = count($histogram);
         foreach($histogram as $color => $frequency) {
             // calculates the percentage of pixels having this color value
             $p = $frequency / $area;

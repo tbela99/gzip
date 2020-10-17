@@ -172,7 +172,7 @@ class ImagesHelper {
 
 				$file = $this->convert($file, $options);
 
-				$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+				 $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
 				//    $const = constant('\Image\Image::'.$method);
 				$hash = sha1($file);
 				$short_name = strtolower(str_replace('CROP_', '', $method));
