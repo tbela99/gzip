@@ -115,6 +115,16 @@ class GZipHelper
 
 	protected static $headers = [];
 
+	public static function sanitizeFileName($string) {
+
+		if (is_callable(' \Transliterator::transliterate')) {
+
+			$string = \Transliterator::transliterate($string);
+		}
+
+		return str_replace(' ', '-', $string);
+	}
+
 	public static function setHeader($name, $value, $replace = false)
 	{
 

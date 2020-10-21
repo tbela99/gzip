@@ -129,7 +129,7 @@ class CSSHelper
 				if (preg_match_all('~^(https?:)?//~', $url)) {
 
 					$parts = explode('/', parse_url($url)['path']);
-					$localName = $path . GZipHelper::shorten(crc32($url)) . '-' . end($parts);
+					$localName = $path . GZipHelper::shorten(crc32($url)) . '-' . GZipHelper::sanitizeFileName(end($parts));
 
 					if (!is_file($localName)) {
 
@@ -172,18 +172,47 @@ class CSSHelper
 
 				if (!empty($options['parseinlinecss']) && !empty($attributes['style'])) {
 
-					$attributes['style'] = str_replace("\n", '', trim(preg_replace('~^\.foo\s*\{([^}]+)\}~s', '$1', $cssRenderer->render((new Parser('.foo { '.preg_replace_callback('~url\(([^)]+)\)~', function ($matches) {
+					$skip = false;
+					$images = [];
+					$attributes['style'] = str_replace("\n", '', trim(preg_replace('~^\.foo\s*\{([^}]+)\}~s', '$1', $cssRenderer->render((new Parser('.foo { '.preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use(&$images, &$skip, $options) {
 
-						$name = preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($matches[1]));
+						$name = GZipHelper::getName(ImagesHelper::fetchRemoteImage(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($matches[1])), $options));
 
 						if (strpos($matches[0], 'data:') !== false || !GZipHelper::isFile($name)) {
 
+							$skip = true;
 							return $matches[0];
+						}
+
+						if (GZipHelper::isFile($name)) {
+
+							$images[] = $name;
 						}
 
 						return 'url('.GZipHelper::url($name).')';
 
 					}, $attributes['style']).' }', $css_options))->parse()))));
+
+					if (!$skip &&
+						count($images) == 1 &&
+						!empty($options['imageenabled']) &&
+						!empty($options['inlineimageconvert']) &&
+						!empty($options['imagecssresize']) &&
+						!empty($options['css_sizes'])) {
+
+						//
+						$sizes = [];
+
+						foreach ($this->createImages($images[0], $options) as $size => $file) {
+
+							$sizes[] = $size.'-'.GZipHelper::url($file);
+						}
+
+						if (!empty($sizes)) {
+
+							$attributes['data-res-bg'] = htmlentities(json_encode($sizes));
+						}
+					}
 
 					$result = '<'.$matches[1].' ';
 
@@ -234,7 +263,7 @@ class CSSHelper
 						}
 
 						$parts = parse_url($remote);
-						$local = $path . GZipHelper::shorten(crc32($remote)) . '-' . basename($parts['path']) . '.css';
+						$local = $path . GZipHelper::shorten(crc32($remote)) . '-' . GZipHelper::sanitizeFileName(basename($parts['path'])) . '.css';
 
 						if (!is_file($local)) {
 
@@ -313,7 +342,7 @@ class CSSHelper
 						$hash = $hashFile($attr['href']) . (isset($attr['media']) && $attr['media'] != 'all' ? $attr['media'] : '');
 
 						$file = $path . GZipHelper::shorten(crc32($hash)) . '-' .
-							pathinfo($attr['href'], PATHINFO_BASENAME) .
+							GZipHelper::sanitizeFileName(pathinfo($attr['href'], PATHINFO_BASENAME)) .
 							(!empty($css_options['compress']) ? '.min' : '') . '.css';
 
 						if (!is_file($file)) {
@@ -416,11 +445,11 @@ class CSSHelper
 
 				$query = [];
 
-				if ($parseWebFonts) {
+//				if ($parseWebFonts) {
 
 					// all fonts with an src attribute
 //					$query[] = '@font-face/src/..';
-				}
+//				}
 
 				if ($parseCritical && !empty($options['criticalcss'])) {
 
@@ -437,17 +466,6 @@ class CSSHelper
 						$headStyle->append($node->copy()->getRoot());
 					}
 				}
-
-//				if ($parseCssResize) {
-
-//					$img_path = $options['img_path'];
-//					$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-//					$const = constant('\Image\Image::'.$method);
-//					$short_name = strtolower(str_replace('CROP_', '', $method));
-
-					// all fonts with an src attribute
-//					$this->parseBackgroundImages($headStyle, $options);
-//				}
 
 				$headStyle->deduplicate();
 				file_put_contents($css_hash, $parseUrls($cssRenderer->render($headStyle)));
@@ -600,11 +618,6 @@ class CSSHelper
 			return $headStyle;
 		}
 
-		$img_path = $options['img_path'];
-		$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-		$const = constant('\Image\Image::'.$method);
-		$short_name = strtolower(str_replace('CROP_', '', $method));
-
 		$stylesheet = new Stylesheet();
 
 		foreach ($headStyle->query('[@name="background"]|[@name="background-image"]') as $property) {
@@ -652,35 +665,15 @@ class CSSHelper
 
 				foreach ($images as $settings) {
 
-					$img = null;
-					$hash = GZipHelper::shorten(crc32($settings['file']));
-
-					foreach ($options['css_sizes'] as $size) {
+					foreach ($this->createImages($settings['file'], $options) as $size => $file) {
 
 						if ($size < $settings['size'][0]) {
 
-							$crop = $img_path.$hash.'-'. $short_name.'-'.$size.'-'.basename($settings['file']);
-
-							if (!is_file($crop)) {
-
-								if (is_null($img)) {
-
-									$img = new Image($settings['file']);
-
-									if ($img->getWidth() > 1200) {
-
-										$img->setSize(1200);
-									}
-								}
-
-								$img->resizeAndCrop($size, null, $const)->save($crop);
-							}
-
-							if (is_file($crop)) {
+							if (is_file($file)) {
 
 								$property = $property->copy();
 								$property->setName('background-image');
-								$property->setValue('url('.GZipHelper::url($crop).')');
+								$property->setValue('url('.GZipHelper::url($file).')');
 
 								$stylesheet->addAtRule('media', '(max-width:'.$size.'px)')->append($property->getRoot());
 							}
@@ -693,5 +686,45 @@ class CSSHelper
 		$headStyle->insert($stylesheet, 0);
 
 		return $headStyle;
+	}
+
+	public function createImages($file, array $options = []) {
+
+		$img_path = $options['img_path'];
+		$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+		$const = constant('\Image\Image::'.$method);
+		$short_name = strtolower(str_replace('CROP_', '', $method));
+
+		$images = [];
+
+		$img = null;
+		$hash = GZipHelper::shorten(crc32($file));
+
+		foreach ($options['css_sizes'] as $size) {
+
+			$crop = $img_path.$hash.'-'. $short_name.'-'.$size.'-'.basename($file);
+
+			if (!is_file($crop)) {
+
+				if (is_null($img)) {
+
+					$img = new Image($file);
+
+					if ($img->getWidth() > 1200) {
+
+						$img->setSize(1200);
+					}
+				}
+
+				$img->resizeAndCrop($size, null, $const)->save($crop);
+			}
+
+			if (is_file($crop)) {
+
+				$images[$size] = $crop;
+			}
+		}
+
+		return $images;
 	}
 }

@@ -14,6 +14,8 @@
 LIB.ready(function (undef) {
 	// intersection-observer.min.js
 
+	console.log(Array.from(document.querySelectorAll('[data-res-bg]')).map(el => JSON.parse(el.dataset.resBg).map(string => string.split('-', 2))))
+
 	if (!("srcset" in new Image())) {
 		//    try {
 
@@ -87,9 +89,6 @@ LIB.ready(function (undef) {
 
 						svg.setAttribute("height", height);
 						svg.setAttribute("width", width);
-
-						//   svgImage.setAttribute('height', height);
-						//   svgImage.setAttribute('width', width);
 					}
 
 					img.addEventListener("sourcechange", resize);
@@ -113,12 +112,10 @@ LIB.ready(function (undef) {
 	function load(img, oldImage) {
 		if (oldImage.dataset.src) {
 			oldImage.src = oldImage.dataset.src;
-			//	oldImage.removeAttribute("data-src");
 		}
 
 		if (oldImage.dataset.srcset) {
 			oldImage.srcset = oldImage.dataset.srcset;
-			//	oldImage.removeAttribute("data-srcset");
 		}
 
 		setTimeout(function () {
@@ -135,7 +132,6 @@ LIB.ready(function (undef) {
 				container = container.parentElement;
 			}
 
-			//	container.classList.add("image-placeholder-complete");
 			if (container) {
 
 				container.parentElement.insertBefore(oldImage, container);

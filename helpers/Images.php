@@ -32,6 +32,45 @@ class ImagesHelper {
 	const EXTENSIONS = ['png', 'gif', 'jpg', 'jpeg', 'webp'];
 	const CONVERT_TO = 'webp';
 
+	public static function fetchRemoteImage($name, array $options = [])
+	{
+
+		$path = $options['img_path'];
+		$file = preg_replace('/(#|\?).*$/', '', $name);
+		$basename = preg_replace('/(#|\?).*$/', '', basename($name));
+		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+
+		if (!empty($options['imageremote']) && preg_match('#^(https?:)?//#', $name)) {
+
+			if (isset(GZipHelper::$accepted[$pathinfo]) && strpos(GZipHelper::$accepted[$pathinfo], 'image/') !== false) {
+
+				if (strpos($name, '//') === 0) {
+
+					$name = $options['scheme'] . ':' . $name;
+				}
+
+				$local = $path . sha1($name) . '.' . GZipHelper::sanitizeFileName($pathinfo);
+
+				if (!is_file($local)) {
+
+					$content = GZipHelper::getContent($name);
+
+					if ($content !== false) {
+
+						file_put_contents($local, $content);
+					}
+				}
+
+				if (is_file($local)) {
+
+					return $local;
+				}
+			}
+		}
+
+		return $file;
+	}
+
 	public function postProcessHTML ($html, array $options = []) {
 
 		return preg_replace_callback('#<([^\s>]+) (.*?)/?>#si', function ($matches) use ($options) {
@@ -103,7 +142,6 @@ class ImagesHelper {
 		if (isset($attributes['src'])) {
 
 			$name = GZipHelper::getName($attributes['src']);
-			$file = preg_replace('/(#|\?).*$/', '', $name);
 
 			if (!empty($ignored_image)) {
 
@@ -116,41 +154,13 @@ class ImagesHelper {
 				}
 			}
 
-			$basename = preg_replace('/(#|\?).*$/', '', basename($name));
-			$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
-
-			if (!empty($options['imageremote']) && preg_match('#^(https?:)?//#', $name)) {
-
-				if (isset(GZipHelper::$accepted[$pathinfo]) && strpos(GZipHelper::$accepted[$pathinfo], 'image/') !== false) {
-
-					if (strpos($name, '//') === 0) {
-
-						$name = $options['scheme'] . ':' . $name;
-					}
-
-					$local = $path . sha1($name) . '.' . $pathinfo;
-
-					if (!is_file($local)) {
-
-						$content = GZipHelper::getContent($name);
-
-						if ($content !== false) {
-
-							file_put_contents($local, $content);
-						}
-					}
-
-					if (is_file($local)) {
-
-						$attributes['src'] = $local;
-						$file = $local;
-					}
-				}
-			}
+			$file = static::fetchRemoteImage($name, $options);
 
 			if (GZipHelper::isFile($file)) {
 
 				$file = GZipHelper::getName($file);
+				$attributes['src'] = $file;
+
 				if (!in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), static::EXTENSIONS)) {
 
 					return $attributes;
@@ -172,14 +182,15 @@ class ImagesHelper {
 
 				$file = $this->convert($file, $options);
 
-				 $method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+				$attributes['src'] = $file;
+
+				$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
 				//    $const = constant('\Image\Image::'.$method);
 				$hash = sha1($file);
 				$short_name = strtolower(str_replace('CROP_', '', $method));
 				//   $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
 				$image = $sizes === false ? null : new Image($file);
-
 				$src = '';
 
 				// generate svg placeholder for faster image preview
@@ -229,11 +240,12 @@ class ImagesHelper {
 
 						//    $image = null;
 						$resource = null;
+						$basename = GZipHelper::sanitizeFileName(basename($file));
 
 						/** @var string[] $images */
-						$images = array_map(function ($size) use($file, $hash, $short_name, $path) {
+						$images = array_map(function ($size) use($basename, $hash, $short_name, $path) {
 
-							return $path.$hash.'-'.$short_name.'-'.$size.'-'.basename($file);
+							return $path.$hash.'-'.$short_name.'-'.$size.'-'.$basename;
 
 						}, $mq);
 
@@ -262,7 +274,9 @@ class ImagesHelper {
 
 						if ($sizes[0] > $mq[0]) {
 
-							array_unshift($srcset, $file.' '.$sizes[0].'w');
+							// cache file
+							// looking for invalid file name
+							array_unshift($srcset, str_replace(' ', '%20', GZipHelper::url($file)).' '.$sizes[0].'w');
 							array_unshift($mq, $sizes[0]);
 						}
 
@@ -311,7 +325,7 @@ class ImagesHelper {
 
 	public function convert($file, array $options = []) {
 
-		$basename = preg_replace('/(#|\?).*$/', '', basename($file));
+		$basename = GZipHelper::sanitizeFileName(preg_replace('/(#|\?).*$/', '', basename($file)));
 		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
 
 		if ($pathinfo == static::CONVERT_TO) {
@@ -323,7 +337,7 @@ class ImagesHelper {
 
 			$img = null;
 			$path = $options['img_path'];
-			$newFile = $path.GZipHelper::shorten(crc32($file)).'-'.pathinfo($file, PATHINFO_FILENAME).'.webp';
+			$newFile = $path.GZipHelper::shorten(crc32($file)).'-'.GZipHelper::sanitizeFileName(pathinfo($file, PATHINFO_FILENAME)).'.webp';
 
 			if (!is_file($newFile)) {
 
@@ -353,7 +367,6 @@ class ImagesHelper {
 
 			if (is_file($newFile)) {
 
-				$attributes['src'] = $options['webroot'].$newFile;
 				$file = $newFile;
 			}
 		}
@@ -389,7 +402,7 @@ class ImagesHelper {
 
             if (!is_file($img)) {
 
-                clone $image->setSize(80)->save($img, 1);
+				(clone $image)->setSize(80)->save($img, 1);
             }
 
             if (is_file($img)) {
@@ -419,7 +432,7 @@ class ImagesHelper {
 
 			$short_name = strtolower(str_replace('CROP_', '', $method));
 
-			$svg = $path.$hash.'-svg-'. $short_name.'-'.pathinfo($file, PATHINFO_FILENAME).'.svg';
+			$svg = $path.$hash.'-svg-'. $short_name.'-'.GZipHelper::sanitizeFileName(pathinfo($file, PATHINFO_FILENAME)).'.svg';
 
 			if (!is_file($svg)) {
 

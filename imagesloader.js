@@ -21,25 +21,25 @@ LIB.ready((function(e) {
             preload(e, t) {
                 const r = !("currentSrc" in e);
                 r ? t.insertAdjacentHTML("beforebegin", '<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg ><image xlink:href="' + (e.currentSrc || e.src) + '" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />') : t.insertAdjacentHTML("beforebegin", "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=background-image:url(" + (e.currentSrc || e.src) + ")>");
-                const n = t.previousElementSibling;
+                const s = t.previousElementSibling;
                 if (r) {
                     if ("function" != typeof window.CustomEvent) {
                         window.Event.prototype;
                     }
-                    const t = n.querySelector("svg");
+                    const t = s.querySelector("svg");
                     //   const svgImage = container.querySelector('svg image');
-                                        function s() {
+                                        function n() {
                         const e = this.height, r = this.width;
                         t.setAttribute("height", e), t.setAttribute("width", r);
                     }
-                    e.addEventListener("sourcechange", s), e.addEventListener("load", s);
+                    e.addEventListener("sourcechange", n), e.addEventListener("load", n);
                 }
                 t.classList.remove("image-placeholder", "image-placeholder-lqip", "image-placeholder-svg"), 
-                n.insertBefore(t, n.firstElementChild);
+                s.insertBefore(t, s.firstElementChild);
             },
             load: r,
-            error(e, t, n) {
-                r(t, n);
+            error(e, t, s) {
+                r(t, s);
             }
         });
     }
@@ -48,14 +48,14 @@ LIB.ready((function(e) {
         setTimeout((function() {
             let e = t;
             for (t.removeAttribute("data-srcset"), t.removeAttribute("data-src"), t.classList.add("image-placeholder-complete"); e instanceof HTMLElement && !e.classList.contains("image-placeholder-wrapper"); ) e = e.parentElement;
-            //	container.classList.add("image-placeholder-complete");
-                        e && e.parentElement.insertBefore(t, e), setTimeout((function() {
+            e && e.parentElement.insertBefore(t, e), setTimeout((function() {
                 t.classList.remove("image-placeholder-complete"), e && e.parentElement.removeChild(e);
             }), 5);
         }), 5);
     }
     if (
     // intersection-observer.min.js
+    console.log(Array.from(document.querySelectorAll("[data-res-bg]")).map(e => JSON.parse(e.dataset.resBg).map(e => e.split("-", 2)))), 
     "srcset" in new Image || 
     //    try {
     document.body.insertAdjacentHTML("beforeend", "<svg xmlns=http://www.w3.org/2000/svg width=1 height=1><defs><filter id=blur-lqip width=100% height=100% ><feGaussianBlur stdDeviation=20 /></filter></defs></svg>"), 
