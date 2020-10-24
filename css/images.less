@@ -1,4 +1,4 @@
-.blur-mixin (@value: 2) {
+.blur-mixin (@value: 4) {
   & {
     -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='@{value}'); //   filter: url(#blur-lqip);
     filter: blur(~"@{value}px");
@@ -8,14 +8,6 @@
 .image-placeholder-lqip {
   .blur-mixin ();
 }
-
-/*
-.image-placeholder-no-js {
-    position: absolute;
-    opacity: .01;
-    visibility: hidden;
-}
-*/
 
 .image-placeholder-loaded {
   transform: translateX(100%);

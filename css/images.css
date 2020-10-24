@@ -1,14 +1,7 @@
 .image-placeholder-lqip {
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
-  filter: blur(2px);
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='4');
+  filter: blur(4px);
 }
-/*
-.image-placeholder-no-js {
-    position: absolute;
-    opacity: .01;
-    visibility: hidden;
-}
-*/
 .image-placeholder-loaded {
   transform: translateX(100%);
 }
@@ -35,8 +28,8 @@
   max-height: 100%;
 }
 .image-placeholder-wrapper :not(.image-placeholder-complete) {
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
-  filter: blur(2px);
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='4');
+  filter: blur(4px);
 }
 .image-placeholder-wrapper .image-placeholder-opacity {
   transition: opacity 0.2s ease-out;
