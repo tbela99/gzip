@@ -19,10 +19,12 @@ $parser->setOptions([
     'allow_duplicate_rules' => true
 ]);
 
-// return an Element
-$stylesheet = $parser->parse();
+// fast way
+echo (new \TBela\CSS\Renderer())->renderAst($parser->getAst());
 
-//
+// or
+// slow
+$stylesheet = $parser->parse();
 echo $stylesheet;
 ```
 
@@ -237,6 +239,18 @@ Merge ast of the specified parser instance into this instance ast
 #### Throws
 
 \TBela\CSS\Parser\SyntaxError
+
+### GetAst
+
+return the ast
+
+#### Parameters
+
+none
+
+#### Return type
+
+stdClass
 
 ### GetErrors
 

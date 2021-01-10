@@ -2,6 +2,7 @@ var classTBela_1_1CSS_1_1Property_1_1Comment =
 [
     [ "__construct", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#adb2fe1b9e16a2bf23eb4dcdeea99c7f3", null ],
     [ "__toString", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#ac78146d21416597d2c49fbe3ab8b7ed1", null ],
+    [ "getAst", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#a9b7d7f86242140fb702a38bc7691a9d0", null ],
     [ "getLeadingComments", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#aa28f2473108078963f00e14c17ea328a", null ],
     [ "getTrailingComments", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#a680059b4e96b87d2c42568fcbf652f91", null ],
     [ "getType", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html#aa3ea0d415819fa171b61d5faace4badf", null ],

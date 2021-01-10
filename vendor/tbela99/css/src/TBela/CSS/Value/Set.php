@@ -60,17 +60,20 @@ class Set implements IteratorAggregate, JsonSerializable, Countable
      */
     public function render (array $options = []) {
 
-        return implode(','.((isset($options['compress']) ? $options['compress'] : false) ? '' : ' '), array_map(function ($data) use($options) {
+        $result = '';
+        $join = ','.(!empty($options['compress']) ? '' : ' ');
 
-            $result = '';
+        foreach ($this->doSplit($this->data, ',') as $data) {
 
             foreach($data as $item) {
 
                 $result .= $item->render($options);
             }
 
-            return $result;
-        }, $this->doSplit($this->data, ',')));
+            $result .= $join;
+        }
+
+        return rtrim($result, $join);
     }
 
     /**
@@ -133,7 +136,7 @@ class Set implements IteratorAggregate, JsonSerializable, Countable
 
         foreach ($data as $value) {
 
-            if (trim($value)=== $separator) {
+            if ($value->value === $separator) {
 
                 $values[] = $current;
                 $current = new Set;

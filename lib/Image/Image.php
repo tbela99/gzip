@@ -238,6 +238,10 @@ class Image {
 		imagefilter($image,IMG_FILTER_GAUSSIAN_BLUR);
 		$destination = imagecreatetruecolor($width, $height);
 
+		//
+		$transparency = imagecolorallocatealpha($destination, 0, 0, 0, 127);
+		imagefill($destination, 0, 0, $transparency);
+
 				// looping through ALL pixels!!
 		for($x=1;$x<$width-1;$x++){
 			for($y=1;$y<$height - 1;$y++){
@@ -622,6 +626,11 @@ class Image {
     public function resizeImage($image, $width, $height) {
 
         $new_image = imagecreatetruecolor($width, $height);
+
+        // transparent background
+		$transparency = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
+		imagefill($new_image, 0, 0, $transparency);
+
         imagecopyresampled($new_image, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
 
         return $new_image;
@@ -680,6 +689,11 @@ class Image {
 		}
 
 		$crop = imagecreatetruecolor($size['width'], $size['height']);
+
+		//
+		$transparency = imagecolorallocatealpha($crop, 0, 0, 0, 127);
+		imagefill($crop, 0, 0, $transparency);
+
 		imagecopy($crop, $image, 0, 0, $left_x, $top_y, $size['width'], $size['height']);
 
 		return $crop;
@@ -717,6 +731,9 @@ class Image {
      */
     private function cloneImage($image) {
         $clone = imagecreatetruecolor(imagesx($image), imagesy($image));
+		//
+		$transparency = imagecolorallocatealpha($clone, 0, 0, 0, 127);
+		imagefill($clone, 0, 0, $transparency);
         imagecopy($clone, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
         return $clone;
     }
@@ -788,6 +805,10 @@ class Image {
      */
     private function cropImage($image, $width, $height, $x0, $y0) {
         $crop = imagecreatetruecolor($width, $height);
+		//
+		$transparency = imagecolorallocatealpha($crop, 0, 0, 0, 127);
+		imagefill($crop, 0, 0, $transparency);
+
         imagecopy($crop, $image, 0, 0, $x0, $y0, $width, $height);
         return $crop;
     }

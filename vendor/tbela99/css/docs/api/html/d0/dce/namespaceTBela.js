@@ -14,6 +14,7 @@ var namespaceTBela =
         [ "EventInterface", "d0/d24/interfaceTBela_1_1CSS_1_1Event_1_1EventInterface.html", "d0/d24/interfaceTBela_1_1CSS_1_1Event_1_1EventInterface" ]
       ] ],
       [ "Interfaces", null, [
+        [ "ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface" ],
         [ "RenderableInterface", "d1/d43/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderableInterface.html", "d1/d43/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderableInterface" ],
         [ "RenderablePropertyInterface", "d1/d3e/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderablePropertyInterface.html", null ],
         [ "RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface" ]
@@ -57,8 +58,11 @@ var namespaceTBela =
         [ "TokenSelectorValueAttributeFunctionGeneric", "d0/df9/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeFunctionGeneric.html", "d0/df9/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeFunctionGeneric" ],
         [ "TokenSelectorValueAttributeFunctionNot", "dd/dae/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeFunctionNot.html", "dd/dae/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeFunctionNot" ],
         [ "TokenSelectorValueAttributeIndex", "d1/d6f/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeIndex.html", "d1/d6f/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeIndex" ],
+        [ "TokenSelectorValueAttributeSelector", "d9/d03/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeSelector.html", "d9/d03/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeSelector" ],
+        [ "TokenSelectorValueAttributeString", "df/d88/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeString.html", "df/d88/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeString" ],
         [ "TokenSelectorValueAttributeTest", "d1/dcc/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeTest.html", "d1/dcc/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeTest" ],
         [ "TokenSelectorValueInterface", "d4/dff/interfaceTBela_1_1CSS_1_1Query_1_1TokenSelectorValueInterface.html", "d4/dff/interfaceTBela_1_1CSS_1_1Query_1_1TokenSelectorValueInterface" ],
+        [ "TokenSelectorValueSeparator", "d6/d63/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueSeparator.html", "d6/d63/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueSeparator" ],
         [ "TokenSelectorValueString", "d3/d53/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueString.html", "d3/d53/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueString" ],
         [ "TokenSelectorValueWhitespace", "d1/d75/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueWhitespace.html", "d1/d75/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueWhitespace" ],
         [ "TokenWhitespace", "de/dc6/classTBela_1_1CSS_1_1Query_1_1TokenWhitespace.html", "de/dc6/classTBela_1_1CSS_1_1Query_1_1TokenWhitespace" ]

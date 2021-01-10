@@ -3,6 +3,7 @@
 namespace TBela\CSS;
 
 use InvalidArgumentException;
+use JsonSerializable;
 use stdClass;
 use TBela\CSS\Value\Number;
 use TBela\CSS\Value\Set;
@@ -14,7 +15,7 @@ use TBela\CSS\Parser\ParserTrait;
  * @property-read string $value
  * @property-read Set $arguments
  */
-abstract class Value
+abstract class Value implements JsonSerializable
 {
     use ParserTrait;
 
@@ -921,6 +922,11 @@ abstract class Value
      * @return string
      */
     public function __toString()
+    {
+        return $this->render();
+    }
+
+    public function jsonSerialize()
     {
         return $this->render();
     }

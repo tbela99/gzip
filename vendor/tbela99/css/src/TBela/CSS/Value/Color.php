@@ -135,34 +135,34 @@ class Color extends Value
     public function render(array $options = [])
     {
         $index = spl_object_hash($this);
-        $key = md5(json_encode($options));
+        $key = md5(json_encode($options).json_encode($this->data));
 
-        if (isset(static::$cache[$index][$key])) {
+        if (isset(static::$cache[$key])) {
 
-            return static::$cache[$index][$key];
+            return static::$cache[$key];
         }
 
         if (isset($this->data->rgba)) {
 
-            static::$cache[$index][$key] = static::rgba2string($this->data, $options);
+            static::$cache[$key] = static::rgba2string($this->data, $options);
         }
 
         else if (isset($this->data->value)) {
 
-                static::$cache[$index][$key] = $this->data->value;
+                static::$cache[$key] = $this->data->value;
         } else {
 
-            static::$cache[$index][$key] = $this->data->name.'('.$this->data->arguments->render($options).')';
+            static::$cache[$key] = $this->data->name.'('.$this->data->arguments->render($options).')';
         }
 
-        return static::$cache[$index][$key];
+        return static::$cache[$key];
     }
 
     public static function rgba2string($data, array $options = []) {
 
         $hex = ColorUtil::rgba_values2hex($data->rgba, $options);
         $value = $hex;
-        $css3 = !isset($options['css_level']) || $options['css_level'] < 4;
+        $css3 = isset($options['css_level']) && $options['css_level'] < 4;
 
         if (empty($options['convert_color'])) {
 

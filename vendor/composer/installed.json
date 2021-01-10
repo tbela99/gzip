@@ -58,18 +58,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/tbela99/css.git",
-            "reference": "60c0cb5afceffa05d89c96b8b12bb3856698b962"
+            "reference": "1b40c5d0d49ec21751ee70c46018f20a19dd4090"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/tbela99/css/zipball/60c0cb5afceffa05d89c96b8b12bb3856698b962",
-            "reference": "60c0cb5afceffa05d89c96b8b12bb3856698b962",
+            "url": "https://api.github.com/repos/tbela99/css/zipball/1b40c5d0d49ec21751ee70c46018f20a19dd4090",
+            "reference": "1b40c5d0d49ec21751ee70c46018f20a19dd4090",
             "shasum": ""
         },
         "require": {
             "php": ">=5.6"
         },
-        "time": "2020-10-07T22:44:44+00:00",
+        "time": "2020-11-03T05:36:34+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {

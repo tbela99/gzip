@@ -3,7 +3,7 @@
 namespace TBela\CSS\Element;
 
 use Exception;
-use TBela\CSS\Element;
+use \TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\ElementTrait;
 
 /**
@@ -48,7 +48,7 @@ class AtRule extends RuleSet {
     /**
      * @inheritDoc
      */
-    public function support (Element $child) {
+    public function support (ElementInterface $child) {
 
         if (!empty($this->ast->isLeaf)) {
 

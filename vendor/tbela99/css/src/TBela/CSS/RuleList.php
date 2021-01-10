@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use TBela\CSS\Element\Comment;
 use TBela\CSS\Element\Declaration;
 use TBela\CSS\Element\Stylesheet;
+use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Property\Property;
 use TBela\CSS\Property\PropertyList;
@@ -81,7 +82,7 @@ abstract class RuleList extends Element implements RuleListInterface
      * @param int $offset
      * @param int|null $length
      * @param ...Element|null $replacement
-     * @return Element[]
+     * @return ElementInterface[]
      */
     public function splice($offset, $length = null, $replacement = null) {
 
@@ -186,7 +187,7 @@ abstract class RuleList extends Element implements RuleListInterface
 
         foreach ($elements as $child) {
 
-            $this->append($child instanceof Element ? $child : Element::getInstance($child));
+            $this->append($child instanceof ElementInterface ? $child : Element::getInstance($child));
         }
 
         return $this;
@@ -195,7 +196,7 @@ abstract class RuleList extends Element implements RuleListInterface
     /**
      * @inheritDoc
      */
-    public function support(Element $child)
+    public function support(ElementInterface $child)
     {
 
         $element = $this;
@@ -217,7 +218,7 @@ abstract class RuleList extends Element implements RuleListInterface
     /**
      * @inheritDoc
      */
-    public function append(Element ...$elements)
+    public function append(ElementInterface ...$elements)
     {
 
         foreach ($elements as $element) {
@@ -270,7 +271,7 @@ abstract class RuleList extends Element implements RuleListInterface
     /**
      * @inheritDoc
      */
-    public function insert(Element $element, $position)
+    public function insert(ElementInterface $element, $position)
     {
         if (!$this->support($element) || $position < 0) {
 
@@ -299,7 +300,7 @@ abstract class RuleList extends Element implements RuleListInterface
     /**
      * @inheritDoc
      */
-    public function remove(Element $element)
+    public function remove(ElementInterface $element)
     {
 
         if ($element->getParent() === $this) {

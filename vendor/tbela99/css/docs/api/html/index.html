@@ -107,6 +107,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <p>A <a class="el" href="d6/ded/namespaceCSS.html">CSS</a> parser, beautifier and minifier written in PHP. It supports the following features</p>
 <h2>Features</h2>
 <ul>
+<li>fastly parse and render <a class="el" href="d6/ded/namespaceCSS.html">CSS</a></li>
 <li>support CSS4 colors</li>
 <li>merge duplicate rules</li>
 <li>remove duplicate declarations</li>
@@ -142,9 +143,12 @@ $(document).ready(function(){initNavTree('index.html','');});
 <p>// append css string $parser-&gt;appendContent($css_string);</p>
 <p>// pretty print css $css = (string) $element;</p>
 <p>// minified output $renderer = new Renderer([ 'compress' =&gt; true, 'convert_color' =&gt; 'hex', 'css_level' =&gt; 4, 'allow_duplicate_declarations' =&gt; false ]);</p>
-<p>$css = $renderer-&gt;render($element);</p>
+<p>// fast $css = $renderer-&gt;renderAst($parser-&gt;getAst()); // slow $css = $renderer-&gt;render($element);</p>
 <p>// save as json file_put_contents('style.json', json_encode($element)); ```</p>
 <p>Load the AST and generate css code</p>
+<p>```php</p>
+<p>use ; // fastest way to render css $beautify = (new Renderer())-&gt;renderAst($parser-&gt;setContent($css)-&gt;getAst());</p>
+<p>// or $css = (new Renderer())-&gt;renderAst(json_decode(file_get_contents('style.json'))); ```</p>
 <p>```php</p>
 <p>use ;</p>
 <p>$ast = json_decode(file_get_contents('style.json'));</p>
@@ -223,7 +227,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <pre class="fragment">// remove @font-face
 if ($node instanceof AtRule &amp;&amp; $node['name'] == 'font-face') {
 
-    return $this::IGNORE_NODE;
+    return \TBela\CSS\Traverser::IGNORE_NODE;
 }
 
 // rewrite image url() path for local file

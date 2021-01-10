@@ -7,5 +7,5 @@ var classTBela_1_1CSS_1_1Element_1_1Rule =
     [ "parseSelector", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html#a55db70036542a3ad38db34d7cc9c1ad3", null ],
     [ "removeSelector", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html#aca5a2e1b2818e0fcacaca9e03af5244f", null ],
     [ "setSelector", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html#a520e20de1797db4e688b3f4a7abf58ea", null ],
-    [ "support", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html#a8c0582cdf6f1b45ed6d6782e4281c1af", null ]
+    [ "support", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html#a9add714608b877ea3bf74d0d6382540a", null ]
 ];

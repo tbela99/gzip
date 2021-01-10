@@ -1,24 +1,27 @@
-<?php 
+<?php
 
 namespace TBela\CSS\Element;
 
 use Exception;
-use TBela\CSS\Element;
+use \TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\RuleList;
 use TBela\CSS\Value;
 
-class Rule extends RuleList {
+class Rule extends RuleList
+{
 
     /**
      * Return the css selectors
      * @return string[]
      */
-    public function getSelector () {
+    public function getSelector()
+    {
 
         return $this->ast->selector;
     }
 
-    protected function parseSelector($selectors) {
+    protected function parseSelector($selectors)
+    {
 
         if (is_array($selectors)) {
 
@@ -33,35 +36,26 @@ class Rule extends RuleList {
             $selectors = implode(',', $selectors);
         }
 
-//        if (strpos($selectors, '/*') !== false || strpos($selectors, '[') !== false) {
+        $selectors = Value::parse($selectors);
 
-            $selectors = Value::parse($selectors);
+        $comments = [];
+        $selectors->filter(function ($node) use (&$comments) {
 
-            $comments = [];
+            if ($node->type == 'Comment') {
 
-            $selectors->filter(function ($node) use(&$comments) {
-
-                if ($node->type == 'Comment') {
-
-                    $comments[] = $node;
-                    return false;
-                }
-
-                return true;
-            });
-
-            if (!empty($comments)) {
-
-                $this->setLeadingComments($comments);
+                $comments[] = $node;
+                return false;
             }
 
-            $selectors = Value::reduce($selectors->split(','));
-//        }
+            return true;
+        });
 
-//        else {
-//
-//            $selectors = array_map('trim', explode(',', $selectors));
-//        }
+        if (!empty($comments)) {
+
+            $this->setLeadingComments($comments);
+        }
+
+        $selectors = Value::parse((string)$selectors)->split(',');
 
         $result = [];
 
@@ -70,7 +64,7 @@ class Rule extends RuleList {
             $result[trim($selector)] = $selector;
         }
 
-       return array_values($result);
+        return array_values($result);
     }
 
     /**
@@ -78,7 +72,8 @@ class Rule extends RuleList {
      * @param string|array $selectors
      * @return $this
      */
-    public function setSelector ($selectors) {
+    public function setSelector($selectors)
+    {
 
         $this->ast->selector = $this->parseSelector($selectors);
         return $this;
@@ -89,7 +84,8 @@ class Rule extends RuleList {
      * @param array|string $selector
      * @return $this
      */
-    public function addSelector($selector) {
+    public function addSelector($selector)
+    {
 
         $result = [];
 
@@ -112,7 +108,8 @@ class Rule extends RuleList {
      * @param array|string $selector
      * @return $this
      */
-    public function removeSelector($selector) {
+    public function removeSelector($selector)
+    {
 
         if (!is_array($selector)) {
 
@@ -130,7 +127,8 @@ class Rule extends RuleList {
      * @return Declaration
      * @throws Exception
      */
-    public function addDeclaration ($name, $value) {
+    public function addDeclaration($name, $value)
+    {
 
         $declaration = new Declaration();
 
@@ -146,7 +144,8 @@ class Rule extends RuleList {
      * @return Rule $this
      * @throws Exception
      */
-    public function merge (Rule $rule) {
+    public function merge(Rule $rule)
+    {
 
         $this->addSelector($rule->getSelector());
 
@@ -161,7 +160,8 @@ class Rule extends RuleList {
     /**
      * @inheritDoc
      */
-    public function support (Element $child) {
+    public function support(ElementInterface $child)
+    {
 
         if ($child instanceof Comment) {
 

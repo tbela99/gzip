@@ -9,6 +9,7 @@ trait ParserTrait
      * @param string $string
      * @return false|string
      */
+
     public static function stripQuotes($string, $force = false) {
 
         $q = substr($string, 0, 1);
@@ -21,6 +22,7 @@ trait ParserTrait
         return $string;
     }
 
+    /*
     protected static function is_separator($char)
     {
 
@@ -39,7 +41,7 @@ trait ParserTrait
 
         return false;
     }
-
+*/
     protected static function match_comment($string, $start, $end)
     {
 
@@ -72,7 +74,9 @@ trait ParserTrait
      * @param array $char_stop
      * @return false|string
      */
+
     protected static function substr($string, $startPosition, $endPosition, array $char_stop) {
+
 
         if ($startPosition < 0 || substr($string, $startPosition, 1) === false) {
 
@@ -88,7 +92,7 @@ trait ParserTrait
 
         while ($startPosition + 1 <= $endPosition) {
 
-            if(!isset($string[++$startPosition])) {
+            if (!isset($string[++$startPosition])) {
 
                 break;
             }
@@ -103,7 +107,7 @@ trait ParserTrait
                     continue;
                 }
 
-                $buffer.= $string[$startPosition];
+                $buffer .= $string[$startPosition];
                 return $buffer;
             }
 
@@ -129,9 +133,7 @@ trait ParserTrait
 
                         $buffer .= $comment;
                         $startPosition += strlen($comment) - 1;
-                    }
-
-                    else {
+                    } else {
 
                         $buffer .= $string[$startPosition];
                     }
@@ -142,7 +144,7 @@ trait ParserTrait
 
                     $substr = static::_close($string, ')', '(', $startPosition, $endPosition, true);
 
-                    if($substr === false) {
+                    if ($substr === false) {
 
                         return false;
                     }
@@ -156,7 +158,7 @@ trait ParserTrait
 
                     $substr = static::_close($string, $string[$startPosition], $string[$startPosition], $startPosition, $endPosition);
 
-                    if($substr === false) {
+                    if ($substr === false) {
 
                         return false;
                     }

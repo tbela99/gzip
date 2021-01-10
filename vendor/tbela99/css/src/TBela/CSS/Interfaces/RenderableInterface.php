@@ -31,5 +31,12 @@ interface RenderableInterface {
     /**
      * @return string[]|null
      */
+
     public function getLeadingComments();
+
+    /**
+     * return the ast
+     * @return \stdClass
+     */
+    public function getAst();
 }

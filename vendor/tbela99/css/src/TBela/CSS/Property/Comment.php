@@ -124,4 +124,19 @@ class Comment implements ArrayAccess, RenderableInterface {
     {
         return null;
     }
+
+    /**
+     * @inheritDoc
+     */
+
+    /**
+     * @inheritDoc
+     */
+    public function getAst()
+    {
+        return (object) array_filter(get_object_vars($this), function ($value) {
+
+            return !is_null($value);
+        });
+    }
 }

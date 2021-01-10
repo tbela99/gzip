@@ -459,12 +459,14 @@ class CSSHelper
 		}
 
 		$headStyle->removeChildren();
+		$style = '';
 
 		foreach ($links as $key => $blob) {
 
 			if (!empty($blob['style'])) {
 
-				$headStyle->appendCss(implode('', $blob['style']));
+				$style .= implode('', $blob['style']);
+//				$headStyle->appendCss(implode('', $blob['style']));
 				unset($links[$key]['style']);
 			}
 		}
@@ -476,10 +478,18 @@ class CSSHelper
 		$body_string = '';
 		$noscript = '';
 
-		if ($headStyle->hasChildren()) {
+		if ($style !== '') {
 
-			$headStyle->deduplicate();
-			$head_string .= '<style>' . $parseUrls($cssRenderer->render($headStyle)) . '</style>';
+			var_dump($style);
+			die;
+			
+			$headStyle->appendCss($style);
+
+			if ($headStyle->hasChildren()) {
+
+				$headStyle->deduplicate();
+				$head_string .= '<style>' . $parseUrls($cssRenderer->render($headStyle)) . '</style>';
+			}
 		}
 
 		foreach ($links as $position => $blob) {
@@ -556,33 +566,33 @@ class CSSHelper
 			$html = str_replace($search, $replace, $html);
 		}
 
-		if (!empty($options['imagecssresize'])) {
-
-			$html = preg_replace_callback('#<html([>]*)>#', function ($matches) {
-
-				preg_match_all(GZipHelper::regexAttr, $matches[1], $attr);
-
-				$attributes = [];
-
-				foreach ($attr[2] as $key => $at) {
-
-					$attributes[$at] = $attr[6][$key];
-				}
-
-				$attributes['class'] = isset($attributes['class']) ? $attributes['class'] . ' ' : '';
-				$attributes['class'] .= 'resize-css-images';
-
-				$result = '<html';
-
-				foreach ($attributes as $key => $value) {
-
-					$result .= ' ' . $key . '="' . $value . '"';
-				}
-
-				return $result . '>';
-
-			}, $html, 1);
-		}
+//		if (!empty($options['imagecssresize'])) {
+//
+//			$html = preg_replace_callback('#<html([>]*)>#', function ($matches) {
+//
+//				preg_match_all(GZipHelper::regexAttr, $matches[1], $attr);
+//
+//				$attributes = [];
+//
+//				foreach ($attr[2] as $key => $at) {
+//
+//					$attributes[$at] = $attr[6][$key];
+//				}
+//
+//				$attributes['class'] = isset($attributes['class']) ? $attributes['class'] . ' ' : '';
+//				$attributes['class'] .= 'resize-css-images';
+//
+//				$result = '<html';
+//
+//				foreach ($attributes as $key => $value) {
+//
+//					$result .= ' ' . $key . '="' . $value . '"';
+//				}
+//
+//				return $result . '>';
+//
+//			}, $html, 1);
+//		}
 
 		return $html;
 	}

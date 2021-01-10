@@ -4,6 +4,7 @@ namespace TBela\CSS;
 
 use Exception;
 use stdClass;
+use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Parser\Helper;
 use TBela\CSS\Parser\ParserTrait;
@@ -210,7 +211,7 @@ class Parser
     public function setOptions(array $options)
     {
 
-        foreach (array_keys($this->options) as $key) {
+        foreach ($this->options as $key => $v) {
 
             if (isset($options[$key])) {
 
@@ -242,19 +243,20 @@ class Parser
     {
 
         if (is_null($this->ast)) {
-//
+
             $this->doParse();
         }
 
-        if (is_null($this->element)) {
-
-            $this->element = Element::getInstance($this->ast)->deduplicate($this->options);
-        }
+//        if (is_null($this->element)) {
 //
+//            $this->element = Element::getInstance(json_encode(json_decode($this->ast)));
+//        }
+
+
         /**
          * @var RuleListInterface $element
          */
-        $element = clone $this->element;
+        $element = Element::getInstance($this->ast);
 
         if (empty($this->options['sourcemap'])) {
 
@@ -266,6 +268,233 @@ class Parser
         }
 
         return $element;
+    }
+
+    public function getAst() {
+
+        if (is_null($this->ast)) {
+
+            $this->doParse();
+        }
+
+        return clone $this->ast;
+    }
+
+    public function setAst(ElementInterface $element) {
+
+        $this->ast = $element->getAst();
+    }
+
+    public function deduplicate($ast)
+    {
+
+        if ((empty($this->options['allow_duplicate_rules']) ||
+            $this->options['allow_duplicate_rules'] !== true ||
+            empty($this->options['allow_duplicate_declarations']) || $this->options['allow_duplicate_declarations'] !== true)) {
+
+            switch ($ast->type) {
+
+                case 'AtRule':
+
+                    return !empty($ast->hasDeclarations) ? $this->deduplicateDeclarations($ast) : $this->deduplicateRules($ast);
+
+                case 'Stylesheet':
+
+                    return $this->deduplicateRules($ast);
+
+                case 'Rule':
+
+                    return $this->deduplicateDeclarations($ast);
+            }
+        }
+
+        return $ast;
+    }
+
+    /**
+     * compute signature
+     * @param stdClass $ast
+     * @return string
+     * @ignore
+     */
+    protected function computeSignature($ast)
+    {
+
+        $signature = 'type:' . $ast->type;
+
+        $name = isset($ast->name) ? $ast->name : null;
+
+        if (isset($name)) {
+
+            $signature .= ':name:' . $name;
+        }
+
+        $value = isset($ast->value) ? $ast->value : null;
+
+        if (isset($value)) {
+
+            $value = is_string($value) ? Value::parse($value, $name) : $value;
+            $signature .= ':value:'.$value->render(['convert_color' => 'hex', 'compress' => true]);
+        }
+
+        $selector = isset($ast->selector) ? $ast->selector : null;
+
+        if (isset($selector)) {
+
+            $signature .= ':selector:' . (is_array($selector) ? implode(',', $selector) : $selector);
+        }
+
+        $vendor = isset($ast->vendor) ? $ast->vendor : null;
+
+        if (isset($vendor)) {
+
+            $signature .= ':vendor:' . $vendor;
+        }
+
+        return $signature;
+    }
+
+    /**
+     * @param stdClass $ast
+     * @return stdClass
+     */
+    protected function deduplicateRules($ast)
+    {
+        if (isset($ast->children)) {
+
+            if (empty($this->options['allow_duplicate_rules']) ||
+                is_array($this->options['allow_duplicate_rules'])) {
+
+                $signature = '';
+                $total = count($ast->children);
+                $el = null;
+
+                $allowed = is_array($this->options['allow_duplicate_rules']) ? $this->options['allow_duplicate_rules'] : [];
+
+                while ($total--) {
+
+                    if ($total > 0) {
+
+                        $el = $ast->children[$total];
+
+                        if ($el->type == 'Comment') {
+
+                            continue;
+                        }
+
+                        $next = $ast->children[$total - 1];
+
+                        while ($total > 1 && (string) $next->type == 'Comment') {
+
+                            $next = $ast->children[--$total - 1];
+                        }
+
+                        if (!empty($allowed) &&
+                            (
+                                ($next->type == 'AtRule' && in_array($next->name, $allowed)) ||
+                                ($next->type == 'Rule' &&
+                                    array_intersect(is_array($next->selector) ? $next->selector : [$next->selector], $allowed))
+                            )
+                        ) {
+
+                            continue;
+                        }
+
+                        if ($signature === '') {
+
+                            $signature = $this->computeSignature($el);
+                        }
+
+                        $nextSignature = $this->computeSignature($next);
+
+                        while ($signature == $nextSignature) {
+
+                            array_splice($ast->children, $total - 1, 1);
+
+                            if ($el->type != 'Declaration') {
+
+                                $next->parent = null;
+                                array_splice($el->children, 0, 0, $next->children);
+
+                                if (isset($next->location) && isset($el->location)) {
+
+                                    $el->location->start = $next->location->start;
+                                }
+                            }
+
+                            if ($total == 1) {
+
+                                break;
+                            }
+
+                            $next = $ast->children[--$total - 1];
+
+                            while ($total > 1 && $next->type == 'Comment') {
+
+                                $next = $ast->children[--$total - 1];
+                            }
+
+                            $nextSignature = $this->computeSignature($next);
+                        }
+
+                        $signature = $nextSignature;
+                    }
+                }
+            }
+
+            foreach ($ast->children as $key => $element) {
+
+                $ast->children[$key] = $this->deduplicate($element);
+            }
+        }
+
+        return $ast;
+    }
+
+    /**
+     * @param stdClass $ast
+     * @return stdClass
+     */
+    protected function deduplicateDeclarations($ast)
+    {
+
+        if (!empty($this->options['allow_duplicate_declarations']) && !empty($ast->children)) {
+
+            $elements = $ast->children;
+
+            $total = count($elements);
+
+            $hash = [];
+            $exceptions = is_array($this->options['allow_duplicate_declarations']) ? $this->options['allow_duplicate_declarations'] : !empty($this->options['allow_duplicate_declarations']);
+
+            while ($total--) {
+
+                $declaration = $ast->children[$total];
+
+                if ($declaration->type == 'Comment') {
+
+                    continue;
+                }
+
+                $signature = $this->computeSignature($declaration);
+
+                if ($exceptions === true || isset($exceptions[$signature])) {
+
+                    continue;
+                }
+
+                if (isset($hash[$signature])) {
+
+                    $declaration->parent = null;
+                    array_splice($ast->children, $total, 1);
+                    continue;
+                }
+
+                $hash[$signature] = 1;
+            }
+        }
+
+        return $ast;
     }
 
     /**
@@ -317,7 +546,7 @@ class Parser
 
             return 'url(' . preg_replace('#^' . preg_quote(Helper::getCurrentDirectory() . '/', '#') . '#', '', $file) . ')';
         },
-            //resolve import directive, note import directive in imported css will NOT be processed
+            // resolve import directive, note import directive in imported css will NOT be processed
             $this->parseImport($css, $path)
         );
 
@@ -531,7 +760,7 @@ class Parser
 
                 } else {
 
-                    $node = $this->parseSelector($substr, clone $this->currentPosition);
+                    $node = $this->parseRule($substr, clone $this->currentPosition);
                 }
 
                 if ($node === false) {
@@ -587,7 +816,7 @@ class Parser
         $this->ast->location->end->index = max(0, $this->currentPosition->index - 1);
         $this->ast->location->end->column = max($this->currentPosition->column - 1, 1);
 
-        return $this->ast;
+        return $this->ast = $this->deduplicate($this->ast);
     }
 
     /**
@@ -764,6 +993,16 @@ class Parser
             unset($data['vendor']);
         }
 
+        if (empty($data['isLeaf'])) {
+
+            unset($data['isLeaf']);
+        }
+
+        if (empty($data['hasDeclarations'])) {
+
+            unset($data['hasDeclarations']);
+        }
+
         return $this->doParseComments((object)$data);
     }
 
@@ -839,7 +1078,7 @@ class Parser
      * @return false|stdClass
      * @ignore
      */
-    protected function parseSelector($rule, $position)
+    protected function parseRule($rule, $position)
     {
 
         $selector = rtrim($rule, "{\n\t\r ");
@@ -1037,5 +1276,20 @@ class Parser
     {
 
         return $this->errors;
+    }
+
+    public function __toString() {
+
+        if (!isset($this->ast)) {
+
+            $this->getAst();
+        }
+
+        if (isset($this->ast)) {
+
+            return (new Renderer())->renderAst($this->ast);
+        }
+
+        return '';
     }
 }

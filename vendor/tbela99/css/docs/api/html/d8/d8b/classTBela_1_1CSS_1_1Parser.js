@@ -1,12 +1,14 @@
 var classTBela_1_1CSS_1_1Parser =
 [
     [ "__construct", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a6dc05a9ab310b6881a78866dc1db3510", null ],
+    [ "__toString", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a39192f15f9c438b763f4154d8f94be78", null ],
     [ "analyse", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a91a54d88bb56a4a971eee063cc33d2e3", null ],
     [ "append", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a8ca09238379da7c848f12e8f2335d463", null ],
     [ "appendContent", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#ae8f4476aff51c034b38d01cd7bca7e1e", null ],
     [ "doParse", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a5a261eaed23d8fddeff22347f8a10f8e", null ],
     [ "doParseComments", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a28ba46df7d5ed410278abadc7e6a2a4a", null ],
     [ "expand", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a5b64d38d85347b0293d4fc592f3ad3bb", null ],
+    [ "getAst", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a85f196c5c9b78aaaffcacf5cb9489c12", null ],
     [ "getBlockType", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a8fd676df3fea2b492e6f2267b5e16d33", null ],
     [ "getContent", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a65f8f4c7d256bcb5da62c9d1b49c5cd9", null ],
     [ "getErrors", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#aa6e2f81f666a24121daf8b3851031b08", null ],
@@ -20,7 +22,7 @@ var classTBela_1_1CSS_1_1Parser =
     [ "parseComment", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a934b00ed1b620c5f7298b48caf91cf71", null ],
     [ "parseDeclarations", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#aceb102b2ac12924d3b548df2ef87dcea", null ],
     [ "parseImport", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#aa645e54616f6f07a62f21b0e24e152e2", null ],
-    [ "parseSelector", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a53e17cf2b3c1626affa5bb4c8885a71a", null ],
+    [ "parseRule", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#ae53e81934397b69d063eaeb437d4b383", null ],
     [ "parseVendor", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#a696308a77ac4dcaba558816fea8897bc", null ],
     [ "setContent", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#ab48068ed05486f12f17fadd6e2ca348a", null ],
     [ "setOptions", "d8/d8b/classTBela_1_1CSS_1_1Parser.html#af4e4fd8936810411640833eaed052d81", null ],

@@ -11,39 +11,45 @@ var hierarchy =
     [ "TBela\\CSS\\Event\\EventInterface", "d0/d24/interfaceTBela_1_1CSS_1_1Event_1_1EventInterface.html", [
       [ "TBela\\CSS\\Event\\Event", "dc/dc7/classTBela_1_1CSS_1_1Event_1_1Event.html", [
         [ "TBela\\CSS\\Traverser", "d8/d60/classTBela_1_1CSS_1_1Traverser.html", null ]
-      ] ],
-      [ "TBela\\CSS\\Renderer", "df/d08/classTBela_1_1CSS_1_1Renderer.html", null ]
+      ] ]
     ] ],
     [ "TBela\\CSS\\Parser\\Helper", "d3/db4/classTBela_1_1CSS_1_1Parser_1_1Helper.html", null ],
-    [ "TBela\\CSS\\Query\\Parser", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html", null ],
     [ "TBela\\CSS\\Parser", "d8/d8b/classTBela_1_1CSS_1_1Parser.html", null ],
+    [ "TBela\\CSS\\Query\\Parser", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html", null ],
     [ "TBela\\CSS\\Property\\PropertyMap", "d0/d88/classTBela_1_1CSS_1_1Property_1_1PropertyMap.html", null ],
     [ "TBela\\CSS\\Property\\PropertySet", "d7/d6d/classTBela_1_1CSS_1_1Property_1_1PropertySet.html", null ],
     [ "TBela\\CSS\\Query\\QueryInterface", "df/d9f/interfaceTBela_1_1CSS_1_1Query_1_1QueryInterface.html", [
-      [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", [
-        [ "TBela\\CSS\\Element\\Comment", "d6/dfd/classTBela_1_1CSS_1_1Element_1_1Comment.html", null ],
-        [ "TBela\\CSS\\Element\\Declaration", "d8/da7/classTBela_1_1CSS_1_1Element_1_1Declaration.html", null ],
-        [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", [
-          [ "TBela\\CSS\\Element\\Rule", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html", null ],
-          [ "TBela\\CSS\\Element\\RuleSet", "d9/d56/classTBela_1_1CSS_1_1Element_1_1RuleSet.html", [
-            [ "TBela\\CSS\\Element\\AtRule", "d7/d0d/classTBela_1_1CSS_1_1Element_1_1AtRule.html", null ],
-            [ "TBela\\CSS\\Element\\Stylesheet", "d2/d6b/classTBela_1_1CSS_1_1Element_1_1Stylesheet.html", null ]
+      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", [
+        [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", [
+          [ "TBela\\CSS\\Element\\Comment", "d6/dfd/classTBela_1_1CSS_1_1Element_1_1Comment.html", null ],
+          [ "TBela\\CSS\\Element\\Declaration", "d8/da7/classTBela_1_1CSS_1_1Element_1_1Declaration.html", null ],
+          [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", [
+            [ "TBela\\CSS\\Element\\Rule", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html", null ],
+            [ "TBela\\CSS\\Element\\RuleSet", "d9/d56/classTBela_1_1CSS_1_1Element_1_1RuleSet.html", [
+              [ "TBela\\CSS\\Element\\AtRule", "d7/d0d/classTBela_1_1CSS_1_1Element_1_1AtRule.html", null ],
+              [ "TBela\\CSS\\Element\\Stylesheet", "d2/d6b/classTBela_1_1CSS_1_1Element_1_1Stylesheet.html", null ]
+            ] ]
           ] ]
+        ] ],
+        [ "TBela\\CSS\\Interfaces\\RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", [
+          [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", null ]
         ] ]
       ] ]
     ] ],
     [ "TBela\\CSS\\Interfaces\\RenderableInterface", "d1/d43/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderableInterface.html", [
-      [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", null ],
+      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
       [ "TBela\\CSS\\Property\\Comment", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html", null ],
       [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ]
     ] ],
     [ "TBela\\CSS\\Interfaces\\RenderablePropertyInterface", "d1/d3e/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderablePropertyInterface.html", [
       [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ]
     ] ],
+    [ "TBela\\CSS\\Renderer", "df/d08/classTBela_1_1CSS_1_1Renderer.html", null ],
     [ "TBela\\CSS\\Query\\TokenInterface", "db/d84/interfaceTBela_1_1CSS_1_1Query_1_1TokenInterface.html", [
       [ "TBela\\CSS\\Query\\Token", "dd/db4/classTBela_1_1CSS_1_1Query_1_1Token.html", [
         [ "TBela\\CSS\\Query\\TokenSelect", "d9/d61/classTBela_1_1CSS_1_1Query_1_1TokenSelect.html", null ],
-        [ "TBela\\CSS\\Query\\TokenSelector", "dd/d6e/classTBela_1_1CSS_1_1Query_1_1TokenSelector.html", null ]
+        [ "TBela\\CSS\\Query\\TokenSelector", "dd/d6e/classTBela_1_1CSS_1_1Query_1_1TokenSelector.html", null ],
+        [ "TBela\\CSS\\Query\\TokenSelectorValueSeparator", "d6/d63/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueSeparator.html", null ]
       ] ],
       [ "TBela\\CSS\\Query\\TokenList", "da/d01/classTBela_1_1CSS_1_1Query_1_1TokenList.html", null ],
       [ "TBela\\CSS\\Query\\TokenSelectInterface", "d7/d86/interfaceTBela_1_1CSS_1_1Query_1_1TokenSelectInterface.html", [
@@ -77,6 +83,9 @@ var hierarchy =
       ] ],
       [ "TBela\\CSS\\Query\\TokenSelectorValueAttributeFunctionNot", "dd/dae/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeFunctionNot.html", null ],
       [ "TBela\\CSS\\Query\\TokenSelectorValueAttributeIndex", "d1/d6f/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeIndex.html", null ],
+      [ "TBela\\CSS\\Query\\TokenSelectorValueAttributeSelector", "d9/d03/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeSelector.html", null ],
+      [ "TBela\\CSS\\Query\\TokenSelectorValueAttributeString", "df/d88/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueAttributeString.html", null ],
+      [ "TBela\\CSS\\Query\\TokenSelectorValueSeparator", "d6/d63/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueSeparator.html", null ],
       [ "TBela\\CSS\\Query\\TokenSelectorValueWhitespace", "d1/d75/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueWhitespace.html", null ],
       [ "TBela\\CSS\\Query\\TokenWhitespace", "de/dc6/classTBela_1_1CSS_1_1Query_1_1TokenWhitespace.html", null ]
     ] ],
@@ -112,7 +121,7 @@ var hierarchy =
       [ "TBela\\CSS\\Value\\Whitespace", "d6/d86/classTBela_1_1CSS_1_1Value_1_1Whitespace.html", null ]
     ] ],
     [ "ArrayAccess", null, [
-      [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", null ],
+      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
       [ "TBela\\CSS\\Property\\Comment", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html", null ],
       [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ]
     ] ],
@@ -123,14 +132,12 @@ var hierarchy =
       [ "TBela\\CSS\\Parser\\SyntaxError", "da/dc4/classTBela_1_1CSS_1_1Parser_1_1SyntaxError.html", null ]
     ] ],
     [ "IteratorAggregate", null, [
-      [ "TBela\\CSS\\Interfaces\\RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", [
-        [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", null ]
-      ] ],
+      [ "TBela\\CSS\\Interfaces\\RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", null ],
       [ "TBela\\CSS\\Property\\PropertyList", "d9/dd3/classTBela_1_1CSS_1_1Property_1_1PropertyList.html", null ],
       [ "TBela\\CSS\\Value\\Set", "dd/d96/classTBela_1_1CSS_1_1Value_1_1Set.html", null ]
     ] ],
     [ "JsonSerializable", null, [
-      [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", null ],
+      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
       [ "TBela\\CSS\\Parser\\Position", "d1/dd8/classTBela_1_1CSS_1_1Parser_1_1Position.html", null ],
       [ "TBela\\CSS\\Parser\\SourceLocation", "d2/d99/classTBela_1_1CSS_1_1Parser_1_1SourceLocation.html", null ],
       [ "TBela\\CSS\\Value\\Set", "dd/d96/classTBela_1_1CSS_1_1Value_1_1Set.html", null ]

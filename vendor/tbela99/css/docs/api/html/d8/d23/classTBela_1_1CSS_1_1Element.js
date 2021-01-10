@@ -8,7 +8,7 @@ var classTBela_1_1CSS_1_1Element =
     [ "createLocation", "d8/d23/classTBela_1_1CSS_1_1Element.html#ad5cf332dfeabec3611fc1a894ae464c4", null ],
     [ "deduplicate", "d8/d23/classTBela_1_1CSS_1_1Element.html#af8acb145341c76e049f46a61d85eb0cf", null ],
     [ "deduplicateDeclarations", "d8/d23/classTBela_1_1CSS_1_1Element.html#a58da3032ba5a845ffbde1d12b2bebe54", null ],
-    [ "deduplicateRules", "d8/d23/classTBela_1_1CSS_1_1Element.html#a1699e013a7f15070d721e5befefee4a5", null ],
+    [ "getAst", "d8/d23/classTBela_1_1CSS_1_1Element.html#a3828f9f4bace83b2797f4581dac3d2e0", null ],
     [ "getLeadingComments", "d8/d23/classTBela_1_1CSS_1_1Element.html#afa55b3665c687808ad92369c7311adb0", null ],
     [ "getLocation", "d8/d23/classTBela_1_1CSS_1_1Element.html#a54921bc409af615357d422370037b568", null ],
     [ "getParent", "d8/d23/classTBela_1_1CSS_1_1Element.html#aa47c87c7479d427c45ed45738fb48766", null ],

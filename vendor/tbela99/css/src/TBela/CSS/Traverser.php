@@ -3,6 +3,7 @@
 namespace TBela\CSS;
 
 use TBela\CSS\Event\Event;
+use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 
 class Traverser extends Event
@@ -12,14 +13,15 @@ class Traverser extends Event
     const IGNORE_CHILDREN = 2;
 
     /**
-     * @param Element $element
-     * @return Element|null
+     * @param ElementInterface $element
+     * @return ElementInterface|null
      */
-    public function traverse(Element $element) {
+    public function traverse(ElementInterface $element) {
 
+        $element = clone $element;
         $result = $this->doTraverse($element);
 
-        if (!($result instanceof Element)) {
+        if (!($result instanceof ElementInterface)) {
 
             return null;
         }
@@ -27,7 +29,7 @@ class Traverser extends Event
         return $result;
     }
 
-    protected function process(Element $node, array $data)
+    protected function process(ElementInterface $node, array $data)
     {
 
         foreach ($data as $res) {
@@ -42,7 +44,7 @@ class Traverser extends Event
                 return static::IGNORE_CHILDREN;
             }
 
-            if ($res instanceof Element) {
+            if ($res instanceof ElementInterface) {
 
                 if ($res !== $node) {
 
@@ -54,7 +56,7 @@ class Traverser extends Event
         return $node;
     }
 
-    protected function doTraverse(Element $node)
+    protected function doTraverse(ElementInterface $node)
     {
 
         $result = $this->process($node, $this->emit('enter', $node));
@@ -66,7 +68,7 @@ class Traverser extends Event
 
         $ignore_children = $result === static::IGNORE_CHILDREN;
 
-        if ($result instanceof Element) {
+        if ($result instanceof ElementInterface) {
 
             if ($result !== $node) {
 
@@ -90,7 +92,7 @@ class Traverser extends Event
 
                 $temp_c = $this->doTraverse($child);
 
-                if ($temp_c instanceof Element) {
+                if ($temp_c instanceof ElementInterface) {
 
                     $node->append($temp_c);
                 } else if ($temp_c !== static::IGNORE_NODE) {
@@ -102,6 +104,11 @@ class Traverser extends Event
                     }
 
                     $node->append($child);
+                }
+
+                else if (isset($child['parent'])) {
+
+                    $child->getParent()->remove($child);
                 }
             }
         }
@@ -115,7 +122,7 @@ class Traverser extends Event
 
         $ignore_children = $result === static::IGNORE_CHILDREN;
 
-        if ($result instanceof Element) {
+        if ($result instanceof ElementInterface) {
 
             if ($result !== $node) {
 

@@ -8,6 +8,6 @@ var searchData=
   ['parsecomment',['parseComment',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a934b00ed1b620c5f7298b48caf91cf71',1,'TBela::CSS::Parser']]],
   ['parsedeclarations',['parseDeclarations',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#aceb102b2ac12924d3b548df2ef87dcea',1,'TBela::CSS::Parser']]],
   ['parseimport',['parseImport',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#aa645e54616f6f07a62f21b0e24e152e2',1,'TBela::CSS::Parser']]],
-  ['parseselector',['parseSelector',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a53e17cf2b3c1626affa5bb4c8885a71a',1,'TBela::CSS::Parser']]],
+  ['parserule',['parseRule',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#ae53e81934397b69d063eaeb437d4b383',1,'TBela::CSS::Parser']]],
   ['parsevendor',['parseVendor',['../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a696308a77ac4dcaba558816fea8897bc',1,'TBela::CSS::Parser']]]
 ];

@@ -2,6 +2,7 @@ var classTBela_1_1CSS_1_1Property_1_1Property =
 [
     [ "__construct", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#a69b712f23e57c41144edfac21229ba04", null ],
     [ "__toString", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#a5dbaa67198e75e054531d1339c3eafe7", null ],
+    [ "getAst", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#afd930ac967392f697efd9639e56e34bc", null ],
     [ "getHash", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#afa0891055f899a7caa3b5ac02c1cd266", null ],
     [ "getLeadingComments", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#af526ce44ce8e2d82a1e994d9705fd64d", null ],
     [ "getName", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html#a416a60aa76b6036c9a732c2913e0bce5", null ],
