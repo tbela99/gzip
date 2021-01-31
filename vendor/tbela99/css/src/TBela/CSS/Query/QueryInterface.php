@@ -2,7 +2,9 @@
 
 namespace TBela\CSS\Query;
 
-interface QueryInterface
+use TBela\CSS\Interfaces\RenderableInterface;
+
+interface QueryInterface extends RenderableInterface
 {
 
     /**

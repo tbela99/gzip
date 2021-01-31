@@ -2,6 +2,8 @@ var classTBela_1_1CSS_1_1Element =
 [
     [ "__construct", "d8/d23/classTBela_1_1CSS_1_1Element.html#aea4d46ca45221da45fde7b1a42509795", null ],
     [ "__clone", "d8/d23/classTBela_1_1CSS_1_1Element.html#a525f2f5e9b3f6f486458194d34148b8b", null ],
+    [ "__get", "d8/d23/classTBela_1_1CSS_1_1Element.html#a2dada0995f0afdef4402931ce3a17efb", null ],
+    [ "__set", "d8/d23/classTBela_1_1CSS_1_1Element.html#a72a0fe18b3c1940cd4b797c2c567fad8", null ],
     [ "__toString", "d8/d23/classTBela_1_1CSS_1_1Element.html#ada9955e8ed0f7b8181be8cc922cc911e", null ],
     [ "computeSignature", "d8/d23/classTBela_1_1CSS_1_1Element.html#a76a17ab30145f5df1fddd11b57444405", null ],
     [ "copy", "d8/d23/classTBela_1_1CSS_1_1Element.html#ae02c6a2803d7b6aa9cbe83ef5287199d", null ],
@@ -18,6 +20,8 @@ var classTBela_1_1CSS_1_1Element =
     [ "getValue", "d8/d23/classTBela_1_1CSS_1_1Element.html#ac5e20129020ae7c41ebf252ff9ac77ba", null ],
     [ "jsonSerialize", "d8/d23/classTBela_1_1CSS_1_1Element.html#af8422a3b077610f6ad43102fd798eb78", null ],
     [ "query", "d8/d23/classTBela_1_1CSS_1_1Element.html#add06304fde3576813e253f9e12f629ea", null ],
+    [ "queryByClassNames", "d8/d23/classTBela_1_1CSS_1_1Element.html#a05cac710db9aeb8363904badd286cca6", null ],
+    [ "setAst", "d8/d23/classTBela_1_1CSS_1_1Element.html#a9f93722855f5472d05efbc8e1a656291", null ],
     [ "setComments", "d8/d23/classTBela_1_1CSS_1_1Element.html#aeec1fffb8640f4c29875a855f6e81a70", null ],
     [ "setLeadingComments", "d8/d23/classTBela_1_1CSS_1_1Element.html#a48ce89bb95d730fb4ca870a8cf3422ac", null ],
     [ "setLocation", "d8/d23/classTBela_1_1CSS_1_1Element.html#a0d891db217135c946e19b80c7a7a85bb", null ],

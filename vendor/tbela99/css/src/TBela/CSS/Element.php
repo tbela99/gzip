@@ -127,6 +127,22 @@ abstract class Element implements ElementInterface  {
         return (new Traverser())->on($event, $fn)->traverse($this);
     }
 
+    public function __get($name) {
+
+        if (is_callable([$this, "get$name"])) {
+
+            return $this->{"get$name"}();
+        }
+    }
+
+    public function __set($name, $value) {
+
+        if (is_callable([$this, "set$name"])) {
+
+            return $this->{"set$name"}($value);
+        }
+    }
+
     /**
      *
      * @inheritDoc
@@ -137,6 +153,17 @@ abstract class Element implements ElementInterface  {
 
         return (new Evaluator())->evaluate($query, $this);
     }
+
+    /**
+     *
+     * @inheritDoc
+     * @throws Parser\SyntaxError
+     */
+    public function queryByClassNames($query) {
+
+        return (new Evaluator())->evaluateByClassName($query, $this);
+    }
+
     /**
      * @inheritDoc
      */

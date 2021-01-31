@@ -14,32 +14,32 @@ LIB.ready((function(e) {
     function t() {
         LIB.images.lazy(".image-placeholder").on({
             /**
-			 *
-			 * @param {HTMLImageElement} img
-			 * @param {HTMLImageElement} oldImage
-			 */
+             *
+             * @param {HTMLImageElement} img
+             * @param {HTMLImageElement} oldImage
+             */
             preload(e, t) {
                 const r = !("currentSrc" in e);
                 r ? t.insertAdjacentHTML("beforebegin", '<span class=image-placeholder-wrapper><span class=image-placeholder-svg><svg width=100% height=100% version=1.1 xmlns=http://www.w3.org/2000/svg ><image xlink:href="' + (e.currentSrc || e.src) + '" width=100% height=100% filter=url(#blur-lqip) x=0 y=0 />') : t.insertAdjacentHTML("beforebegin", "<span class=image-placeholder-wrapper><span class=image-placeholder-opacity><span class=image-placeholder-element style=background-image:url(" + (e.currentSrc || e.src) + ")>");
-                const s = t.previousElementSibling;
+                const n = t.previousElementSibling;
                 if (r) {
                     if ("function" != typeof window.CustomEvent) {
                         window.Event.prototype;
                     }
-                    const t = s.querySelector("svg");
+                    const t = n.querySelector("svg");
                     //   const svgImage = container.querySelector('svg image');
-                                        function n() {
+                                        function s() {
                         const e = this.height, r = this.width;
                         t.setAttribute("height", e), t.setAttribute("width", r);
                     }
-                    e.addEventListener("sourcechange", n), e.addEventListener("load", n);
+                    e.addEventListener("sourcechange", s), e.addEventListener("load", s);
                 }
                 t.classList.remove("image-placeholder", "image-placeholder-lqip", "image-placeholder-svg"), 
-                s.insertBefore(t, s.firstElementChild);
+                n.insertBefore(t, n.firstElementChild);
             },
             load: r,
-            error(e, t, s) {
-                r(t, s);
+            error(e, t, n) {
+                r(t, n);
             }
         });
     }
@@ -55,7 +55,6 @@ LIB.ready((function(e) {
     }
     if (
     // intersection-observer.min.js
-    console.log(Array.from(document.querySelectorAll("[data-res-bg]")).map(e => JSON.parse(e.dataset.resBg).map(e => e.split("-", 2)))), 
     "srcset" in new Image || 
     //    try {
     document.body.insertAdjacentHTML("beforeend", "<svg xmlns=http://www.w3.org/2000/svg width=1 height=1><defs><filter id=blur-lqip width=100% height=100% ><feGaussianBlur stdDeviation=20 /></filter></defs></svg>"), 

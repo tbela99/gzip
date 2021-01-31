@@ -8,7 +8,7 @@ var classTBela_1_1CSS_1_1Query_1_1Parser =
     [ "parse_path", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#aad7f74174ecca04191dbc7429dd5c23b", null ],
     [ "parse_selector", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#acff1c24e4b29b4d2cd706eec33b543da", null ],
     [ "parse_selectors", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#a98c509844317ba78eeff17ef545052d8", null ],
-    [ "split", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#acea40ee1986a71467ddb6b9dd859dc0d", null ],
+    [ "split", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#aaa54c616292d403412351693d0ac07b6", null ],
     [ "$last", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#aca88841fee55a32b4db0b9d7eceecf70", null ],
     [ "$position", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#a6882439cd680265135b3b70bdd04cfcc", null ],
     [ "$string", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html#aa5769edfbb0305e5dec336b6ca503eee", null ],

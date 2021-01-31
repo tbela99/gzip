@@ -34,7 +34,7 @@ var namespaceTBela =
         [ "PropertySet", "d7/d6d/classTBela_1_1CSS_1_1Property_1_1PropertySet.html", "d7/d6d/classTBela_1_1CSS_1_1Property_1_1PropertySet" ]
       ] ],
       [ "Query", null, [
-        [ "Evaluator", "d8/d89/classTBela_1_1CSS_1_1Query_1_1Evaluator.html", null ],
+        [ "Evaluator", "d8/d89/classTBela_1_1CSS_1_1Query_1_1Evaluator.html", "d8/d89/classTBela_1_1CSS_1_1Query_1_1Evaluator" ],
         [ "Parser", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser" ],
         [ "QueryInterface", "df/d9f/interfaceTBela_1_1CSS_1_1Query_1_1QueryInterface.html", "df/d9f/interfaceTBela_1_1CSS_1_1Query_1_1QueryInterface" ],
         [ "Token", "dd/db4/classTBela_1_1CSS_1_1Query_1_1Token.html", null ],

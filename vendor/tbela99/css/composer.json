@@ -1,7 +1,7 @@
 {
   "name": "tbela99/css",
   "description": "A CSS parser and minifier written in PHP",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "type": "library",
   "keywords": [
     "CSS",

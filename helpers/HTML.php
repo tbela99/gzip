@@ -28,7 +28,7 @@ class HTMLHelper {
 		$script = '';
 		$css = '';
 
-		if ($hasScript || !empty($options['imagesvgplaceholder'])) {
+		if ($hasScript || !empty($options['imagesvgplaceholder']) || !empty($options['inlineimageconvert'])) {
 
 			$script .= file_get_contents(__DIR__.'/../js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
 			$script .= file_get_contents(__DIR__.'/../loader'.$debug.'.js');
@@ -37,6 +37,11 @@ class HTMLHelper {
 
 				$script .=  file_get_contents(__DIR__.'/../imagesloader'.$debug.'.js');
 				$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/../css/images.css').'</style>';
+			}
+
+			if (!empty($options['inlineimageconvert'])) {
+
+				$script .=  file_get_contents(__DIR__.'/../bgstyles'.$debug.'.js');
 			}
 		}
 

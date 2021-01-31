@@ -18,28 +18,27 @@ var hierarchy =
     [ "TBela\\CSS\\Query\\Parser", "da/df5/classTBela_1_1CSS_1_1Query_1_1Parser.html", null ],
     [ "TBela\\CSS\\Property\\PropertyMap", "d0/d88/classTBela_1_1CSS_1_1Property_1_1PropertyMap.html", null ],
     [ "TBela\\CSS\\Property\\PropertySet", "d7/d6d/classTBela_1_1CSS_1_1Property_1_1PropertySet.html", null ],
-    [ "TBela\\CSS\\Query\\QueryInterface", "df/d9f/interfaceTBela_1_1CSS_1_1Query_1_1QueryInterface.html", [
-      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", [
-        [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", [
-          [ "TBela\\CSS\\Element\\Comment", "d6/dfd/classTBela_1_1CSS_1_1Element_1_1Comment.html", null ],
-          [ "TBela\\CSS\\Element\\Declaration", "d8/da7/classTBela_1_1CSS_1_1Element_1_1Declaration.html", null ],
-          [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", [
-            [ "TBela\\CSS\\Element\\Rule", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html", null ],
-            [ "TBela\\CSS\\Element\\RuleSet", "d9/d56/classTBela_1_1CSS_1_1Element_1_1RuleSet.html", [
-              [ "TBela\\CSS\\Element\\AtRule", "d7/d0d/classTBela_1_1CSS_1_1Element_1_1AtRule.html", null ],
-              [ "TBela\\CSS\\Element\\Stylesheet", "d2/d6b/classTBela_1_1CSS_1_1Element_1_1Stylesheet.html", null ]
+    [ "TBela\\CSS\\Interfaces\\RenderableInterface", "d1/d43/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderableInterface.html", [
+      [ "TBela\\CSS\\Property\\Comment", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html", null ],
+      [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ],
+      [ "TBela\\CSS\\Query\\QueryInterface", "df/d9f/interfaceTBela_1_1CSS_1_1Query_1_1QueryInterface.html", [
+        [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", [
+          [ "TBela\\CSS\\Element", "d8/d23/classTBela_1_1CSS_1_1Element.html", [
+            [ "TBela\\CSS\\Element\\Comment", "d6/dfd/classTBela_1_1CSS_1_1Element_1_1Comment.html", null ],
+            [ "TBela\\CSS\\Element\\Declaration", "d8/da7/classTBela_1_1CSS_1_1Element_1_1Declaration.html", null ],
+            [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", [
+              [ "TBela\\CSS\\Element\\Rule", "df/d73/classTBela_1_1CSS_1_1Element_1_1Rule.html", null ],
+              [ "TBela\\CSS\\Element\\RuleSet", "d9/d56/classTBela_1_1CSS_1_1Element_1_1RuleSet.html", [
+                [ "TBela\\CSS\\Element\\AtRule", "d7/d0d/classTBela_1_1CSS_1_1Element_1_1AtRule.html", null ],
+                [ "TBela\\CSS\\Element\\Stylesheet", "d2/d6b/classTBela_1_1CSS_1_1Element_1_1Stylesheet.html", null ]
+              ] ]
             ] ]
+          ] ],
+          [ "TBela\\CSS\\Interfaces\\RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", [
+            [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", null ]
           ] ]
-        ] ],
-        [ "TBela\\CSS\\Interfaces\\RuleListInterface", "d2/dc7/interfaceTBela_1_1CSS_1_1Interfaces_1_1RuleListInterface.html", [
-          [ "TBela\\CSS\\RuleList", "db/dd6/classTBela_1_1CSS_1_1RuleList.html", null ]
         ] ]
       ] ]
-    ] ],
-    [ "TBela\\CSS\\Interfaces\\RenderableInterface", "d1/d43/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderableInterface.html", [
-      [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
-      [ "TBela\\CSS\\Property\\Comment", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html", null ],
-      [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ]
     ] ],
     [ "TBela\\CSS\\Interfaces\\RenderablePropertyInterface", "d1/d3e/interfaceTBela_1_1CSS_1_1Interfaces_1_1RenderablePropertyInterface.html", [
       [ "TBela\\CSS\\Property\\Property", "da/db6/classTBela_1_1CSS_1_1Property_1_1Property.html", null ]
@@ -89,37 +88,6 @@ var hierarchy =
       [ "TBela\\CSS\\Query\\TokenSelectorValueWhitespace", "d1/d75/classTBela_1_1CSS_1_1Query_1_1TokenSelectorValueWhitespace.html", null ],
       [ "TBela\\CSS\\Query\\TokenWhitespace", "de/dc6/classTBela_1_1CSS_1_1Query_1_1TokenWhitespace.html", null ]
     ] ],
-    [ "TBela\\CSS\\Value", "dd/dca/classTBela_1_1CSS_1_1Value.html", [
-      [ "TBela\\CSS\\Value\\Color", "d0/d18/classTBela_1_1CSS_1_1Value_1_1Color.html", [
-        [ "TBela\\CSS\\Value\\OutlineColor", "d6/ddc/classTBela_1_1CSS_1_1Value_1_1OutlineColor.html", null ]
-      ] ],
-      [ "TBela\\CSS\\Value\\Comment", "d8/d66/classTBela_1_1CSS_1_1Value_1_1Comment.html", null ],
-      [ "TBela\\CSS\\Value\\CssAttribute", "d1/d80/classTBela_1_1CSS_1_1Value_1_1CssAttribute.html", null ],
-      [ "TBela\\CSS\\Value\\CSSFunction", "d1/d80/classTBela_1_1CSS_1_1Value_1_1CSSFunction.html", null ],
-      [ "TBela\\CSS\\Value\\CssParenthesisExpression", "db/de0/classTBela_1_1CSS_1_1Value_1_1CssParenthesisExpression.html", null ],
-      [ "TBela\\CSS\\Value\\CssString", "d3/d54/classTBela_1_1CSS_1_1Value_1_1CssString.html", [
-        [ "TBela\\CSS\\Value\\FontFamily", "d2/da5/classTBela_1_1CSS_1_1Value_1_1FontFamily.html", null ]
-      ] ],
-      [ "TBela\\CSS\\Value\\FontSize", "d5/d56/classTBela_1_1CSS_1_1Value_1_1FontSize.html", null ],
-      [ "TBela\\CSS\\Value\\FontStretch", "d1/de4/classTBela_1_1CSS_1_1Value_1_1FontStretch.html", null ],
-      [ "TBela\\CSS\\Value\\FontStyle", "d8/db9/classTBela_1_1CSS_1_1Value_1_1FontStyle.html", null ],
-      [ "TBela\\CSS\\Value\\FontVariant", "df/d1e/classTBela_1_1CSS_1_1Value_1_1FontVariant.html", null ],
-      [ "TBela\\CSS\\Value\\FontWeight", "d8/d56/classTBela_1_1CSS_1_1Value_1_1FontWeight.html", null ],
-      [ "TBela\\CSS\\Value\\LineHeight", "dd/dfa/classTBela_1_1CSS_1_1Value_1_1LineHeight.html", null ],
-      [ "TBela\\CSS\\Value\\Number", "da/d44/classTBela_1_1CSS_1_1Value_1_1Number.html", [
-        [ "TBela\\CSS\\Value\\Unit", "dd/dcf/classTBela_1_1CSS_1_1Value_1_1Unit.html", [
-          [ "TBela\\CSS\\Value\\OutlineWidth", "d5/df3/classTBela_1_1CSS_1_1Value_1_1OutlineWidth.html", null ]
-        ] ]
-      ] ],
-      [ "TBela\\CSS\\Value\\Operator", "db/d5f/classTBela_1_1CSS_1_1Value_1_1Operator.html", null ],
-      [ "TBela\\CSS\\Value\\OutlineStyle", "df/d55/classTBela_1_1CSS_1_1Value_1_1OutlineStyle.html", null ],
-      [ "TBela\\CSS\\Value\\Separator", "d1/d60/classTBela_1_1CSS_1_1Value_1_1Separator.html", null ],
-      [ "TBela\\CSS\\Value\\ShortHand", "d8/d5c/classTBela_1_1CSS_1_1Value_1_1ShortHand.html", [
-        [ "TBela\\CSS\\Value\\Font", "dc/d0a/classTBela_1_1CSS_1_1Value_1_1Font.html", null ],
-        [ "TBela\\CSS\\Value\\Outline", "da/db6/classTBela_1_1CSS_1_1Value_1_1Outline.html", null ]
-      ] ],
-      [ "TBela\\CSS\\Value\\Whitespace", "d6/d86/classTBela_1_1CSS_1_1Value_1_1Whitespace.html", null ]
-    ] ],
     [ "ArrayAccess", null, [
       [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
       [ "TBela\\CSS\\Property\\Comment", "d6/d0a/classTBela_1_1CSS_1_1Property_1_1Comment.html", null ],
@@ -140,6 +108,37 @@ var hierarchy =
       [ "TBela\\CSS\\Interfaces\\ElementInterface", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html", null ],
       [ "TBela\\CSS\\Parser\\Position", "d1/dd8/classTBela_1_1CSS_1_1Parser_1_1Position.html", null ],
       [ "TBela\\CSS\\Parser\\SourceLocation", "d2/d99/classTBela_1_1CSS_1_1Parser_1_1SourceLocation.html", null ],
+      [ "TBela\\CSS\\Value", "dd/dca/classTBela_1_1CSS_1_1Value.html", [
+        [ "TBela\\CSS\\Value\\Color", "d0/d18/classTBela_1_1CSS_1_1Value_1_1Color.html", [
+          [ "TBela\\CSS\\Value\\OutlineColor", "d6/ddc/classTBela_1_1CSS_1_1Value_1_1OutlineColor.html", null ]
+        ] ],
+        [ "TBela\\CSS\\Value\\Comment", "d8/d66/classTBela_1_1CSS_1_1Value_1_1Comment.html", null ],
+        [ "TBela\\CSS\\Value\\CssAttribute", "d1/d80/classTBela_1_1CSS_1_1Value_1_1CssAttribute.html", null ],
+        [ "TBela\\CSS\\Value\\CSSFunction", "d1/d80/classTBela_1_1CSS_1_1Value_1_1CSSFunction.html", null ],
+        [ "TBela\\CSS\\Value\\CssParenthesisExpression", "db/de0/classTBela_1_1CSS_1_1Value_1_1CssParenthesisExpression.html", null ],
+        [ "TBela\\CSS\\Value\\CssString", "d3/d54/classTBela_1_1CSS_1_1Value_1_1CssString.html", [
+          [ "TBela\\CSS\\Value\\FontFamily", "d2/da5/classTBela_1_1CSS_1_1Value_1_1FontFamily.html", null ]
+        ] ],
+        [ "TBela\\CSS\\Value\\FontSize", "d5/d56/classTBela_1_1CSS_1_1Value_1_1FontSize.html", null ],
+        [ "TBela\\CSS\\Value\\FontStretch", "d1/de4/classTBela_1_1CSS_1_1Value_1_1FontStretch.html", null ],
+        [ "TBela\\CSS\\Value\\FontStyle", "d8/db9/classTBela_1_1CSS_1_1Value_1_1FontStyle.html", null ],
+        [ "TBela\\CSS\\Value\\FontVariant", "df/d1e/classTBela_1_1CSS_1_1Value_1_1FontVariant.html", null ],
+        [ "TBela\\CSS\\Value\\FontWeight", "d8/d56/classTBela_1_1CSS_1_1Value_1_1FontWeight.html", null ],
+        [ "TBela\\CSS\\Value\\LineHeight", "dd/dfa/classTBela_1_1CSS_1_1Value_1_1LineHeight.html", null ],
+        [ "TBela\\CSS\\Value\\Number", "da/d44/classTBela_1_1CSS_1_1Value_1_1Number.html", [
+          [ "TBela\\CSS\\Value\\Unit", "dd/dcf/classTBela_1_1CSS_1_1Value_1_1Unit.html", [
+            [ "TBela\\CSS\\Value\\OutlineWidth", "d5/df3/classTBela_1_1CSS_1_1Value_1_1OutlineWidth.html", null ]
+          ] ]
+        ] ],
+        [ "TBela\\CSS\\Value\\Operator", "db/d5f/classTBela_1_1CSS_1_1Value_1_1Operator.html", null ],
+        [ "TBela\\CSS\\Value\\OutlineStyle", "df/d55/classTBela_1_1CSS_1_1Value_1_1OutlineStyle.html", null ],
+        [ "TBela\\CSS\\Value\\Separator", "d1/d60/classTBela_1_1CSS_1_1Value_1_1Separator.html", null ],
+        [ "TBela\\CSS\\Value\\ShortHand", "d8/d5c/classTBela_1_1CSS_1_1Value_1_1ShortHand.html", [
+          [ "TBela\\CSS\\Value\\Font", "dc/d0a/classTBela_1_1CSS_1_1Value_1_1Font.html", null ],
+          [ "TBela\\CSS\\Value\\Outline", "da/db6/classTBela_1_1CSS_1_1Value_1_1Outline.html", null ]
+        ] ],
+        [ "TBela\\CSS\\Value\\Whitespace", "d6/d86/classTBela_1_1CSS_1_1Value_1_1Whitespace.html", null ]
+      ] ],
       [ "TBela\\CSS\\Value\\Set", "dd/d96/classTBela_1_1CSS_1_1Value_1_1Set.html", null ]
     ] ]
 ];

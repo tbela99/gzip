@@ -247,12 +247,6 @@ class Parser
             $this->doParse();
         }
 
-//        if (is_null($this->element)) {
-//
-//            $this->element = Element::getInstance(json_encode(json_decode($this->ast)));
-//        }
-
-
         /**
          * @var RuleListInterface $element
          */

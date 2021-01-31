@@ -50,37 +50,35 @@ class ImagesHelper
 			}
 
 			if (!empty($options['inlineimageconvert']) && !empty($attributes['style'])) {
-				/*
-				 *
-					if (!$skip &&
-						count($images) == 1 &&
-						!empty($options['imageenabled']) &&
-						!empty($options['inlineimageconvert']) &&
-						!empty($options['imagecssresize']) &&
-						!empty($options['css_sizes'])) {
 
-						//
-						$sizes = [];
-
-						foreach ($this->createImages($images[0], $options) as $size => $file) {
-
-							$sizes[] = $size.'-'.GZipHelper::url($file);
-						}
-
-						if (!empty($sizes)) {
-
-							$attributes['data-res-bg'] = htmlentities(json_encode($sizes));
-						}
-					}
-				 */
-
-				$attributes['style'] = preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use ($options) {
+				$attributes['style'] = preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use ($options, &$attributes) {
 
 					$name = preg_replace('~^(["\']?)([^\1]+)\1$~', '$2', trim($matches[1]));
 
-					if (GZipHelper::isFile($name)) {
+					$file = GZipHelper::getName($name);
 
-						return 'url(' . GZipHelper::url($this->convert(GZipHelper::getName($name), $options)) . ')';
+					if (!GZipHelper::isFile($file)) {
+
+						$file = static::fetchRemoteImage($file, $options);
+					}
+
+					if (GZipHelper::isFile($file)) {
+
+						$file = $this->convert($file, $options);
+
+						//
+						if (!empty($options['css_sizes'])) {
+
+							$srcSet = $this->generateSrcSet($file, $options['css_sizes'], $options);
+
+							if (!empty($srcSet)) {
+
+								$attributes['data-bg-style'] = htmlentities(json_encode(array_map(GZipHelper::class.'::url', $srcSet)));
+								return 'url(' . GZipHelper::url(end($srcSet)) . ')';
+							}
+						}
+
+						return 'url(' . GZipHelper::url($file) . ')';
 					}
 
 					return $matches[0];
@@ -173,11 +171,8 @@ class ImagesHelper
 				$attributes['src'] = $file;
 
 				$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-				//    $const = constant('\Image\Image::'.$method);
-				$hash = sha1($file);
-				$short_name = strtolower(str_replace('CROP_', '', $method));
-				//   $crop =  $path.$hash.'-'. $short_name.'-'.basename($file);
 
+				$hash = sha1($file);
 				$image = null; // $sizes === false ? null : new Image($file);
 				$src = '';
 				$imagesize = getimagesize($file);
@@ -266,51 +261,23 @@ class ImagesHelper
 						}
 					}
 
-					if (!empty($mq)) {
+					$set = $this->generateSrcSet($file, $mq, $options);
 
-						$mq = array_values($mq);
-
-						//    $image = null;
-//						$resource = null;
-						$basename = GZipHelper::sanitizeFileName(basename($file));
-
-						/** @var string[] $images */
-						$images = array_map(function ($size) use ($basename, $hash, $short_name, $path) {
-
-							return $path . $hash . '-' . $short_name . '-' . $size . '-' . $basename;
-
-						}, $mq);
+					if (!empty($set)) {
 
 						$srcset = [];
 
-						foreach ($images as $k => $img) {
+						foreach ($set as $size => $img) {
 
-							if (!is_file($img)) {
-
-								if (is_null($image)) {
-
-									$image = $this->initImage($file);
-								}
-
-								(clone $image)->resizeAndCrop($mq[$k], null, $method)->save($img);
-							}
-
-							$srcset[] = $img . ' ' . $mq[$k] . 'w';
+							$srcset[] = $img . ' ' . $size . 'w';
 						}
 
-						if (!empty($images)) {
+						if (!empty($set)) {
 
-							$attributes['data-src'] = end($images);
+							$attributes['data-src'] = end($set);
 						}
 
-						if ($sizes[0] > $mq[0]) {
-
-							// cache file
-							// looking for invalid file name
-							array_unshift($srcset, str_replace(' ', '%20', GZipHelper::url($file)) . ' ' . $sizes[0] . 'w');
-							array_unshift($mq, $sizes[0]);
-						}
-
+						$mq = array_keys($set);
 						$j = count($mq);
 
 						for ($i = 0; $i < $j; $i++) {
@@ -324,22 +291,8 @@ class ImagesHelper
 							}
 						}
 
-						if (!empty($mq)) {
-
-							$attributes['data-srcset'] = implode(',', array_map(function ($url) {
-
-								$data = explode(' ', $url, 2);
-
-								if (count($data) == 2) {
-
-									return $data[0] . ' ' . $data[1];
-								}
-
-								return $url;
-
-							}, $srcset));
-							$attributes['sizes'] = implode(',', $mq);
-						}
+						$attributes['srcset'] = implode(', ', $srcset);
+						$attributes['sizes'] = implode(',', $mq);
 					}
 				}
 			}
@@ -353,10 +306,10 @@ class ImagesHelper
 		return $attributes;
 	}
 
-	public function convert($file, array $options = [])
+	public static function convert($file, array $options = [])
 	{
 
-		$basename = GZipHelper::sanitizeFileName(preg_replace('/(#|\?).*$/', '', basename($file)));
+		$basename = GZipHelper::sanitizeFileName(preg_replace('/(#|\?).*$/', '', pathinfo($file, PATHINFO_FILENAME)));
 		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
 
 		if ($pathinfo == static::CONVERT_TO) {
@@ -368,7 +321,7 @@ class ImagesHelper
 
 			$img = null;
 			$path = $options['img_path'];
-			$newFile = $path . GZipHelper::shorten(crc32($file)) . '-' . GZipHelper::sanitizeFileName(pathinfo($file, PATHINFO_FILENAME)) . '.webp';
+			$newFile = $path . $basename.substr(md5($file), 6) . '.webp';
 
 			if (!is_file($newFile)) {
 
@@ -403,6 +356,92 @@ class ImagesHelper
 		}
 
 		return $file;
+	}
+
+	/**
+	 * @param $file
+	 * @param array $sizes
+	 * @param array $options
+	 *
+	 * @return array
+	 *
+	 * @since 2.9.0
+	 */
+	public static function generateSrcSet($file, array $sizes = [], array $options = [])
+	{
+
+		if (empty($sizes)) {
+
+			return [];
+		}
+
+		$srcset = [];
+		$file = GZipHelper::getName($file);
+
+		if (!GZipHelper::isFile($file)) {
+
+			$file = static::fetchRemoteImage($file, $options);
+		}
+
+		if (GZipHelper::isFile($file)) {
+
+			$dim = getimagesize($file);
+
+			if ($dim === false) {
+
+				return [];
+			}
+
+			$width = $dim[0];
+
+			$sizes = array_filter($sizes, function ($size) use ($width) {
+
+				return $width > $size;
+			});
+
+			if (empty($sizes)) {
+
+				return [];
+			}
+
+			$file = static::convert($file, $options);
+
+			$path = $options['img_path'];
+			$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+
+			$hash = substr(md5($file), 0, 4);
+			$root = $path . GZipHelper::sanitizeFileName(pathinfo($file, PATHINFO_FILENAME)) . '-%s-' . $hash . '.' . pathinfo($file, PATHINFO_EXTENSION);
+
+			$img = null;
+			$image = null;
+
+			foreach ($sizes as $size) {
+
+				$img = sprintf($root, $size);
+
+				if (!is_file($img)) {
+
+					if (is_null($image)) {
+
+						$image = static::initImage($file, $size);
+					}
+
+					(clone $image)->resizeAndCrop($size, null, $method)->save($img);
+				}
+
+				$srcset[$size] = $img;
+			}
+
+			if ($dim[0] > $sizes[0]) {
+
+				// cache file
+				// looking for invalid file name
+				$srcset[$sizes[0]] = str_replace(' ', '%20', GZipHelper::url($file));
+				krsort($srcset, SORT_NUMERIC);
+			}
+		}
+
+		return $srcset;
 	}
 
 	protected function parseSVGAttribute($value, $attr, $tag)
@@ -581,19 +620,19 @@ class ImagesHelper
 
 	/**
 	 * @param $file
-	 *
+	 * @param int $size
 	 * @return Image
 	 *
 	 * @since version
 	 */
-	private function initImage($file)
+	private static function initImage($file, $size = 1200)
 	{
 
 		$image = new Image($file);
 
-		if ($image->getWidth() > 1200) {
+		if ($image->getWidth() > $size) {
 
-			$image->setSize(1200);
+			$image->setSize($size);
 		}
 
 		return $image;

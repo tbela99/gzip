@@ -16,7 +16,7 @@ A CSS parser, beautifier and minifier written in PHP. It supports the following 
 - process @import directive
 - remove @charset directive
 - compute css shorthand (margin, padding, outline, border-radius, font)
-- query the css nodes using xpath like syntax
+- query the css nodes using xpath like syntax or class name
 - transform the css output using the Renderer class
 
 ## Installation
@@ -203,8 +203,14 @@ $compiler->setContent($css);
 
 $stylesheet = $compiler->getData();
 
+// get @font-face nodes by class names
+$nodes = $stylesheet->queryByClassNames('@font-face, .foo .bar');
+
+// or
+
 // get all src properties in a @font-face rule
 $nodes = $stylesheet->query('@font-face/src');
+
 
 echo implode("\n", array_map('trim', $nodes));
 ```
@@ -369,7 +375,7 @@ $stylesheet->appendCss($css_string);
 
 ## Performance
 
-parsing and rendering ast is 3x faster than 
+parsing and rendering ast is 3x faster than parsing an element
 
 ```php
 
@@ -382,7 +388,7 @@ $parser = new Parser($css);
 echo (string) $parser;
 
 // or render minified css
-$renderer = new Renderer(['compress' => true);
+$renderer = new Renderer(['compress' => true]);
 echo $renderer->renderAst($parser->getAst());
 
 ```

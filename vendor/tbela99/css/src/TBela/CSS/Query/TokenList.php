@@ -2,6 +2,8 @@
 
 namespace TBela\CSS\Query;
 
+use SplObjectStorage;
+
 class TokenList implements TokenInterface
 {
     use TokenStringifiableTrait;
@@ -27,6 +29,8 @@ class TokenList implements TokenInterface
     {
         $result = [];
 
+        $objectStore = new SplObjectStorage;
+
         // TODO: Implement filter() method.
         foreach ($this->tokens as $tokens) {
 
@@ -44,11 +48,18 @@ class TokenList implements TokenInterface
 
             if (!empty($data)) {
 
-                array_splice($result, count($result), 0, $data);
+                foreach ($data as $node) {
+
+                    if (!$objectStore->contains($node)) {
+
+                        $result[] = $node;
+                        $objectStore->attach($node);
+                    }
+                }
             }
         }
 
-        return array_values(array_unique($result));
+        return $result;
     }
 
     /**

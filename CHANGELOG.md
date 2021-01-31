@@ -1,5 +1,10 @@
 # Change History
 
+## 2.9.0
+
+- Preserve background transparency #117
+- New [CSS parser](https://github.com/tbela99/css) #67
+
 ## 2.8.1
 
 - fix empty service worker files #102

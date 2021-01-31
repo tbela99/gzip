@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 <li>process  directive</li>
 <li>remove  directive</li>
 <li>compute css shorthand (margin, padding, outline, border-radius, font)</li>
-<li>query the css nodes using xpath like syntax</li>
+<li>query the css nodes using xpath like syntax or class name</li>
 <li>transform the css output using the Renderer class</li>
 </ul>
 <h2>Installation</h2>
@@ -168,6 +168,8 @@ $(document).ready(function(){initNavTree('index.html','');});
 <p>$compiler = new Compiler();</p>
 <p>$compiler-&gt;setContent($css);</p>
 <p>$stylesheet = $compiler-&gt;getData();</p>
+<p>// get -face nodes by class names $nodes = $stylesheet-&gt;queryByClassNames('-face');</p>
+<p>// or</p>
 <p>// get all src properties in a -face rule $nodes = $stylesheet-&gt;query('-face/src');</p>
 <p>echo implode("\n", array_map('trim', $nodes)); ```</p>
 <p>result</p>
@@ -209,6 +211,14 @@ $(document).ready(function(){initNavTree('index.html','');});
 <p>output</p>
 <p>```css div { max-width: 100%; border-width: 0; }  print { div { background-color: #fff; color: #000; } } ``` Adding existing css ```php</p>
 <p>$stylesheet-&gt;appendCss($css_string);</p>
+<p>```</p>
+<h2>Performance</h2>
+<p>parsing and rendering ast is 3x faster than parsing an element</p>
+<p>```php</p>
+<p>use ; use ;</p>
+<p>$parser = new Parser($css);</p>
+<p>// parse and render echo (string) $parser;</p>
+<p>// or render minified css $renderer = new Renderer(['compress' =&gt; true]); echo $renderer-&gt;renderAst($parser-&gt;getAst());</p>
 <p>```</p>
 <h2>Transform Rendered <a class="el" href="d6/ded/namespaceCSS.html">CSS</a></h2>
 <p>Use the Renderer class to transform the output. the callback returns three types of values</p>

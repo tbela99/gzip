@@ -104,12 +104,16 @@ class Renderer
         return '';
     }
 
+    protected function renderStylesheet($ast, $level) {
+
+        return $this->renderCollection($ast, $level);
+    }
+
     /**
      * @param \stdClass $ast
      * @param int|null $level
      * @return string
      */
-
     protected function renderComment($ast, $level) {
 
         if ($this->options['remove_comments']) {

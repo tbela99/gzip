@@ -72,6 +72,17 @@
     }
   };
 
+  const bgStyles = {
+    input: "./bgstyles.es6",
+    output: "./bgstyles.js",
+    config: {
+      //  ie8: true,
+      ecma: 5,
+      output,
+      warnings: true
+    }
+  };
+
   const intersectionObserver = {
     input: "./js/lib/intersection-observer.js",
     output: "./js/dist/intersection-observer.js",
@@ -86,6 +97,16 @@
   const imageLoaderMin = {
     input: "./imagesloader.js",
     output: "./imagesloader.min.js",
+    config: {
+      ...minify,
+      //  ie8: true,
+      ecma: 5 // specify one of: 5, 6, 7 or 8
+    }
+  };
+
+  const bgStylesMin = {
+    input: "./bgstyles.js",
+    output: "./bgstyles.min.js",
     config: {
       ...minify,
       //  ie8: true,
@@ -207,8 +228,10 @@
   var config = /*#__PURE__*/Object.freeze({
     __proto__: null,
     imageLoader: imageLoader,
+    bgStyles: bgStyles,
     intersectionObserver: intersectionObserver,
     imageLoaderMin: imageLoaderMin,
+    bgStylesMin: bgStylesMin,
     loaderMin: loaderMin,
     libReadyMin: libReadyMin,
     libImageMin: libImageMin,

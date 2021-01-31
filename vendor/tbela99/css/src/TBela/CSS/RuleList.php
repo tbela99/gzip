@@ -230,16 +230,18 @@ abstract class RuleList extends Element implements RuleListInterface
 
             if ($element instanceof Stylesheet) {
 
-                foreach ($element->getChildren() as $child) {
+                call_user_func_array([$this, 'append'], $element->getChildren());
 
-                    if (!$this->support($child)) {
-
-                        throw new InvalidArgumentException('Illegal argument', 400);
-                    }
-
-                    $child->parent->remove($child);
-                    $this->append($child);
-                }
+//                foreach ($element->getChildren() as $child) {
+//
+//                    if (!$this->support($child)) {
+//
+//                        throw new InvalidArgumentException('Illegal argument', 400);
+//                    }
+//
+//                    $child->parent->remove($child);
+//                    $this->append($child);
+//                }
             } else {
 
                 if (empty($this->ast->children) || !in_array($element, $this->ast->children, true)) {
@@ -273,6 +275,17 @@ abstract class RuleList extends Element implements RuleListInterface
      */
     public function insert(ElementInterface $element, $position)
     {
+
+    	if ($element instanceof Stylesheet) {
+
+    		foreach (array_reverse($element->getChildren()) as $el) {
+
+    			$this->insert($el, $position);
+			}
+
+    		return $this;
+		}
+
         if (!$this->support($element) || $position < 0) {
 
             throw new InvalidArgumentException('Illegal argument', 400);

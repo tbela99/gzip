@@ -10,6 +10,7 @@ var interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface =
     [ "getType", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#a32e6c7ec56da65153159d3477226309a", null ],
     [ "getValue", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#a3483da3bec8cf5096d964d196df0e8f9", null ],
     [ "query", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#a15fff6b4b848eb5b91169591063cf335", null ],
+    [ "queryByClassNames", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#adf6ea7276b7547d75245e0326a9d1bf5", null ],
     [ "setLocation", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#a922054c53dad9f19aac2da08d7f32fd2", null ],
     [ "setValue", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#ac6e9049723837635ebfb8c50fdcaae01", null ],
     [ "traverse", "d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html#a416335e42c0cf71a7c2d0a7ad77d85bb", null ]

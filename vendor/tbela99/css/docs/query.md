@@ -1,6 +1,24 @@
 ## Query Api
 
-It allows you to query the CSS node in using and xpath like syntax. 
+It allows you to query the CSS node in using and xpath like syntax or class names. 
+
+### queryByClassNames
+
+Search nodes by class names.
+
+```php
+$result = $element->queryByClassNames('@font-face, .foo .bar, .class, .another-class');
+```
+
+### query
+
+Search nodes using an expression.
+
+```php
+// search @font-face that contain an src attribute
+$result = $element->query('@font-face[@src]/..');
+
+```
 
 ### Node Selectors
 
@@ -11,9 +29,9 @@ the node selectors are
 - '..': match the parent node
 - '/': match the root nodes
 - '//' : match all descendant nodes
-- '|': match nodes that match selector a or selector /b in 'a|/b'
 - 'a': match all nodes with a selector or name 'a'
 - 'a[2]': match the second node with name or selector equals to 'a'
+- '|': match nodes that match selector a or selector /b in 'a|/b'. It will set the root node as the current node before searching the right operand
 - 'a,b': match nodes with name or selector that is either 'a' or 'b'
 - '@media[@value=print]': match all media with value equals to 'print'. Example: @media print {}
 - '@media[@value^=print]': match all media with value that begins with 'print'. Example: @media print and (max-width: 320px)

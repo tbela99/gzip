@@ -1,7 +1,6 @@
 <?php
 
 namespace TBela\CSS\Query;
-
 use TBela\CSS\Parser\SyntaxError;
 use function usort;
 
@@ -18,14 +17,133 @@ class Evaluator
 
         $tokenList = (new Parser())->parse($expression);
 
-        $results = $tokenList->filter([$context]);
+        return $this->sortNodes($tokenList->filter([$context]));
+
+    }
+
+    /**
+     * search nodes by class ame
+     * @param string $classNames a comma separated list of class names
+     * @param QueryInterface $context
+     * @return array
+     * @throws SyntaxError
+     */
+    public function evaluateByClassName($classNames, QueryInterface $context)
+    {
+
+        $parser = new Parser();
+
+        $selectors = [];
+
+        foreach ($parser->split($classNames) as $className) {
+
+            foreach ($parser->split($className, ',') as $selector) {
+
+                $selector = trim($selector);
+
+                $selectors[$selector] = (string) $parser->parse($selector);
+            }
+        }
+
+        $selectors = array_values($selectors);
+
+        sort($selectors);
+
+        $result = [];
+
+        $stack = $context->getType() == 'Stylesheet' ? $context->getChildren() : [$context];
+
+        while($node = array_shift($stack)) {
+
+            if ($node->getType() == 'Rule') {
+
+                /**
+                 * @var \TBela\CSS\Element\Rule $node
+                 */
+
+                if ($this->search($selectors, array_map('trim', $node->getSelector()))) {
+
+                        $result[] = $node;
+                }
+            }
+
+            /**
+             * @var \TBela\CSS\Element\AtRule $node
+             */
+
+            else if ($node->getType() == 'AtRule') {
+
+                if ($this->search($selectors, [trim('@'.$node->getName().' '.$node->getValue()->render(['remove_comments' => true]))])) {
+
+                    $result[] = $node;
+                }
+
+                if (!$node->isLeaf() && !$node->hasDeclarations()) {
+
+                    array_splice($stack, count($stack), 0, $node->getChildren());
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    protected function search(array $selectors, array $search)
+    {
+
+        $l = count($search);
+
+        while ($l--) {
+
+            $k = count($selectors) - 1;
+            $i = 0;
+
+            while (true) {
+
+                $j = $i + ceil(($k - $i) / 2);
+
+                if ($selectors[$j] < $search[$l]) {
+
+                    if ($i == $j) {
+
+                        break;
+                    }
+
+                    $i = $j;
+
+                } else if ($selectors[$j] > $search[$l]) {
+
+                    if ($k == $j) {
+
+                        if ($selectors[$i] === $search[$l]) {
+
+                            return true;
+                        }
+
+                        break;
+                    }
+
+                    $k = $j;
+
+                } else if ($selectors[$j] === $search[$l]) {
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected function sortNodes($nodes)
+    {
 
         $info = [];
 
         /**
-         * @var \TBela\CSS\Element $element
+         * @var \TBela\CSS\Interfaces\ElementInterface $element
          */
-        foreach ($results as $key => $element) {
+        foreach ($nodes as $key => $element) {
 
             $index = spl_object_hash($element);
 
@@ -33,9 +151,7 @@ class Evaluator
 
                 $info[$index] = [
                     'key' => $key,
-                    'depth' => [],
-                    'name' => is_null($element['name']) ? implode(',', (array) $element['selector']) : $element['name'],
-                    'val' => (string) $element
+                    'depth' => []
                 ];
 
                 $el = $element;
@@ -69,7 +185,7 @@ class Evaluator
 
         foreach ($info as $value) {
 
-            $res[] = $results[$value['key']];
+            $res[] = $nodes[$value['key']];
         }
 
         return $res;

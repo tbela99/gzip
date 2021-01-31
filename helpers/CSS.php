@@ -14,10 +14,10 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-use Image\Image;
 use TBela\CSS\Compiler;
 use TBela\CSS\Element;
 use TBela\CSS\Element\Stylesheet;
+use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Parser;
 use TBela\CSS\Renderer;
 use TBela\CSS\Value;
@@ -47,7 +47,6 @@ class CSSHelper
 		$fetch_remote = !empty($options['fetchcss']);
 
 		$links = [];
-//		$root = $options['uri_root'];
 		$ignore = !empty($options['cssignore']) ? $options['cssignore'] : [];
 		$remove = !empty($options['cssremove']) ? $options['cssremove'] : [];
 
@@ -74,11 +73,6 @@ class CSSHelper
 				$query = $node->query('./[@name=src]');
 
 				if ($query) {
-
-					// copy only the src property of the font-face => the font will not block page loading
-					// @font-face {
-					//  src: url(...);
-					// }
 
 					foreach ($query as $q) {
 
@@ -155,6 +149,9 @@ class CSSHelper
 				return $matches[0];
 			}, $html);
 		};
+
+		$profiler = \JProfiler::getInstance('Application');
+		$profiler->mark('CssInit');
 
 		$html = preg_replace_callback('#<(' . (empty($options['parseinlinecss']) ? 'link' : '[^\s>]+') . ')([^>]*)>#', function ($matches) use ($css_options, $cssRenderer, $parseUrls, &$links, $ignore, $remove, $cssParser, $path, $fetch_remote, $options) {
 
@@ -267,6 +264,8 @@ class CSSHelper
 			return $matches[0];
 		}, $html);
 
+		$profiler->mark('CssParseHTML');
+
 		if (!empty($options['mergecss'])) {
 
 			foreach ($links as $position => $blob) {
@@ -292,7 +291,7 @@ class CSSHelper
 							$cssParser->append($attr['href']);
 						}
 
-						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter')))));
+						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter'), $options))));
 					}
 
 					$links[$position]['links'] = [
@@ -304,6 +303,8 @@ class CSSHelper
 				}
 			}
 		}
+
+		$profiler->mark('CssMergeFile');
 
 		if (empty($options['mergecss']) && !empty($css_options['compress'])) {
 
@@ -337,6 +338,7 @@ class CSSHelper
 			}
 		}
 
+		$profiler->mark('CssMergeStyle');
 		$cssParser->setContent('');
 
 		$css_hash = '';
@@ -378,6 +380,9 @@ class CSSHelper
 			return '';
 		}, $html);
 
+
+		$profiler->mark('CssParseStyle');
+
 		$parseCritical = !empty($options['criticalcssenabled']);
 		$parseCssResize = !empty($options['imagecssresize']) && !empty($options['css_sizes']);
 		$parseWebFonts = !empty($options['fontpreload']) || !isset($options);
@@ -413,19 +418,16 @@ class CSSHelper
 				}
 
 				$cssRoot = $cssParser->parse();
+				$profiler->mark('CssParseObject');
 
 				if ($parseCritical && !empty($options['criticalcssclass'])) {
 
 					$headStyle->appendCss($options['criticalcssclass']);
 				}
 
+				$profiler->mark('CssQCriticalClass');
+
 				$query = [];
-
-//				if ($parseWebFonts) {
-
-				// all fonts with an src attribute
-//					$query[] = '@font-face/src/..';
-//				}
 
 				if ($parseCritical && !empty($options['criticalcss'])) {
 
@@ -433,7 +435,8 @@ class CSSHelper
 					$query[] = implode(',', preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY));
 				}
 
-				$nodes = $cssRoot->query(implode('|', $query));
+				$nodes = $cssRoot->queryByClassNames(implode(',', $query));
+				$profiler->mark('CssQueryByName');
 
 				if (!empty($nodes)) {
 
@@ -443,8 +446,13 @@ class CSSHelper
 					}
 				}
 
+				$profiler->mark('CssQueryAppend');
+
 				$headStyle->deduplicate();
-				file_put_contents($css_hash, $parseUrls($cssRenderer->render($headStyle)));
+
+				file_put_contents($css_hash, $cssRenderer->render($this->parseBackgroundImages($headStyle, $options)));
+
+				$profiler->mark('CssDedup');
 			}
 
 			if (is_file($css_hash)) {
@@ -458,6 +466,8 @@ class CSSHelper
 			}
 		}
 
+		$profiler->mark('CssCritical');
+
 		$headStyle->removeChildren();
 		$style = '';
 
@@ -466,7 +476,6 @@ class CSSHelper
 			if (!empty($blob['style'])) {
 
 				$style .= implode('', $blob['style']);
-//				$headStyle->appendCss(implode('', $blob['style']));
 				unset($links[$key]['style']);
 			}
 		}
@@ -480,17 +489,18 @@ class CSSHelper
 
 		if ($style !== '') {
 
-			var_dump($style);
-			die;
-			
-			$headStyle->appendCss($style);
+			$headStyle->append($this->parseBackgroundImages((new Parser($style, $css_options))->parse(), $options));
 
 			if ($headStyle->hasChildren()) {
 
+				$profiler->mark('CssStyle');
 				$headStyle->deduplicate();
-				$head_string .= '<style>' . $parseUrls($cssRenderer->render($headStyle)) . '</style>';
+				$profiler->mark('CssRender');
+				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>';
 			}
 		}
+
+		$profiler->mark('CssHead');
 
 		foreach ($links as $position => $blob) {
 
@@ -566,37 +576,19 @@ class CSSHelper
 			$html = str_replace($search, $replace, $html);
 		}
 
-//		if (!empty($options['imagecssresize'])) {
-//
-//			$html = preg_replace_callback('#<html([>]*)>#', function ($matches) {
-//
-//				preg_match_all(GZipHelper::regexAttr, $matches[1], $attr);
-//
-//				$attributes = [];
-//
-//				foreach ($attr[2] as $key => $at) {
-//
-//					$attributes[$at] = $attr[6][$key];
-//				}
-//
-//				$attributes['class'] = isset($attributes['class']) ? $attributes['class'] . ' ' : '';
-//				$attributes['class'] .= 'resize-css-images';
-//
-//				$result = '<html';
-//
-//				foreach ($attributes as $key => $value) {
-//
-//					$result .= ' ' . $key . '="' . $value . '"';
-//				}
-//
-//				return $result . '>';
-//
-//			}, $html, 1);
-//		}
-
+		$profiler->mark('CssWrapUp');
 		return $html;
 	}
 
+	/** generate responsive background images
+	 * @param Element $headStyle
+	 * @param array $options
+	 *
+	 * @return Element|RuleListInterface
+	 *
+	 * @throws Parser\SyntaxError
+	 * @since version
+	 */
 	public function parseBackgroundImages(Element $headStyle, array $options = [])
 	{
 
@@ -607,6 +599,9 @@ class CSSHelper
 
 		$stylesheet = new Stylesheet();
 
+		/**
+		 * @var Element\Declaration $property
+		 */
 		foreach ($headStyle->query('[@name="background"]|[@name="background-image"]') as $property) {
 
 			$images = [];
@@ -620,16 +615,15 @@ class CSSHelper
 
 					$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
 
+					// honor the "ignore image" setting
+					if ((empty($options['imageignore']) ||
+						strpos($name, $options['imageignore']) === false) &&
+						in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
+
+						$images[] = $name;
+					}
+
 					if (GZipHelper::isFile($name)) {
-
-						if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
-
-							$images[] = [
-
-								'file' => $name,
-								'size' => getimagesize($name)
-							];
-						}
 
 						return Value::getInstance((object)[
 							'name' => 'url',
@@ -647,72 +641,36 @@ class CSSHelper
 				return $value;
 			});
 
-			// ignore multiple backgrounds
+			// ignore multiple backgrounds for now
 			if (count($images) == 1) {
 
-				foreach ($images as $settings) {
+				foreach ($images as $file) {
 
-					foreach ($this->createImages($settings['file'], $options) as $size => $file) {
+					$set = array_reverse(ImagesHelper::generateSrcSet($file, $options['css_sizes'], $options), true);
 
-						if ($size < $settings['size'][0]) {
+					$keys = array_keys($set);
+					$values = array_values($set);
+					$property->setValue('url('.array_shift($values).')');
 
-							if (is_file($file)) {
+					while ($value = array_shift($values)) {
 
-								$property = $property->copy();
-								$property->setName('background-image');
-								$property->setValue('url(' . GZipHelper::url($file) . ')');
+						$rule = $stylesheet->addAtRule('media', Element\AtRule::ELEMENT_AT_RULE_LIST);
 
-								$stylesheet->addAtRule('media', '(max-width:' . $size . 'px)')->append($property->getRoot());
-							}
-						}
+						$prop = $property->copy();
+						$prop->setValue('url('.$value.')');
+						$rule->setValue('(min-width: '.(array_shift($keys) + 1).'px)');
+						$rule->append($prop->getRoot());
 					}
 				}
+
+				/**
+				 * @var RuleListInterface $headStyle
+				 */
+				$headStyle->append($stylesheet);
 			}
 		}
 
-		$headStyle->insert($stylesheet, 0);
-
+		$headStyle->append($stylesheet);
 		return $headStyle;
-	}
-
-	public function createImages($file, array $options = [])
-	{
-
-		$img_path = $options['img_path'];
-		$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
-		$const = constant('\Image\Image::' . $method);
-		$short_name = strtolower(str_replace('CROP_', '', $method));
-
-		$images = [];
-
-		$img = null;
-		$hash = GZipHelper::shorten(crc32($file));
-
-		foreach ($options['css_sizes'] as $size) {
-
-			$crop = $img_path . $hash . '-' . $short_name . '-' . $size . '-' . basename($file);
-
-			if (!is_file($crop)) {
-
-				if (is_null($img)) {
-
-					$img = new Image($file);
-
-					if ($img->getWidth() > 1200) {
-
-						$img->setSize(1200);
-					}
-				}
-
-				$img->resizeAndCrop($size, null, $const)->save($crop);
-			}
-
-			if (is_file($crop)) {
-
-				$images[$size] = $crop;
-			}
-		}
-
-		return $images;
 	}
 }

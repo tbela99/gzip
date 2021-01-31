@@ -133,6 +133,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a85f196c5c9b78aaaffcacf5cb9489c12"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85f196c5c9b78aaaffcacf5cb9489c12"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>getAst</b> ()</td></tr>
 <tr class="separator:a85f196c5c9b78aaaffcacf5cb9489c12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2651457d74591d955c2e2f7f1ce28141"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2651457d74591d955c2e2f7f1ce28141"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>setAst</b> (<a class="el" href="../../d5/d9e/interfaceTBela_1_1CSS_1_1Interfaces_1_1ElementInterface.html">ElementInterface</a> $element)</td></tr>
+<tr class="separator:a2651457d74591d955c2e2f7f1ce28141"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae613c74d62e7fdfaf971af756c2719f4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae613c74d62e7fdfaf971af756c2719f4"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>deduplicate</b> ($ast)</td></tr>
+<tr class="separator:ae613c74d62e7fdfaf971af756c2719f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa6e2f81f666a24121daf8b3851031b08"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#aa6e2f81f666a24121daf8b3851031b08">getErrors</a> ()</td></tr>
 <tr class="separator:aa6e2f81f666a24121daf8b3851031b08"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39192f15f9c438b763f4154d8f94be78"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a39192f15f9c438b763f4154d8f94be78"></a>
@@ -141,6 +147,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a9de6f792a0c603ca726d91d21f046b50"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a9de6f792a0c603ca726d91d21f046b50">computeSignature</a> ($ast)</td></tr>
+<tr class="separator:a9de6f792a0c603ca726d91d21f046b50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5302b551a3108818291edcdb1462ef9c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a5302b551a3108818291edcdb1462ef9c">deduplicateRules</a> ($ast)</td></tr>
+<tr class="separator:a5302b551a3108818291edcdb1462ef9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e8078a59a7adbfc137376b5b1582a01"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a0e8078a59a7adbfc137376b5b1582a01">deduplicateDeclarations</a> ($ast)</td></tr>
+<tr class="separator:a0e8078a59a7adbfc137376b5b1582a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b64d38d85347b0293d4fc592f3ad3bb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a5b64d38d85347b0293d4fc592f3ad3bb">expand</a> ($css, $path=null)</td></tr>
 <tr class="separator:a5b64d38d85347b0293d4fc592f3ad3bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9178d2eaae077a2ad002625038e84cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#ae9178d2eaae077a2ad002625038e84cb">getFileContent</a> ($file, $media= '')</td></tr>
@@ -354,6 +366,102 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>$path</b> = ''</td>
 </dl>
 
 <p>Referenced by <a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a8ca09238379da7c848f12e8f2335d463">TBela\CSS\Parser\append()</a>, and <a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a40e8b10045b13eecb37de5523887d39a">TBela\CSS\Parser\merge()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9de6f792a0c603ca726d91d21f046b50"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TBela\CSS\Parser::computeSignature </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$ast</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>compute signature </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">stdClass</td><td class="paramname">$ast</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>string  </dd></dl>
+
+<p>Referenced by <a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a0e8078a59a7adbfc137376b5b1582a01">TBela\CSS\Parser\deduplicateDeclarations()</a>, and <a class="el" href="../../d8/d8b/classTBela_1_1CSS_1_1Parser.html#a5302b551a3108818291edcdb1462ef9c">TBela\CSS\Parser\deduplicateRules()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0e8078a59a7adbfc137376b5b1582a01"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TBela\CSS\Parser::deduplicateDeclarations </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$ast</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">stdClass</td><td class="paramname">$ast</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>stdClass </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5302b551a3108818291edcdb1462ef9c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TBela\CSS\Parser::deduplicateRules </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>$ast</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">stdClass</td><td class="paramname">$ast</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>stdClass </dd></dl>
 
 </div>
 </div>

@@ -27,6 +27,8 @@
         <filename>responder.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
+        <filename>bgstyles.js</filename>
+        <filename>bgstyles.min.js</filename>
         <filename>loader.js</filename>
         <filename>loader.min.js</filename>
         <filename>imagesloader.js</filename>

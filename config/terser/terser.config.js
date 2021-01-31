@@ -69,6 +69,17 @@ export const imageLoader = {
   }
 };
 
+export const bgStyles = {
+  input: "./bgstyles.es6",
+  output: "./bgstyles.js",
+  config: {
+    //  ie8: true,
+    ecma: 5,
+    output,
+    warnings: true
+  }
+};
+
 export const intersectionObserver = {
   input: "./js/lib/intersection-observer.js",
   output: "./js/dist/intersection-observer.js",
@@ -83,6 +94,16 @@ export const intersectionObserver = {
 export const imageLoaderMin = {
   input: "./imagesloader.js",
   output: "./imagesloader.min.js",
+  config: {
+    ...minify,
+    //  ie8: true,
+    ecma: 5 // specify one of: 5, 6, 7 or 8
+  }
+};
+
+export const bgStylesMin = {
+  input: "./bgstyles.js",
+  output: "./bgstyles.min.js",
   config: {
     ...minify,
     //  ie8: true,

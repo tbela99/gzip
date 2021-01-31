@@ -125,6 +125,95 @@ class GZipHelper
 		return str_replace(' ', '-', $string);
 	}
 
+	/**
+	 * @param $file
+	 * @param array $sizes
+	 * @param array $options
+	 *
+	 * @return array
+	 *
+	 * @since 2.9.0
+	 */
+	protected function generateSrcSet($file, $sizes = [], array $options = [])
+	{
+
+		if (empty($sizes)) {
+
+			return [];
+		}
+
+		$srcset = [];
+		$file = GZipHelper::getName($file);
+
+		if (!GZipHelper::isFile($file)) {
+
+			$file = static::fetchRemoteImage($file, $options);
+		}
+
+		if (GZipHelper::isFile($file)) {
+
+			$dim = getimagesize($file);
+
+			if ($dim === false) {
+
+				return [];
+			}
+
+			$width = $dim[0];
+
+			$sizes = array_filter($sizes, function ($size) use ($width) {
+
+				return $width > $size;
+			});
+
+			if (empty($sizes)) {
+
+				return [];
+			}
+
+
+			$file = $this->convert($file, $options);
+
+
+			$path = $options['img_path'];
+			$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
+			//    $const = constant('\Image\Image::'.$method);
+			$hash = substr(md5($file), 0, 4);
+
+			$root = $path . GZipHelper::sanitizeFileName(pathinfo($file, PATHINFO_FILENAME)) . '-%s-' . $hash . '.' . pathinfo($file, PATHINFO_EXTENSION);
+
+			$img = null;
+			$image = null;
+
+			foreach ($sizes as $size) {
+
+				$img = sprintf($root, $size);
+
+				if (!is_file($img)) {
+
+					if (is_null($image)) {
+
+						$image = $this->initImage($file, $size);
+					}
+
+					(clone $image)->resizeAndCrop($size, null, $method)->save($img);
+				}
+
+				$srcset[$size] = $img;
+			}
+
+			if ($dim[0] > $sizes[0]) {
+
+				// cache file
+				// looking for invalid file name
+				$srcset[$sizes[0]] = str_replace(' ', '%20', GZipHelper::url($file));
+				krsort($srcset, SORT_NUMERIC);
+			}
+		}
+
+		return $srcset;
+	}
+
 	public static function setHeader($name, $value, $replace = false)
 	{
 
