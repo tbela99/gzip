@@ -2,8 +2,15 @@
 
 ## 2.9.0
 
-- Preserve background transparency #117
-- New [CSS parser](https://github.com/tbela99/css) #67
+- New [CSS parser](https://github.com/tbela99/css) and minifier #67
+- Resize background images in inline css #116
+- Preserve background transparency when resizing #117
+- \[bug\] Fix an issue with responsive images #95
+- \[bug\] PWA start_url missing from preloaded urls #113
+- \[bug\] Cannot download sourcemap file #112
+- \[bug\] fix an error in the service worker #104
+- Convert CSS inline images to webp #93
+- Parse and minify inline CSS attribute #105
 
 ## 2.8.1
 

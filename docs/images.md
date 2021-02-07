@@ -40,6 +40,10 @@ Firefox will send this header
 Accept: image/webp,*/*
 ```
 
+### Convert Inline Background
+
+Convert background images defined in HTML 'style' attribute
+
 ### Crop Method
 
 Algorithm used when resizing images. Values are:

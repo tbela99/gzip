@@ -43,6 +43,6 @@ LIB.ready((function(e) {
             }));
         })), o.sort((function(e, t) {
             return t - e;
-        })), window.addEventListener("resize", n, !1), setTimeout(n, 10);
+        })), window.addEventListener("resize", n, !1), setTimeout(n, 25);
     }
 }));

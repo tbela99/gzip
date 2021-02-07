@@ -105,6 +105,6 @@ LIB.ready(function (undef) {
         }
 
         window.addEventListener('resize', updateBgStyle, false);
-        setTimeout(updateBgStyle, 10);
+        setTimeout(updateBgStyle, 25);
     }
 });

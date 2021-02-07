@@ -212,6 +212,8 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
+                    <field type="spacer" hr="true" />
                     <field name="imageconvert" label="PLG_GZIP_FIELD_IMAGE_CONVERT_LABEL" description="PLG_GZIP_FIELD_IMAGE_CONVERT_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGE_CONVERT_HINT" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -220,7 +222,6 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
                     <field name="imagesresizestrategy" label="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_LABEL" description="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_DESCRIPTION" type="list" default="CROP_CENTER">
                         <option value="CROP_DEFAULT">JOPTION_IMAGE_RESIZE_CROP_DEFAULT</option>
                         <option value="CROP_CENTER">JOPTION_IMAGE_RESIZE_CROP_CENTER</option>
@@ -313,16 +314,16 @@
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Parser Options" />
                         <field name="flatten_import" label="PLG_GZIP_FIELD_CSS_PARSER_PARSE_IMPORT_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_PARSE_IMPORT_DESCRIPTION" default="1" type="radio" class="btn-group">
-                            <option value="0">JNo</option>
                             <option value="1">JYes</option>
+                            <option value="0">JNo</option>
                         </field>
                         <field name="allow_duplicate_rules" label="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_RULES_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DESCRIPTION" default="0" type="radio" class="btn-group">
-                            <option value="0">JNo</option>
                             <option value="1">JYes</option>
+                            <option value="0">JNo</option>
                         </field>
                         <field name="allow_duplicate_declarations" label="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_DESCRIPTION" default="0" type="radio" class="btn-group">
-                            <option value="0">JNo</option>
                             <option value="1">JYes</option>
+                            <option value="0">JNo</option>
                         </field>
                         <field type="spacer" hr="true" />
                     </fields>
@@ -338,13 +339,13 @@
                             <option value="hsl">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_HSL</option>
                             <option value="0">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_NONE</option>
                         </field>
-                        <field name="remove_comments" label="Remove Comments" description="" default="1" type="radio" class="btn-group">
-                            <option value="0">JNo</option>
+                        <field name="remove_comments" label="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_COMMENTS_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_COMMENTS_DESCRIPTION" default="1" type="radio" class="btn-group">
                             <option value="1">JYes</option>
+                            <option value="0">JNo</option>
                         </field>
-                        <field name="remove_empty_nodes" label="Remove Empty Nodes" description="" default="1" type="radio" class="btn-group">
-                            <option value="0">JNo</option>
+                        <field name="remove_empty_nodes" label="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_EMPTY_NODES_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_EMPTY_NODES_DESCRIPTION" default="1" type="radio" class="btn-group">
                             <option value="1">JYes</option>
+                            <option value="0">JNo</option>
                         </field>
                     </fields>
                     <field type="spacer" hr="true" />
