@@ -22,6 +22,5 @@ if (SW.app.offline.enabled) {
                 return caches.match(SW.app.offline.url);
             }
         }
-
     });
 }

@@ -269,61 +269,14 @@ class PlgSystemGzip extends JPlugin
 				$table->store();
 			}
 
+			$this->cleanCache();
+
 			$options = json_decode(json_encode($data['params']['gzip']), JSON_OBJECT_AS_ARRAY);
 
-			$php_config = [];
-			$attributes = [];
-
-			foreach ($options['instantloading'] as $key => $value) {
-
-				switch ($key) {
-
-					case 'filters':
-
-						$attributes[] = $key . '="' . htmlspecialchars(json_encode(array_filter(preg_split('#\s+#s', $value, -1, PREG_SPLIT_NO_EMPTY), function ($value) {
-								return $value !== '';
-							})), ENT_QUOTES) . '"';
-						break;
-
-					case 'trigger':
-					case 'intensity':
-					case 'filter-type':
-					case 'allow-query-string':
-					case 'allow-external-links':
-
-						if (!empty($value)) {
-
-							$attributes[] = $key . '="' . $value . '"';
-						}
-
-						break;
-				}
-			}
-
-			$php_config['instantloading'] = $attributes;
-			$php_config['headers'] = $this->updateSecurityHeaders($options);
-
-			$this->cleanCache();
 			//	$this->updateSecurityHeaders($options);
 			$this->updateManifest($options);
 			$this->updateServiceWorker($options);
-
-
-			$path = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
-
-			if (!is_dir($path)) {
-
-				$old_mask = umask();
-
-				umask(022);
-				mkdir($path, 0755, true);
-				umask($old_mask);
-			}
-
-			file_put_contents($path . 'config.php', '<?php' . "\n" .
-				"defined('JPATH_PLATFORM') or die;\n\n" .
-				"\$php_config = " . var_export($php_config, true) . ';');
-
+			$this->updateConfig($options);
 		}
 
 		return true;
@@ -338,20 +291,29 @@ class PlgSystemGzip extends JPlugin
 
 		$options = (array)$this->params->get('gzip');
 
-		if (!empty($options)) {
+		if ($app->isClient('site')) {
 
-			$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
+			if (!empty($options)) {
+
+				$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
+			}
+
+			if (!is_file($file)) {
+
+				$this->updateServiceWorker($this->options);
+			}
+
+			if (!is_file(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php')) {
+
+				$this->updateConfig($this->options);
+			}
+
+			if (is_file($file)) {
+
+				$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
+			}
 		}
 
-		if (!is_file($file)) {
-
-			$this->updateServiceWorker($this->options);
-		}
-
-		if (is_file($file)) {
-
-			$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
-		}
 
 		$dirname = JURI::base(true) . '/';
 
@@ -755,6 +717,13 @@ class PlgSystemGzip extends JPlugin
 			$options['cssremove'] = [];
 		}
 
+		$options['uri_root'] = JUri::root(true);
+
+		if ($options['uri_root'] === '') {
+
+			$options['uri_root']  = '/';
+		}
+
 		// Save-Data header enforce some settings
 		if (isset($_SERVER["HTTP_SAVE_DATA"]) && $this->params->get('gzip.savedata', true) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
 
@@ -1133,6 +1102,57 @@ class PlgSystemGzip extends JPlugin
 		return $headers;
 	}
 
+	protected function updateConfig($options) {
+
+		$path = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
+
+		if (!is_dir($path)) {
+
+			$old_mask = umask();
+
+			umask(022);
+			mkdir($path, 0755, true);
+			umask($old_mask);
+		}
+
+
+		$php_config = [];
+		$attributes = [];
+
+		foreach ($options['instantloading'] as $key => $value) {
+
+			switch ($key) {
+
+				case 'filters':
+
+					$attributes[] = $key . '="' . htmlspecialchars(json_encode(array_filter(preg_split('#\s+#s', $value, -1, PREG_SPLIT_NO_EMPTY), function ($value) {
+							return $value !== '';
+						})), ENT_QUOTES) . '"';
+					break;
+
+				case 'trigger':
+				case 'intensity':
+				case 'filter-type':
+				case 'allow-query-string':
+				case 'allow-external-links':
+
+					if (!empty($value)) {
+
+						$attributes[] = $key . '="' . $value . '"';
+					}
+
+					break;
+			}
+		}
+
+		$php_config['instantloading'] = $attributes;
+		$php_config['headers'] = $this->updateSecurityHeaders($options);
+
+		file_put_contents($path . 'config.php', '<?php' . "\n" .
+			"defined('JPATH_PLATFORM') or die;\n\n" .
+			"\$php_config = " . var_export($php_config, true) . ';');
+	}
+
 	protected function updateManifest($options)
 	{
 
@@ -1171,6 +1191,8 @@ class PlgSystemGzip extends JPlugin
 
 		$path = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
 
+		$manifest = is_file($path.'manifest.json') ? json_decode(file_get_contents($path.'manifest.json'), true) : [];
+
 		if (!is_dir($path)) {
 
 			$old_mask = umask();
@@ -1186,9 +1208,9 @@ class PlgSystemGzip extends JPlugin
 		$exclude_urls[] = JUri::root(true) . '/administrator/';
 		$exclude_urls = array_values(array_unique(array_filter($exclude_urls)));
 
-		if (!empty($options['pwa_offline_page'])) {
+		if (!empty($manifest['start_url'])) {
 
-			$preloaded_urls[] = $options['pwa_offline_page'];
+			$preloaded_urls[] = $manifest['start_url'];
 		}
 
 		$preloaded_urls = array_values(array_unique($preloaded_urls));
@@ -1477,7 +1499,7 @@ class PlgSystemGzip extends JPlugin
 
 					foreach (
 						[
-							//	"config.php",
+							"config.php",
 							"headers.php",
 							"manifest.json",
 							"manifest_version",

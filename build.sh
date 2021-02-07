@@ -8,22 +8,32 @@ VER=$(git rev-parse --short HEAD)
 cd $DIR
 #
 #
+fail() {
+
+  echo -e '\e[31mbuild failed\e[0m'
+  exit 1
+}
+#
+#
+# build config files
+# process es6+ deps
 node rollup.config.js
-#
-cat worker/dist/serviceworker.js | sed "s/build-date/$DATE/g" | sed "s/build-id/$VER/g" > worker/dist/serviceworker.js
-#
-./node_modules/terser/bin/terser --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
- -- worker/src/browser.js | sed "s/build-date/$DATE/g" | sed "s/build-id/$VER/g" > worker/dist/browser.js
-#
-./node_modules/terser/bin/terser --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
- -- worker/src/browser.administrator.js | sed "s/build-date/$DATE/g" | sed "s/build-id/$VER/g" > worker/dist/browser.administrator.js
-#
-./node_modules/terser/bin/terser --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
- -- worker/src/browser.sync.js | sed "s/build-date/$DATE/g" | sed "s/build-id/$VER/g" > worker/dist/browser.sync.js
-#
-./node_modules/terser/bin/terser --warn --comments all --beautify beautify=true,preamble='"/* do not edit! */"' --ecma=8\
- -- worker/src/browser.uninstall.js | sed "s/build-date/$DATE/g" | sed "s/build-id/$VER/g" > worker/dist/browser.uninstall.js
-#
+# minify
 node terser.config.js
+#
+sed -i "s/build-date/$DATE/g" worker/dist/serviceworker.js && sed -i "s/build-id/$VER/g" worker/dist/serviceworker.js || fail
+#
+[ -s worker/dist/serviceworker.js ] || fail
+#
+# shellcheck disable=SC2002
+sed "s/build-date/$DATE/g" worker/src/browser.js | sed "s/build-id/$VER/g" > worker/dist/browser.js || fail
+#
+sed "s/build-date/$DATE/g" worker/src/browser.administrator.js | sed "s/build-id/$VER/g" > worker/dist/browser.administrator.js || fail
+#
+sed "s/build-date/$DATE/g" worker/src/browser.sync.js | sed "s/build-id/$VER/g" > worker/dist/browser.sync.js || fail
+#
+sed "s/build-date/$DATE/g" worker/src/browser.uninstall.js | sed "s/build-id/$VER/g" > worker/dist/browser.uninstall.js || fail
+#
+# node terser.config.js
 #
 sha1sum worker/dist/serviceworker.js | awk '{print $1;}' | tee ./worker_version

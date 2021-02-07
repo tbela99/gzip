@@ -27,6 +27,8 @@
         <filename>responder.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
+        <filename>bgstyles.js</filename>
+        <filename>bgstyles.min.js</filename>
         <filename>loader.js</filename>
         <filename>loader.min.js</filename>
         <filename>imagesloader.js</filename>
@@ -210,11 +212,16 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
+                    <field type="spacer" hr="true" />
                     <field name="imageconvert" label="PLG_GZIP_FIELD_IMAGE_CONVERT_LABEL" description="PLG_GZIP_FIELD_IMAGE_CONVERT_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGE_CONVERT_HINT" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
+                    <field name="inlineimageconvert" label="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_LABEL" description="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_DESCRIPTION" hint="PLG_GZIP_FIELD_INLINE_IMAGE_CONVERT_HINT" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="imagesresizestrategy" label="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_LABEL" description="PLG_GZIP_FIELD_IMAGE_CROP_STRATEGY_DESCRIPTION" type="list" default="CROP_CENTER">
                         <option value="CROP_DEFAULT">JOPTION_IMAGE_RESIZE_CROP_DEFAULT</option>
                         <option value="CROP_CENTER">JOPTION_IMAGE_RESIZE_CROP_CENTER</option>
@@ -283,18 +290,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
-                        <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
-                        <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
-                        <option value="optional">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_OPTIONAL</option>
-                        <option value="block">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_BLOCK</option>
-                        <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
-                    </field>
                     <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION" type="radio" class="btn-group" default="1">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
@@ -302,10 +298,70 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="minifycss" label="PLG_GZIP_FIELD_MINIFYCSS_LABEL" description="PLG_GZIP_FIELD_MINIFYCSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
                     <field name="mergecss" label="PLG_GZIP_FIELD_MERGECSS_LABEL" description="PLG_GZIP_FIELD_MERGECSS_DESCRIPTION" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field name="parseinlinecss" label="PLG_GZIP_FIELD_PARSE_INLINE_CSS_LABEL" description="PLG_GZIP_FIELD_PARSE_INLINE_CSS_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <fields name="css_parser">
+                        <field type="spacer" hr="true" />
+                        <field type="spacer" label="Parser Options" />
+                        <field name="flatten_import" label="PLG_GZIP_FIELD_CSS_PARSER_PARSE_IMPORT_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_PARSE_IMPORT_DESCRIPTION" default="1" type="radio" class="btn-group">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field name="allow_duplicate_rules" label="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_RULES_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DESCRIPTION" default="0" type="radio" class="btn-group">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field name="allow_duplicate_declarations" label="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_DESCRIPTION" default="0" type="radio" class="btn-group">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field type="spacer" hr="true" />
+                    </fields>
+                    <fields name="css_renderer">
+                        <field type="spacer" label="Rendering Options" />
+                        <field name="css_level" label="PLG_GZIP_FIELD_CSS_RENDERING_CSS_LEVEL_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_CSS_LEVEL_DESCRIPTION" type="list" default="4">
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                        </field>
+                        <field name="convert_color" label="PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_DESCRIPTION" type="list" default="hex">
+                            <option value="hex">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_HEX</option>
+                            <option value="rgba">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_RGBA</option>
+                            <option value="hsl">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_HSL</option>
+                            <option value="0">PLG_GZIP_FIELD_CSS_RENDERING_CONVERT_COLOR_OPTION_NONE</option>
+                        </field>
+                        <field name="remove_comments" label="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_COMMENTS_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_COMMENTS_DESCRIPTION" default="1" type="radio" class="btn-group">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                        <field name="remove_empty_nodes" label="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_EMPTY_NODES_LABEL" description="PLG_GZIP_FIELD_CSS_RENDERING_REMOVE_EMPTY_NODES_DESCRIPTION" default="1" type="radio" class="btn-group">
+                            <option value="1">JYes</option>
+                            <option value="0">JNo</option>
+                        </field>
+                    </fields>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Web Fonts" />
+                    <field name="fontpreload" label="PLG_GZIP_FIELD_FONT_REPLOAD_LABEL" description="PLG_GZIP_FIELD_FONT_REPLOAD_DESCRIPTION" type="radio" class="btn-group" default="1">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="fontdisplay" label="PLG_GZIP_FIELD_FONTDISPLAY_LABEL" description="PLG_GZIP_FIELD_FONTDISPLAY_DESCRIPTION" type="list" default="swap">
+                        <option value="swap">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_SWAP</option>
+                        <option value="fallback">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_FALLBACK</option>
+                        <option value="optional">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_OPTIONAL</option>
+                        <option value="block">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_BLOCK</option>
+                        <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
+                    </field>
+                    <field type="spacer" hr="true" />
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="15" cols="45" />
                     <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
                 </fields>

@@ -4,9 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34
+class ComposerStaticIniteecc78d1480540a369ddaecadfca63b2
 {
     public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'TBela\\CSS\\' => 10,
+        ),
         'E' => 
         array (
             'Elphin\\IcoFileLoader\\' => 21,
@@ -14,17 +18,26 @@ class ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34
     );
 
     public static $prefixDirsPsr4 = array (
+        'TBela\\CSS\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tbela99/css/src/TBela/CSS',
+        ),
         'Elphin\\IcoFileLoader\\' => 
         array (
             0 => __DIR__ . '/..' . '/lordelph/icofileloader/src',
         ),
     );
 
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4c2aa7183d3029549822bb4d1bfaaf34::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticIniteecc78d1480540a369ddaecadfca63b2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticIniteecc78d1480540a369ddaecadfca63b2::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticIniteecc78d1480540a369ddaecadfca63b2::$classMap;
 
         }, null, ClassLoader::class);
     }

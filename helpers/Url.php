@@ -69,7 +69,7 @@ class UrlHelper {
 
 						foreach (explode(',', $attributes[$attr]) as $chunk) {
 
-							$parts = explode(' ', $chunk);
+							$parts = explode(' ', $chunk, 2);
 
 							$name = trim($parts[0]);
 

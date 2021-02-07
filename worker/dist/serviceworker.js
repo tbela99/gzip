@@ -881,14 +881,14 @@
 		 * service worker build id
 		 */
 		buildid: {
-			value: "fbc78ce",
+			value: "ac3d844",
 			enumerable: true
 		},
 		/**
 		 * service worker buid date
 		 */
 		builddate: {
-			value: "2020-05-16 17:28:47-04:00",
+			value: "2021-02-07 11:00:41-05:00",
 			enumerable: true
 		},
 		/**
@@ -1657,7 +1657,8 @@
 	 */
 
 	self.addEventListener("fetch", (event) => {
-		event.respondWith((async function () {
+
+		event.respondWith(!event.url || (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') ? fetch(event.request) : (async function () {
 
 			let response;
 
@@ -2105,7 +2106,6 @@
 	                return caches.match(SW.app.offline.url);
 	            }
 	        }
-
 	    });
 	}
 

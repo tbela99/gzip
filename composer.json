@@ -1,5 +1,7 @@
 {
     "require": {
-        "lordelph/icofileloader": "^2.0"
+        "lordelph/icofileloader": "^2.0",
+        "tbela99/css": "dev-php56-backport",
+      "ext-gd": "*"
     }
 }
