@@ -7,14 +7,13 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.9.0</version>
+    <version>2.9.1</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>docs</folder>
         <folder>css</folder>
         <folder>fields</folder>
         <folder>helpers</folder>
-        <folder>js/lib</folder>
         <folder>js/dist</folder>
         <folder>lib</folder>
         <folder>language</folder>
