@@ -92,17 +92,6 @@ export const intersectionObserver = {
   }
 };
 
-export const oneSignal = {
-  input: "./worker/src/onesignal/onesignal.js",
-  output: "./worker/dist/onesignal.js",
-  config: {
-    //  ie8: true,
-    ecma: ECMA_VERSION,
-    output,
-    warnings: true
-  }
-};
-
 export const imageLoaderMin = {
   input: "./imagesloader.js",
   output: "./imagesloader.min.js",

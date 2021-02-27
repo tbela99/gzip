@@ -39,6 +39,14 @@
     }
   };
 
+  const oneSignal = {
+    input: "./worker/src/onesignal/onesignal.js",
+    output: {
+      file: "./worker/dist/onesignal.js",
+      format: "iife"
+    }
+  };
+
   const serviceworkerAdmin = {
     input: "worker/src/administrator/index.js",
     output: {
@@ -69,6 +77,7 @@
     libReady: libReady,
     libImages: libImages,
     serviceworker: serviceworker,
+    oneSignal: oneSignal,
     serviceworkerAdmin: serviceworkerAdmin,
     browserPrefetch: browserPrefetch,
     sync: sync

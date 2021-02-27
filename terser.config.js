@@ -95,17 +95,6 @@
     }
   };
 
-  const oneSignal = {
-    input: "./worker/src/onesignal/onesignal.js",
-    output: "./worker/dist/onesignal.js",
-    config: {
-      //  ie8: true,
-      ecma: ECMA_VERSION,
-      output,
-      warnings: true
-    }
-  };
-
   const imageLoaderMin = {
     input: "./imagesloader.js",
     output: "./imagesloader.min.js",
@@ -251,7 +240,6 @@
     imageLoader: imageLoader,
     bgStyles: bgStyles,
     intersectionObserver: intersectionObserver,
-    oneSignal: oneSignal,
     imageLoaderMin: imageLoaderMin,
     bgStylesMin: bgStylesMin,
     loaderMin: loaderMin,

@@ -9,7 +9,6 @@ var prefetch = (function (exports) {
 	function domReady() {
 
 		document.removeEventListener('DOMContentLoaded', domReady);
-		document.removeEventListener('readystatechange', readystatechange);
 		fired = true;
 
 		while (queue.length > 0) {
@@ -18,23 +17,7 @@ var prefetch = (function (exports) {
 		}
 	}
 
-	function readystatechange() {
-
-		switch (document.readyState) {
-
-			case 'loading':
-				break;
-
-			case 'interactive':
-			default:
-
-				domReady();
-				break;
-		}
-	}
-
 	document.addEventListener('DOMContentLoaded', domReady);
-	document.addEventListener('readystatechange', readystatechange);
 
 	function ready(cb) {
 

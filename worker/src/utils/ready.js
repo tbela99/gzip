@@ -22,7 +22,6 @@ let fired = document.readyState != 'loading';
 function domReady() {
 
 	document.removeEventListener('DOMContentLoaded', domReady);
-	document.removeEventListener('readystatechange', readystatechange);
 	fired = true;
 
 	while (queue.length > 0) {
@@ -31,23 +30,7 @@ function domReady() {
 	}
 }
 
-function readystatechange() {
-
-	switch (document.readyState) {
-
-		case 'loading':
-			break;
-
-		case 'interactive':
-		default:
-
-			domReady();
-			break;
-	}
-}
-
 document.addEventListener('DOMContentLoaded', domReady);
-document.addEventListener('readystatechange', readystatechange);
 
 export function ready(cb) {
 
