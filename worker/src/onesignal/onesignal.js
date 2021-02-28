@@ -12,7 +12,7 @@
 // @ts-check
 /* wrap-iife: 0 */
 
-!(function(script, body) {
+!(function(script, window) {
 	script.src = "https://cdn.onesignal.com/sdks/OneSignalSDK.js";
 	script.defer = true;
 	script.async = true;
@@ -40,5 +40,12 @@
 		);
 	};
 
-	body.removeChild(body.appendChild(script));
-}(document.createElement("script"), document.body));
+	window.addEventListener('DOMContentLoaded', function l() {
+
+		let body = document.body;
+
+		body.removeChild(body.appendChild(script));
+		window.removeEventListener('DOMContentLoaded', l);
+	});
+
+}(document.createElement("script"), window));

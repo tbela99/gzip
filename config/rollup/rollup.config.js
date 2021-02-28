@@ -36,6 +36,14 @@ export const serviceworker = {
   }
 };
 
+export const oneSignal = {
+  input: "./worker/src/onesignal/onesignal.js",
+  output: {
+    file: "./worker/dist/onesignal.js",
+    format: "iife"
+  }
+};
+
 export const serviceworkerAdmin = {
   input: "worker/src/administrator/index.js",
   output: {

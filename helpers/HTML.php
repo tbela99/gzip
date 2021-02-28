@@ -217,7 +217,7 @@ class HTMLHelper {
 		$root = $options['webroot'];
 
 		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
-		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s\3]*)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
+		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s="\'`]*)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
 
 			if ($matches[2] == 'style') {
 

@@ -170,6 +170,7 @@ class CSSHelper
 				// parsing css can be expansive
 				// let do it only when needed
 				if (!empty($options['parseinlinecss']) &&
+					!empty($attributes['style']) &&
 					strpos($attributes['style'], 'background') !== false &&
 					strpos($attributes['style'], 'url(') !== false &&
 					!empty($attributes['style'])) {
