@@ -1,20 +1,23 @@
 # Change History
 
-## 2.9.0
+## 2.9.3
 
-- New [CSS parser](https://github.com/tbela99/css) and minifier #67
-- Resize background images in inline css #116
-- Preserve background transparency when resizing #117
-- \[bug\] Fix an issue with responsive images #95
-- \[bug\] PWA start_url missing from preloaded urls #113
-- \[bug\] Cannot download sourcemap file #112
-- \[bug\] fix an error in the service worker #104
-- Convert CSS inline images to webp #93
-- Parse and minify inline CSS attribute #105
+- Do not remove quotes when some characters are present #126
+- Fix notice when parse inline CSS is enabled #105
+- Update version number #124
+- Add missing onesignal javascript #125
+
+## 2.9.2
+
+fix bug that prevent installation
+
+## 2.9.1
+
+fix bug that prevent installation
 
 ## 2.8.1
 
-- fix empty service worker files #102
+- Fix empty service worker files #102
 
 ## 2.8.0
 
