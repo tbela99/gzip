@@ -2,7 +2,7 @@
 <extension version="3.5" type="plugin" group="system" method="upgrade">
     <name>plg_system_gzip</name>
     <author>Thierry Bela</author>
-    <creationDate>August 2016</creationDate>
+    <creationDate>Feb 2021</creationDate>
     <copyright>Copyright (C) 2005 - 2021 Thierry Bela.</copyright>
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
