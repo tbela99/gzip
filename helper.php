@@ -647,7 +647,7 @@ class GZipHelper
 
 		while ($id != 0) {
 			$id = ($id - ($r = $id % $base)) / $base;
-			$short = $alphabet{$r} . $short;
+			$short = $alphabet[$r] . $short;
 		}
 
 		$response = ltrim($short, '0');
