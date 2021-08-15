@@ -133,7 +133,7 @@ abstract class Element implements ElementInterface  {
      */
     public function traverse(callable $fn, $event) {
 
-        return (new Element\Traverser())->on($event, $fn)->traverse($this);
+        return (new Traverser())->on($event, $fn)->traverse($this);
     }
 
     /**
