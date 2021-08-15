@@ -379,9 +379,7 @@ class Parser
 
                                     $result[] = (object)['type' => 'operator', 'value' => $selector[$i]];
                                 }
-
                             } else {
-
                                 $buffer .= $selector[$i];
                             }
 
@@ -415,21 +413,9 @@ class Parser
 
                             break;
                         }
-//
-//                        else {
-//
+
                         $buffer .= $selector[$i];
                         break;
-//                        }
-//
-//                        if ($buffer !== '') {
-//
-//                            $result[] = $this->getTokenType($buffer, $context);
-//                        }
-//
-//                        $result[] = (object)['type' => 'operator', 'value' => $selector[$i]];
-//                        $buffer = '';
-//                        break;
 
                     case '|':
 
@@ -678,11 +664,8 @@ class Parser
 
             if ($token == '/') {
 
-                //    $this->position++;
                 $this->tokens[] = (object)['type' => 'select', 'node' => '>'];
             } else if ($token !== '') {
-
-                var_dump($token, $substr);
 
                 throw new SyntaxError(sprintf('expected "%s" at position %d', $token, $this->position));
             }

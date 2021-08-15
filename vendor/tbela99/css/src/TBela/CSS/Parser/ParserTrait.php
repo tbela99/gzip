@@ -14,9 +14,12 @@ trait ParserTrait
 
         $q = substr($string, 0, 1);
 
-        if (($q == '"' || $q == "'") && strlen($string) > 2 && substr($string, -1) == $q && ($force || preg_match('#^[\w_-]+$#', $string))) {
+        if (($q == '"' || $q == "'") && strlen($string) > 2 && substr($string, -1) == $q) {
 
-            return substr($string, 1, -1);
+            if (($force || preg_match('#^' . $q . '[\w_-]+' . $q . '$#', $string))) {
+
+                return substr($string, 1, -1);
+            }
         }
 
         return $string;
@@ -237,6 +240,99 @@ trait ParserTrait
         }
 
         return false;
+    }
+
+    public static function split($string, $separator)
+    {
+
+        $result = [];
+
+        $i = -1;
+        $j = strlen($string) - 1;
+        $buffer = '';
+
+        while (++$i <= $j) {
+
+            switch ($string[$i]) {
+
+                case $separator:
+
+                    if (trim($buffer) !== '') {
+
+                        $result[] = $buffer;
+                        $buffer = '';
+                    }
+                    break;
+
+                case '\\':
+
+                    $buffer .= $string[$i];
+
+                    if (isset($string[$i + 1])) {
+
+                        $buffer .= $string[++$i];
+                    }
+
+                    break;
+
+                case '/':
+
+                    if (isset($string[$i + 1]) && $string[$i + 1] == '*') {
+
+                        // capture comments
+                        $comment = static::match_comment($string, $i, $j);
+
+                        $buffer .= $comment;
+                        $i += strlen($comment) - 1;
+                    } else {
+
+                        $buffer .= $string[$i];
+                    }
+
+                    break;
+
+                case '(':
+
+                    $substr = static::_close($string, ')', '(', $i, $j, true);
+
+                    if ($substr === false) {
+
+                        $buffer .= $string[$i];
+                        break;
+                    }
+
+                    $buffer .= $substr;
+                    $i += strlen($substr) - 1;
+                    break;
+
+                case '"':
+                case "'":
+
+                    $buffer .= $string[$i];
+                    $substr = static::_close($string, $string[$i], $string[$i], $i + 1, $j);
+
+                    if ($substr === false) {
+
+                        break;
+                    }
+
+                    $buffer .= $substr;
+                    $i += strlen($substr) - 1;
+                    break;
+
+                default:
+
+                    $buffer .= $string[$i];
+                    break;
+            }
+        }
+
+        if (trim($buffer) !== '') {
+
+            $result[] = $buffer;
+        }
+
+        return $result;
     }
 
     protected static function is_whitespace($char)

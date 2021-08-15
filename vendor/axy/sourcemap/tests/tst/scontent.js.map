@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "file": "script.js",
+    "sourceRoot": "",
+    "sources": ["script.ts", "other.ts"],
+    "sourcesContent": ["The first file", "The second file"],
+    "names":["MyClass","constructor","initEvents","redraw","CW","CW.constructor"],
+    "mappings":"AAAA,YAAY,CAAC;;;;;;;AAEb,IAAO,GAAG,WAAW,OAAO,CAAC,CAAC"
+}

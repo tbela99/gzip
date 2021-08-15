@@ -2,9 +2,13 @@
 
 namespace TBela\CSS;
 
+use axy\sourcemap\SourceMap;
 use Exception;
+use TBela\CSS\Exceptions\IOException;
+use TBela\CSS\Interfaces\ParsableInterface;
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Interfaces\ElementInterface;
+use TBela\CSS\Parser\Helper;
 use TBela\CSS\Property\PropertyList;
 use TBela\CSS\Value\Set;
 use function is_string;
@@ -15,30 +19,30 @@ use function is_string;
  */
 class Renderer
 {
-    /**
-     * @var Traverser
-     */
-    protected $traverser = null;
 
-    /**
-     * @var array
-     */
     protected $options = [
-        'compress' => false,
-        'css_level' => 4,
-        'indent' => ' ',
         'glue' => "\n",
+        'indent' => ' ',
+        'css_level' => 4,
         'separator' => ' ',
         'charset' => false,
+        'compress' => false,
+        'sourcemap' => false,
         'convert_color' => false,
         'remove_comments' => false,
+        'preserve_license' => false,
         'compute_shorthand' => true,
         'remove_empty_nodes' => false,
         'allow_duplicate_declarations' => false
     ];
 
+    /**
+     * @var string
+     * @ignore
+     */
+    protected $outFile = '';
+
     protected $indents = [];
-    protected $events = [];
 
     /**
      * Identity constructor.
@@ -66,27 +70,30 @@ class Renderer
             return $this->render($element->copy()->getRoot(), $level);
         }
 
-        if (isset($this->traverser)) {
-
-            $result = $this->traverser->traverse($element);
-
-            if ($result instanceof ElementInterface) {
-
-                $element = $result;
-            }
-        }
-
         return $this->renderAst($element->getAst(), $level);
     }
 
-        public function renderAst($ast, $level = null)
+    /**
+     * @param \stdClass|ParsableInterface $ast
+     * @param int|null $level
+     * @return string
+     * @throws Exception
+     */
+    public function renderAst($ast, $level = null)
     {
+
+        $this->outFile = '';
+
+        if ($ast instanceof ParsableInterface) {
+
+            $ast = $ast->getAst();
+        }
 
         switch ($ast->type) {
 
             case 'Stylesheet':
 
-                return $this->renderCollection($ast, $level);
+//                return $this->renderCollection($ast, $level);
 
             case 'Comment':
             case 'Declaration':
@@ -94,7 +101,7 @@ class Renderer
             case 'Rule':
             case 'AtRule':
 
-                return $this->{'render'.$ast->type}($ast, $level);
+                return $this->{'render' . $ast->type}($ast, $level);
 
             default:
 
@@ -104,7 +111,347 @@ class Renderer
         return '';
     }
 
-    protected function renderStylesheet($ast, $level) {
+    /**
+     * @param ParsableInterface|\stdClass $ast
+     * @param string $file
+     * @return Renderer
+     * @throws IOException
+     */
+    public function save($ast, $file)
+    {
+
+        if ($ast instanceof ParsableInterface) {
+
+            $ast = $ast->getAst();
+        }
+
+        $data = (object)[
+            'sourcemap' => new SourceMap(),
+                'position' => (object)[
+                'line' => 0,
+                'column' => 0
+            ]
+        ];
+
+        $this->outFile = Helper::absolutePath($file, Helper::getCurrentDirectory());
+
+        $result = $this->walk($ast, $data);
+        $map = $file.'.map';
+
+        $json = $data->sourcemap->getData();
+//        $json['mappings'] = preg_replace('#;+#', ';', $json['mappings']);
+
+        if (file_put_contents($map, json_encode($json)) === false) {
+
+            throw new IOException("cannot write map into $map", 500);
+        }
+
+        if (file_put_contents($file, $result->css."\n/*# sourceMappingURL=".Helper::relativePath($map, dirname($file))." */") === false) {
+
+            throw new IOException("cannot write output into $file", 500);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \stdClass $ast
+     * @param \stdClass $data\
+     * @param int|null $level
+     * @return object|null
+     * @throws Exception
+     * @ignore
+     */
+    protected function walk($ast, $data, $level = null)
+    {
+
+        $result = [
+
+            'css' => '',
+            'type' => $ast->type,
+        ];
+
+        // rule
+        switch ($ast->type) {
+
+            case 'Rule':
+            case 'AtRule':
+            case 'Stylesheet':
+
+                if ($ast->type == 'AtRule'&& $ast->name == 'media' && $ast->value == 'all') {
+
+                    // render children
+                    $css = '';
+                    $d = clone $data;
+                    $d->position = clone $d->position;
+
+                    foreach ($ast->children as $c) {
+
+                        $r = $this->walk($c, $d, $level);
+
+                        if (is_null($r)) {
+
+                            continue;
+                        }
+
+                        $p = $r->css.$this->options['glue'];
+                        $css .= $p;
+
+                        $this->update($d->position, $p);
+                    }
+
+                    $result['css'] = $css;
+                    break;
+                }
+
+                $type = $ast->type;
+                $map = [];
+
+                if ($type == 'Stylesheet') {
+
+                    $ast->css = '';
+
+                    foreach ($ast->children as $c) {
+
+                        $d = clone $data;
+                        $d->position = clone $d->position;
+
+                        $child = $this->walk($c, $d);
+
+                        if (is_null($child) || $child->css === '') {
+
+                            continue;
+                        }
+
+                        $css = $child->css . $this->options['glue'];
+                        $this->update($data->position, $css);
+
+                        $ast->css .= $css;
+                    }
+
+                    $result['css'] = rtrim($ast->css);
+                } else {
+
+                    if ($type == 'Rule' || ($type == 'AtRule' && isset($ast->children))) {
+
+                        if (!isset($this->indents[$level])) {
+
+                            $this->indents[$level] = str_repeat($this->options['indent'], $level);
+                        }
+
+                        $children = isset($ast->children) ? $ast->children : [];
+
+                        if (empty($children) && $this->options['remove_empty_nodes']) {
+
+                            return null;
+                        }
+
+                        if ($this->options['compute_shorthand'] || !$this->options['allow_duplicate_declarations']) {
+
+                            $children = new PropertyList(null, $this->options);
+
+                            foreach ((isset($ast->children) ? $ast->children : []) as $child) {
+
+                                if(isset($child->name)) {
+
+                                    $map[$child->name] = $child;
+                                }
+
+                                else {
+
+                                    $map[] = $child;
+                                }
+
+                                $children->set(isset($child->name) ? $child->name : null, $child->value, $child->type, isset($child->leadingcomments) ? $child->leadingcomments : null, isset($child->trailingcomments) ? $child->trailingcomments : null, isset($child->src) ? $child->src : null);
+                            }
+
+                            if ($children->isEmpty() && $this->options['remove_empty_nodes']) {
+
+                                return null;
+                            }
+                        }
+                    }
+
+                    if (!is_null($level)) {
+
+                        $this->update($data->position, $this->indents[$level]);
+                    }
+
+                    $this->addPosition($data, $ast);
+
+
+                    if ($type == 'Rule') {
+
+                        $result['css'] .= $this->renderSelector($ast, $level) . $this->options['indent'] . '{' .
+                            $this->options['glue'];
+
+                        $this->update($data->position, substr($result['css'], $level));
+                    }
+
+                    else {
+
+                        $media = $this->renderAtRuleMedia($ast, $level);
+
+                        if ($media === '') {
+
+                            return null;
+                        }
+
+                        $result['css'] = $media;
+
+                        if (!empty($ast->isLeaf)) {
+
+                            $this->update($data->position, substr($result['css'], $level));
+                            break;
+                        }
+
+                        $result['css'] .= $this->options['indent'] . '{' . $this->options['glue'];
+                        $this->update($data->position, substr($result['css'], $level));
+                    }
+
+                    $res = [];
+
+                    foreach ($children as $child) {
+
+                        $declaration = $this->{'render' . $child->type}($child, $level + 1);
+
+                        if ($declaration === '') {
+
+                            continue;
+                        }
+
+                        if (isset($res[$declaration])) {
+
+                            unset($res[$declaration]);
+                        }
+
+                        $v = isset($child->name) ? $child->name : null;
+                        $res[$declaration] = [$declaration, isset($map[$v]) ? $map[$v] : $child];
+                    }
+
+                    $css = '';
+                    $d = clone $data;
+                    $d->position = clone $d->position;
+                    $glue = ';' . $this->options['glue'];
+
+                    foreach ($res as $r) {
+
+                        $this->update($d->position, $this->indents[$level + 1]);
+
+                        if (!is_null(isset($r[1]->position) ? $r[1]->position : (isset($r[1]->location->start) ? $r[1]->location->start : null)) && in_array($r[1]->type, ['AtRule', 'Rule'])) {
+
+                            $this->addPosition($d, $r[1]);
+                        }
+
+                        $text = $r[0] . ($r[1]->type == 'Comment' ? $this->options['glue'] : $glue);
+                        $this->update($d->position, substr($text, $level + 1));
+                        $css .= $text;
+                    }
+
+                    $result['css'] .= rtrim($css, $glue) . $this->options['glue'] . $this->indents[$level] . '}';
+                }
+
+                break;
+
+            case 'Comment':
+//            case 'Property':
+//            case 'Declaration':
+
+                $css = $this->{'render' . $ast->type}($ast, $level);
+
+                if ($css === '') {
+
+                    return null;
+                }
+
+                if (!isset($this->indents[$level])) {
+
+                    $this->indents[$level] = str_repeat($this->options['indent'], $level);
+                }
+
+                $c = clone $data;
+                $c->position = clone $c->position;
+                $this->update($c->position, $this->indents[$level]);
+//                $this->addPosition($data, substr($css, $level));
+
+                $result['css'] = $css;
+                break;
+
+            default:
+
+                throw new Exception('Type not supported ' . $ast->type);
+        }
+
+        return (object)$result;
+    }
+
+    /**
+     * @param \stdClass $position
+     * @param string $string
+     * @return \stdClass
+     * @ignore
+     */
+    protected function update($position, $string)
+    {
+
+        $j = strlen($string);
+
+        for ($i = 0; $i < $j; $i++) {
+
+            if ($string[$i] == "\n") {
+
+                $position->line++;
+                $position->column = 0;
+            } else {
+
+                $position->column++;
+            }
+        }
+
+        return $position;
+    }
+
+    /**
+     * @param \stdClass $data
+     * @param \stdClass $ast
+     * @ignore
+     */
+    protected function addPosition($data, $ast)
+    {
+
+        if (empty($ast->src)) {
+
+            return;
+        }
+
+        $position = isset($ast->location->start) ? $ast->location->start : (isset($ast->position) ? $ast->position : null);
+
+        if (is_null($position)) {
+
+            return;
+        }
+
+        $data->sourcemap->addPosition([
+            'generated' => [
+                'line' => $data->position->line,
+                'column' => $data->position->column,
+            ],
+            'source' => [
+                'fileName' => $ast->src,
+                'line' => $position->line - 1,
+                'column' => $position->column - 1,
+            ],
+        ]);
+    }
+
+    /**
+     * @param \stdClass $ast
+     * @param int|null $level
+     * @return string
+     * @ignore
+     */
+    protected function renderStylesheet($ast, $level)
+    {
 
         return $this->renderCollection($ast, $level);
     }
@@ -113,12 +460,17 @@ class Renderer
      * @param \stdClass $ast
      * @param int|null $level
      * @return string
+     * @ignore
      */
-    protected function renderComment($ast, $level) {
+    protected function renderComment($ast, $level)
+    {
 
         if ($this->options['remove_comments']) {
 
-            return '';
+            if (!$this->options['preserve_license'] || substr($ast->value, 0, 3) != '/*!') {
+
+                return '';
+            }
         }
 
         settype($level, 'int');
@@ -139,7 +491,7 @@ class Renderer
      * @throws Exception
      * @ignore
      */
-    protected function renderRule($ast, $level)
+    protected function renderSelector($ast, $level)
     {
 
         $selector = $ast->selector;
@@ -147,13 +499,6 @@ class Renderer
         if (!isset($selector)) {
 
             throw new Exception('The selector cannot be empty');
-        }
-
-        $output = $this->renderCollection($ast, $level + 1);
-
-        if ($output === '' && $this->options['remove_empty_nodes']) {
-
-            return '';
         }
 
         settype($level, 'int');
@@ -180,11 +525,9 @@ class Renderer
 
             foreach ($selector as $sel) {
 
-                $result .= $sel.$join;
+                $result .= $sel . $join;
             }
-        }
-
-        else {
+        } else {
 
             $result .= $selector;
         }
@@ -201,34 +544,58 @@ class Renderer
 
                 foreach ($comments as $comment) {
 
-                    $result .= $join.$comment;
+                    $result .= $join . $comment;
                 }
             }
+        }
+
+        return $result;
+    }
+
+    /**
+     * render a rule
+     * @param \stdClass $ast
+     * @param int|null $level
+     * @return string
+     * @throws Exception
+     * @ignore
+     */
+    protected function renderRule($ast, $level)
+    {
+
+        settype($level, 'int');
+        $result = $this->renderSelector($ast, $level);
+        $output = $this->renderCollection($ast, $level + 1);
+
+        if ($output === '' && $this->options['remove_empty_nodes']) {
+
+            return '';
         }
 
         return $result . $this->options['indent'] . '{' .
             $this->options['glue'] .
             $output . $this->options['glue'] .
-            $indent .
-        '}';
+            $this->indents[$level] .
+            '}';
     }
 
     /**
-     * render at-rule
+
+     * render a rule
      * @param \stdClass $ast
-     * @param ?int $level
+     * @param int|null $level
      * @return string
+     * @throws Exception
      * @ignore
      */
-    protected function renderAtRule($ast, $level)
-    {
+    protected function renderAtRuleMedia($ast, $level) {
 
         if ($ast->name == 'charset' && !$this->options['charset']) {
 
             return '';
         }
 
-        $output = '@'. $this->renderName($ast);
+        $output = '@' . $this->renderName($ast);
         $value = $this->renderValue($ast);
 
         if ($value !== '') {
@@ -236,9 +603,7 @@ class Renderer
             if ($this->options['compress'] && $value[0] == '(') {
 
                 $output .= $value;
-            }
-
-            else {
+            } else {
 
                 $output .= rtrim($this->options['separator'] . $value);
             }
@@ -258,6 +623,47 @@ class Renderer
             return $indent . $output . ';';
         }
 
+        return $indent . $output;
+    }
+
+    /**
+     * render at-rule
+     * @param \stdClass $ast
+     * @param ?int $level
+     * @return string
+     * @ignore
+     */
+    protected function renderAtRule($ast, $level)
+    {
+
+        settype($level, 'int');
+
+        $media = $this->renderAtRuleMedia($ast, $level);
+
+        if ($media === '' || !empty($ast->isLeaf)) {
+
+            return $media;
+        }
+
+        if ($ast->name == 'media' && $ast->value == 'all') {
+
+            $css = '';
+            
+            foreach ($ast->children as $child) {
+
+                $r = $this->{'render'.$child->type}($child, $level);
+
+                if ($r === '') {
+
+                    continue;
+                }
+
+                $css .= $r.$this->options['glue'];
+            }
+
+            return rtrim($css);
+        }
+
         $elements = $this->renderCollection($ast, $level + 1);
 
         if ($elements === '' && $this->options['remove_empty_nodes']) {
@@ -265,15 +671,17 @@ class Renderer
             return '';
         }
 
-        return $indent . $output . $this->options['indent'] . '{' . $this->options['glue'] . $elements . $this->options['glue'] . $indent . '}';
+        return $media . $this->options['indent'] . '{' . $this->options['glue'] . $elements . $this->options['glue'] . $this->indents[$level] . '}';
     }
 
     /**
      * @param \stdClass $ast
      * @param int|null $level
      * @return string
+     * @ignore
      */
-    protected function renderDeclaration($ast, $level) {
+    protected function renderDeclaration($ast, $level)
+    {
 
         return $this->renderProperty($ast, $level);
     }
@@ -299,34 +707,63 @@ class Renderer
         $options = [
             'compress' => $this->options['compress'],
             'css_level' => $this->options['css_level'],
-            'convert_color' => $this->options['convert_color'] === true ? 'hex' : $this->options['convert_color']];
+            'convert_color' => $this->options['convert_color'] === true ? 'hex' : $this->options['convert_color']
+        ];
+//
+//        if (is_string($value)) {
+//
+//            if (!isset($this->indents[$level])) {
+//
+//                $this->indents[$level] = str_repeat($this->options['indent'], (int)$level);
+//            }
+//
+//            return $this->indents[$level] . $name . ':' . $this->options['indent'] . $value;
+//        }
 
         if (is_string($value)) {
 
-            return $name.':'.$this->options['indent'].$value;
-//            $value = Value::parse($value, $ast->name);
+            $value = Value::parse($value, $name);
         }
 
         if (empty($this->options['compress'])) {
 
-            $value = implode(', ',  array_map(function (Set $value) use($options) {
+            if (is_string($value)) {
+
+                $value = Value::parse($value, $name);
+            }
+
+            $value = implode(', ', array_map(function (Set $value) use ($options) {
 
                 return $value->render($options);
 
             }, $value->split(',')));
-        }
-
-        else {
+        } else {
 
             $value = $value->render($options);
         }
 
-        if ($value == 'none' && in_array($name, ['border', 'border-top', 'border-right', 'border-left', 'border-bottom', 'outline'])) {
+        if ($value == 'none') {
 
-            $value = 0;
+            if (in_array($name, ['border', 'border-top', 'border-right', 'border-left', 'border-bottom', 'outline'])) {
+
+                $value = 0;
+            }
         }
 
-        if(!$this->options['remove_comments'] && !empty($ast->trailingcomments)) {
+        else if (in_array($name, ['background', 'background-image', 'src'])) {
+
+                $value = preg_replace_callback('#(^|\s)url\(\s*(["\']?)([^)\\2]+)\\2\)#', function ($matches) {
+
+                    if (strpos($matches[3], 'data:') !== false) {
+
+                        return $matches[0];
+                    }
+
+                    return $matches[1].'url('.Helper::relativePath($matches[3], $this->outFile === '' ? Helper::getCurrentDirectory() : dirname($this->outFile)).')';
+                }, $value);
+            }
+
+        if (!$this->options['remove_comments'] && !empty($ast->trailingcomments)) {
 
             $comments = $ast->trailingcomments;
 
@@ -334,7 +771,7 @@ class Renderer
 
                 foreach ($comments as $comment) {
 
-                    $value .= ' '.$comment;
+                    $value .= ' ' . $comment;
                 }
             }
         }
@@ -346,7 +783,7 @@ class Renderer
             $this->indents[$level] = str_repeat($this->options['indent'], $level);
         }
 
-        return $this->indents[$level].trim($name).':'.$this->options['indent'].trim($value);
+        return $this->indents[$level] . trim($name) . ':' . $this->options['indent'] . trim($value);
     }
 
     /**
@@ -368,7 +805,7 @@ class Renderer
 
                 foreach ($comments as $comment) {
 
-                    $result .= ' '.$comment;
+                    $result .= ' ' . $comment;
                 }
             }
         }
@@ -405,7 +842,7 @@ class Renderer
 
             foreach ($trailingComments as $comment) {
 
-                $result .= $glue.$comment;
+                $result .= $glue . $comment;
             }
         }
 
@@ -423,13 +860,12 @@ class Renderer
     protected function renderCollection($ast, $level)
     {
 
-        $glue = '';
         $type = $ast->type;
+        $glue = ($type == 'Rule' || ($type == 'AtRule' && !empty($ast->hasDeclarations))) ? ';' : '';
         $count = 0;
 
-        if (($this->options['compute_shorthand'] || !$this->options['allow_duplicate_declarations']) && ($type == 'Rule' || ($type == 'AtRule' && !empty($ast->hasDeclarations)))) {
+        if (($this->options['compute_shorthand'] || !$this->options['allow_duplicate_declarations']) && $glue == ';') {
 
-            $glue = ';';
             $children = new PropertyList(null, $this->options);
 
             if (isset($ast->children)) {
@@ -445,7 +881,6 @@ class Renderer
         }
 
         $result = [];
-
         settype($level, 'int');
 
         foreach ($children as $el) {
@@ -455,11 +890,11 @@ class Renderer
                 $el = $el->getAst();
             }
 
-            $output = $this->{'render'.$el->type}($el, $level);
+            $output = $this->{'render' . $el->type}($el, $level);
 
             if (trim($output) === '') {
 
-                    continue;
+                continue;
 
             } else if ($el->type != 'Comment') {
 
@@ -492,11 +927,12 @@ class Renderer
 
         foreach ($result as $res) {
 
-            $output .= $res.$join;
+            $output .= $res . $join;
         }
 
         return rtrim($output, $glue . $this->options['glue']);
     }
+
     /**
      * Set output formatting
      * @param array $options
@@ -562,27 +998,5 @@ class Renderer
         }
 
         return isset($this->options[$name]) ? $this->options[$name] : $default;
-    }
-
-    public function on($type, $callable) {
-
-        if (is_null($this->traverser)) {
-
-            $this->traverser = new Traverser();
-        }
-
-        $this->traverser->on($type == 'traverse' ? 'enter' : $type, $callable);
-
-        return $this;
-    }
-
-    public function off($type, $callable) {
-
-        if (isset($this->traverser)) {
-
-            $this->traverser->off($type == 'traverse' ? 'enter' : 'traverse', $callable);
-        }
-
-        return $this;
     }
 }

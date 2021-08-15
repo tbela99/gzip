@@ -9,11 +9,11 @@ namespace TBela\CSS\Interfaces;
  * @method getType(): string;
  * @method getValue(): \TBela\CSS\Value\Set;
  */
-interface RenderableInterface {
+interface RenderableInterface extends ParsableInterface, ObjectInterface {
 
     /**
      * @param array|null $comments
-     * @return RenderableInterface
+     * @return ObjectInterface
      */
     public function setTrailingComments($comments);
 
@@ -24,19 +24,12 @@ interface RenderableInterface {
 
     /**
      * @param string[]|null $comments
-     * @return RenderableInterface
+     * @return ObjectInterface
      */
     public function setLeadingComments($comments);
 
     /**
      * @return string[]|null
      */
-
     public function getLeadingComments();
-
-    /**
-     * return the ast
-     * @return \stdClass
-     */
-    public function getAst();
 }

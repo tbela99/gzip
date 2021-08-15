@@ -1,0 +1,30 @@
+{
+    "name": "axy/sourcemap",
+    "type": "library",
+    "description": "Work with JavaScript/CSS Source Map",
+    "keywords": [
+        "sourcemap",
+        "Source Map",
+        "JavaScript",
+        "CSS"
+    ],
+    "homepage": "https://github.com/axypro/sourcemap",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oleg Grigoriev",
+            "email": "go.vasac@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "ext-json": "*",
+        "axy/errors": "~1.0.1",
+        "axy/codecs-base64vlq": "~1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "axy\\sourcemap\\": ""
+        }
+    }
+}

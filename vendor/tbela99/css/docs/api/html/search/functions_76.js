@@ -1,4 +1,0 @@
-var searchData=
-[
-  ['validate',['validate',['../d0/d18/classTBela_1_1CSS_1_1Value_1_1Color.html#a17e100928d1a36fdfa825d164b0ef03b',1,'TBela\CSS\Value\Color\validate()'],['../d8/d66/classTBela_1_1CSS_1_1Value_1_1Comment.html#ab2df756ffa8b40334c11206ecd294187',1,'TBela\CSS\Value\Comment\validate()'],['../da/d44/classTBela_1_1CSS_1_1Value_1_1Number.html#a01bded3e9fff94224cbf527d93cc59f2',1,'TBela\CSS\Value\Number\validate()'],['../db/d5f/classTBela_1_1CSS_1_1Value_1_1Operator.html#af53e6d0d5deb8fd87a6cb5cd3c320cce',1,'TBela\CSS\Value\Operator\validate()'],['../dd/dcf/classTBela_1_1CSS_1_1Value_1_1Unit.html#a389604ed58d7849af8ce9b2c7129977e',1,'TBela\CSS\Value\Unit\validate()'],['../d6/d86/classTBela_1_1CSS_1_1Value_1_1Whitespace.html#aec594af818872ab883a2cc566a03142c',1,'TBela\CSS\Value\Whitespace\validate()'],['../dd/dca/classTBela_1_1CSS_1_1Value.html#aa80e87c092bcf1b16c7d8a78a8852e08',1,'TBela\CSS\Value\validate()']]]
-];

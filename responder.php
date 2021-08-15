@@ -25,7 +25,10 @@ defined('_JEXEC') or die;
 
 function enable_compression () {
 
-	ob_end_clean();
+	if (ob_get_length()) {
+
+		ob_end_clean();
+	}
 
 	if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 
@@ -394,7 +397,10 @@ if ($precompress && $validFileSize && preg_match('#(text)|(xml)|(font)#', $accep
 			file_put_contents($name, $data);
 		}
 
-		ob_end_clean();
+		if (ob_get_length()) {
+
+			ob_end_clean();
+		}
 
 		ini_set('zlib.output_compression', 'Off');
 		ini_set('brotli.output_compression', 'Off');

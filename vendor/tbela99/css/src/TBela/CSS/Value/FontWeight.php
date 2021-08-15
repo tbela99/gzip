@@ -77,7 +77,7 @@ class FontWeight extends Value
     /**
      * @inheritDoc
      */
-    public static function matchToken($token, $previousToken = null, $previousValue = null)
+    public static function matchToken($token, $previousToken = null, $previousValue = null, $nextToken = null, $nextValue = null, $index = null, array $tokens = [])
     {
 
         if ($token->type == 'number' && $token->value > 0 && $token->value <= 1000) {
@@ -97,7 +97,6 @@ class FontWeight extends Value
 
         return $token->type == static::type();
     }
-
 
     /**
      * @inheritDoc

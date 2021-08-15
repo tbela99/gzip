@@ -19,6 +19,9 @@ use Exception;
 use JProfiler as JProfiler;
 use JUri;
 use Patchwork\JSqueeze as JSqueeze;
+use Peast\Formatter\Compact;
+use Peast\Formatter\PrettyPrint;
+use Peast\Renderer;
 use function base64_encode;
 use function curl_close;
 use function curl_exec;
@@ -420,10 +423,10 @@ class GZipHelper
 
 		if (is_null($jsShrink)) {
 
-			$jsShrink = new JSqueeze;
+			$jsShrink = new Renderer(static::$options['minifyjs'] ? new Compact() : new PrettyPrint());
 		}
 
-		return trim($jsShrink->squeeze($content, false, false), ';');
+		return trim($jsShrink->render(Peast\Peast::latest($content)->parse(), false, false), ';');
 	}
 
 	/**
@@ -647,7 +650,7 @@ class GZipHelper
 
 		while ($id != 0) {
 			$id = ($id - ($r = $id % $base)) / $base;
-			$short = $alphabet{$r} . $short;
+			$short = $alphabet[$r] . $short;
 		}
 
 		$response = ltrim($short, '0');

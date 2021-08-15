@@ -1,0 +1,1 @@
+{    "file": "a.js",    "mappings": "AAAA,SAAS,CAAC;IACNA,MAAMA,CAACA,GAAGA,CAACA;AACfA,CAACA",    "names": [        "a"    ],    "sourceRoot": "",    "sources": [        "a.ts"    ],    "sourcesContent": ["var file = 'a'"],    "version": 3}

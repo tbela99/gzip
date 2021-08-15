@@ -7,9 +7,21 @@ namespace Composer\Autoload;
 class ComposerStaticIniteecc78d1480540a369ddaecadfca63b2
 {
     public static $prefixLengthsPsr4 = array (
+        'a' => 
+        array (
+            'axy\\sourcemap\\' => 14,
+            'axy\\errors\\' => 11,
+            'axy\\codecs\\base64vlq\\' => 21,
+            'axy\\backtrace\\' => 14,
+        ),
         'T' => 
         array (
             'TBela\\CSS\\' => 10,
+        ),
+        'P' => 
+        array (
+            'Peast\\test\\' => 11,
+            'Peast\\' => 6,
         ),
         'E' => 
         array (
@@ -18,9 +30,33 @@ class ComposerStaticIniteecc78d1480540a369ddaecadfca63b2
     );
 
     public static $prefixDirsPsr4 = array (
+        'axy\\sourcemap\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/axy/sourcemap',
+        ),
+        'axy\\errors\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/axy/errors',
+        ),
+        'axy\\codecs\\base64vlq\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/axy/codecs-base64vlq',
+        ),
+        'axy\\backtrace\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/axy/backtrace',
+        ),
         'TBela\\CSS\\' => 
         array (
             0 => __DIR__ . '/..' . '/tbela99/css/src/TBela/CSS',
+        ),
+        'Peast\\test\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mck89/peast/test/Peast',
+        ),
+        'Peast\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
         ),
         'Elphin\\IcoFileLoader\\' => 
         array (
