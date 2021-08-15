@@ -1,0 +1,1 @@
+{    "file": "bc.js",    "mappings": "AAAA,SAAS,CAAC;IACNA,MAAMA,CAACA,GAAGA,CAACA;AACfA,CAACA;ACFD,SAAS,CAAC;IACNC,MAAMA,CAACA,GAAGA,GAAGA,CAACA,EAAEA,CAACA;AACrBA,CAACA",    "names": [        "b",        "c"    ],    "sourceRoot": "",    "sources": [        "b.ts",        "c.ts"    ],    "sourcesContent": ["var file = 'b'", "var file = 'c'"],    "version": 3}

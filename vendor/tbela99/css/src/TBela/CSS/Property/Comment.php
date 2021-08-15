@@ -11,17 +11,8 @@ use TBela\CSS\Value\Set;
 /**
  * Comment property class
  * @package TBela\CSS\Property
- * @method  getName()
  */
-class Comment implements ArrayAccess, RenderableInterface {
-
-    use ArrayTrait;
-
-    /**
-     * @var string|Value|Set
-     * @ignore
-     */
-    protected $value;
+class Comment extends Property {
 
     /**
      * @var string
@@ -37,6 +28,11 @@ class Comment implements ArrayAccess, RenderableInterface {
     {
 
         $this->setValue($value);
+    }
+
+    public function getName() {
+
+        return null;
     }
 
     /**
@@ -60,15 +56,6 @@ class Comment implements ArrayAccess, RenderableInterface {
     }
 
     /**
-     * return the object type
-     * @return string
-     */
-    public function getType () {
-
-        return $this->type;
-    }
-
-    /**
      * Converty this object to string
      * @param array $options
      * @return string
@@ -84,13 +71,12 @@ class Comment implements ArrayAccess, RenderableInterface {
     }
 
     /**
-     * Automatically convert this object to string
+     * get property hash.
      * @return string
      */
-    public function __toString()
-    {
+    public function getHash() {
 
-        return $this->render();
+        return ':'.$this->value;
     }
 
     /**
@@ -123,20 +109,5 @@ class Comment implements ArrayAccess, RenderableInterface {
     public function getLeadingComments()
     {
         return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-
-    /**
-     * @inheritDoc
-     */
-    public function getAst()
-    {
-        return (object) array_filter(get_object_vars($this), function ($value) {
-
-            return !is_null($value);
-        });
     }
 }

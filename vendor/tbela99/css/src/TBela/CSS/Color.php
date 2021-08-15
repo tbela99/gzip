@@ -872,8 +872,6 @@ class Color
 
                 $color .= $matches[4];
             }
-
-            //    return $color;
         }
 
         return strlen($str) <= strlen($color) ? $str : $color;

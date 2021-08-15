@@ -3,6 +3,7 @@
 namespace TBela\CSS\Value;
 
 use \Exception;
+use TBela\CSS\Property\Config;
 use \TBela\CSS\Value;
 
 /**
@@ -39,19 +40,43 @@ class ShortHand extends Value
     protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
     {
 
+        $separator = Config::getPath('map.'.static::type().'.separator');
+        $results = [];
 
-        $keyword = static::matchKeyword($string);
+        foreach ((is_null($separator) ? [$string] : static::split($string, $separator)) as $string) {
 
-        if (!is_null($keyword)) {
+            $keyword = static::matchKeyword($string);
 
-            return new Set([(object)['value' => $keyword, 'type' => static::type()]]);
+            if (!is_null($keyword)) {
+
+                $results[] = new Set([(object)['value' => $keyword, 'type' => static::type()]]);
+                break;
+            }
+
+            $tokens = static::getTokens($string, $capture_whitespace, $context, $contextName);
+            $results[] = new Set(static::reduce(static::matchPattern($tokens)));
         }
 
-        $tokens = static::matchPattern(static::getTokens($string, $capture_whitespace, $context, $contextName));
+        $j = count($results) - 1;
+        $i = -1;
 
-        return new Set(static::reduce($tokens));
+        $set = new Set();
+
+        while (++$i < $j) {
+
+            $set->merge($results[$i]);
+            $set->add(Value::getInstance((object) ['type' => 'separator', 'value' => $separator]));
+        }
+
+        $set->merge($results[$j]);
+        return $set;
     }
 
+    /**
+     * @param array $tokens
+     * @return array
+     * @throws Exception
+     */
     public static function matchPattern(array $tokens)
     {
 
@@ -64,8 +89,14 @@ class ShortHand extends Value
 
             $j = count($tokens);
             $previous = null;
+            $next = null;
 
             for ($i = 0; $i < $j; $i++) {
+
+                if (!isset($tokens[$i]->type)) {
+
+                    echo new Exception('empty type not allowed');
+                }
 
                 if (in_array($tokens[$i]->type, ['separator', 'whitespace'])) {
 
@@ -77,33 +108,82 @@ class ShortHand extends Value
 
                     $className = static::getClassName($pattern['type']) . '::matchToken';
 
-                    if (call_user_func($className, $tokens[$i], isset($tokens[$i - 1]) ? $tokens[$i - 1] : null, $previous)) {
+                    $k = $i + 1;
+                    $next = isset($tokens[$k]) ? $tokens[$k] : null;
 
-                        array_splice($patterns, $key, 1);
+                    while (!is_null($next)) {
+
+                        if (!in_array($next->type, ['separator', 'whitespace'])) {
+
+                            break;
+                        }
+
+                        ++$k;
+                        $next = isset($tokens[$k]) ? $tokens[$k] : null;
+                    }
+
+                    if (call_user_func($className, $tokens[$i], isset($tokens[$i - 1]) ? $tokens[$i - 1] : null, $previous, isset($tokens[$i + 1]) ? $tokens[$i + 1] : null, $next, $i, $tokens)) {
 
                         $tokens[$i]->type = $pattern['type'];
                         $previous = $tokens[$i];
 
+                        $k = $i;
+
                         if (!empty($pattern['multiple'])) {
 
-                            while (++$i < $j) {
+                            while (++$k < $j) {
 
-                                if (in_array($tokens[$i]->type, ['separator', 'white-space'])) {
+                                if (in_array($tokens[$k]->type, ['separator', 'whitespace'])) {
 
                                     continue;
                                 }
 
-                                if (call_user_func($className, $tokens[$i], $tokens[$i - 1], $previous)) {
+                                $w = $k;
 
-                                    $tokens[$i]->type = $pattern['type'];
+                                while (!is_null($next)) {
+
+                                    if (!in_array($next->type, ['separator', 'whitespace'])) {
+
+                                        break;
+                                    }
+
+                                    $next = isset($tokens[++$w]) ? $tokens[$w] : null;
+                                }
+
+                                if (call_user_func($className, $tokens[$k], $tokens[$k - 1], $previous, isset($tokens[$k + 1]) ? $tokens[$k + 1] : null, $next, $k, $tokens)) {
+
+                                    $tokens[$k]->type = $pattern['type'];
+                                    $i = $k;
+                                    $previous = $tokens[$k];
+
+                                    $w = $k;
+                                    $next = isset($tokens[$k + 1]) ? $tokens[$k + 1] : null;
+
+                                    while (!is_null($next)) {
+
+                                        if (!in_array($next->type, ['separator', 'whitespace'])) {
+
+                                            break;
+                                        }
+
+                                        
+                                        $next = isset($tokens[++$w]) ? $tokens[$w] : null;
+                                    }
+                                }
+
+                                else {
+
+                                    break;
                                 }
                             }
 
-                            $previous = $tokens[$i - 1];
+                            $previous = isset($tokens[$i - 1]) ? $tokens[$i - 1] : null;
                         }
 
+                        unset($patterns[$key]);
                         break;
-                    } // failure to match a mandatory property
+                    }
+                    // failure to match a mandatory property
                     else if (empty($pattern['optional'])) {
 
                         break;
@@ -115,21 +195,13 @@ class ShortHand extends Value
 
                 return empty($pattern['optional']);
             }));
-//
+
             if (!empty($mandatory)) {
 
-                throw new Exception(' Invalid "' . static::type() . '" definition, missing \'' . $mandatory[0]['type'] . '\'', 400);
+                throw new Exception(' Invalid "' . static::type() . '" definition, missing \'' . $mandatory[0]['type'] . '\' in "'.implode(' ', array_map(Value::class.'::getInstance', $tokens)).'"', 400);
             }
 
-            $i = count($tokens);
-
-            while ($i--) {
-
-                if (call_user_func(static::getClassName($tokens[$i]->type) . '::matchDefaults', $tokens[$i])) {
-
-                    array_splice($tokens, $i, 1);
-                }
-            }
+            break;
         }
 
         return $tokens;

@@ -8,7 +8,7 @@ namespace TBela\CSS\Value;
  */
 class OutlineWidth extends Unit
 {
-    use ValueTrait;
+    use UnitTrait;
 
     protected static $keywords = [
         'thin',
@@ -19,7 +19,7 @@ class OutlineWidth extends Unit
     /**
      * @inheritDoc
      */
-    public static function matchToken($token, $previousToken = null, $previousValue = null)
+    public static function matchToken($token, $previousToken = null, $previousValue = null, $nextToken = null, $nextValue = null, $index = null, array $tokens = [])
     {
 
         return $token->type == 'unit' || ($token->type == 'number' && $token->value == 0);

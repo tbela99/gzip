@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"out.js",
+"lineCount":1,
+"mappings":"AAAAA,QAASA,IAAG,EAAG,CACX,MAAO,GADI,CAGfC,QAASA,IAAG,EAAG,CACX,MAAO,GADI,C,CCHfC,QAASA,MAAK,EAAG,CACb,MAAO,GAAP,CAAaD,GAAA,EADA,CAGjBE,QAASA,KAAI,EAAG,CACZ,MAAO,GADK;",
+"sources":["ab.js","cd.js"],
+"names":["one","two","three","four"]
+}
