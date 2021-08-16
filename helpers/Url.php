@@ -45,6 +45,11 @@ class UrlHelper {
 
 		$checksum = !empty($options['checksum']) ? $options['checksum'] : false;
 
+		if ($checksum == 'none') {
+
+			$checksum = false;
+		}
+
 		$domains = [];
 
 		$html = preg_replace_callback('#<([a-zA-Z0-9:-]+)\s([^>]+)>(?!["\'])#s', function ($matches) use($checksum, $hashFile, $accepted, &$domains, &$pushed, $types, $hashmap, $base, $options) {
@@ -97,19 +102,19 @@ class UrlHelper {
 						}
 					}
 
-					if (!empty($options['cachefiles']) && isset($attributes[$attr]) && isset($options['parse_url_attr'][$attr])) {
+					if ((!empty($options['cachefiles']) || $checksum) && isset($attributes[$attr]) && isset($options['parse_url_attr'][$attr])) {
 
 						$file = GZipHelper::getName($attributes[$attr]);
 
 						if (GZipHelper::isFile($file)) {
 
 							$name = preg_replace('~[#?].*$~', '', $file);
-
 							$ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
 							if (isset(GZipHelper::$static_types[$ext]) && empty($attributes['crossorigin'])) {
 
-								$attributes['crossorigin'] = 'anonymous';
+								// crossorigin="anonymous"
+								$attributes['crossorigin'] = '';
 							}
 
 							$push_data = empty($types) ? false : GZipHelper::canPush($name, $ext);
@@ -136,13 +141,26 @@ class UrlHelper {
 								}
 							}
 
+							if ($checksum) {
+
+								$checkSumData = GZipHelper::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
+
+								if ($tag == 'script' || ($tag == 'link' && $ext == 'css')) {
+
+									$attributes['integrity'] = $checkSumData['integrity'];
+									// crossorigin="anonymous"
+									$attributes['crossorigin'] = '';
+								}
+							}
+
 							if (isset($accepted[$ext])) {
 
 								unset($pushed[$base . $file]);
 
-								$checkSumData = GZipHelper::getChecksum($name, $hashFile, $checksum, $tag == 'script' || ($tag == 'link' && $ext == 'css'));
+								if (!empty($options['cachefiles'])) {
 
-								$file = GZipHelper::getHost(JURI::root(true).'/'.GZipHelper::$route.GZipHelper::$pwa_network_strategy . $checkSumData['hash'] . '/' . $file);
+									$file = GZipHelper::getHost(JURI::root(true).'/'.GZipHelper::$route.GZipHelper::$pwa_network_strategy . (isset($checkSumData['hash']) ? $checkSumData['hash'] : $hashFile($file)) . '/' . $file);
+								}
 
 								if (!empty($push_data)) {
 
@@ -150,16 +168,7 @@ class UrlHelper {
 									$pushed[$file] = $push_data;
 								}
 
-								$attributes[$attr] = $file ;
-
-								if(!empty($checksum) && $checksum != 'none') {
-
-									if ($tag == 'script' || ($tag == 'link' && $ext == 'css')) {
-
-										$attributes['integrity'] = $checkSumData['integrity'];
-										$attributes['crossorigin'] = 'anonymous';
-									}
-								}
+								$attributes[$attr] = $file;
 							}
 						}
 
