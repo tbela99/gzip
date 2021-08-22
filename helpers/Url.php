@@ -206,6 +206,7 @@ class UrlHelper {
 				}
 
 				return $a['href'] < $b['href'] ? -1 : 1;
+
 			});
 
 
