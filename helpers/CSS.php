@@ -14,7 +14,7 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-use TBela\CSS\Compiler;
+//use TBela\CSS\Compiler;
 use TBela\CSS\Element;
 use TBela\CSS\Element\Stylesheet;
 use TBela\CSS\Interfaces\ElementInterface;
@@ -112,7 +112,15 @@ class CSSHelper
 					}
 
 					$copy = $query->copy();
-					$copy->getParent()->addDeclaration('font-display', $options['fontdisplay']);
+
+					$declaration = new Element\Declaration();
+					$declaration->setName('font-display');
+					$declaration->setValue($options['fontdisplay']);
+
+					/**
+					 * @var RuleListInterface
+					 */
+					$copy->getParent()->insert($declaration, 0);
 
 					$headStyle->append($copy->getRoot());
 				}
@@ -385,7 +393,7 @@ class CSSHelper
 			}
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Compiler($css_options))->setContent($matches[2])->compile() : $matches[2];
+			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $matches[2];
 
 			return '';
 		}, $html);
