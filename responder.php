@@ -23,6 +23,8 @@ defined('_JEXEC') or die;
  * @var $app ;
  */
 
+use \Gzip\GZipHelper;
+
 function enable_compression () {
 
 	if (ob_get_length()) {
@@ -45,8 +47,6 @@ function enable_compression () {
 		}
 	}
 }
-
-use \Gzip\GZipHelper;
 
 $cdn_access_control_origin = isset($this->options['cdn_access_control_origin']) ? $this->options['cdn_access_control_origin'] : '*';
 

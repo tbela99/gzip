@@ -258,18 +258,80 @@
             "install-path": "../lordelph/icofileloader"
         },
         {
+            "name": "mck89/peast",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mck89/peast.git",
+                "reference": "4f89ad98e3402b851beb81ad1925e325adaa2124"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/4f89ad98e3402b851beb81ad1925e325adaa2124",
+                "reference": "4f89ad98e3402b851beb81ad1925e325adaa2124",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "time": "2021-07-28T17:14:56+00:00",
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.13.5-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Peast\\": "lib/Peast/",
+                    "Peast\\test\\": "test/Peast/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Marco Marchiò",
+                    "email": "marco.mm89@gmail.com"
+                }
+            ],
+            "description": "Peast is PHP library that generates AST for JavaScript code",
+            "support": {
+                "issues": "https://github.com/mck89/peast/issues",
+                "source": "https://github.com/mck89/peast/tree/v1.13.5"
+            },
+            "install-path": "../mck89/peast"
+        },
+        {
             "name": "tbela99/css",
             "version": "dev-php56-backport-dev",
             "version_normalized": "dev-php56-backport-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
+<<<<<<< HEAD
                 "reference": "0813a2463eab243104f41c448d73898269caee05"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tbela99/css/zipball/0813a2463eab243104f41c448d73898269caee05",
                 "reference": "0813a2463eab243104f41c448d73898269caee05",
+=======
+                "reference": "78731964a1b13962ab48da3c530290342c7f7d18"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/78731964a1b13962ab48da3c530290342c7f7d18",
+                "reference": "78731964a1b13962ab48da3c530290342c7f7d18",
+>>>>>>> joomla4_plugin_edit
                 "shasum": ""
             },
             "require": {
@@ -278,7 +340,11 @@
                 "ext-json": "*",
                 "php": ">=5.6"
             },
+<<<<<<< HEAD
             "time": "2021-08-24T05:30:46+00:00",
+=======
+            "time": "2021-08-08T23:57:58+00:00",
+>>>>>>> joomla4_plugin_edit
             "type": "library",
             "installation-source": "dist",
             "autoload": {

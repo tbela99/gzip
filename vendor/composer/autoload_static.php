@@ -18,6 +18,11 @@ class ComposerStaticIniteecc78d1480540a369ddaecadfca63b2
         array (
             'TBela\\CSS\\' => 10,
         ),
+        'P' => 
+        array (
+            'Peast\\test\\' => 11,
+            'Peast\\' => 6,
+        ),
         'E' => 
         array (
             'Elphin\\IcoFileLoader\\' => 21,
@@ -44,6 +49,14 @@ class ComposerStaticIniteecc78d1480540a369ddaecadfca63b2
         'TBela\\CSS\\' => 
         array (
             0 => __DIR__ . '/..' . '/tbela99/css/src/TBela/CSS',
+        ),
+        'Peast\\test\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mck89/peast/test/Peast',
+        ),
+        'Peast\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
         ),
         'Elphin\\IcoFileLoader\\' => 
         array (
