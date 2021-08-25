@@ -88,8 +88,18 @@ class Evaluator
         return $result;
     }
 
+    /**
+     * @param array $selectors
+     * @param array $search
+     * @return bool
+     * @ignore
+     */
     protected function search(array $selectors, array $search)
     {
+        if (empty($selectors)) {
+
+            return false;
+        }
 
         $l = count($search);
 
@@ -135,14 +145,16 @@ class Evaluator
         return false;
     }
 
+    /**
+     * @param \TBela\CSS\Interfaces\ElementInterface[] $nodes
+     * @return array
+     * @ignore
+     */
     protected function sortNodes($nodes)
     {
 
         $info = [];
 
-        /**
-         * @var \TBela\CSS\Interfaces\ElementInterface $element
-         */
         foreach ($nodes as $key => $element) {
 
             $index = spl_object_hash($element);

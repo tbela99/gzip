@@ -492,7 +492,7 @@ class GZipHelper
 
 		if (empty(static::$options['cachefiles'])) {
 
-			if ($file[0] == '/' || preg_match('#^(https?:)?//#')) {
+			if ($file[0] == '/' || preg_match('#^(https?:)?//#', $file)) {
 
 				return $file;
 			}
@@ -647,7 +647,7 @@ class GZipHelper
 
 		while ($id != 0) {
 			$id = ($id - ($r = $id % $base)) / $base;
-			$short = $alphabet{$r} . $short;
+			$short = $alphabet[$r] . $short;
 		}
 
 		$response = ltrim($short, '0');
