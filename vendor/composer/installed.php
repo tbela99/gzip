@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '59ae73be0a2f8efd7d874ec8fabf6542556cc5c2',
+        'reference' => 'bd119bbc8cbae03b8de3d7fd8d0a15a4a7f92f8e',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '59ae73be0a2f8efd7d874ec8fabf6542556cc5c2',
+            'reference' => 'bd119bbc8cbae03b8de3d7fd8d0a15a4a7f92f8e',
             'dev_requirement' => false,
         ),
         'axy/backtrace' => array(
@@ -62,6 +62,15 @@
             'install_path' => __DIR__ . '/../lordelph/icofileloader',
             'aliases' => array(),
             'reference' => '97fa83f23d3b155b08923629377a8a34327f6930',
+            'dev_requirement' => false,
+        ),
+        'mck89/peast' => array(
+            'pretty_version' => 'v1.13.6',
+            'version' => '1.13.6.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mck89/peast',
+            'aliases' => array(),
+            'reference' => '67566e6d594ffb70057fee7adceac9300998cc95',
             'dev_requirement' => false,
         ),
         'tbela99/css' => array(
