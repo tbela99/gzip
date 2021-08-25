@@ -5,11 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-<<<<<<< HEAD
-        'reference' => 'e4a0df45c17afb91575a2115cee90441546f6293',
-=======
-        'reference' => '10cdc2c02f32a6901f3b7a3c472e24c93daca9cb',
->>>>>>> joomla4_plugin_edit
+        'reference' => '59ae73be0a2f8efd7d874ec8fabf6542556cc5c2',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -20,11 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-<<<<<<< HEAD
-            'reference' => 'e4a0df45c17afb91575a2115cee90441546f6293',
-=======
-            'reference' => '10cdc2c02f32a6901f3b7a3c472e24c93daca9cb',
->>>>>>> joomla4_plugin_edit
+            'reference' => '59ae73be0a2f8efd7d874ec8fabf6542556cc5c2',
             'dev_requirement' => false,
         ),
         'axy/backtrace' => array(
@@ -72,7 +64,6 @@
             'reference' => '97fa83f23d3b155b08923629377a8a34327f6930',
             'dev_requirement' => false,
         ),
-<<<<<<< HEAD
         'tbela99/css' => array(
             'pretty_version' => 'dev-php56-backport-dev',
             'version' => 'dev-php56-backport-dev',
@@ -80,26 +71,6 @@
             'install_path' => __DIR__ . '/../tbela99/css',
             'aliases' => array(),
             'reference' => '0813a2463eab243104f41c448d73898269caee05',
-=======
-        'mck89/peast' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../mck89/peast',
-            'aliases' => array(
-                0 => '1.13.5.x-dev',
-            ),
-            'reference' => '4f89ad98e3402b851beb81ad1925e325adaa2124',
-            'dev_requirement' => false,
-        ),
-        'tbela99/css' => array(
-            'pretty_version' => 'dev-php56-backport',
-            'version' => 'dev-php56-backport',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../tbela99/css',
-            'aliases' => array(),
-            'reference' => '78731964a1b13962ab48da3c530290342c7f7d18',
->>>>>>> joomla4_plugin_edit
             'dev_requirement' => false,
         ),
     ),

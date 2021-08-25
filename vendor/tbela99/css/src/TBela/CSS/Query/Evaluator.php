@@ -6,89 +6,88 @@ use function usort;
 
 class Evaluator
 {
-	/**
-	 * @param string $expression
-	 * @param QueryInterface $context
-	 * @return QueryInterface[]
-	 * @throws SyntaxError
-	 */
-	public function evaluate($expression, QueryInterface $context)
-	{
+    /**
+     * @param string $expression
+     * @param QueryInterface $context
+     * @return QueryInterface[]
+     * @throws SyntaxError
+     */
+    public function evaluate($expression, QueryInterface $context)
+    {
 
-		$tokenList = (new Parser())->parse($expression);
+        $tokenList = (new Parser())->parse($expression);
 
-		return $this->sortNodes($tokenList->filter([$context]));
+        return $this->sortNodes($tokenList->filter([$context]));
 
-	}
+    }
 
-	/**
-	 * search nodes by class ame
-	 * @param string $classNames a comma separated list of class names
-	 * @param QueryInterface $context
-	 * @return array
-	 * @throws SyntaxError
-	 */
-	public function evaluateByClassName($classNames, QueryInterface $context)
-	{
+    /**
+     * search nodes by class ame
+     * @param string $classNames a comma separated list of class names
+     * @param QueryInterface $context
+     * @return array
+     * @throws SyntaxError
+     */
+    public function evaluateByClassName($classNames, QueryInterface $context)
+    {
 
-		$parser = new Parser();
+        $parser = new Parser();
 
-		$selectors = [];
+        $selectors = [];
 
-		foreach ($parser->split($classNames) as $className) {
+        foreach ($parser->split($classNames) as $className) {
 
-			foreach ($parser->split($className, ',') as $selector) {
+            foreach ($parser->split($className, ',') as $selector) {
 
-				$selector = trim($selector);
+                $selector = trim($selector);
 
-				$selectors[$selector] = (string) $parser->parse($selector);
-			}
-		}
+                $selectors[$selector] = (string) $parser->parse($selector);
+            }
+        }
 
-		$selectors = array_values($selectors);
+        $selectors = array_values($selectors);
 
-		sort($selectors);
+        sort($selectors);
 
-		$result = [];
+        $result = [];
 
-		$stack = $context->getType() == 'Stylesheet' ? $context->getChildren() : [$context];
+        $stack = $context->getType() == 'Stylesheet' ? $context->getChildren() : [$context];
 
-		while($node = array_shift($stack)) {
+        while($node = array_shift($stack)) {
 
-			if ($node->getType() == 'Rule') {
+            if ($node->getType() == 'Rule') {
 
-				/**
-				 * @var \TBela\CSS\Element\Rule $node
-				 */
+                /**
+                 * @var \TBela\CSS\Element\Rule $node
+                 */
 
-				if ($this->search($selectors, array_map('trim', $node->getSelector()))) {
+                if ($this->search($selectors, array_map('trim', $node->getSelector()))) {
 
-					$result[] = $node;
-				}
-			}
+                        $result[] = $node;
+                }
+            }
 
-			/**
-			 * @var \TBela\CSS\Element\AtRule $node
-			 */
+            /**
+             * @var \TBela\CSS\Element\AtRule $node
+             */
 
-			else if ($node->getType() == 'AtRule') {
+            else if ($node->getType() == 'AtRule') {
 
-				if ($this->search($selectors, [trim('@'.$node->getName().' '.$node->getValue()->render(['remove_comments' => true]))])) {
+                if ($this->search($selectors, [trim('@'.$node->getName().' '.$node->getValue()->render(['remove_comments' => true]))])) {
 
-					$result[] = $node;
-				}
+                    $result[] = $node;
+                }
 
-				if (!$node->isLeaf() && !$node->hasDeclarations()) {
+                if (!$node->isLeaf() && !$node->hasDeclarations()) {
 
-					array_splice($stack, count($stack), 0, $node->getChildren());
-				}
-			}
-		}
+                    array_splice($stack, count($stack), 0, $node->getChildren());
+                }
+            }
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-<<<<<<< HEAD
     /**
      * @param array $selectors
      * @param array $search
@@ -101,63 +100,51 @@ class Evaluator
 
             return false;
         }
-=======
-	/**
-	 * @param array $selectors
-	 * @param array $search
-	 * @return bool
-	 * @ignore
-	 */
-	protected function search(array $selectors, array $search)
-	{
-		if (empty($selectors)) {
->>>>>>> joomla4_plugin_edit
 
-			return false;
-		}
+        $l = count($search);
 
-		$l = count($search);
+        while ($l--) {
 
-		while ($l--) {
+            $k = count($selectors) - 1;
+            $i = 0;
 
-			$k = count($selectors) - 1;
-			$i = 0;
+            while (true) {
 
-			while (true) {
+                $j = $i + ceil(($k - $i) / 2);
 
-				$j = $i + ceil(($k - $i) / 2);
+                if ($selectors[$j] < $search[$l]) {
 
-				if ($selectors[$j] < $search[$l]) {
+                    if ($i == $j) {
 
-					if ($i == $j) {
+                        break;
+                    }
 
-						break;
-					}
+                    $i = $j;
 
-					$i = $j;
+                } else if ($selectors[$j] > $search[$l]) {
 
-				} else if ($selectors[$j] > $search[$l]) {
+                    if ($k == $j) {
 
-					if ($k == $j) {
+                        if ($selectors[$i] === $search[$l]) {
 
-						if ($selectors[$i] === $search[$l]) {
+                            return true;
+                        }
 
-							return true;
-						}
+                        break;
+                    }
 
-						break;
-					}
+                    $k = $j;
 
-					$k = $j;
+                } else if ($selectors[$j] === $search[$l]) {
 
-				} else if ($selectors[$j] === $search[$l]) {
+                    return true;
+                }
+            }
+        }
 
-					return true;
-				}
-			}
-		}
+        return false;
+    }
 
-<<<<<<< HEAD
     /**
      * @param \TBela\CSS\Interfaces\ElementInterface[] $nodes
      * @return array
@@ -165,70 +152,54 @@ class Evaluator
      */
     protected function sortNodes($nodes)
     {
-=======
-		return false;
-	}
->>>>>>> joomla4_plugin_edit
 
-	/**
-	 * @param \TBela\CSS\Interfaces\ElementInterface[] $nodes
-	 * @return array
-	 * @ignore
-	 */
-	protected function sortNodes($nodes)
-	{
+        $info = [];
 
-<<<<<<< HEAD
         foreach ($nodes as $key => $element) {
-=======
-		$info = [];
->>>>>>> joomla4_plugin_edit
 
-		foreach ($nodes as $key => $element) {
+            $index = spl_object_hash($element);
 
-			$index = spl_object_hash($element);
+            if (!isset($info[$index])) {
 
-			if (!isset($info[$index])) {
+                $info[$index] = [
+                    'key' => $key,
+                    'depth' => []
+                ];
 
-				$info[$index] = [
-					'key' => $key,
-					'depth' => []
-				];
+                $el = $element;
 
-				$el = $element;
+                while ($el && ($parent = $el->getParent())) {
 
-				while ($el && ($parent = $el->getParent())) {
+                    $info[$index]['depth'][] = array_search($el, $parent->getChildren(), true);
+                    $el = $parent;
+                }
 
-					$info[$index]['depth'][] = array_search($el, $parent->getChildren(), true);
-					$el = $parent;
-				}
+                $info[$index]['depth'] = implode('', array_reverse($info[$index]['depth']));
+            }
+        }
 
-				$info[$index]['depth'] = implode('', array_reverse($info[$index]['depth']));
-			}
-		}
+        usort($info, function ($a, $b) {
 
-		usort($info, function ($a, $b) {
+            if ($a['depth'] < $b['depth']) {
 
-			if ($a['depth'] < $b['depth']) {
+                return -1;
+            }
 
-				return -1;
-			}
+            if ($a['depth'] > $b['depth']) {
 
-			if ($a['depth'] > $b['depth']) {
+                return 1;
+            }
 
-				return 1;
-			}
+            return 0;
+        });
 
-			return 0;
-		});
+        $res = [];
 
-		$res = [];
+        foreach ($info as $value) {
 
-		foreach ($info as $value) {
+            $res[] = $nodes[$value['key']];
+        }
 
-			$res[] = $nodes[$value['key']];
-		}
-
-		return $res;
-	}
+        return $res;
+    }
 }
