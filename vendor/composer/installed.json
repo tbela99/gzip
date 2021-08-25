@@ -320,12 +320,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
-                "reference": "0813a2463eab243104f41c448d73898269caee05"
+                "reference": "a1de00dce686dca3cf73695c957cebd7cd1e14cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tbela99/css/zipball/0813a2463eab243104f41c448d73898269caee05",
-                "reference": "0813a2463eab243104f41c448d73898269caee05",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/a1de00dce686dca3cf73695c957cebd7cd1e14cb",
+                "reference": "a1de00dce686dca3cf73695c957cebd7cd1e14cb",
                 "shasum": ""
             },
             "require": {
@@ -334,7 +334,7 @@
                 "ext-json": "*",
                 "php": ">=5.6"
             },
-            "time": "2021-08-24T05:30:46+00:00",
+            "time": "2021-08-25T22:42:46+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

@@ -53,6 +53,11 @@ abstract class Element implements ElementInterface  {
 
             foreach ($ast as $key => $value) {
 
+                if (is_null($value)) {
+
+                    continue;
+                }
+
                 if (is_callable([$this, 'set'.$key])) {
 
                     $this->{'set'.$key}($value);
