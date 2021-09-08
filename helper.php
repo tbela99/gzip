@@ -424,7 +424,7 @@ class GZipHelper
 
 		if (is_null($parser)) {
 
-			$parser = new Renderer(static::$options['minifyjs'] ? new Compact() : new PrettyPrint());
+			$parser = (new Renderer)->setFormatter(static::$options['minifyjs'] ? new Compact() : new PrettyPrint());
 		}
 
 		try {

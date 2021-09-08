@@ -211,7 +211,7 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="15" cols="45" />
+                    <field name="imageignore" label="PLG_GZIP_FIELD_IMAGEIGNORE_LABEL" description="PLG_GZIP_FIELD_IMAGEIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGEIGNORE_HINT" type="textarea" rows="5" cols="45" />
                     <field type="spacer" hr="true" />
                     <field name="imageconvert" label="PLG_GZIP_FIELD_IMAGE_CONVERT_LABEL" description="PLG_GZIP_FIELD_IMAGE_CONVERT_DESCRIPTION" hint="PLG_GZIP_FIELD_IMAGE_CONVERT_HINT" type="radio" class="btn-group" default="0">
                         <option value="1">JYes</option>
@@ -277,8 +277,8 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_JSIGNORE_HINT" type="textarea" rows="15" cols="45" />
-                    <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                    <field name="jsignore" label="PLG_GZIP_FIELD_JSIGNORE_LABEL" description="PLG_GZIP_FIELD_JSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_JSIGNORE_HINT" type="textarea" rows="5" cols="45" />
+                    <field name="jsremove" label="PLG_GZIP_FIELD_JSREMOVE_LABEL" description="PLG_GZIP_FIELD_JSREMOVE_DESCRIPTION" type="textarea" rows="5" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="css" label="CSS">
@@ -361,8 +361,8 @@
                         <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
                     </field>
                     <field type="spacer" hr="true" />
-                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="15" cols="45" />
-                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="15" cols="45" />
+                    <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="5" cols="45" />
+                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="5" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="critical_path" label="Critical Css">
@@ -405,7 +405,7 @@
                         <option value="html">JOPTION_PWA_OFFLINE_PREF_HTML</option>
                     </field>
                     <field name="pwa_offline_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_PAGE_HINT" type="text" default="" />
-                    <field name="pwa_offline_html_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_HINT" type="textarea" rows="15" cols="80" filter="raw" default="&lt;!doctype html&gt;
+                    <field name="pwa_offline_html_page" label="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_LABEL" description="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_OFFLINE_HTML_PAGE_HINT" type="textarea" rows="5" cols="80" filter="raw" default="&lt;!doctype html&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
 &lt;title&gt;Site Unreachable&lt;/title&gt;
 &lt;style&gt;
@@ -507,7 +507,7 @@
                         <field name="title" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_LABEL" description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_DESCRIPTION" type="text" default="" hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TITLE_HINT" />
                         <field name="text" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_LABEL" description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_DESCRIPTION" type="text" default="" hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_TEXT_HINT" />
                         <field name="url" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_LABEL" description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_DESCRIPTION" type="text" default="" hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_URL_HINT" />
-                        <field name="files" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_LABEL" description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_DESCRIPTION" type="textarea" default="" cols="15" rows="15" hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_HINT" />
+                        <field name="files" label="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_LABEL" description="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_DESCRIPTION" type="textarea" default="" cols="15" rows="5" hint="PLG_GZIP_FIELD_PWA_SHARE_TARGET_FIELDS_FILES_HINT" />
                     </fields>
                 </fields>
             </fieldset>
@@ -623,7 +623,7 @@
                         <option value="GET">JOPTION_PWA_SYNC_METHOD_OPTION_GET</option>
                         <option value="POST">JOPTION_PWA_SYNC_METHOD_OPTION_POST</option>
                     </field>
-                    <field name="pwa_sync_patterns" label="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_LABEL" description="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_HINT" type="textarea" default="" rows="15" />
+                    <field name="pwa_sync_patterns" label="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_LABEL" description="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_DESCRIPTION" hint="PLG_GZIP_FIELD_PWA_SYNC_PATTERN_HINT" type="textarea" default="" rows="5" />
                 </fields>
             </fieldset>
             <fieldset name="webpush" label="Web Push">

@@ -48,8 +48,13 @@ class ScriptHelper {
 		$fetch_remote = !empty($options['fetchjs']);
 		$remote_service = !empty($options['minifyjsservice']);
 
+		/**
+		 * capture scripts marked as nomodule/module
+		 */
+		$modules = [];
+
 		// parse scripts
-		$html = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, $path, $fetch_remote, $ignore, $remove) {
+		$html = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, &$modules, $path, $fetch_remote, $ignore, $remove) {
 
 			$attributes = [];
 
@@ -63,9 +68,21 @@ class ScriptHelper {
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
 
+			if (array_key_exists('nomodule', $attributes)) {
+
+				$modules[] = $matches[0];
+				return '';
+			}
+
 			// ignore custom type
 			//   preg_match('#\btype=(["\'])(.*?)\1#', $matches[1], $match);
 			if (isset($attributes['type']) && stripos($attributes['type'], 'javascript') === false) {
+
+				if($attributes['type'] == 'module') {
+
+					$modules[] = $matches[0];
+					return '';
+				}
 
 				return $matches[0];
 			}
@@ -290,11 +307,11 @@ class ScriptHelper {
 							$async = true;
 						}
 
-						$script[$position] .= "\n".'<script data-async async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
+						$script[$position] .= "\n".'<script data-async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
 
 						if ($hasScript) {
 
-							$script[$position] .= "\n".'<script type="text/foo">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
+							$script[$position] .= "\n".'<script type="text/script">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
 							unset($sources['inline'][$position]);
 						}
 					}
@@ -326,6 +343,19 @@ class ScriptHelper {
 			if (!isset($script['body'])) {
 
 				$script['head'] = '';
+			}
+		}
+
+		if (!empty($modules)) {
+
+			if (isset($script['body'])) {
+
+				$script['body'] .= '<template data-type="module">'.implode("\n", $modules).'</template>';
+			}
+
+			else {
+
+				$script['body'] = '<template data-type="module">'.implode("\n", $modules).'</template>';
 			}
 		}
 
