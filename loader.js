@@ -80,7 +80,7 @@ LIB.ready(function () {
 
 	let count = scripts.length;
 
-	if (count == 0) {
+	if (count === 0) {
 
 		runScripts();
 	}
