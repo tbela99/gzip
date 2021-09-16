@@ -10,7 +10,7 @@
  */
 // @ts-check
 
-// build 61eb1e1 2021-02-27 17:46:22-05:00
+// build b01eb80 2021-09-15 20:57:17-04:00
 
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
 	navigator.serviceWorker.getRegistration().then(function (registration) {

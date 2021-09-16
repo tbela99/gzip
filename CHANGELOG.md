@@ -1,5 +1,19 @@
 # Change History
 
+# 2.9.11
+
+- @cbahiana-sd Added info on enabling zlib.output_compression 495b84d
+- @cbahiana-sd #132 Changing {$r} for [$r] at line 650
+- @tbela99 #135 Correcting typo on PLG_GZIP_FIELD_PWA_APP_URL_DESCRIPTION
+- @tbela99 #111 replace javascript minifier with an ES6+ compatible alternative
+- @tbela99 Merge pull request #140 from tbela99/javascript_minifier 39a7e38
+- @tbela99 #137 compute integrity even when HTTP caching is off
+- @tbela99 #142 add missing font-display from extracted font-face rules
+- @tbela99 #144 cannot edit Joomla settings
+- @tbela99 #147 fix css parser fatal error
+- @tbela99 #148 fix warning
+- @tbela99 #149 fix Joomla javascript error
+
 ## 2.9.3
 
 - Do not remove quotes when some characters are present #126
