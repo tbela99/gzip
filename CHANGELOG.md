@@ -1,6 +1,6 @@
 # Change History
 
-# 2.9.11
+# 2.11.0
 
 - @cbahiana-sd Added info on enabling zlib.output_compression 495b84d
 - @cbahiana-sd #132 Changing {$r} for [$r] at line 650
