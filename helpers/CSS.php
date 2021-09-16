@@ -14,9 +14,10 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-use TBela\CSS\Compiler;
+//use TBela\CSS\Compiler;
 use TBela\CSS\Element;
 use TBela\CSS\Element\Stylesheet;
+use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Parser;
 use TBela\CSS\Renderer;
@@ -63,14 +64,19 @@ class CSSHelper
 
 		$fetchFonts = function ($node) use ($options, $headStyle) {
 
+			/**
+			 * @var Element\AtRule $node
+			 */
+
 			if ((string)$node['name'] == 'font-face') {
 
-				/**
-				 * @var Element\AtRule $node
-				 */
-				$node->addDeclaration('font-display', $options['fontdisplay']);
-
 				$query = $node->query('./[@name=src]');
+
+				/**
+				 * @var ElementInterface $query
+				 */
+
+				$query = end($query);
 
 				if ($query) {
 
@@ -105,7 +111,18 @@ class CSSHelper
 						});
 					}
 
-					$headStyle->append(end($query)->copy()->getRoot());
+					$copy = $query->copy();
+
+					$declaration = new Element\Declaration();
+					$declaration->setName('font-display');
+					$declaration->setValue($options['fontdisplay']);
+
+					/**
+					 * @var RuleListInterface
+					 */
+					$copy->getParent()->insert($declaration, 0);
+
+					$headStyle->append($copy->getRoot());
 				}
 			}
 		};
@@ -376,7 +393,7 @@ class CSSHelper
 			}
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Compiler($css_options))->setContent($matches[2])->compile() : $matches[2];
+			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $matches[2];
 
 			return '';
 		}, $html);

@@ -16,7 +16,7 @@ use TBela\CSS\Value\Set;
  */
 class Property implements ArrayAccess, RenderableInterface, RenderablePropertyInterface
 {
-    use ArrayTrait;
+    use ArrayTrait, PropertyTrait;
 
     /**
      * @var string
@@ -27,17 +27,22 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     protected $leadingcomments = null;
 
     protected $trailingcomments = null;
+
     /**
      * @var string
      * @ignore
      */
     protected $type = 'Property';
 
+    /**
+     * @var Set|string
+     * @ignore
+     */
     protected $value;
 
     /**
      * Property constructor.
-     * @param Value\Set|string$name
+     * @param Value\Set|string $name
      */
     public function __construct($name)
     {
@@ -72,7 +77,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
 
     /**
      * get the property name
-     * @return string
+     * @return string|null
      */
     public function getName() {
 

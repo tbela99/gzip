@@ -1,42 +1,86 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'reference' => '5d00283a0be6534d6b5d6fff42c897277b96a9a4',
+        'name' => '__root__',
+        'dev' => true,
     ),
-    'reference' => 'd6b059a9c35d2138a99c225a5b64fdec0fc0d89d',
-    'name' => '__root__',
-  ),
-  'versions' => 
-  array (
-    '__root__' => 
-    array (
-      'pretty_version' => 'dev-master',
-      'version' => 'dev-master',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'd6b059a9c35d2138a99c225a5b64fdec0fc0d89d',
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'reference' => '5d00283a0be6534d6b5d6fff42c897277b96a9a4',
+            'dev_requirement' => false,
+        ),
+        'axy/backtrace' => array(
+            'pretty_version' => '1.0.7',
+            'version' => '1.0.7.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../axy/backtrace',
+            'aliases' => array(),
+            'reference' => 'c6c7d0f3497a07ae934f9e8511cbc2286db311c5',
+            'dev_requirement' => false,
+        ),
+        'axy/codecs-base64vlq' => array(
+            'pretty_version' => '1.0.1',
+            'version' => '1.0.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../axy/codecs-base64vlq',
+            'aliases' => array(),
+            'reference' => '53a1957f2cb773c6533ac615b3f1ac59e40e13cc',
+            'dev_requirement' => false,
+        ),
+        'axy/errors' => array(
+            'pretty_version' => '1.0.5',
+            'version' => '1.0.5.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../axy/errors',
+            'aliases' => array(),
+            'reference' => '2c64374ae2b9ca51304c09b6b6acc275557fc34f',
+            'dev_requirement' => false,
+        ),
+        'axy/sourcemap' => array(
+            'pretty_version' => '0.1.5',
+            'version' => '0.1.5.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../axy/sourcemap',
+            'aliases' => array(),
+            'reference' => '95a52df5a08c3a011031dae2e79390134e28467c',
+            'dev_requirement' => false,
+        ),
+        'lordelph/icofileloader' => array(
+            'pretty_version' => '2.0.1',
+            'version' => '2.0.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../lordelph/icofileloader',
+            'aliases' => array(),
+            'reference' => '97fa83f23d3b155b08923629377a8a34327f6930',
+            'dev_requirement' => false,
+        ),
+        'mck89/peast' => array(
+            'pretty_version' => 'v1.13.6',
+            'version' => '1.13.6.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mck89/peast',
+            'aliases' => array(),
+            'reference' => '67566e6d594ffb70057fee7adceac9300998cc95',
+            'dev_requirement' => false,
+        ),
+        'tbela99/css' => array(
+            'pretty_version' => 'dev-php56-backport-dev',
+            'version' => 'dev-php56-backport-dev',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../tbela99/css',
+            'aliases' => array(),
+            'reference' => 'a1de00dce686dca3cf73695c957cebd7cd1e14cb',
+            'dev_requirement' => false,
+        ),
     ),
-    'lordelph/icofileloader' => 
-    array (
-      'pretty_version' => '2.0.1',
-      'version' => '2.0.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '97fa83f23d3b155b08923629377a8a34327f6930',
-    ),
-    'tbela99/css' => 
-    array (
-      'pretty_version' => 'dev-php56-backport',
-      'version' => 'dev-php56-backport',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '144c4b7e7c92d80ceece0710be9b635eb98ef2c4',
-    ),
-  ),
 );

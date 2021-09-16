@@ -13,6 +13,32 @@ namespace TBela\CSS;
 trait ArrayTrait
 {
 
+    public function __get($name) {
+
+        if (is_callable([$this, "get$name"])) {
+
+            return $this->{"get$name"}();
+        }
+    }
+
+    public function __set($name, $value) {
+
+        if (is_callable([$this, "set$name"])) {
+
+            return $this->{"set$name"}($value);
+        }
+    }
+
+    public function __isset($name) {
+
+        return $this->offsetExists($name);
+    }
+
+    public function __unset($name) {
+
+        return $this->offsetUnset($name);
+    }
+
     /**
      * @param string $offset
      * @param Value\Set|string $value

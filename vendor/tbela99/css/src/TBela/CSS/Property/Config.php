@@ -2,7 +2,12 @@
 
 namespace TBela\CSS\Property;
 
-Config::load(dirname(__DIR__).'/config.json');
+$file = dirname(__DIR__).'/config.json';
+
+if (is_file($file)) {
+
+    Config::load($file);
+}
 
 /**
  * Property configuration manager class
@@ -26,7 +31,8 @@ final class Config {
      */
     public static function load($file) {
 
-        static::$config = json_decode(file_get_contents($file), true);
+        $v = json_decode(file_get_contents($file), true);
+        static::$config = isset($v) ? $v : [];
     }
 
     /**
@@ -125,26 +131,26 @@ final class Config {
      * Add a configuration entry
      * @param $shorthand
      * @param $pattern
-     * @param $properties
-     * @param bool $separator allow multiple values
-     * @ignore
-     *
+     * @param array $properties
+     * @param string|null $separator allow multiple values
+     * @param string|null $shorthandOverride
      * @return array
+     * @ignore
      */
-    public static function addSet ($shorthand, $pattern, $properties, $separator = null) {
+    public static function addSet ($shorthand, $pattern, array $properties, $separator = null, $shorthandOverride = null) {
 
         $config = [];
 
         $config[$shorthand] = [
 
-            'shorthand' => $shorthand,
+            'shorthand' => isset($shorthandOverride) ? $shorthandOverride : $shorthand,
             'pattern' => $pattern,
             'value_map' => []
         ];
 
-        if (!is_null($separator)) {
+        if ($shorthandOverride === false) {
 
-            $config[$shorthand]['separator'] = $separator;
+            unset($config[$shorthand]['shorthand']);
         }
 
         $value_map_keys = [];
@@ -192,7 +198,12 @@ final class Config {
             $config[$shorthand]['value_map'] = array_reverse($config[$shorthand]['value_map']);
         }
 
-        static::$config['properties'] = isset(static::$config['properties']) ? array_merge(static::$config['properties'], $config) : $config;
+        if (!is_null($separator)) {
+
+            $config[$shorthand]['separator'] = $separator;
+        }
+
+//        static::$config['properties'] = isset(static::$config['properties']) ? array_merge(static::$config['properties'], $config) : $config;
         return $config;
     }
 }

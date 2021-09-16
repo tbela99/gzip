@@ -4,7 +4,6 @@ namespace TBela\CSS\Element;
 
 use Exception;
 use \TBela\CSS\Interfaces\ElementInterface;
-use TBela\CSS\ElementTrait;
 
 /**
  * Class AtRule

@@ -2,6 +2,8 @@
 
 namespace TBela\CSS\Value;
 
+use phpDocumentor\Reflection\Types\Static_;
+
 /**
  * Css unit value
  * @package TBela\CSS\Value
@@ -14,7 +16,7 @@ class Unit extends Number {
      */
     protected static function validate($data) {
 
-        return isset($data->unit) || (isset($data->value) && $data->value == '0');
+        return isset($data->unit) || (isset($data->value) && $data->value == '0') || in_array(strtolower($data->value), static::$keywords);
     }
 
     /**
@@ -31,6 +33,11 @@ class Unit extends Number {
      */
     public function render(array $options = [])
     {
+
+        if (in_array(strtolower($this->value), static::$keywords)) {
+
+            return $this->value;
+        }
 
         if ($this->data->value == 0) {
 

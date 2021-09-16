@@ -394,10 +394,10 @@ class ImagesHelper
 
 			$width = $dim[0];
 
-			$sizes = array_filter($sizes, function ($size) use ($width) {
+			$sizes = array_values(array_filter($sizes, function ($size) use ($width) {
 
 				return $width > $size;
-			});
+			}));
 
 			if (empty($sizes)) {
 

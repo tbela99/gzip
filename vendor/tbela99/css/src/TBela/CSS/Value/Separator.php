@@ -10,6 +10,15 @@ use \TBela\CSS\Value;
  */
 class Separator extends Value
 {
+
+    /**
+     * @inheritDoc
+     */
+    protected static function validate($data)
+    {
+        return isset($data->value) && is_string($data->value);
+    }
+
     /**
      * @inheritDoc
      */

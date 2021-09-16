@@ -15,21 +15,42 @@ trait EventTrait {
         return $this;
     }
 
-    public function off($event, callable $callable) {
+    /**
+     * remove events handlers.
+     * - if $event is null, all events are removed
+     * - if $callable is null, all events handlers for $event are removed
+     * @param string|null $event
+     * @param callable|null $callable
+     * @return $this
+     */
+    public function off($event = null, callable $callable = null) {
 
-        $event = strtolower($event);
+        if (is_null($event)) {
 
-        if (isset($this->events[$event])) {
+            $this->events = [];
+        }
+        else {
 
-            foreach ($this->events[$event] as $key => $value) {
+            $event = strtolower($event);
 
-                if ($value === $callable) {
+            if (is_null($callable)) {
 
-                    array_splice($this->events[$event], $key, 1);
-                    break;
+                unset($this->events[$event]);
+            }
+
+            else if (isset($this->events[$event])) {
+
+                foreach ($this->events[$event] as $key => $value) {
+
+                    if ($value === $callable) {
+
+                        array_splice($this->events[$event], $key, 1);
+                        break;
+                    }
                 }
             }
         }
+
 
         return $this;
     }

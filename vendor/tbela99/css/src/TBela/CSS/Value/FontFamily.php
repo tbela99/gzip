@@ -6,12 +6,12 @@ namespace TBela\CSS\Value;
  * Css string value
  * @package TBela\CSS\Value
  */
-class FontFamily extends CssString
+class FontFamily extends ShortHand
 {
     /**
      * @inheritDoc
      */
-    public static function matchToken ($token, $previousToken = null, $previousValue = null) {
+    public static function matchToken ($token, $previousToken = null, $previousValue = null, $nextToken = null, $nextValue = null, $index = null, array $tokens = []) {
 
         return $token->type == 'css-string' || $token->type == static::type();
     }

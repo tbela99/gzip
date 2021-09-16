@@ -13,6 +13,48 @@
  
 LIB.ready(function () {
 
+	function runScripts() {
+		const scripts = document.querySelectorAll('script[type="text/script"],script[type="text/module"]');
+		const j = scripts.length;
+		let i = 0;
+
+		for (; i < j; i++) {
+
+			setTimeout(
+				(function (oldScript, script) {
+					return function () {
+						const parent = oldScript.parentElement;
+						script.text = oldScript.text;
+
+						if (oldScript.type == 'text/module') {
+
+							script.type = 'module';
+						}
+
+						try {
+							parent.insertBefore(script, oldScript);
+							parent.removeChild(oldScript);
+						} catch (e) {
+							console.error(e);
+						}
+					};
+				}(scripts[i], document.createElement("script"))),
+				0
+			);
+		}
+
+		const module = document.querySelector('template[data-type=module]');
+
+		if (module) {
+
+			setTimeout(function () {
+
+				module.parentElement.insertBefore(module.content, module);
+				module.remove();
+			}, 0)
+		}
+	}
+
 	const links = document.querySelectorAll(
 		'link[data-media]'
 	);
@@ -33,43 +75,30 @@ LIB.ready(function () {
 	}
 
 	 const scripts = document.querySelectorAll(
-		 'script[data-async][async]'
+		 'script[data-async]'
 	 );
 
 	let count = scripts.length;
 
-	for (i = 0; i < count; i++) {
+	if (count === 0) {
 
-		scripts[i].addEventListener('load', function () {
-
-			count--;
-
-			if (count == 0) {
-
-				const scripts = document.querySelectorAll('script[type="text/foo"]');
-				const j = scripts.length;
-				let i = 0;
-
-				for (; i < j; i++) {
-
-					setTimeout(
-						(function (oldScript, script) {
-							return function () {
-								const parent = oldScript.parentElement;
-								script.text = oldScript.text;
-
-								try {
-									parent.insertBefore(script, oldScript);
-									parent.removeChild(oldScript);
-								} catch (e) {
-									console.error(e);
-								}
-							};
-						}(scripts[i], document.createElement("script"))),
-						0
-					);
-				}
-			}
-		})
+		runScripts();
 	}
+
+	else {
+
+		for (i = 0; i < count; i++) {
+
+			scripts[i].addEventListener('load', function () {
+
+				count--;
+
+				if (count == 0) {
+
+					runScripts()
+				}
+			})
+		}
+	}
+
 });

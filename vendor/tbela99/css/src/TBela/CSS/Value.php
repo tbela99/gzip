@@ -5,6 +5,8 @@ namespace TBela\CSS;
 use InvalidArgumentException;
 use JsonSerializable;
 use stdClass;
+use TBela\CSS\Interfaces\ObjectInterface;
+use TBela\CSS\Property\Config;
 use TBela\CSS\Value\Number;
 use TBela\CSS\Value\Set;
 use TBela\CSS\Parser\ParserTrait;
@@ -12,10 +14,13 @@ use TBela\CSS\Parser\ParserTrait;
 /**
  * CSS value base class
  * @package CSS
- * @property-read string $value
- * @property-read Set $arguments
+ * @property-read string|null $value
+ * @property-read Set|null $arguments
+ * @method string getName()
+ * @method \stdClass|null getData()
+ * @method \stdClass|null getValue()
  */
-abstract class Value implements JsonSerializable
+abstract class Value implements JsonSerializable, ObjectInterface
 {
     use ParserTrait;
 
@@ -25,12 +30,21 @@ abstract class Value implements JsonSerializable
      */
     protected $data = null;
 
+    /**
+     * @var array
+     * @ignore
+     */
     protected static $defaults = [];
 
+    /**
+     * @var array
+     * @ignore
+     */
     protected static $keywords = [];
 
     /**
      * @var string|null
+     * @ignore
      */
     protected $hash = null;
 
@@ -81,7 +95,7 @@ abstract class Value implements JsonSerializable
     }
 
     /**
-     * @param $name
+     * @param string $name
      * @return bool
      * @ignore
      */
@@ -91,6 +105,10 @@ abstract class Value implements JsonSerializable
         return isset($this->data->{$name});
     }
 
+    /**
+     * compute the hash value
+     * @return string|null
+     */
     public function getHash()
     {
 
@@ -107,7 +125,11 @@ abstract class Value implements JsonSerializable
 
         return strtolower($this->data->type) == $type;
     }
-
+    /**
+     * get the class name of the specified type
+     * @param string $type
+     * @return string
+     */
     public static function getClassName($type)
     {
 
@@ -124,6 +146,11 @@ abstract class Value implements JsonSerializable
         return $classNames[$type];
     }
 
+    /**
+     * value type
+     * @return string
+     * @ignore
+     */
     protected static function type()
     {
 
@@ -145,6 +172,7 @@ abstract class Value implements JsonSerializable
     /**
      * @param object $token
      * @return bool
+     * @ignore
      */
 
     protected static function matchDefaults($token)
@@ -156,12 +184,15 @@ abstract class Value implements JsonSerializable
 
     /**
      * @param object $token
-     * @param object $previousToken
-     * @param object $previousValue
+     * @param object|null $previousToken
+     * @param object|null $previousValue
+     * @param object|null $nextToken
+     * @param object|null $nextValue
+     * @param int|null $index
+     * @param array $tokens
      * @return bool
      */
-
-    public static function matchToken($token, $previousToken = null, $previousValue = null)
+    public static function matchToken($token, $previousToken = null, $previousValue = null, $nextToken = null, $nextValue = null, $index = null, array $tokens = [])
     {
 
         return $token->type == static::type() || isset($token->value) && static::matchKeyword($token->value);
@@ -177,7 +208,6 @@ abstract class Value implements JsonSerializable
 
         return isset($data->value);
     }
-
     /**
      * create an instance
      * @param stdClass $data
@@ -260,6 +290,7 @@ abstract class Value implements JsonSerializable
                     return call_user_func([$className, 'doParse'], $string, $capture_whitespace, $context, $contextName);
                 } catch (\Exception $e) {
 
+//                    throw $e;
                     // failed to parse css property
                 }
             }
@@ -276,33 +307,57 @@ abstract class Value implements JsonSerializable
      */
     public static function reduce(array $tokens, array $options = [])
     {
-        $count = count($tokens) - 1;
+        $j = count($tokens);
 
-        if ($count > 1) {
+        if ($j > 1) {
 
-            $j = $count;
-
-            while ($j-- >= 1) {
+            while ($j--) {
 
                 $token = $tokens[$j];
 
+                if ($token->type == 'css-string' && $token->value == '!important' && count($tokens) <= 2) {
+
+                    break;
+                }
+
                 if ($token->type == 'whitespace' &&
-                    (in_array($tokens[$j + 1]->type, ['separator', 'whitespace', 'css-parenthesis-expression']) ||
-                    $tokens[$j + 1]->type == 'css-string' && $tokens[$j + 1]->value == '!important')
+                    isset($tokens[$j + 1]) &&
+                    (in_array($tokens[$j + 1]->type, ['separator', 'operator', 'whitespace', 'css-parenthesis-expression']) ||
+                        $tokens[$j + 1]->type == 'css-string' && $tokens[$j + 1]->value == '!important')
                 ) {
 
                     array_splice($tokens, $j, 1);
-                } else if ($token->type == 'css-parenthesis-expression' && $tokens[$j + 1]->type == 'whitespace') {
-
-                    array_splice($tokens, $j + 1, 1);
-                } else if (in_array($token->type, ['separator', 'operator']) && $tokens[$j + 1]->type == 'whitespace') {
+                } else if (in_array($token->type, ['separator', 'operator', 'css-parenthesis-expression']) && isset($tokens[$j + 1]) && $tokens[$j + 1]->type == 'whitespace') {
 
                     array_splice($tokens, $j + 1, 1);
                 } else if (!empty($options['remove_defaults']) && !in_array($token->type, ['whitespace', 'separator'])) {
 
+                    // check if the previous token has the same type and matches the defaults
+                    // same type? no -> remove
+                    // same type? yes -> matches defaults? yes -> remove
+
                     $className = static::getClassName($token->type);
 
                     if (is_callable($className . '::matchDefaults') && call_user_func($className . '::matchDefaults', $token)) {
+
+                        if ($token->type == 'background-size') {
+
+                            if ((isset($tokens[$j - 2]) && $token->type == $tokens[$j - 2]->type) ||
+                                (isset($tokens[$j + 2]) && $token->type == $tokens[$j + 2]->type)) {
+
+                                continue;
+                            }
+                        }
+
+                        $prefix = Config::getPath('map.' . $token->type . '.prefix');
+
+                        if (!is_null($prefix)) {
+
+                            if (is_array($prefix)) {
+
+                                $prefix = $prefix[1];
+                            }
+                        }
 
                         // remove item
                         array_splice($tokens, $j, 1);
@@ -311,6 +366,13 @@ abstract class Value implements JsonSerializable
 
                             // remove whitespace after the item removed
                             array_splice($tokens, $j, 1);
+                        }
+
+                        $key = isset($tokens[$j - 1]) ? $tokens[$j - 1] : null;
+
+                        if (!is_null($key) && $key->type == 'separator' && $key->value == $prefix) {
+
+                            array_splice($tokens, --$j, 1);
                         }
                     }
                 }
@@ -324,6 +386,14 @@ abstract class Value implements JsonSerializable
 
                 array_shift($tokens);
             } else {
+
+                $count = count($tokens) - 1;
+
+                if (isset($tokens[$count]) && $tokens[$count]->type == 'whitespace') {
+
+                    array_pop($tokens);
+                    continue;
+                }
 
                 break;
             }
@@ -475,7 +545,6 @@ abstract class Value implements JsonSerializable
                         if (trim($buffer) !== '') {
 
                             $tokens[] = static::getType($buffer);
-                            //   $buffer = '';
                         }
 
                         $token = new stdClass;
@@ -550,6 +619,18 @@ abstract class Value implements JsonSerializable
                             $token->arguments = Value::parse($str, null, $capture_whitespace, $token->type, $token->name);
                         }
 
+                        if ($token->type == 'color') {
+
+                            foreach ($token->arguments as $arg) {
+
+                                if($arg->type == 'css-function') {
+
+                                    $token->type = 'css-function';
+                                    break;
+                                }
+                            }
+                        }
+
                         $tokens[] = $token;
 
                         $buffer = '';
@@ -590,33 +671,22 @@ abstract class Value implements JsonSerializable
                 case '>':
                 case '+':
 
-                if ($context === '') {
+                    if ($context === '') {
 
                         if ($buffer !== '') {
 
                             $tokens[] = static::getType($buffer);
-                            $buffer = '';
                         }
 
-                        $token = end($tokens);
+                        $tokens[] = (object)['type' => 'separator', 'value' => $string[$i]];
+                        $buffer = '';
+                        break;
+                    }
 
-                        if ((isset($token->type) ? $token->type : '') == 'whitespace') {
+                    if ($context == 'css-function' && trim($buffer) === '' && static::is_whitespace(substr($string, $i + 1, 1))) {
 
-                            array_pop($tokens);
-                        }
-
-                        $tokens[] = (object)['type' => 'operator', 'value' => $string[$i]];
-
-                        while($i++ < $j) {
-
-                            if (!preg_match('#\s#', $string[$i])) {
-
-                                $i--;
-                                $buffer = '';
-                                break;
-                            }
-                        }
-
+                        $tokens[] = (object)['type' => 'css-string', 'value' => $string[$i]];
+                        $buffer = '';
                         break;
                     }
 
@@ -650,43 +720,24 @@ abstract class Value implements JsonSerializable
                         }
                     }
 
-                    $prev = trim(substr($string, $i - 1, 1));
-                    $next = trim(substr($string, $i + 1, 1));
+                    $token = static::getType($buffer);
 
-                    if ($prev !== '' || $next !== '') {
+                    if (trim($buffer) === '') {
 
-                        $buffer .= $string[$i];
+                        $tokens[] = (object)['type' => $context == 'css-function' ? 'operator' : 'separator', 'value' => '/'];
+                        $buffer = '';
                         break;
                     }
 
-//                    if (in_array($string[$i], ['+', '-']) &&
-//                        (is_numeric(substr($string, $i + 1, 1)) ||
-//                            (substr($string, $i + 1, 1) == '.' && is_numeric(substr($string, $i + 1, 2))))
-//                    ) {
-//
-//                        $buffer .= $string[$i];
-//                        break;
-//                    }
+                    if (in_array($token->type, ['unit', 'number'])) {
 
-//                    if ($context !== '' && $prev === '' && $next === '' && preg_match('#^[a-zA-Z0-9_~-]*$#', $contextName)) {
-
-                        if ($buffer !== '') {
-
-                            $tokens[] = static::getType($buffer);
-                        }
-
-                        $token = end($tokens);
-
-                        if ((isset($token->type) ? $token->type : '') == 'whitespace') {
-
-                            array_pop($tokens);
-                        }
-
-                        $tokens[] = (object)['type' => 'operator', 'value' => $string[$i]];
+                        $tokens[] = $token;
+                        $tokens[] = (object)['type' => $context == 'css-function' ? 'operator' : 'separator', 'value' => '/'];
                         $buffer = '';
-//                        break;
-//                    }
+                        break;
+                    }
 
+                    $buffer .= $string[$i];
                     break;
 
                 case '~':
@@ -714,14 +765,10 @@ abstract class Value implements JsonSerializable
                         if ($string[$i] == '=') {
 
                             $tokens[] = (object)['type' => $context === 'attribute' ? 'operator' : 'css-string', 'value' => '='];
-                        }
+                        } else if ($context === 'attribute') {
 
-                        else if ($context === 'attribute') {
-
-                            $tokens[] = (object)['type' => 'operator', 'value' => $string[$i++].'='];
-                        }
-
-                        else {
+                            $tokens[] = (object)['type' => 'operator', 'value' => $string[$i++] . '='];
+                        } else {
 
                             $tokens[] = (object)['type' => 'css-string', 'value' => $string[$i++]];
                         }
@@ -733,7 +780,6 @@ abstract class Value implements JsonSerializable
                     break;
 
                 case ',':
-//                case '=':
                 case ':':
 
                     if ($string[$i] == ':' && $context != 'css-parenthesis-expression') {
@@ -810,6 +856,37 @@ abstract class Value implements JsonSerializable
         return $type;
     }
 
+    /**
+     * convert to an object
+     * @return stdClass
+     */
+    public function toObject()
+    {
+
+        $result = new stdClass;
+
+        foreach ($this->data as $key => $value) {
+
+            $val = null;
+            if ($value instanceof Set) {
+
+                $val = array_map(function ($value) {
+
+                    return $value->toObject();
+                }, $value->toArray());
+            } else {
+
+                $val = $value;
+            }
+
+            if (!is_null($key) && $key !== false && $key !== "") {
+
+                $result->{$key} = $val;
+            }
+        }
+
+        return $result;
+    }
 
     /**
      * return the list of keywords
@@ -907,11 +984,6 @@ abstract class Value implements JsonSerializable
             case 'turn':
                 // do nothing
                 return floatval((string)$value->value);
-
-            //    case 'deg':
-            //    default:
-
-            //        break;
         }
 
         return floatval((string)$value->value) / 360;

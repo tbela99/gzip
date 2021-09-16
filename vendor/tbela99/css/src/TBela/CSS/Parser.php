@@ -5,6 +5,7 @@ namespace TBela\CSS;
 use Exception;
 use stdClass;
 use TBela\CSS\Interfaces\ElementInterface;
+use TBela\CSS\Interfaces\ParsableInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Parser\Helper;
 use TBela\CSS\Parser\ParserTrait;
@@ -18,7 +19,7 @@ use function substr;
  * Css Parser
  * @package TBela\CSS
  */
-class Parser
+class Parser implements ParsableInterface
 {
 
     use ParserTrait;
@@ -66,14 +67,13 @@ class Parser
      * @var string
      * @ignore
      */
-    protected $path = '';
+    protected $src = '';
 
     /**
      * @var array
      * @ignore
      */
     protected $options = [
-        'sourcemap' => false,
         'flatten_import' => false,
         'allow_duplicate_rules' => ['font-face'], // set to true for speed
         'allow_duplicate_declarations' => false
@@ -105,7 +105,7 @@ class Parser
     public function load($file, $media = '')
     {
 
-        $this->path = $file;
+        $this->src = Helper::absolutePath($file, Helper::getCurrentDirectory());
         $this->css = $this->getFileContent($file, $media);
         $this->ast = null;
         $this->element = null;
@@ -123,7 +123,7 @@ class Parser
     public function append($file, $media = '')
     {
 
-        return $this->appendContent($this->getFileContent($file, $media));
+        return $this->merge((new Parser('', $this->options))->load($file, $media));
     }
 
     /**
@@ -142,7 +142,14 @@ class Parser
             $this->doParse();
         }
 
-        return $this->appendContent($parser->css);
+        if (is_null($parser->ast)) {
+
+            $parser->doParse();
+        }
+
+        array_splice($this->ast->children, count($this->ast->children), 0, $parser->ast->children);
+
+        return $this;
     }
 
     /**
@@ -187,7 +194,7 @@ class Parser
         }
 
         $this->css = $css;
-        $this->path = '';
+        $this->src = '';
         $this->ast = null;
         $this->element = null;
         return $this;
@@ -247,23 +254,13 @@ class Parser
             $this->doParse();
         }
 
-        /**
-         * @var RuleListInterface $element
-         */
-        $element = Element::getInstance($this->ast);
-
-        if (empty($this->options['sourcemap'])) {
-
-            return (new Traverser())->on('enter', function (Element $element) {
-
-                $element->setLocation(null);
-
-            })->traverse($element);
-        }
-
-        return $element;
+        return Element::getInstance($this->ast);
     }
 
+    /**
+     * @inheritDoc
+     * @throws SyntaxError
+     */
     public function getAst() {
 
         if (is_null($this->ast)) {
@@ -274,9 +271,14 @@ class Parser
         return clone $this->ast;
     }
 
+    /**
+     * @param ElementInterface $element
+     * @return Parser
+     */
     public function setAst(ElementInterface $element) {
 
         $this->ast = $element->getAst();
+        return $this;
     }
 
     public function deduplicate($ast)
@@ -361,7 +363,6 @@ class Parser
 
                 $signature = '';
                 $total = count($ast->children);
-                $el = null;
 
                 $allowed = is_array($this->options['allow_duplicate_rules']) ? $this->options['allow_duplicate_rules'] : [];
 
@@ -492,76 +493,20 @@ class Parser
     }
 
     /**
-     *
-     * @param string $css
-     * @param null $path
-     * @return string
-     * @throws Exception
-     * @ignore
-     */
-    protected function expand($css, $path = null)
-    {
-
-        if (!is_null($path) && $path !== '') {
-
-            if ($path[strlen($path) - 1] != '/') {
-
-                $path .= '/';
-            }
-        }
-
-        $isRemote = preg_match('#^(https?:)//#', $path);
-
-        $css = preg_replace_callback('#url\(([^)]+)\)#', function ($matches) use ($path, $isRemote) {
-
-            $file = trim(str_replace(array("'", '"'), "", $matches[1]));
-
-            if (strpos($file, 'data:') === 0) {
-
-                return $matches[0];
-            }
-
-            if ($isRemote) {
-
-                if (!preg_match('#^(https?:)?//#i', $file)) {
-
-                    if ($file[0] == '/') {
-
-                        $file = $path . substr($file, 1);
-                    } else {
-
-                        $file = Helper::resolvePath($path . $file);
-                    }
-                }
-            } else if (!preg_match('#^(/|((https?:)?//))#i', $file)) {
-
-                $file = Helper::resolvePath($path . trim(str_replace(array("'", '"'), "", $matches[1])));
-            }
-
-            return 'url(' . preg_replace('#^' . preg_quote(Helper::getCurrentDirectory() . '/', '#') . '#', '', $file) . ')';
-        },
-            // resolve import directive, note import directive in imported css will NOT be processed
-            $this->parseImport($css, $path)
-        );
-
-        return $css;
-    }
-
-    /**
      * @param string $file
      * @param string $media
-     * @return string|bool
+     * @return string
      * @throws Exception
      * @ignore
      */
     protected function getFileContent($file, $media = '')
     {
 
-        if (!preg_match('#^(https?:)//#', $file)) {
+        if (!preg_match('#^(https?:)?//#', $file)) {
 
             if (is_file($file)) {
 
-                $content = $this->expand(file_get_contents($file), preg_replace('#^' . preg_quote(Helper::getCurrentDirectory() . '/', '#') . '#', '', dirname($file)));
+                $content = file_get_contents($file);
 
                 return $media === '' || $media == 'all' ? $content : '@media ' . $media . ' {' . $content . '}';
             }
@@ -577,63 +522,7 @@ class Parser
             throw new Exception(sprintf('File Not Found "%s"', $file), 404);
         }
 
-        return $this->expand($content, dirname($file));
-    }
-
-    /**
-     * @param $css
-     * @param string $path
-     * @return string
-     * @throws Exception
-     * @ignore
-     */
-    protected function parseImport($css, $path = '')
-    {
-
-        $comments = [];
-        $css = preg_replace_callback('/\/\*(.*?)\*\//sm', function ($matches) use (&$comments) {
-
-            $comments[$matches[0]] = '~~~b' . md5($matches[0]) . 'b~~~';
-
-            return str_replace($matches[0], $comments[$matches[0]], $matches[0]);
-        }, $css);
-
-        $css = preg_replace_callback('#@import ([^;]+);#', function ($matches) use ($path) {
-
-            if (preg_match('#(url\(\s*((["\']?)([^\\3]+)\\3)\s*\)|((["\'])([^\\6]+)\\6))(.*)$#s', $matches[1], $match)) {
-
-                $file = Helper::resolvePath(trim(empty($match[4]) ? $match[7] : $match[4]), $path);
-
-                $media = trim($match[8]);
-
-                if (strpos($media, ' ') !== false ) {
-
-                    $media = ' ' . $media;
-                }
-
-                $css = $this->getFileContent($file);
-
-                if ($css !== false) {
-
-                    if ($media !== '' && $media !== 'all') {
-
-                        $css = '@media ' . $media . " {\n" . $css . "\n}\n";
-                    }
-
-                    return '/* start: @import from ' . $file . ' */' . "\n" . $css . "\n" . '/* end: @import from ' . $file . ' */' . "\n";
-                }
-            }
-
-            return $matches[0];
-
-        }, $css);
-
-        if (!empty($comments)) {
-
-            $css = str_replace(array_values($comments), array_keys($comments), $css);
-        }
-
-        return $css;
+        return $content;
     }
 
     /**
@@ -660,6 +549,11 @@ class Parser
                     ]
                 ]
             ];
+
+            if ($this->src !== '') {
+
+                $this->ast->src = $this->src;
+            }
         }
     }
 
@@ -673,11 +567,6 @@ class Parser
     {
 
         $this->errors = [];
-
-        if (!empty($this->options['flatten_import'])) {
-
-            $this->css = $this->parseImport($this->css, $this->path === '' ? Helper::getCurrentDirectory() : dirname($this->path));
-        }
 
         $this->css = rtrim($this->css);
 
@@ -700,6 +589,11 @@ class Parser
      */
     protected function analyse()
     {
+
+        if (!isset($this->ast->children)) {
+
+            $this->ast->children = [];
+        }
 
         while ($this->next()) {
 
@@ -731,10 +625,68 @@ class Parser
 
                     $this->errors[] = new Exception(sprintf('cannot parse token at %s:%s : "%s"', $this->previousPosition->line, $this->previousPosition->column,
                         preg_replace('#^(.{40}).*$#sm', '$1... ', $substr)));
-                    //     continue;
+
                 } else {
 
-                    $this->ast->children[] = $node;
+                    if ($node->name == 'import') {
+
+                        preg_match('#(url\(\s*((["\']?)([^\\3]+)\\3)\s*\)|((["\'])([^\\6]+)\\6))(.*)$#s', $node->value, $matches);
+
+                        $file = trim(empty($matches[4]) ? $matches[7] : $matches[4]);
+
+                        if ($this->src !== '' && !preg_match('#^(/|(https?:))#i', $file)) {
+
+                            $file = preg_replace('#'.preg_quote(Helper::getCurrentDirectory().'/', '#').'#', '', dirname($this->src).'/'.$file);
+                        }
+
+                        $media = trim($matches[8]);
+
+                        if ($media == 'all') {
+
+                            $media = '';
+                        }
+
+                        if ($this->options['flatten_import']) {
+
+                            try {
+
+                                $parser = (new self('', $this->options))->load($file);
+                                $parser->doParse();
+
+                                if ($media === '') {
+
+                                    array_splice($this->ast->children, count($this->ast->children), 0, $parser->ast->children);
+                                }
+
+                                else {
+
+                                    $node->name = 'media';
+                                    $node->value = $media;
+                                    $node->children = $parser->ast->children;
+                                    $this->ast->children[] = $node;
+
+                                    unset($node->isLeaf);
+                                }
+                            }
+
+                            catch (Exception $e) {
+
+                                $node->value = "'$file'".($media !== '' ? " $media" : '');
+                                $this->ast->children[] = $node;
+                            }
+                        }
+
+                        else {
+
+                            $node->value = "'$file'".($media !== '' ? " $media" : '');
+                            $this->ast->children[] = $node;
+                        }
+                    }
+
+                    else {
+
+                        $this->ast->children[] = $node;
+                    }
                 }
 
                 $this->update($this->currentPosition, $substr);
@@ -779,7 +731,7 @@ class Parser
                     if ($type == 'block') {
 
                         $parser = new Parser($block, array_merge($this->options, ['flatten_import' => false]));
-                        $parser->path = $this->path;
+                        $parser->src = $this->src;
                         $parser->ast = $node;
 
                         $parser->doParse();
@@ -918,7 +870,7 @@ class Parser
         $position->column--;
         $position->index += $this->ast->location->start->index + strlen($comment);
 
-        return (object)[
+        $comment = (object)[
             'type' => 'Comment',
             'location' => (object)[
                 'start' => (object)[
@@ -930,6 +882,13 @@ class Parser
             ],
             'value' => $comment
         ];
+
+        if ($this->src !== '') {
+
+            $comment->src = $this->src;
+        }
+
+        return $comment;
     }
 
     /**
@@ -995,6 +954,11 @@ class Parser
         if (empty($data['hasDeclarations'])) {
 
             unset($data['hasDeclarations']);
+        }
+
+        if ($this->src !== '') {
+
+            $data['src'] = $this->src;
         }
 
         return $this->doParseComments((object)$data);
@@ -1087,7 +1051,7 @@ class Parser
         $position->column--;
         $position->index += $this->ast->location->start->index + strlen($rule);
 
-        return  $this->doParseComments((object)[
+        $ast = (object)[
 
             'type' => 'Rule',
             'location' => (object)[
@@ -1096,7 +1060,14 @@ class Parser
                 'end' => $position
             ],
             'selector' => $selector
-        ]);
+        ];
+
+        if ($this->src !== '') {
+
+            $ast->src = $this->src;
+        }
+
+        return  $this->doParseComments($ast);
     }
 
     /**
@@ -1108,7 +1079,6 @@ class Parser
      */
     protected function parseDeclarations($rule, $block, $position)
     {
-
 
         $j = strlen($block) - 1;
         $i = -1;
@@ -1152,30 +1122,17 @@ class Parser
                     $comment = substr($block, $i);
                 }
 
-                $currentPosition = clone $position;
-
                 $this->update($position, $comment);
                 $position->index += strlen($comment);
 
-                $rule->children[] = (object)[
+                $ast = (object)[
 
                     'type' => 'Comment',
-                    'location' => (object)[
-                        'start' => (object)[
-
-                            'line' => $currentPosition->line,
-                            'column' => $currentPosition->column,
-                            'index' => $this->ast->location->start->index + $currentPosition->index
-                        ],
-                        'end' => (object)[
-
-                            'line' => $position->line,
-                            'column' => $position->column - 1,
-                            'index' => $this->ast->location->start->index + $position->index
-                        ]
-                    ],
                     'value' => $comment
                 ];
+
+                $rule->children[] = $ast;
+                unset($ast);
 
                 $i += strlen($comment) - 1;
                 continue;
@@ -1184,7 +1141,6 @@ class Parser
             $currentPosition = clone $position;
             $this->update($position, $statement);
             $position->index += strlen($statement);
-
 
             $i += strlen($statement) - 1;
 
@@ -1208,20 +1164,6 @@ class Parser
                 $declaration = (object)array_merge(
                     [
                         'type' => 'Declaration',
-                        'location' => (object)[
-                            'start' => (object)[
-
-                                'line' => $currentPosition->line,
-                                'column' => $currentPosition->column,
-                                'index' => $currentPosition->index
-                            ],
-                            'end' => (object)[
-
-                                'line' => $endPosition->line,
-                                'column' => $endPosition->column - 1,
-                                'index' => $currentPosition->index + strlen($value)
-                            ]
-                        ]
                     ],
                     $this->parseVendor(trim($declaration[0])),
                     [
@@ -1234,6 +1176,27 @@ class Parser
                 $declaration = $this->doParseComments($declaration);
                 $declaration->name = trim($declaration->name);
 
+                if (in_array($declaration->name, ['src', 'background', 'background-image'])) {
+
+                    $declaration->value = preg_replace_callback('#(^|[\s,/])url\(\s*(["\']?)([^)\\2]+)\\2\)#', function ($matches) {
+
+                        $file = trim($matches[3]);
+
+                        if (strpos($file, 'data:') !== false) {
+
+                            return $matches[0];
+                        }
+
+                        if (!preg_match('#^(/|((https?:)?//))#', $file)) {
+
+                            $file = Helper::absolutePath($file, dirname($this->src));
+                        }
+
+                        return $matches[1].'url('.$file.')';
+
+                    }, $declaration->value);
+                }
+
                 $rule->children[] = $declaration;
             }
 
@@ -1243,7 +1206,7 @@ class Parser
     }
 
     /**
-     * @param $str
+     * @param string $str
      * @return array
      * @ignore
      */

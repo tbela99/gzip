@@ -31,7 +31,6 @@ class TokenList implements TokenInterface
 
         $objectStore = new SplObjectStorage;
 
-        // TODO: Implement filter() method.
         foreach ($this->tokens as $tokens) {
 
             $data = $context;
