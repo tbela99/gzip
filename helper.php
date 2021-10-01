@@ -38,6 +38,7 @@ use function str_replace;
 use function strtolower;
 use function ucwords;
 
+define('AVIF', function_exists('imageavif') && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/avif') !== false);
 define('WEBP', function_exists('imagewebp') && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false);
 
 class GZipHelper

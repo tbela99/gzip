@@ -18,9 +18,15 @@
 
  defined('_JEXEC') or die;
 
+ // php 8.1
+ if (!defined('IMAGETYPE_AVIF') && function_exists('imagecreatefromavif')) {
+
+	 define('IMAGETYPE_AVIF', 'avif');
+ }
+
  // php 7.1
  if (!defined('IMAGETYPE_WEBP') && function_exists('imagecreatefromwebp')) {
-	 
+
 	 define('IMAGETYPE_WEBP', 'webp');
  }
 
@@ -61,7 +67,7 @@ class Image {
 
 	public function getMimetype() {
 
-		return image_type_to_mime_type  ($this->_image_type);
+		return image_type_to_mime_type($this->_image_type);
 	}
 	
 	/**
@@ -95,6 +101,10 @@ class Image {
             $this->_image = imagecreatefromwebp($file);
 			$this->_image_type = IMAGETYPE_WEBP;
         }
+		elseif(function_exists('imagecreatefromavif') && strtolower(pathinfo($file, PATHINFO_EXTENSION)) == 'avif') {
+			$this->_image = imagecreatefromavif($file);
+			$this->_image_type = IMAGETYPE_AVIF;
+		}
         else {
 			
 			$image_string = file_get_contents($file);
@@ -193,9 +203,15 @@ class Image {
                     if (defined('IMAGETYPE_WEBP')) {
                             
                         $type = IMAGETYPE_WEBP;
-                    
 					    break;
                     }
+				case 'avif':
+
+					if (defined('IMAGETYPE_AVIF')) {
+
+						$type = IMAGETYPE_AVIF;
+						break;
+					}
 			}
 		}
 
@@ -208,9 +224,12 @@ class Image {
         elseif($type == IMAGETYPE_PNG) {
             imagepng($this->_image, $abspath);
         }
-        elseif($type == IMAGETYPE_WEBP) {
-            imagewebp($this->_image, $abspath, $compression);
-        }
+		elseif($type == IMAGETYPE_WEBP) {
+			imagewebp($this->_image, $abspath, $compression);
+		}
+		elseif($type == IMAGETYPE_AVIF) {
+			imageavif($this->_image, $abspath, $compression);
+		}
 
         else {
 

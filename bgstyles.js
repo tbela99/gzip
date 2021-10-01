@@ -18,30 +18,30 @@ LIB.ready((function(e) {
     // responsive css background-image in [style] attribute
         if (t.length > 0) {
         // or use resizeObserver
-        const c = t.map((function(e) {
+        const o = t.map((function(e) {
             return JSON.parse(e.dataset.bgStyle);
         }));
-        let o = [];
+        let c = [];
         function n() {
-            let n, i, a, r, u, l = o.length;
+            let n, i, a, r, u, l = c.length;
             for (l = t.length; l--; ) {
-                for (i = t[l], a = Object.keys(c[l]), u = e, r = 0; r < a.length && (u = window.matchMedia("(max-width: " + a[r] + "px)"), 
-                !u.matches); r++) ;
+                for (i = t[l], a = Object.keys(o[l]).map(e => +e).sort((e, t) => t - e), u = e, 
+                r = 0; r < a.length && (u = window.matchMedia("(min-width: " + a[r] + "px)"), !u.matches); r++) ;
                 if (u == e || !u.matches || r == a.length) continue;
-                if (n = "url(" + c[l][a[r]] + ")", i.style.backgroundImage == n) continue;
-                let o = new Image, d = function(e) {
+                if (n = "url(" + o[l][a[r]] + ")", i.style.backgroundImage == n) continue;
+                let c = new Image, s = function(e) {
                     return function() {
                         i.style.backgroundImage = e;
                     };
                 }(n);
-                o.src = c[l][a[r]], o.width > 0 && o.height > 0 ? d() : "decode" in o ? o.decode().then(d) : o.onload = d;
+                c.src = o[l][a[r]], c.width > 0 && c.height > 0 ? s() : "decode" in c ? c.decode().then(s) : c.onload = s;
             }
         }
-        Object.values(c).forEach((function(e) {
+        Object.values(o).forEach((function(e) {
             Object.keys(e).forEach((function(e) {
-                e = +e, -1 == o.indexOf(e) && o.push(e);
+                e = +e, -1 == c.indexOf(e) && c.push(e);
             }));
-        })), o.sort((function(e, t) {
+        })), c.sort((function(e, t) {
             return t - e;
         })), window.addEventListener("resize", n, !1), setTimeout(n, 25);
     }
