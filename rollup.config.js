@@ -31,6 +31,25 @@
     }
   };
 
+  // export const critical = {
+  //   input: "./worker/src/critical/critical.js",
+  //   output: {
+  //
+  //     name: 'critical',
+  //     file:"./worker/dist/critical.js",
+  //     format: "iife"
+  //   }
+  // };
+
+  const criticalExtract = {
+    input: "./worker/src/critical/extract.js",
+    output: {
+
+      file:"./worker/dist/critical-extract.js",
+      format: "iife"
+    }
+  };
+
   const serviceworker = {
     input: "worker/src/index.js",
     output: {
@@ -76,6 +95,7 @@
     __proto__: null,
     libReady: libReady,
     libImages: libImages,
+    criticalExtract: criticalExtract,
     serviceworker: serviceworker,
     oneSignal: oneSignal,
     serviceworkerAdmin: serviceworkerAdmin,

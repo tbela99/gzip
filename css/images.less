@@ -1,7 +1,7 @@
-.blur-mixin (@value: 4) {
+.blur-mixin (@value: .3, @unit: 'rem') {
   & {
     -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='@{value}'); //   filter: url(#blur-lqip);
-    filter: blur(~"@{value}px");
+    filter: blur(~"@{value}@{unit}");
   }
 }
 

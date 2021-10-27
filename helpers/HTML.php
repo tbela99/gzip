@@ -28,7 +28,10 @@ class HTMLHelper {
 		$script = '';
 		$css = '';
 
-		if ($hasScript || !empty($options['imagesvgplaceholder']) || !empty($options['inlineimageconvert'])) {
+		if ($hasScript ||
+			(!empty($options['cssenabled']) && !empty($options['criticalcssenabled'])) ||
+			!empty($options['imagesvgplaceholder']) ||
+			!empty($options['inlineimageconvert'])) {
 
 			$script .= file_get_contents(__DIR__.'/../js/dist/lib.'.(!empty($options['imagesvgplaceholder']) ? 'images' : 'ready').$debug.'.js');
 			$script .= file_get_contents(__DIR__.'/../loader'.$debug.'.js');
@@ -36,7 +39,7 @@ class HTMLHelper {
 			if (!empty($options['imagesvgplaceholder'])) {
 
 				$script .=  file_get_contents(__DIR__.'/../imagesloader'.$debug.'.js');
-				$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/../css/images.css').'</style>';
+				$css .= '<style type="text/css" data-position="head">'.file_get_contents(__DIR__.'/../css/images.css').'</style>'."\n";
 			}
 
 			if (!empty($options['inlineimageconvert'])) {
@@ -47,7 +50,7 @@ class HTMLHelper {
 
 		if(!empty($script)) {
 
-			$html = str_replace('</head>', $css.'<script data-ignore="true">'.$script.'</script></head>', $html);
+			$html = str_replace('</head>', $css.'<script data-ignore="true">'.$script.'</script>'."\n".'</head>', $html);
 		}
 
 		$script = '';
@@ -216,7 +219,7 @@ class HTMLHelper {
 
 		$root = $options['webroot'];
 
-		//remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
+		// remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
 		$html = preg_replace_callback('~([\r\n\t ])?([a-zA-Z0-9:]+)=(["\'])([^\s="\'`]*)\3([\r\n\t ])?~', function ($matches) use ($options, $root) {
 
 			if ($matches[2] == 'style') {
@@ -259,11 +262,9 @@ class HTMLHelper {
 			$html = str_replace(array_keys($scripts), array_values($scripts), $html);
 		}
 
-		$html = preg_replace_callback('#<([^>]+)>#s', function ($matches) {
+		return preg_replace_callback('#<([^>]+)>#s', function ($matches) {
 
 			return '<'.rtrim($matches[1]).'>';
 		}, $html);
-
-		return $html;
 	}
 }

@@ -19,6 +19,7 @@ use Elphin\IcoFileLoader\IcoFileService;
 use Gzip\GZipHelper as GZipHelper;
 use Joomla\CMS\Factory as JFactory;
 use Joomla\Registry\Registry as Registry;
+use TBela\CSS\Parser;
 
 class PlgSystemGzip extends JPlugin
 {
@@ -296,6 +297,113 @@ class PlgSystemGzip extends JPlugin
 			if (!empty($options)) {
 
 				$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
+			}
+
+			if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
+
+				$dimensions = preg_split('#\s+#s', $this->options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY);
+
+				usort($dimensions, function ($a, $b) {
+
+					$a = +explode('x', $a)[0];
+					$b = +explode('x', $b)[0];
+
+					return $b - $a;
+				});
+
+				$signatures = explode('.', $_SERVER['HTTP_X_SIGNATURE']);
+
+				$raw = file_get_contents('php://input');
+				$post = json_decode($raw, JSON_OBJECT_AS_ARRAY);
+
+				if (count($signatures) != 2 ||
+					!is_array($post) ||
+					!isset($post['url']) ||
+					!isset($post['css']) ||
+					!isset($post['fonts']) ||
+					!is_array($post['fonts']) ||
+					!isset($_SERVER['HTTP_X_SIGNATURE']) ||
+					!isset($post['dimension']) ||
+					!in_array($post['dimension'], $dimensions)) {
+
+					http_response_code(400);
+					exit;
+				}
+
+				$data = [
+
+					'url' => $post['url'],
+					'dimensions' => $dimensions
+				];
+
+				// compute the key used to sign data
+				$hash = hash_hmac('sha256', $app->getTemplate().json_encode($data), $this->options['expiring_links']['secret']);
+
+				if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.'.hash('sha256', $signatures[0].$raw)) {
+
+					http_response_code(400);
+					exit;
+				}
+
+				$raw_message = hex2bin($signatures[0]);
+				$nonce = substr($raw_message, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+				$encrypted_message2 = substr($raw_message, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+				$decrypted_message = sodium_crypto_secretbox_open($encrypted_message2, $nonce, hex2bin($hash));
+
+				$encrypted_data = json_decode($decrypted_message, JSON_OBJECT_AS_ARRAY);
+
+				if (!is_array($encrypted_data) ||
+					!isset($encrypted_data['key']) ||
+					$encrypted_data['key'] != $hash ||
+					!isset($encrypted_data['duration'])) {
+
+					http_response_code(400);
+					exit;
+				}
+
+				if ($encrypted_data['duration'] > time()) {
+
+					http_response_code(410);
+					exit;
+				}
+
+				$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
+
+				if (!is_dir($path)) {
+
+					$old_mask = umask();
+
+					umask(022);
+					mkdir($path, 0755, true);
+					umask($old_mask);
+				}
+
+				header('Content-Type: application/json; charset=utf-8');
+				file_put_contents($path.'/'.$hash.'_'.$post['dimension'].'.css', new Parser($post['css']));
+
+				$fonts = [];
+
+				foreach ($post['fonts'] as $font) {
+
+					$fonts[md5(json_encode($font))] = $font;
+				}
+
+				$fontFile = $path.'/'.$hash.'_'.$post['dimension'].'.php';
+
+				if (!empty($fonts)) {
+
+					file_put_contents($fontFile, '<?php'."\n
+defined('JPATH_PLATFORM') or die;
+\$fonts = ".var_export($fonts, true).';');
+				}
+
+				else if (is_file($fontFile)) {
+
+					unlink($fontFile);
+				}
+
+				echo 1;
+				exit;
 			}
 
 			if (!is_file($file)) {
@@ -675,6 +783,7 @@ class PlgSystemGzip extends JPlugin
 		$options = $this->options;
 
 		$options['webroot'] = JURI::root(true) . '/';
+		$options['request_uri'] = $_SERVER['REQUEST_URI'];
 		$options['scheme'] = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ? 'https' : 'http';
 
 		if (!empty($options['jsignore'])) {
@@ -717,6 +826,7 @@ class PlgSystemGzip extends JPlugin
 			$options['cssremove'] = [];
 		}
 
+		$options['template'] = $app->getTemplate();
 		$options['uri_root'] = JUri::root(true);
 
 		if ($options['uri_root'] === '') {

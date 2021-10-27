@@ -209,7 +209,6 @@ class UrlHelper {
 
 			});
 
-
 			foreach ($pushed as $push) {
 
 				$header = '';

@@ -14,7 +14,6 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-//use TBela\CSS\Compiler;
 use TBela\CSS\Element;
 use TBela\CSS\Element\Stylesheet;
 use TBela\CSS\Interfaces\ElementInterface;
@@ -24,11 +23,155 @@ use TBela\CSS\Renderer;
 use TBela\CSS\Value;
 use function file_get_contents;
 use function file_put_contents;
-use function getimagesize;
 use function preg_replace_callback;
 
 class CSSHelper
 {
+
+	/**
+	 * @throws \SodiumException
+	 * @throws \Exception
+	 * @since
+	 */
+	public function preProcessHTML($html, array $options = []) {
+
+		$min = empty($options['minifyjs']) ? '' : '.min';
+
+		if (!empty($options['criticalcssenabled']) && !empty($options['criticalcssviewports'])) {
+
+			$data = [
+				'url' => $options['request_uri'],
+				'dimensions' => preg_split('#\s+#s', $options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY)
+			];
+
+			usort($data['dimensions'], function ($a, $b) {
+
+				$a = +explode('x', $a)[0];
+				$b = +explode('x', $b)[0];
+
+				return $b - $a;
+			});
+
+			$key = hash_hmac('sha256', $options['template'].json_encode($data), $options['expiring_links']['secret']);
+			$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
+
+			$path .= $key.'_';
+
+			$paths = [];
+			$matched = [];
+			$data['dimensions'] = array_values(array_filter($data['dimensions'], function ($dimension) use($path, &$paths, &$matched) {
+
+				if (!is_file($path.$dimension.'.css')) {
+
+					return true;
+				}
+
+				$matched[] = $dimension;
+				$paths[] = $path.$dimension;
+				return false;
+			}));
+
+			// filter matched resolutions
+			// lower matched resolutions must be removed
+			if (!empty($matched)) {
+
+				$matched = array_filter($matched, function ($value) use($data) {
+
+					$value = intval($value);
+					foreach ($data['dimensions'] as $dimension) {
+
+						if (intval($dimension) >= $value) {
+
+							return false;
+						}
+					}
+
+					return true;
+				});
+			}
+
+			$replace = '';
+
+			if (!empty($paths)) {
+
+				$paths = array_reverse($paths);
+				$checksum = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/chk_'.hash('md5', json_encode($paths)).'_'.implode('_', $data['dimensions']);
+
+				if (!is_file($checksum.'.css')) {
+
+					$css = '';
+					$fontList = [];
+
+					foreach ($paths as $p) {
+
+						$css .= "\n".file_get_contents($p.'.css');
+
+						if (is_file($p.'.php')) {
+
+							$fonts = [];
+
+							require $p.'.php';
+
+							$fontList = array_merge($fontList, $fonts);
+						}
+					}
+
+					if (trim($css) !== '') {
+
+						file_put_contents($checksum.'.css', new Parser($css));
+					}
+
+					if (!empty($fontList)) {
+
+						file_put_contents($checksum.'.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList), JSON_PRETTY_PRINT), file_get_contents(__DIR__.'/../worker/dist/fontloader.js')), JSON_PRETTY_PRINT);
+						file_put_contents($checksum.'.min.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList)), file_get_contents(__DIR__.'/../worker/dist/fontloader.min.js')));
+					}
+				}
+
+				$jsMin = !empty($this->options['minifyjs']) ? '.min' : '';
+
+				if (is_file($checksum.$jsMin.'.js')) {
+
+					$replace .= '<script data-position="head" data-ignore="true">'.file_get_contents($checksum.$jsMin.'.js').'</script>'."\n";
+				}
+
+				if (is_file($checksum.$min.'.css')) {
+
+					$replace .= '<style data-position="head" data-ignore="true">'.file_get_contents($checksum.$min.'.css').'</style>'."\n";
+				}
+			}
+
+			if (!empty($data['dimensions'])) {
+
+				$dt = new \DateTime();
+				$dt->modify('+90s');
+
+				$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+				$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
+						'key' => $key,
+						'duration' => $dt->getTimestamp()
+					]), $nonce, hex2bin($key)));
+
+				$data['hash'] = $secret;
+
+				$script = '<script>'.file_get_contents(__DIR__.'/../worker/dist/critical'.$min.'.js').'</script>'.
+					'<script>'.str_replace(
+						['"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
+						[json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
+						file_get_contents(__DIR__.'/../worker/dist/critical-extract'.$min.'.js')).'
+</script>';
+
+				$replace .= $script."\n";
+			}
+
+			if (!empty($replace)) {
+
+				return str_replace('</head>', $replace.'</head>', $html);
+			}
+		}
+
+		return $html;
+	}
 
 	/**
 	 * @param string $html
@@ -38,7 +181,7 @@ class CSSHelper
 	 *
 	 * @throws Parser\SyntaxError
 	 * @throws \Exception
-	 * @since version
+	 * @since
 	 */
 	public function processHTML($html, array $options = [])
 	{
@@ -126,7 +269,8 @@ class CSSHelper
 				}
 			}
 		};
-		$parseUrls = function ($html) use ($path) {
+
+		$parseUrls = function ($css) use ($path) {
 
 			return preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use ($path) {
 
@@ -164,7 +308,7 @@ class CSSHelper
 				}
 
 				return $matches[0];
-			}, $html);
+			}, $css);
 		};
 
 		$profiler = \JProfiler::getInstance('Application');
@@ -182,7 +326,7 @@ class CSSHelper
 				}
 			}
 
-			if ($matches[1] != 'link') {
+			if ($matches[1] != 'link' && $matches[1] != 'style') {
 
 				// parsing css can be expansive
 				// let do it only when needed
@@ -220,10 +364,9 @@ class CSSHelper
 
 			if (!empty($attributes)) {
 
-				if (isset($attributes['rel']) && $attributes['rel'] == 'stylesheet' && isset($attributes['href'])) {
+				if (isset($attributes['rel']) && in_array($attributes['rel'], ['stylesheet', 'lazy-stylesheet']) && isset($attributes['href'])) {
 
 					$name = GZipHelper::getName($attributes['href']);
-
 					$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
 
 					unset($attributes['data-position']);
@@ -375,7 +518,7 @@ class CSSHelper
 			}
 		}
 
-		$html = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use (&$links, $css_options) {
+		$html = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use (&$links, $css_options, $parseUrls) {
 
 			$attributes = [];
 
@@ -387,44 +530,24 @@ class CSSHelper
 				}
 			}
 
-			if (isset($attributes['type']) && $attributes['type'] != 'text/css') {
+			if ((isset($attributes['type']) && $attributes['type'] != 'text/css')) {
 
 				return $matches[0];
 			}
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $matches[2];
+			$matches[2] = $parseUrls($matches[2]);
+			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $parseUrls($matches[2]);
 
 			return '';
 		}, $html);
 
-
 		$profiler->mark('CssParseStyle');
 
-		$parseCritical = !empty($options['criticalcssenabled']);
-		$parseCssResize = !empty($options['imagecssresize']) && !empty($options['css_sizes']);
-		$parseWebFonts = !empty($options['fontpreload']) || !isset($options);
+		// resize background images
+		if (!empty($options['imagecssresize']) && !empty($options['css_sizes'])) {
 
-		$criticalCss = null;
-		$cssResize = null;
-		$webFont = null;
-
-		if ($parseWebFonts || $parseCritical || $parseCssResize) {
-
-			if ($parseWebFonts) {
-
-				$css_hash .= '|parseWebFonts';
-			}
-
-			if ($parseCritical) {
-
-				$css_hash .= '|parseCritical' . $options['criticalcssclass'] . $options['criticalcssclass'];
-			}
-
-			if ($parseCssResize) {
-
-				$css_hash .= '|parseCssResize' . json_encode($options['css_sizes']);
-			}
+			$css_hash .= '|parseCssResize' . json_encode($options['css_sizes']);
 
 			$css_hash = $path . GZipHelper::shorten(crc32($css_hash)) . (empty($options['compress']) ? '' : '.min') . '.css';
 
@@ -435,37 +558,7 @@ class CSSHelper
 					$cssParser->append($stylesheet[0], $stylesheet[1]);
 				}
 
-				$cssRoot = $cssParser->parse();
 				$profiler->mark('CssParseObject');
-
-				if ($parseCritical && !empty($options['criticalcssclass'])) {
-
-					$headStyle->appendCss($options['criticalcssclass']);
-				}
-
-				$profiler->mark('CssQCriticalClass');
-
-				$query = [];
-
-				if ($parseCritical && !empty($options['criticalcss'])) {
-
-					$query[] = 'html, body';
-					$query[] = implode(',', preg_split('#\n#s', $options['criticalcss'], -1, PREG_SPLIT_NO_EMPTY));
-				}
-
-				$nodes = $cssRoot->queryByClassNames(implode(',', $query));
-				$profiler->mark('CssQueryByName');
-
-				if (!empty($nodes)) {
-
-					foreach ($nodes as $node) {
-
-						$headStyle->append($node->copy()->getRoot());
-					}
-				}
-
-				$profiler->mark('CssQueryAppend');
-
 				$headStyle->deduplicate();
 
 				file_put_contents($css_hash, $cssRenderer->render($this->parseBackgroundImages($headStyle, $options)));
@@ -483,8 +576,6 @@ class CSSHelper
 				array_unshift($links['head']['style'], file_get_contents($css_hash));
 			}
 		}
-
-		$profiler->mark('CssCritical');
 
 		$headStyle->removeChildren();
 		$style = '';
@@ -514,7 +605,7 @@ class CSSHelper
 				$profiler->mark('CssStyle');
 				$headStyle->deduplicate();
 				$profiler->mark('CssRender');
-				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>';
+				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>'."\n";
 			}
 		}
 
@@ -534,7 +625,6 @@ class CSSHelper
 
 					//
 					$css = '<link';
-
 					reset($link);
 
 					foreach ($link as $attr => $value) {
@@ -542,7 +632,7 @@ class CSSHelper
 						$css .= ' ' . $attr . '="' . $value . '"';
 					}
 
-					$css .= '>';
+					$css .= '>'."\n";
 
 					if ($async) {
 
@@ -567,7 +657,7 @@ class CSSHelper
 
 				if ($style !== '') {
 
-					${$position . '_string'} .= '<style>' . $style . '</style>';
+					${$position . '_string'} .= '<style>' . $style . '</style>'."\n";
 				}
 			}
 		}
@@ -576,11 +666,11 @@ class CSSHelper
 
 			if ($noscript != '') {
 
-				$head_string .= '<noscript>' . $noscript . '</noscript>';
+				$head_string .= '<noscript>' . $noscript . '</noscript>'."\n";
 			}
 
 			$search[] = '</head>';
-			$replace[] = $head_string . '</head>';
+			$replace[] = $head_string."\n" . '</head>';
 		}
 
 		if ($body_string !== '') {

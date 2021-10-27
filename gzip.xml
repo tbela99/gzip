@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>2.11.0</version>
+    <version>3.0-alpha1</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>docs</folder>
@@ -373,8 +373,9 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_CLASS_HINT" type="textarea" rows="5" cols="15" default="" />
-                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_HINT" type="textarea" rows="5" cols="15" default="" />
+                    <field name="criticalcssviewports" label="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_HINT" type="textarea" rows="5" cols="15" default="800x600" />
+<!--                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_CLASS_HINT" type="textarea" rows="5" cols="15" default="" />-->
+<!--                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_HINT" type="textarea" rows="5" cols="15" default="" />-->
                 </fields>
             </fieldset>
             <fieldset name="pwa_app" label="Service Worker">

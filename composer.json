@@ -1,8 +1,10 @@
 {
-    "require": {
-        "lordelph/icofileloader": "^2.0",
-        "tbela99/css": "dev-php56-backport-dev",
-      "ext-gd": "*",
-        "mck89/peast": "^1.13"
-    }
+  "require": {
+    "lordelph/icofileloader": "^2.0",
+    "tbela99/css": "dev-php56-backport",
+    "mck89/peast": "^1.13",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "ext-sodium": "*"
+  }
 }

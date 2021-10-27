@@ -48,6 +48,8 @@ class GZipHelper
 	const regexAttr = '~([\r\n\t ])?([a-zA-Z0-9:-]+)((=(["\'])(.*?)\5)|([\r\n\t ]|$))?~m'; #s
 	const regexUrl = '#url\(([^)]+)\)#';
 
+	const CRITICAL_PATH_URL = '/gzip-critical-path';
+
 	/**
 	 * @var string regex
 	 * @since version

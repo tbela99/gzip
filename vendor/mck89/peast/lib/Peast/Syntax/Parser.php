@@ -1258,10 +1258,11 @@ class Parser extends ParserAbstract
      * Parses a for statement that does not start with var, let or const
      * 
      * @param Token $forToken Token that corresponds to the "for" keyword
+     * @param bool  $hasAwait True if "for" is followed by "await"
      * 
      * @return Node\Node|null
      */
-    protected function parseForNotVarLetConstStatement($forToken)
+    protected function parseForNotVarLetConstStatement($forToken, $hasAwait)
     {
         $state = $this->scanner->getState();
         $notBeforeSB = !$this->scanner->isBefore(array(array("let", "[")), true);
@@ -1298,20 +1299,13 @@ class Parser extends ParserAbstract
         } else {
             
             $this->scanner->setState($state);
+            $beforeLetAsyncOf = $this->scanner->isBefore(array("let", array("async", "of")), true);
             $left = $this->parseLeftHandSideExpression();
 
-            $beforeLetAsyncOf = false;
-            if ($left) {
-                $leftType = $left->getType();
-                if ($leftType === "Identifier" &&
-                    in_array($left->getName(), array("let", "async", "of"))
-                ) {
-                    $beforeLetAsyncOf = true;
-                } elseif ($leftType === "ChainExpression") {
-                    $this->error(
-                        "Optional chain can't appear in left-hand side"
-                    );
-                }
+            if ($left && $left->getType() === "ChainExpression") {
+                $this->error(
+                    "Optional chain can't appear in left-hand side"
+                );
             }
 
             $left = $this->expressionToPattern($left);
@@ -1331,7 +1325,9 @@ class Parser extends ParserAbstract
                     $node->setBody($body);
                     return $this->completeNode($node);
                 }
-            } elseif (!$beforeLetAsyncOf && $left && $this->scanner->consume("of")) {
+            } elseif (($hasAwait || !$beforeLetAsyncOf) &&
+                $left && $this->scanner->consume("of")
+            ) {
                 
                 if (($right = $this->isolateContext(
                         array("allowIn" => true),
@@ -1377,7 +1373,7 @@ class Parser extends ParserAbstract
             if ($this->scanner->consume("(") && (
                 ($node = $this->parseForVarStatement($startForToken)) ||
                 ($node = $this->parseForLetConstStatement($startForToken)) ||
-                ($node = $this->parseForNotVarLetConstStatement($startForToken)))
+                ($node = $this->parseForNotVarLetConstStatement($startForToken, $forAwait)))
             ) {
                 if ($forAwait) {
                     if (!$node instanceof Node\ForOfStatement) {
@@ -1783,12 +1779,17 @@ class Parser extends ParserAbstract
     /**
      * Parses a class elements
      * 
-     * @return Node\MethodDefinition|bool|null
+     * @return Node\MethodDefinition|Node\PropertyDefinition|Node\StaticBlock|bool|null
      */
     protected function parseClassElement()
     {
         if ($this->scanner->consume(";")) {
             return true;
+        }
+        if ($this->features->classStaticBlock &&
+            $this->scanner->isBefore(array(array("static", "{")), true)
+        ) {
+            return $this->parseClassStaticBlock();
         }
         $staticToken = null;
         $state = $this->scanner->getState();
@@ -1979,7 +1980,16 @@ class Parser extends ParserAbstract
             return $item;
         } elseif ($item = $this->parseExportDeclaration()) {
             return $item;
-        } elseif ($item = $this->parseStatementListItem()) {
+        } elseif (
+            $item = $this->isolateContext(
+                array(
+                    "allowYield" => false,
+                    "allowReturn" => false,
+                    "allowAwait" => $this->features->topLevelAwait
+                ),
+                "parseStatementListItem"
+            )
+        ) {
             return $item;
         }
         return null;
@@ -2036,12 +2046,12 @@ class Parser extends ParserAbstract
                     $lookaheadTokens[] = array("async", true);
                 }
                 if (($declaration = $this->isolateContext(
-                        null,
+                        array("allowAwait" => $this->features->topLevelAwait),
                         "parseFunctionOrGeneratorDeclaration",
                         array(true)
                     )) ||
                     ($declaration = $this->isolateContext(
-                        null,
+                        array("allowAwait" => $this->features->topLevelAwait),
                         "parseClassDeclaration",
                         array(true)
                     ))
@@ -2056,7 +2066,7 @@ class Parser extends ParserAbstract
                         $this->features->asyncAwait
                     ) &&
                     ($declaration = $this->isolateContext(
-                        array(null, "allowIn" => true),
+                        array("allowIn" => true, "allowAwait" => $this->features->topLevelAwait),
                         "parseAssignmentExpression"
                     ))
                 ) {
@@ -2081,10 +2091,12 @@ class Parser extends ParserAbstract
 
             } elseif (
                 ($dec = $this->isolateContext(
-                    null, "parseVariableStatement"
+                    array("allowAwait" => $this->features->topLevelAwait),
+                    "parseVariableStatement"
                 )) ||
                 $dec = $this->isolateContext(
-                    null, "parseDeclaration"
+                    array("allowAwait" => $this->features->topLevelAwait),
+                    "parseDeclaration"
                 )
             ) {
 
@@ -2502,6 +2514,33 @@ class Parser extends ParserAbstract
         return $this->parsePropertyName();
     }
 
+    /**
+     * Parses a field definition
+     * 
+     * @return Node\StaticBlock
+     */
+    protected function parseClassStaticBlock()
+    {
+        $staticToken = $this->scanner->consume("static");
+        $this->scanner->consume("{");
+        $statements = $this->isolateContext(
+            array("allowAwait" => true), "parseStatementList"
+        );
+        if ($this->scanner->consume("}")) {
+            $node = $this->createNode("StaticBlock", $staticToken);
+            if ($statements) {
+                $node->setBody($statements);
+            }
+            return $this->completeNode($node);
+        }
+        $this->error();
+    }
+
+    /**
+     * Parses a field definition
+     * 
+     * @return Node\PropertyDefinition|null
+     */
     protected function parseFieldDefinition()
     {
         $state = $this->scanner->getState();
@@ -3073,7 +3112,23 @@ class Parser extends ParserAbstract
         }
         
         if (!($exp = $this->parseUnaryExpression())) {
-            return null;
+            if (
+                !$this->features->classFieldsPrivateIn ||
+                !$this->context->allowIn
+            ) {
+                return null;
+            }
+            //Support "#private in x" syntax
+            $state = $this->scanner->getState();
+            if (
+                !($exp = $this->parsePrivateIdentifier()) ||
+                !$this->scanner->isBefore(array("in"))
+            ) {
+                if ($exp) {
+                    $this->scanner->setState($state);
+                }
+                return null;
+            }
         }
         
         $list = array($exp);
@@ -3715,7 +3770,7 @@ class Parser extends ParserAbstract
         
         $this->scanner->consumeToken();
         $node = $this->createNode("Identifier", $token);
-        $node->setName($value);
+        $node->setRawName($value);
         return $this->completeNode($node);
     }
     
@@ -3943,7 +3998,7 @@ class Parser extends ParserAbstract
         }
         $checkLegacyOctal = $forceLegacyOctalCheck || $this->scanner->getStrictMode();
         if ($number) {
-            if ($val && $val[0] === "0" && preg_match("#^0[0-7_]+$#", $val)) {
+            if ($val && $val[0] === "0" && preg_match("#^0[0-9_]+$#", $val)) {
                 if ($checkLegacyOctal) {
                     $this->error(
                         "Octal literals are not allowed in strict mode"
@@ -3969,8 +4024,9 @@ class Parser extends ParserAbstract
                 "u[$hex]{0,3}$"
             );
             if ($checkLegacyOctal) {
-                $invalidSyntax[] = "[0-7]{2}";
+                $invalidSyntax[] = "\d{2}";
                 $invalidSyntax[] = "[1-7]";
+                $invalidSyntax[] = "0[89]";
             }
             $reg = "#(\\\\+)(" . implode("|", $invalidSyntax) . ")#";
             if (preg_match_all($reg, $val, $matches, PREG_SET_ORDER)) {
