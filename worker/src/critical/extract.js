@@ -7,7 +7,7 @@ for (dimension of "{CRITICAL_MATCHED_VIEWPORTS}") {
     if (window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches) {
 
         console.info(`matched viewport "${dimension}" skipped`);
-        return
+        break
     }
 }
 
@@ -31,7 +31,7 @@ for (dimension of "{CRITICAL_DIMENSIONS}") {
             clearInterval(timeout);
 
             const start = performance.now();
-            critical.extract().then(async (result) => {
+            critical.extract({fonts: true}).then(async (result) => {
 
                 console.info(`ended in ${((performance.now() - start) / 1000).toFixed(3)}s`);
 
@@ -45,7 +45,6 @@ for (dimension of "{CRITICAL_DIMENSIONS}") {
                 }
 
                 const key = "{CRITICAL_HASH}";
-
                 await fetch("{CRITICAL_POST_URL}", {
                     method: "POST",
                     headers: {

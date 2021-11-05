@@ -28,15 +28,15 @@ export const libImages = {
   }
 };
 
-// export const critical = {
-//   input: "./worker/src/critical/critical.js",
-//   output: {
-//
-//     name: 'critical',
-//     file:"./worker/dist/critical.js",
-//     format: "iife"
-//   }
-// };
+export const critical = {
+  input: "./worker/src/critical/critical.js",
+  output: {
+
+    name: 'critical',
+    file:"./worker/dist/critical.js",
+    format: "iife"
+  }
+};
 
 export const criticalExtract = {
   input: "./worker/src/critical/extract.js",

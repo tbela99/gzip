@@ -4,6 +4,7 @@
 
 - @tbela99 #138 AVIF image support: automatically convert images to AVIF format when the browser advertise it and the dg support is enabled
 - @tbela99 #84 Automatically generate critical css path. no more parameter are required
+- changed LQIP blur value #b188238
 
 # 2.11.0
 

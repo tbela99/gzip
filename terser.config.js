@@ -105,17 +105,6 @@
     }
   };
 
-  const critical = {
-    input: "./worker/src/critical/critical.js",
-    output: "./worker/dist/critical.js",
-    config: {
-      //  ie8: true,
-      ecma: ECMA_VERSION,
-      output,
-      warnings: true
-    }
-  };
-
   const criticalMin = {
     input: "./worker/dist/critical.js",
     output: "./worker/dist/critical.min.js",
@@ -295,7 +284,6 @@
     bgStyles: bgStyles,
     intersectionObserver: intersectionObserver,
     imageLoaderMin: imageLoaderMin,
-    critical: critical,
     criticalMin: criticalMin,
     criticalFontLoader: criticalFontLoader,
     criticalFontLoaderMin: criticalFontLoaderMin,
@@ -326,15 +314,23 @@
       try {
         // create a bundle
         console.log('build ' + config.input + ' > ' + config.output + ' ...');
-        const result = Terser.minify(
-          fs.readFileSync(config.input, "utf8"),
+        const result = Terser.minify({[config.input]: fs.readFileSync(config.input, "utf8")},
           Object.assign({}, config.config)
         );
 
-        fs.writeFileSync(config.output, result.code);
+        if (result.error) {
+
+          console.error('build failed ...');
+          console.error(JSON.stringify({result}, null, 1));
+
+        }
+        else {
+
+          fs.writeFileSync(config.output, result.code);
+        }
 
       } catch (error) {
-        console.log({
+        console.error({
           name,
           error
         });

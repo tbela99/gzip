@@ -102,17 +102,6 @@ export const imageLoaderMin = {
   }
 };
 
-export const critical = {
-  input: "./worker/src/critical/critical.js",
-  output: "./worker/dist/critical.js",
-  config: {
-    //  ie8: true,
-    ecma: ECMA_VERSION,
-    output,
-    warnings: true
-  }
-};
-
 export const criticalMin = {
   input: "./worker/dist/critical.js",
   output: "./worker/dist/critical.min.js",
