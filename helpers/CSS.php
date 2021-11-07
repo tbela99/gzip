@@ -128,23 +128,23 @@ class CSSHelper
 					}
 				}
 
+				if (is_file($checksum.$min.'.css')) {
+
+					$replace .= '<style data-position="head" data-ignore="true">'.file_get_contents($checksum.$min.'.css').'</style>'."\n";
+				}
+
 				$jsMin = !empty($this->options['minifyjs']) ? '.min' : '';
 
 				if (is_file($checksum.$jsMin.'.js')) {
 
 					$replace .= '<script data-position="head" data-ignore="true">'.file_get_contents($checksum.$jsMin.'.js').'</script>'."\n";
 				}
-
-				if (is_file($checksum.$min.'.css')) {
-
-					$replace .= '<style data-position="head" data-ignore="true">'.file_get_contents($checksum.$min.'.css').'</style>'."\n";
-				}
 			}
 
 			if (!empty($data['dimensions'])) {
 
 				$dt = new \DateTime();
-				$dt->modify('+90s');
+				$dt->modify('+40s');
 
 				$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 				$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
@@ -165,6 +165,13 @@ class CSSHelper
 			}
 
 			if (!empty($replace)) {
+
+				$search = '</head>';
+
+				if (preg_match('#(<meta\s*charset=[^>]+>)#', $html,$match)) {
+
+					return str_replace($match[1], $match[1].$replace, $html);
+				}
 
 				return str_replace('</head>', $replace.'</head>', $html);
 			}
@@ -681,11 +688,129 @@ class CSSHelper
 
 		if (!empty($search)) {
 
+			$search[] = '<noscript></noscript>';
+			$replace[] = '';
+
 			$html = str_replace($search, $replace, $html);
 		}
 
 		$profiler->mark('CssWrapUp');
 		return $html;
+	}
+
+	/**
+	 * @since 3.0
+	 * @param array $options
+	 * @throws \SodiumException
+	 */
+	public function afterInitialise($html, array $options = []) {
+
+		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
+
+			$dimensions = preg_split('#\s+#s', $options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY);
+
+			usort($dimensions, function ($a, $b) {
+
+				$a = +explode('x', $a)[0];
+				$b = +explode('x', $b)[0];
+
+				return $b - $a;
+			});
+
+			$signatures = explode('.', $_SERVER['HTTP_X_SIGNATURE']);
+
+			$raw = file_get_contents('php://input');
+			$post = json_decode($raw, JSON_OBJECT_AS_ARRAY);
+
+			if (count($signatures) != 2 ||
+				!is_array($post) ||
+				!isset($post['url']) ||
+				!isset($post['css']) ||
+				!isset($post['fonts']) ||
+				!is_array($post['fonts']) ||
+				!isset($_SERVER['HTTP_X_SIGNATURE']) ||
+				!isset($post['dimension']) ||
+				!in_array($post['dimension'], $dimensions)) {
+
+				http_response_code(400);
+				exit;
+			}
+
+			$data = [
+
+				'url' => $post['url'],
+				'dimensions' => $dimensions
+			];
+
+			// compute the key used to sign data
+			$hash = hash_hmac('sha256', $options['template'].json_encode($data), $options['expiring_links']['secret']);
+
+			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.'.hash('sha256', $signatures[0].$raw)) {
+
+				http_response_code(400);
+				exit;
+			}
+
+			$raw_message = hex2bin($signatures[0]);
+			$nonce = substr($raw_message, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+			$encrypted_message2 = substr($raw_message, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+			$decrypted_message = sodium_crypto_secretbox_open($encrypted_message2, $nonce, hex2bin($hash));
+
+			$encrypted_data = json_decode($decrypted_message, JSON_OBJECT_AS_ARRAY);
+
+			if (!is_array($encrypted_data) ||
+				!isset($encrypted_data['key']) ||
+				$encrypted_data['key'] != $hash ||
+				!isset($encrypted_data['duration'])) {
+
+				http_response_code(400);
+				exit;
+			}
+
+			if ($encrypted_data['duration'] > time()) {
+
+				http_response_code(410);
+				exit;
+			}
+
+			$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
+
+			if (!is_dir($path)) {
+
+				$old_mask = umask();
+
+				umask(022);
+				mkdir($path, 0755, true);
+				umask($old_mask);
+			}
+
+			header('Content-Type: application/json; charset=utf-8');
+			file_put_contents($path.'/'.$hash.'_'.$post['dimension'].'.css', new Parser($post['css']));
+
+			$fonts = [];
+
+			foreach ($post['fonts'] as $font) {
+
+				$fonts[md5(json_encode($font))] = $font;
+			}
+
+			$fontFile = $path.'/'.$hash.'_'.$post['dimension'].'.php';
+
+			if (!empty($fonts)) {
+
+				file_put_contents($fontFile, '<?php'."\n
+defined('JPATH_PLATFORM') or die;
+\$fonts = ".var_export($fonts, true).';');
+			}
+
+			else if (is_file($fontFile)) {
+
+				unlink($fontFile);
+			}
+
+			echo 1;
+			exit;
+		}
 	}
 
 	/** generate responsive background images

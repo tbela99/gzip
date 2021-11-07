@@ -1,4 +1,7 @@
-
+/**
+ * from https://github.com/tbela99/critical/blob/master/dist/browser.js
+ *
+ */
     /**
      * resolve to absolute for external urls, relative for same domain
      * @param {string} path

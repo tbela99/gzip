@@ -19,6 +19,7 @@
   const compress = {
     // ecma: ECMA_VERSION,
     // keep_fnames: true,
+    inline: true,
     passes: 3,
     toplevel: true,
     unsafe_proto: true,
@@ -26,7 +27,7 @@
   };
 
   const mangle = {
-    keep_fnames: true
+    // keep_fnames: true
   };
 
   const output = {
@@ -318,7 +319,7 @@
           Object.assign({}, config.config)
         );
 
-        if (result.error) {
+        if (result.error || result.code == undefined) {
 
           console.error('build failed ...');
           console.error(JSON.stringify({result}, null, 1));

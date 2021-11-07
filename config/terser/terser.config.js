@@ -16,6 +16,7 @@ const ECMA_VERSION = 6;
 const compress = {
   // ecma: ECMA_VERSION,
   // keep_fnames: true,
+  inline: true,
   passes: 3,
   toplevel: true,
   unsafe_proto: true,
@@ -23,7 +24,7 @@ const compress = {
 };
 
 const mangle = {
-  keep_fnames: true
+  // keep_fnames: true
 };
 
 const output = {

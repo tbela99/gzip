@@ -54,6 +54,7 @@ class ScriptHelper {
 		 * capture scripts marked as nomodule/module
 		 */
 		$modules = [];
+		$nomodules = [];
 
 		// parse scripts
 		$html = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, &$modules, $path, $fetch_remote, $ignore, $remove) {
@@ -257,7 +258,7 @@ class ScriptHelper {
 
 				if (!empty($content)) {
 
-					file_put_contents($js_file, implode(';', $content));
+					file_put_contents($js_file, implode(";\n", $content));
 					file_put_contents($hash_file, $hash);
 				}
 
