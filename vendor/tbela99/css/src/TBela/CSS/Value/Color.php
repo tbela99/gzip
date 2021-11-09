@@ -115,9 +115,7 @@ class Color extends Value
             return in_array($data->name, ['rgb', 'rgba', 'hsl', 'hsla', 'hwb', 'device-cmyk']);
         }
 
-        $colors = ColorUtil::COLORS_NAMES;
-
-        return isset($colors[$data->value]) || (isset($data->colorType) && in_array($data->colorType, ['hex', 'keyword']));
+        return array_key_exists($data->value, ColorUtil::COLORS_NAMES) || (isset($data->colorType) && in_array($data->colorType, ['hex', 'keyword']));
     }
 
     /**
@@ -169,9 +167,7 @@ class Color extends Value
             $options['convert_color'] = isset($data->colorType) ? $data->colorType : $data->name;
         }
 
-        $colors = ColorUtil::NAMES_COLORS;
-
-        if (isset($colors[$hex])) {
+        if (array_key_exists($hex, ColorUtil::NAMES_COLORS)) {
 
             $hex = ColorUtil::NAMES_COLORS[$hex];
         }

@@ -215,6 +215,8 @@ class Image {
 			}
 		}
 
+		imageinterlace($this->_image, true);
+
         if($type == IMAGETYPE_JPEG) {
             imagejpeg($this->_image, $abspath, $compression);
         }

@@ -24,35 +24,13 @@ class Parser implements ParsableInterface
 
     use ParserTrait;
 
-    /**
-     * @var stdClass
-     * @ignore
-     */
     protected $currentPosition;
-    /**
-     * @var stdClass
-     * @ignore
-     */
     protected $previousPosition;
-    /**
-     * @var int
-     * @ignore
-     */
     protected $end = 0;
-
 
     protected $errors = [];
 
-    /**
-     * @var stdClass|null
-     * @ignore
-     */
     protected $ast = null;
-
-    /**
-     * @var RuleListInterface|null
-     * @ignore
-     */
     protected $element = null;
 
     /**
@@ -60,7 +38,6 @@ class Parser implements ParsableInterface
      * @var string
      * @ignore
      */
-
     protected $css = '';
 
     /**
@@ -131,7 +108,6 @@ class Parser implements ParsableInterface
      * @return Parser
      * @throws SyntaxError
      */
-
     public function merge($parser)
     {
 
@@ -203,7 +179,6 @@ class Parser implements ParsableInterface
     /**
      * @return string
      */
-
     public function getContent()
     {
 
@@ -329,7 +304,7 @@ class Parser implements ParsableInterface
 
         if (isset($value)) {
 
-            $value = is_string($value) ? Value::parse($value, $name) : $value;
+            $value = (is_string($value) ? Value::parse($value, $name) : $value);
             $signature .= ':value:'.$value->render(['convert_color' => 'hex', 'compress' => true]);
         }
 
@@ -1022,7 +997,6 @@ class Parser implements ParsableInterface
 
             if (!empty($leading)) {
 
-                $node->{$property} = Value::parse(trim($node->{$property}));
                 $node->leadingcomments = $leading;
             }
         }

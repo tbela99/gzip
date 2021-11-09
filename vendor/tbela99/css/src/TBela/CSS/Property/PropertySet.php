@@ -71,7 +71,7 @@ class PropertySet
      * @param array|null $trailingcomments
      * @return PropertySet
      */
-    public function set($name, $value, $leadingcomments = null, $trailingcomments = null)
+    public function set($name, $value, array $leadingcomments = null, array $trailingcomments = null)
     {
 
         // is valid property
@@ -153,7 +153,7 @@ class PropertySet
         return $this;
     }
 
-    protected function expandProperties(array $result, $leadingcomments = null, $trailingcomments = null)
+    protected function expandProperties(array $result, array $leadingcomments = null, array $trailingcomments = null)
     {
 
         foreach ($result as $property => $values) {
@@ -402,14 +402,12 @@ class PropertySet
     protected function setProperty($name, $value)
     {
 
-        $property = $name instanceof Set ? trim($name->render(['remove_comments' => true])) : $name;
+        if (!isset($this->properties[$name])) {
 
-        if (!isset($this->properties[$property])) {
-
-            $this->properties[$property] = new Property($name);
+            $this->properties[$name] = new Property($name);
         }
 
-        $this->properties[$property]->setValue($value);
+        $this->properties[$name]->setValue($value);
 
         return $this;
     }

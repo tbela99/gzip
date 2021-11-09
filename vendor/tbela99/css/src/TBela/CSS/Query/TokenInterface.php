@@ -9,7 +9,7 @@ interface TokenInterface
      * @param QueryInterface[] $context
      * @return QueryInterface[]
      */
-    public function filter(array $context);
+    public function filter(array $context): array;
 
     /**
      * @param array $options

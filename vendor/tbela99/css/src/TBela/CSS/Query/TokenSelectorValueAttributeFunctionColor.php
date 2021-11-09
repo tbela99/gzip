@@ -9,7 +9,7 @@ class TokenSelectorValueAttributeFunctionColor implements TokenSelectorValueInte
 {
     use FilterTrait;
 
-    protected $value = [];
+    protected array $value = [];
 
     /**
      * TokenSelectorValueAttributeExpression constructor.
@@ -69,7 +69,7 @@ class TokenSelectorValueAttributeFunctionColor implements TokenSelectorValueInte
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
         $result = [];
 

@@ -13,9 +13,9 @@ class TokenSelectorValueString extends TokenSelectorValue
 {
     use TokenStringifiableTrait;
 
-    protected $q = '';
-    protected $value = '';
-    protected $isAtRule = false;
+    protected string $q = '';
+    protected string $value = '';
+    protected bool $isAtRule = false;
 
     public function __construct($data)
     {
@@ -27,7 +27,7 @@ class TokenSelectorValueString extends TokenSelectorValue
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
         if ($this->value == '*') {
 

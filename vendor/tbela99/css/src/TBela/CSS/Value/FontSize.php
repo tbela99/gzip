@@ -14,7 +14,6 @@ class FontSize extends Unit
     use UnitTrait, ValueTrait;
 
     protected static $keywords = [
-
         'xx-small',
         'x-small',
         'small',

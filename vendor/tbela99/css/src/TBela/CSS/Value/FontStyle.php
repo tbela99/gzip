@@ -14,7 +14,6 @@ class FontStyle extends Value
     use UnitTrait;
 
     protected static $keywords = [
-
         'normal',
         'italic',
         'oblique'

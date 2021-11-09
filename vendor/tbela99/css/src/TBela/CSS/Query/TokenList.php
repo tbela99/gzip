@@ -11,7 +11,7 @@ class TokenList implements TokenInterface
     /**
      * @var TokenInterface[][]
      */
-    protected $tokens = [];
+    protected array $tokens = [];
 
     /**
      * TokenList constructor.
@@ -25,7 +25,7 @@ class TokenList implements TokenInterface
     /**
      * @inheritDoc
      */
-    public function filter(array $context)
+    public function filter(array $context): array
     {
         $result = [];
 

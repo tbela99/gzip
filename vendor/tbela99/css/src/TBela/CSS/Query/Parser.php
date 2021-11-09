@@ -380,6 +380,7 @@ class Parser
                                     $result[] = (object)['type' => 'operator', 'value' => $selector[$i]];
                                 }
                             } else {
+
                                 $buffer .= $selector[$i];
                             }
 
@@ -659,7 +660,7 @@ class Parser
 
             $this->position += 1;
             $this->tokens[] = (object)['type' => 'select', 'node' => '*'];
-        } else if ($substr !== false) {
+        } else {
             $token = substr($substr, 0, 1);
 
             if ($token == '/') {

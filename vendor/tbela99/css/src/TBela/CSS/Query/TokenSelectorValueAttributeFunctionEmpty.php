@@ -4,14 +4,14 @@ namespace TBela\CSS\Query;
 
 class TokenSelectorValueAttributeFunctionEmpty extends TokenSelectorValue implements TokenSelectorValueInterface
 {
-    protected $arguments = [];
-    protected $name;
-    protected $expression;
+    protected array $arguments = [];
+    protected string $name;
+    protected TokenSelectorValueInterface $expression;
 
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
        return array_filter($context, function (QueryInterface $element) {
 

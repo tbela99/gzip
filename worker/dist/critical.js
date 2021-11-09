@@ -107,7 +107,7 @@ var critical = (function (exports) {
 
             if (allStylesheets.length === 0) {
 
-                return [];
+                return {styles: [], fonts: [], nodeCount, stats: {nodeCount, stats: []}};
             }
 
             let node;

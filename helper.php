@@ -296,14 +296,14 @@ class GZipHelper
 		static::$callbacks[] = [$callback, ucwords(str_replace(['Helpers', 'Helper', 'Gzip', '\\'], '', get_class($callback)))];
 	}
 
-	public static function trigger($event, $html, $options = [], $escape = false)
+	public static function trigger($event, $options = [], $html = '', $escape = false)
 	{
 
 		$replace = [];
 
 		if ($escape) {
 
-			$tags = ['script', 'style', 'pre'];
+			$tags = ['noscript', 'script', 'style', 'pre'];
 
 			$html = preg_replace_callback('#(<((' . implode(')|(', $tags) . '))[^>]*>)(.*?)</\2>#si', function ($matches) use (&$replace, $tags) {
 
@@ -321,7 +321,7 @@ class GZipHelper
 
 			if (is_callable([$callback[0], $event])) {
 
-				$html = call_user_func_array([$callback[0], $event], [$html, $options]);
+				$html = call_user_func_array([$callback[0], $event], [$options, $html]);
 				$profiler->mark($callback[1] . ucwords($event));
 			}
 		}

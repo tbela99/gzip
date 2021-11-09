@@ -24,6 +24,11 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     protected $name;
 
+    /**
+     * @var string | null
+     */
+    protected $vendor = null;
+
     protected $leadingcomments = null;
 
     protected $trailingcomments = null;
@@ -73,6 +78,24 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
         }
 
         return $this->value;
+    }
+
+    /**
+     * @param $vendor
+     * @return $this
+     */
+    public function setVendor($vendor) {
+
+        $this->vendor = $vendor;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getVendor() {
+
+        return $this->vendor;
     }
 
     /**
@@ -138,7 +161,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     /**
      * @inheritDoc
      */
-    public function setTrailingComments($comments)
+    public function setTrailingComments(array $comments = null)
     {
         $this->trailingcomments = $comments;
         return $this;
@@ -155,7 +178,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     /**
      * @inheritDoc
      */
-    public function setLeadingComments($comments)
+    public function setLeadingComments(array $comments = null)
     {
         $this->leadingcomments = $comments;
         return $this;

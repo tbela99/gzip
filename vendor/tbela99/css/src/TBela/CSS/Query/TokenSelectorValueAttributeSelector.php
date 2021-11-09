@@ -8,7 +8,7 @@ class TokenSelectorValueAttributeSelector implements TokenSelectorValueInterface
 {
     use FilterTrait;
 
-    protected $value = [];
+    protected array $value = [];
     protected $_value = '';
 
     /**
@@ -47,13 +47,13 @@ class TokenSelectorValueAttributeSelector implements TokenSelectorValueInterface
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
         $result = [];
 
         foreach ($context as $element) {
 
-            foreach ((isset($element['selector']) ? $element['selector'] : []) as $val) {
+            foreach ($element['selector'] ?? [] as $val) {
 
                 if (strpos((string) $val, $this->_value) !== false) {
 
@@ -75,7 +75,7 @@ class TokenSelectorValueAttributeSelector implements TokenSelectorValueInterface
 
         foreach ($this->value as $value) {
 
-            $q = isset($value->q) ? $value->q : '';
+            $q = $value->q ?? '';
 
             $result .= $q.$value->value.$q;
         }

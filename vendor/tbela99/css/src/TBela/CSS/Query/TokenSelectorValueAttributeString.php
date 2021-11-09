@@ -7,7 +7,7 @@ use TBela\CSS\Element\Rule;
 
 class TokenSelectorValueAttributeString implements TokenSelectorValueInterface
 {
-    protected $value;
+    protected string $value;
 
     /**
      * TokenSelectorValueAttributeExpression constructor.
@@ -21,7 +21,7 @@ class TokenSelectorValueAttributeString implements TokenSelectorValueInterface
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
         $result = [];
 

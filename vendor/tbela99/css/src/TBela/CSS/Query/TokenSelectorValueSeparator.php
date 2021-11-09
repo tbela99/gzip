@@ -20,7 +20,7 @@ class TokenSelectorValueSeparator extends Token implements TokenSelectorValueInt
     /**
      * @inheritDoc
      */
-    public function filter(array $context)
+    public function filter(array $context): array
     {
 
         return $context;
@@ -29,7 +29,7 @@ class TokenSelectorValueSeparator extends Token implements TokenSelectorValueInt
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
 
         return $context;

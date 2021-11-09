@@ -19,13 +19,24 @@ use Elphin\IcoFileLoader\IcoFileService;
 use Gzip\GZipHelper as GZipHelper;
 use Joomla\CMS\Factory as JFactory;
 use Joomla\Registry\Registry as Registry;
-use TBela\CSS\Parser;
 
 class PlgSystemGzip extends JPlugin
 {
+	/**
+	 * @var array
+	 */
 	protected $options = [];
+	/**
+	 * @var string
+	 */
 	protected $worker_id = '';
+	/**
+	 * @var string
+	 */
 	protected $manifest_id = '';
+	/**
+	 * @var string
+	 */
 	protected $route = '';
 
 	public function onContentPrepareForm(JForm $form, $data)
@@ -290,138 +301,7 @@ class PlgSystemGzip extends JPlugin
 
 		$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version';
 
-		$options = (array)$this->params->get('gzip');
-
-		if ($app->isClient('site')) {
-
-			if (!empty($options)) {
-
-				$this->options = json_decode(json_encode($options), JSON_OBJECT_AS_ARRAY);
-			}
-
-			if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
-
-				$dimensions = preg_split('#\s+#s', $this->options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY);
-
-				usort($dimensions, function ($a, $b) {
-
-					$a = +explode('x', $a)[0];
-					$b = +explode('x', $b)[0];
-
-					return $b - $a;
-				});
-
-				$signatures = explode('.', $_SERVER['HTTP_X_SIGNATURE']);
-
-				$raw = file_get_contents('php://input');
-				$post = json_decode($raw, JSON_OBJECT_AS_ARRAY);
-
-				if (count($signatures) != 2 ||
-					!is_array($post) ||
-					!isset($post['url']) ||
-					!isset($post['css']) ||
-					!isset($post['fonts']) ||
-					!is_array($post['fonts']) ||
-					!isset($_SERVER['HTTP_X_SIGNATURE']) ||
-					!isset($post['dimension']) ||
-					!in_array($post['dimension'], $dimensions)) {
-
-					http_response_code(400);
-					exit;
-				}
-
-				$data = [
-
-					'url' => $post['url'],
-					'dimensions' => $dimensions
-				];
-
-				// compute the key used to sign data
-				$hash = hash_hmac('sha256', $app->getTemplate().json_encode($data), $this->options['expiring_links']['secret']);
-
-				if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.'.hash('sha256', $signatures[0].$raw)) {
-
-					http_response_code(400);
-					exit;
-				}
-
-				$raw_message = hex2bin($signatures[0]);
-				$nonce = substr($raw_message, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-				$encrypted_message2 = substr($raw_message, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-				$decrypted_message = sodium_crypto_secretbox_open($encrypted_message2, $nonce, hex2bin($hash));
-
-				$encrypted_data = json_decode($decrypted_message, JSON_OBJECT_AS_ARRAY);
-
-				if (!is_array($encrypted_data) ||
-					!isset($encrypted_data['key']) ||
-					$encrypted_data['key'] != $hash ||
-					!isset($encrypted_data['duration'])) {
-
-					http_response_code(400);
-					exit;
-				}
-
-				if ($encrypted_data['duration'] > time()) {
-
-					http_response_code(410);
-					exit;
-				}
-
-				$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
-
-				if (!is_dir($path)) {
-
-					$old_mask = umask();
-
-					umask(022);
-					mkdir($path, 0755, true);
-					umask($old_mask);
-				}
-
-				header('Content-Type: application/json; charset=utf-8');
-				file_put_contents($path.'/'.$hash.'_'.$post['dimension'].'.css', new Parser($post['css']));
-
-				$fonts = [];
-
-				foreach ($post['fonts'] as $font) {
-
-					$fonts[md5(json_encode($font))] = $font;
-				}
-
-				$fontFile = $path.'/'.$hash.'_'.$post['dimension'].'.php';
-
-				if (!empty($fonts)) {
-
-					file_put_contents($fontFile, '<?php'."\n
-defined('JPATH_PLATFORM') or die;
-\$fonts = ".var_export($fonts, true).';');
-				}
-
-				else if (is_file($fontFile)) {
-
-					unlink($fontFile);
-				}
-
-				echo 1;
-				exit;
-			}
-
-			if (!is_file($file)) {
-
-				$this->updateServiceWorker($this->options);
-			}
-
-			if (!is_file(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php')) {
-
-				$this->updateConfig($this->options);
-			}
-
-			if (is_file($file)) {
-
-				$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
-			}
-		}
-
+		$this->options = (array)$this->params->get('gzip');
 
 		$dirname = JURI::base(true) . '/';
 
@@ -442,32 +322,33 @@ defined('JPATH_PLATFORM') or die;
 
 		if ($app->isClient('site')) {
 
-			$this->route = $this->params->get('gzip.cache_key') . '/';
-
-			GZipHelper::$route = $this->route;
+			$options = json_decode(json_encode($this->options), JSON_OBJECT_AS_ARRAY);
 
 			// segregate http and https cache
 			$prefix = 'cache/z/' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'ssl/' : '');
 
-			if (!empty($this->options['pwaenabled'])) {
+			if (!empty($options['pwaenabled'])) {
 
-				if (empty($this->options['pwa_network_strategy']) || $this->options['pwa_network_strategy'] == 'un') {
+				if (empty($options['pwa_network_strategy']) || $options['pwa_network_strategy'] == 'un') {
 
-					$this->options['pwa_network_strategy'] = 'no';
+					$options['pwa_network_strategy'] = 'no';
 				}
 
-				$prefix .= $this->options['pwa_network_strategy'] . '/';
-				GZipHelper::$pwa_network_strategy = $this->options['pwa_network_strategy'] . '/';
+				$prefix .= $options['pwa_network_strategy'] . '/';
+				GZipHelper::$pwa_network_strategy = $options['pwa_network_strategy'] . '/';
 			}
 
-			$this->options['config_path'] = 'cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
-			$this->options['app_path'] = $prefix . $_SERVER['SERVER_NAME'] . '/';
+			$options['route'] = $options['cache_key'].'/';
 
-			foreach (['js', 'css', 'img', 'ch', 'e', 'c'] as $key) {
+			$options['config_path'] = 'cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
+			$options['app_path'] = $prefix . $_SERVER['SERVER_NAME'] . '/';
+
+			// js, css, img, ch, e(encrypted), c, cri (critical)
+			foreach (['js', 'css', 'img', 'ch', 'e', 'c', 'cri'] as $key) {
 
 				$path = $_SERVER['SERVER_NAME'] . '/' . $key . '/';
 
-				if (isset($this->options['hashfiles']) && $this->options['hashfiles'] == 'content' && $key != 'e') {
+				if (isset($options['hashfiles']) && $options['hashfiles'] == 'content' && $key != 'e') {
 
 					$path .= '1/';
 				}
@@ -481,57 +362,57 @@ defined('JPATH_PLATFORM') or die;
 					umask($old_mask);
 				}
 
-				$this->options[$key . '_path'] = $prefix . $path;
+				$options[$key . '_path'] = $prefix . $path;
 			}
 
-			if (!empty($this->options['cdn'])) {
+			if (!empty($options['cdn'])) {
 
-				$this->options['cdn'] = array_filter(array_values($this->options['cdn']));
+				$options['cdn'] = array_filter(array_values($options['cdn']));
 			} else
-				$this->options['cdn'] = [];
+				$options['cdn'] = [];
 
-			$this->options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+			$options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
 
-			if (is_object($this->options['cdn'])) {
+//			if (is_object($options['cdn'])) {
+//
+//				$options['cdn'] = array_filter(array_values($options['cdn']));
+//			}
 
-				$this->options['cdn'] = array_filter(array_values($this->options['cdn']));
+			if (empty($options['cdn'])) {
+
+				$options['cdn'] = [];
 			}
 
-			if (empty($this->options['cdn'])) {
-
-				$this->options['cdn'] = [];
-			}
-
-			GZipHelper::$regReduce = ['#^((' . implode(')|(', array_filter(array_merge(array_map(function ($host) {
+			GZipHelper::$regReduce = ['#^((' . implode(')|(', array_filter(array_merge(array_map(function ($host) use($options) {
 					return $host . '/';
-				}, $this->options['cdn']),
-					[JUri::root(), JUri::root(true) . '/(?!/)']))) . '))#', '#^(' . JUri::root(true) . '/)?' . $this->route . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
+				}, $options['cdn']),
+					[JUri::root(), JUri::root(true) . '/(?!/)']))) . '))#', '#^(' . JUri::root(true) . '/)?' . $options['route'] . '(((nf)|(cf)|(cn)|(no)|(co))/)?[^/]+/#', '#(\?|\#).*$#'];
 
-			if (!isset($this->options['cdn_types'])) {
+			if (!isset($options['cdn_types'])) {
 
-				$this->options['cdn_types'] = array_keys(GZipHelper::$accepted);
+				$options['cdn_types'] = array_keys(GZipHelper::$accepted);
 			}
 
-			$this->options['static_types'] = [];
+			$options['static_types'] = [];
 
-			foreach ($this->options['cdn_types'] as $type) {
+			foreach ($options['cdn_types'] as $type) {
 
 				if (isset(GZipHelper::$accepted[$type])) {
 
-					$this->options['static_types'][$type] = GZipHelper::$accepted[$type];
+					$options['static_types'][$type] = GZipHelper::$accepted[$type];
 				}
 			}
 
 			$types = '';
 
-			if (!empty($this->options['cdntypes_custom'])) {
+			if (!empty($options['cdntypes_custom'])) {
 
-				$types = $this->options['cdntypes_custom'];
+				$types = $options['cdntypes_custom'];
 			}
 
-			if (!empty($this->options['expiring_links']['mimetypes_expiring_links'])) {
+			if (!empty($options['expiring_links']['mimetypes_expiring_links'])) {
 
-				$types .= "\n" . $this->options['expiring_links']['mimetypes_expiring_links'];
+				$types .= "\n" . $options['expiring_links']['mimetypes_expiring_links'];
 			}
 
 			if (trim($types) !== '') {
@@ -546,123 +427,36 @@ defined('JPATH_PLATFORM') or die;
 
 						if (count($option) == 2) {
 
-							$this->options['static_types'][$option[0]] = $option[1];
+							$options['static_types'][$option[0]] = $option[1];
 						}
 					}
 				}
 			}
 
-			foreach ($this->options['cdn'] as $key => $option) {
+			foreach ($options['cdn'] as $key => $option) {
 
-				$this->options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option) ?: $this->options['scheme'] . '://') . $option;
+				$options['cdn'][$key] = (preg_match('#^([a-zA-z]+:)?//#', $option) ?: $options['scheme'] . '://') . $option;
 			}
 
-			GZipHelper::$hosts = empty($this->options['cnd_enabled']) ? [] : $this->options['cdn'];
-			GZipHelper::$static_types = $this->options['static_types'];
+			GZipHelper::$hosts = empty($options['cnd_enabled']) ? [] : $options['cdn'];
+			GZipHelper::$static_types = $options['static_types'];
 
 			// do not render blank js file when service worker is disabled
-			if (!empty($this->options['pwaenabled'])) {
+			if (!empty($options['pwaenabled'])) {
 
-				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version';
+				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/';
 
-				if (!is_file($file)) {
+				if (!is_file($file.'worker_version') ||
+					!is_file($file.'serviceworker.js') ||
+					!is_file($file.'serviceworker.min.js')) {
 
-					$this->updateServiceWorker($this->options);
-				}
-
-				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/manifest_version';
-
-				if (!is_file($file)) {
-
-					$this->updateManifest($this->options);
+					$this->updateServiceWorker($options);
 				}
 
 				if (is_file($file)) {
 
-					$this->manifest_id = file_get_contents($file);
+					$this->worker_id = file_get_contents(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version');
 				}
-			}
-
-			if (strpos($_SERVER['REQUEST_URI'], JURI::root(true) . '/' . $this->route) === 0) {
-
-				require __DIR__ . '/responder.php';
-				$app->close();
-			}
-
-			// prevent accessing the domain through the cdn address
-			$domain = !empty($this->options['cdn_redirect']) ? preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn_redirect']) : '';
-
-			if ($domain !== '' && strpos($_SERVER['REQUEST_URI'], '/' . $this->route) === 0) {
-
-				foreach ($this->options['cdn'] as $key => $option) {
-
-					if (preg_replace('#^([a-z]+:)?//#', '', $this->options['cdn'][$key]) == $_SERVER['SERVER_NAME']) {
-
-						header('Location: //' . $domain . $_SERVER['REQUEST_URI'], true, 301);
-						$app->close();
-					}
-				}
-			}
-
-			$this->options['parse_url_attr'] = empty($this->options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $this->options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
-			$this->options['parse_url_attr']['href'] = '';
-			$this->options['parse_url_attr']['src'] = '';
-			$this->options['parse_url_attr']['srcset'] = '';
-			$this->options['parse_url_attr']['data-src'] = '';
-			$this->options['parse_url_attr']['data-srcset'] = '';
-
-			$dirname = dirname($_SERVER['SCRIPT_NAME']);
-
-			if ($dirname != '/') {
-
-				$dirname .= '/';
-			}
-
-			// fetch worker.js
-			if (preg_match('#^' . $dirname . 'worker([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
-
-				$debug = $this->params->get('gzip.debug_pwa') ? '' : '.min';
-
-				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/serviceworker' . $debug . '.js';
-
-				if (!is_file($file)) {
-
-					$this->updateManifest($this->options);
-				}
-
-				header('Cache-Control: max-age=86400');
-				header('Content-Type: text/javascript;charset=utf-8');
-				header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
-
-				readfile($file);
-				$app->close();
-			}
-
-			// fetch sync.fallback.js
-			// plugins/system/gzip/worker/dist/sync.fallback'.$debug.'.js
-			if (preg_match('#^' . $dirname . 'sync-fallback([a-z0-9.]+)?\.js#i', $_SERVER['REQUEST_URI'])) {
-
-				$debug = $this->params->get('gzip.debug_pwa') ? '' : '.min';
-
-				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/sync.fallback' . $debug . '.js';
-
-				if (!is_file($file)) {
-
-					$this->updateServiceWorker($this->options);
-				}
-
-				header('Cache-Control: max-age=86400');
-				header('Content-Type: text/javascript; charset=utf-8');
-				header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
-
-				readfile($file);
-				$app->close();
-			}
-
-			$document = JFactory::getDocument();
-
-			// fetch worker.js
-			if (!empty($this->options['pwa_app_manifest']) && $this->options['pwaenabled'] == 1) {
 
 				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/manifest.json';
 
@@ -671,15 +465,157 @@ defined('JPATH_PLATFORM') or die;
 					$this->updateManifest($this->options);
 				}
 
-				if (preg_match('#^' . $dirname . 'manifest([a-z0-9.]+)?\.json#i', $_SERVER['REQUEST_URI'])) {
+				$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/manifest_version';
 
-					header('Cache-Control: max-age=86400');
-					header('Content-Type: application/manifest+json;charset=utf-8');
-					header('Last-Modified: ' . gmdate('D, d M Y H:i:s T', filemtime($file)));
+				if (!is_file($file)) {
 
-					readfile($file);
-					exit;
+					$this->updateManifest($options);
 				}
+
+				if (is_file($file)) {
+
+					$this->manifest_id = file_get_contents($file);
+				}
+			}
+
+			if (!is_file($file)) {
+
+				$this->updateServiceWorker($options);
+			}
+
+			if (!is_file(JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/config.php')) {
+
+				$this->updateConfig($options);
+			}
+
+			$options['request_method'] = $_SERVER['REQUEST_METHOD'];
+			$options['webroot'] = JURI::root(true) . '/';
+			$options['request_uri'] = $_SERVER['REQUEST_URI'];
+			$options['scheme'] = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ? 'https' : 'http';
+
+			if (!empty($options['jsignore'])) {
+
+				$options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
+			}
+
+			if (!empty($options['imageignore'])) {
+
+				$options['imageignore'] = preg_split('#\s+#s', $options['imageignore'], -1, PREG_SPLIT_NO_EMPTY);
+			}
+
+			if (!empty($options['jsremove'])) {
+
+				$options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
+			}
+
+			if (empty($options['jsremove'])) {
+
+				$options['jsremove'] = [];
+			}
+
+			if (!empty($options['cssignore'])) {
+
+				$options['cssignore'] = preg_split('#\s+#s', $options['cssignore'], -1, PREG_SPLIT_NO_EMPTY);
+			}
+
+			if (empty($options['cssignore'])) {
+
+				$options['cssignore'] = [];
+			}
+
+			if (!empty($options['cssremove'])) {
+
+				$options['cssremove'] = preg_split('#\s+#s', $options['cssremove'], -1, PREG_SPLIT_NO_EMPTY);
+			}
+
+			if (empty($options['cssremove'])) {
+
+				$options['cssremove'] = [];
+			}
+
+			$options['template'] = $app->getTemplate();
+			$options['uri_root'] = JUri::root(true);
+
+			if ($options['uri_root'] === '') {
+
+				$options['uri_root']  = '/';
+			}
+
+			// Save-Data header enforce some settings
+			if (isset($_SERVER["HTTP_SAVE_DATA"]) && (!isset($options['savedata']) || !empty($options['savedata'])) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
+
+				// optimize images
+				$options['imageenabled'] = true;
+				$options['imageconvert'] = true;
+				$options['imagedimensions'] = true;
+
+				// optimize css
+				$options['asynccss'] = true;
+				$options['minifycss'] = true;
+				$options['fetchcss'] = true;
+				$options['cssenabled'] = true;
+				$options['mergecss'] = true;
+				$options['imagecssresize'] = true;
+				$options['criticalcssenabled'] = true;
+
+				// optimize javascript
+				$options['jsenabled'] = true;
+				$options['fetchjs'] = true;
+				$options['minifyjs'] = true;
+				$options['mergejs'] = true;
+
+				// minify html
+				$options['minifyhtml'] = true;
+
+				// enable service worker? no?
+			}
+
+			$options['parse_url_attr'] = empty($options['parse_url_attr']) ? [] : array_flip(array_map('strtolower', preg_split('#[\s,]#', $options['parse_url_attr'], -1, PREG_SPLIT_NO_EMPTY)));
+			$options['parse_url_attr']['href'] = '';
+			$options['parse_url_attr']['src'] = '';
+			$options['parse_url_attr']['srcset'] = '';
+			$options['parse_url_attr']['data-src'] = '';
+			$options['parse_url_attr']['data-srcset'] = '';
+
+			$this->route = GZipHelper::$route = $options['route'];
+
+			$this->options = GZipHelper::$options = $options;
+
+			if (!empty($options['imageenabled']) && extension_loaded('gd')) {
+
+				GZipHelper::register(new Gzip\Helpers\ImagesHelper());
+			}
+
+			if (!empty($options['cssenabled'])) {
+
+				GZipHelper::register(new Gzip\Helpers\CSSHelper());
+			}
+
+			if (!empty($options['jsenabled'])) {
+
+				GZipHelper::register(new Gzip\Helpers\ScriptHelper());
+			}
+
+			if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
+
+				GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
+			}
+
+			if (!empty($options['cachefiles']) || !empty($options['link_rel']) || (!empty($options['checksum']) && $options['checksum'] != 'none') ){
+
+				GZipHelper::register(new Gzip\Helpers\UrlHelper());
+			}
+
+			GZipHelper::register(new Gzip\Helpers\HTMLHelper());
+			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
+			GZipHelper::register(new Gzip\Helpers\Responder());
+
+			GZipHelper::trigger('afterInitialise', $options);
+
+			$document = JFactory::getDocument();
+
+			// fetch worker.js
+			if (!empty($this->options['pwa_app_manifest']) && $this->options['pwaenabled'] == 1) {
 
 				if (method_exists($document, 'addHeadLink')) {
 
@@ -782,126 +718,14 @@ defined('JPATH_PLATFORM') or die;
 
 		$options = $this->options;
 
-		$options['webroot'] = JURI::root(true) . '/';
-		$options['request_uri'] = $_SERVER['REQUEST_URI'];
-		$options['scheme'] = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on' ? 'https' : 'http';
-
-		if (!empty($options['jsignore'])) {
-
-			$options['jsignore'] = preg_split('#\s+#s', $options['jsignore'], -1, PREG_SPLIT_NO_EMPTY);
-		}
-
-		if (!empty($options['imageignore'])) {
-
-			$options['imageignore'] = preg_split('#\s+#s', $options['imageignore'], -1, PREG_SPLIT_NO_EMPTY);
-		}
-
-		if (!empty($options['jsremove'])) {
-
-			$options['jsremove'] = preg_split('#\s+#s', $options['jsremove'], -1, PREG_SPLIT_NO_EMPTY);
-		}
-
-		if (empty($options['jsremove'])) {
-
-			$options['jsremove'] = [];
-		}
-
-		if (!empty($options['cssignore'])) {
-
-			$options['cssignore'] = preg_split('#\s+#s', $options['cssignore'], -1, PREG_SPLIT_NO_EMPTY);
-		}
-
-		if (empty($options['cssignore'])) {
-
-			$options['cssignore'] = [];
-		}
-
-		if (!empty($options['cssremove'])) {
-
-			$options['cssremove'] = preg_split('#\s+#s', $options['cssremove'], -1, PREG_SPLIT_NO_EMPTY);
-		}
-
-		if (empty($options['cssremove'])) {
-
-			$options['cssremove'] = [];
-		}
-
-		$options['template'] = $app->getTemplate();
-		$options['uri_root'] = JUri::root(true);
-
-		if ($options['uri_root'] === '') {
-
-			$options['uri_root']  = '/';
-		}
-
-		// Save-Data header enforce some settings
-		if (isset($_SERVER["HTTP_SAVE_DATA"]) && $this->params->get('gzip.savedata', true) && strtolower($_SERVER["HTTP_SAVE_DATA"]) === "on") {
-
-			// optimize images
-			$options['imageenabled'] = true;
-			$options['imageconvert'] = true;
-			$options['imagedimensions'] = true;
-
-			// optimize css
-			$options['asynccss'] = true;
-			$options['minifycss'] = true;
-			$options['fetchcss'] = true;
-			$options['cssenabled'] = true;
-			$options['mergecss'] = true;
-			$options['imagecssresize'] = true;
-			$options['criticalcssenabled'] = true;
-
-			// optimize javascript
-			$options['jsenabled'] = true;
-			$options['fetchjs'] = true;
-			$options['minifyjs'] = true;
-			$options['mergejs'] = true;
-
-			// minify html
-			$options['minifyhtml'] = true;
-
-			// enable service worker? no?
-		}
+		$profiler = JProfiler::getInstance('Application');
+		$profiler->mark('afterRenderStart');
 
 		$body = $app->getBody();
 
-		GZipHelper::$options = $options;
-
-		if (!empty($options['imageenabled']) && extension_loaded('gd')) {
-
-			GZipHelper::register(new Gzip\Helpers\ImagesHelper());
-		}
-
-		if (!empty($options['cssenabled'])) {
-
-			GZipHelper::register(new Gzip\Helpers\CSSHelper());
-		}
-
-		if (!empty($options['jsenabled'])) {
-
-			GZipHelper::register(new Gzip\Helpers\ScriptHelper());
-		}
-
-		if (!empty($options['expiring_links_enabled']) && !empty($options['expiring_links']['file_type'])) {
-
-			GZipHelper::register(new Gzip\Helpers\EncryptedLinksHelper());
-		}
-
-		if (!empty($options['cachefiles']) || !empty($options['link_rel']) || (!empty($options['checksum']) && $options['checksum'] != 'none') ){
-
-			GZipHelper::register(new Gzip\Helpers\UrlHelper());
-		}
-
-		GZipHelper::register(new Gzip\Helpers\HTMLHelper());
-		GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
-
-		$profiler = JProfiler::getInstance('Application');
-
-		$profiler->mark('afterRenderStart');
-
-		$body = GZipHelper::trigger('preprocessHTML', $body, $options);
-		$body = GZipHelper::trigger('processHTML', $body, $options);
-		$body = GZipHelper::trigger('postProcessHTML', $body, $options, true);
+		$body = GZipHelper::trigger('preprocessHTML', $options, $body);
+		$body = GZipHelper::trigger('processHTML', $options, $body);
+		$body = GZipHelper::trigger('postProcessHTML', $options, $body, true);
 
 		GZipHelper::setTimingHeaders($options);
 

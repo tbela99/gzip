@@ -67,7 +67,7 @@
                         matches: true
                     });
 
-                    const timeout = setInterval(function () {
+                    const timeout = setInterval(() => {
 
                         // wait for stylesheets to load
                         if (document.querySelector('link[data-media]')) {

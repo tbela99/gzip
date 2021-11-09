@@ -16,9 +16,7 @@ trait ValueTrait
     /**
      * @inheritDoc
      */
-
     protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
-
     {
 
         $type = static::type();

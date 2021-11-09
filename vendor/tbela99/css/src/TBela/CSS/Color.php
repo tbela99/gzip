@@ -335,9 +335,7 @@ class Color
 
         $hex = static::expand($hex);
 
-        $colors = static::COLORS_NAMES;
-
-        if (isset($colors[$hex])) {
+        if (array_key_exists($hex, static::COLORS_NAMES)) {
 
             $hex = static::COLORS_NAMES[$hex];
         }
@@ -387,8 +385,7 @@ class Color
         $na = !isset($rgb[3]) || is_null($rgb[3]) || $rgb[3] == 1 || $rgb[3] === '';
         $hex = sprintf($na ? "#%02x%02x%02x" : "#%02x%02x%02x%02x", $rgb[0], $rgb[1], $rgb[2], $na ? 255 : round(255 * $rgb[3]));
 
-        $colors = static::NAMES_COLORS;
-        if (isset($colors[$hex]) && strlen($hex) >= strlen(static::NAMES_COLORS[$hex])) {
+        if (array_key_exists($hex, static::NAMES_COLORS) && strlen($hex) >= strlen(static::NAMES_COLORS[$hex])) {
 
             return static::NAMES_COLORS[$hex];
         }
@@ -846,9 +843,7 @@ class Color
 
         $color = strtolower($str);
 
-        $colors = static::COLORS_NAMES;
-
-        if (isset($colors[$color])) {
+        if (array_key_exists($color, static::COLORS_NAMES)) {
 
             $str = $color;
             $color = static::COLORS_NAMES[$color];

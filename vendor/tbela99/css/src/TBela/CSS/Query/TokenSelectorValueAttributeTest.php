@@ -4,18 +4,18 @@ namespace TBela\CSS\Query;
 
 class TokenSelectorValueAttributeTest extends TokenSelectorValueAttribute
 {
-    protected $name;
+    protected string $name;
 
     /**
      * TokenSelectorValueAttributeTest constructor.
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function evaluate(array $context)
+    public function evaluate(array $context): array
     {
         $result = [];
 

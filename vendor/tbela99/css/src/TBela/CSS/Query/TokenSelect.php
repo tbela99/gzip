@@ -7,14 +7,14 @@ use TBela\CSS\Element\RuleList;
 
 class TokenSelect extends Token implements TokenSelectInterface
 {
-    protected $node = '';
-    protected $context = null;
+    protected string $node = '';
+    protected ?string $context = null;
 
     /**
      * @inheritDoc
      * @throws Exception
      */
-    public function filter(array $context) {
+    public function filter(array $context): array {
 
         if (empty($context)) {
 
@@ -93,7 +93,7 @@ class TokenSelect extends Token implements TokenSelectInterface
      * @param QueryInterface $element
      * @return QueryInterface[]
      */
-    protected function select_all_nodes (QueryInterface $element) {
+    protected function select_all_nodes (QueryInterface $element): array {
 
         $result = [];
 

@@ -18,7 +18,13 @@ use function strlen;
 
 class HTMLHelper {
 
-	public function preProcessHTML($html, array $options = []) {
+	/**
+	 * @param array $options
+	 * @param string $html
+	 * @return string
+	 * @since
+	 */
+	public function preProcessHTML(array $options, $html) {
 
 		$debug = empty($options['debug']) ? '.min' : '';
 
@@ -82,12 +88,12 @@ class HTMLHelper {
 
 	/**
 	 * html minification
-	 * @param string $html
 	 * @param array $options
+	 * @param string $html
 	 * @return string
 	 * @since 1.0
 	 */
-	public function postProcessHTML ($html, array $options = []) {
+	public function postProcessHTML (array $options, $html) {
 
 		if (!empty($options['fix_invalid_html'])) {
 
@@ -207,8 +213,8 @@ class HTMLHelper {
 		$replace = [
 
 			'#<(('.implode(')|(', $self).'))(\s[^>]*?)?/>#si' => '<$1$'.(count($self) + 2).'>',
-			'/\>[^\S ]+/s' => '>',
-			'/[^\S ]+\</s' => '<',
+			'/\>[^\S ]+/s' => '> ',
+			'/[^\S ]+\</s' => ' <',
 			//shorten multiple whitespace sequences; keep new-line characters because they matter in JS!!!
 			'/([\t\r\n ])+/s' => ' ',
 			//remove leading and trailing spaces

@@ -62,7 +62,7 @@ class Set implements IteratorAggregate, JsonSerializable, Countable, ObjectInter
     public function render (array $options = []) {
 
         $result = '';
-        $join = ','.(!empty($options['compress']) ? '' : ' ');
+        $join = ','.((isset($options['compress']) ? $options['compress'] : false) ? '' : ' ');
 
         foreach ($this->doSplit($this->data, ',') as $data) {
 
@@ -81,7 +81,7 @@ class Set implements IteratorAggregate, JsonSerializable, Countable, ObjectInter
      * @param string $type
      * @return bool
      */
-    public function match(string $type)
+    public function match($type)
     {
         foreach ($this->data as $value) {
 

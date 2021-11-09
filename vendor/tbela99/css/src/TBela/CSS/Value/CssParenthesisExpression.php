@@ -15,7 +15,7 @@ class CssParenthesisExpression extends Value {
         return isset($data->name) && $data->name === '' && isset($data->arguments);
     }
 
-    public function render(array $options = []) {
+    public function render(array $options = []){
 
         return '('. $this->data->arguments->render($options).')';
     }

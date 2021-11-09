@@ -7,7 +7,7 @@ use InvalidArgumentException;
 
 trait TokenTrait
 {
-    protected $type = '';
+    protected string $type = '';
 
     protected function __construct($data)
     {
@@ -65,7 +65,7 @@ trait TokenTrait
 
         foreach ($context as $element) {
 
-            $result[spl_object_hash($element)] = $element;
+            $result[spl_object_id($element)] = $element;
         }
 
         return array_values($result);

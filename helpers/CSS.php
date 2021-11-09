@@ -33,164 +33,169 @@ class CSSHelper
 	 * @throws \Exception
 	 * @since
 	 */
-	public function preProcessHTML($html, array $options = []) {
+	public function preProcessHTML(array $options, $html)
+	{
+
+		if (empty($options['criticalcssenabled']) || trim($options['criticalcssviewports']) === '') {
+
+			return $html;
+		}
 
 		$min = empty($options['minifyjs']) ? '' : '.min';
 
-		if (!empty($options['criticalcssenabled']) && !empty($options['criticalcssviewports'])) {
+		$data = [
+			'url' => $options['request_uri'],
+			'dimensions' => preg_split('#\s+#s', $options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY)
+		];
 
-			$data = [
-				'url' => $options['request_uri'],
-				'dimensions' => preg_split('#\s+#s', $options['criticalcssviewports'], -1, PREG_SPLIT_NO_EMPTY)
-			];
+		usort($data['dimensions'], function ($a, $b) {
 
-			usort($data['dimensions'], function ($a, $b) {
+			$a = +explode('x', $a)[0];
+			$b = +explode('x', $b)[0];
 
-				$a = +explode('x', $a)[0];
-				$b = +explode('x', $b)[0];
+			return $b - $a;
+		});
 
-				return $b - $a;
+		$key = hash_hmac('sha256', $options['template'] . json_encode($data), $options['expiring_links']['secret']);
+		$path = $options['cri_path'];
+
+		$path .= $key . '_';
+
+		$paths = [];
+		$matched = [];
+		$data['dimensions'] = array_values(array_filter($data['dimensions'], function ($dimension) use ($path, &$paths, &$matched) {
+
+			$dimension = preg_replace('#[^x0-9]+#', '', $dimension);
+
+			if (!is_file($path . $dimension . '.css')) {
+
+				return true;
+			}
+
+			$matched[] = $dimension;
+			$paths[] = $path . $dimension;
+			return false;
+		}));
+
+		// filter matched resolutions
+		// lower matched resolutions must be removed
+		if (!empty($matched)) {
+
+			$matched = array_filter($matched, function ($value) use ($data) {
+
+				$value = intval($value);
+				foreach ($data['dimensions'] as $dimension) {
+
+					if (intval($dimension) >= $value) {
+
+						return false;
+					}
+				}
+
+				return true;
 			});
+		}
 
-			$key = hash_hmac('sha256', $options['template'].json_encode($data), $options['expiring_links']['secret']);
-			$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
+		$replace = '';
+		$jsMin = !empty($options['minifyjs']) ? '.min' : '';
 
-			$path .= $key.'_';
+		if (!empty($paths)) {
 
-			$paths = [];
-			$matched = [];
-			$data['dimensions'] = array_values(array_filter($data['dimensions'], function ($dimension) use($path, &$paths, &$matched) {
+			$paths = array_reverse($paths);
+			$checksum = $options['cri_path'] . 'chk_' . hash('md5', json_encode($paths)) . '_' . implode('_', $data['dimensions']);
 
-				if (!is_file($path.$dimension.'.css')) {
+			if (!is_file($checksum . '.css')) {
 
-					return true;
-				}
+				$css = '';
+				$fontList = [];
 
-				$matched[] = $dimension;
-				$paths[] = $path.$dimension;
-				return false;
-			}));
+				foreach ($paths as $p) {
 
-			// filter matched resolutions
-			// lower matched resolutions must be removed
-			if (!empty($matched)) {
+					$css .= "\n" . file_get_contents($p . '.css');
 
-				$matched = array_filter($matched, function ($value) use($data) {
+					if (is_file($p . '.php')) {
 
-					$value = intval($value);
-					foreach ($data['dimensions'] as $dimension) {
+						$fonts = [];
 
-						if (intval($dimension) >= $value) {
+						require $p . '.php';
 
-							return false;
-						}
-					}
-
-					return true;
-				});
-			}
-
-			$replace = '';
-
-			if (!empty($paths)) {
-
-				$paths = array_reverse($paths);
-				$checksum = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/chk_'.hash('md5', json_encode($paths)).'_'.implode('_', $data['dimensions']);
-
-				if (!is_file($checksum.'.css')) {
-
-					$css = '';
-					$fontList = [];
-
-					foreach ($paths as $p) {
-
-						$css .= "\n".file_get_contents($p.'.css');
-
-						if (is_file($p.'.php')) {
-
-							$fonts = [];
-
-							require $p.'.php';
-
-							$fontList = array_merge($fontList, $fonts);
-						}
-					}
-
-					if (trim($css) !== '') {
-
-						file_put_contents($checksum.'.css', new Parser($css));
-					}
-
-					if (!empty($fontList)) {
-
-						file_put_contents($checksum.'.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList), JSON_PRETTY_PRINT), file_get_contents(__DIR__.'/../worker/dist/fontloader.js')), JSON_PRETTY_PRINT);
-						file_put_contents($checksum.'.min.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList)), file_get_contents(__DIR__.'/../worker/dist/fontloader.min.js')));
+						$fontList = array_merge($fontList, $fonts);
 					}
 				}
 
-				if (is_file($checksum.$min.'.css')) {
+				if (trim($css) !== '') {
 
-					$replace .= '<style data-position="head" data-ignore="true">'.file_get_contents($checksum.$min.'.css').'</style>'."\n";
+					$parser = new Parser($css);
+
+					file_put_contents($checksum . '.css', $parser);
+					file_put_contents($checksum . '.min.css', (new Renderer(['compress' => true]))->renderAst($parser));
 				}
 
-				$jsMin = !empty($this->options['minifyjs']) ? '.min' : '';
+				if (!empty($fontList)) {
 
-				if (is_file($checksum.$jsMin.'.js')) {
-
-					$replace .= '<script data-position="head" data-ignore="true">'.file_get_contents($checksum.$jsMin.'.js').'</script>'."\n";
+					file_put_contents($checksum . '.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList), JSON_PRETTY_PRINT), file_get_contents(__DIR__ . '/../worker/dist/fontloader.js')), JSON_PRETTY_PRINT);
+					file_put_contents($checksum . '.min.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList)), file_get_contents(__DIR__ . '/../worker/dist/fontloader.min.js')));
 				}
 			}
 
-			if (!empty($data['dimensions'])) {
+			if (is_file($checksum . $min . '.css')) {
 
-				$dt = new \DateTime();
-				$dt->modify('+40s');
+				$replace .= "\n".'<style data-ignore="true">' . file_get_contents($checksum . $min . '.css') . '</style>' . "\n";
+			}
 
-				$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-				$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
-						'key' => $key,
-						'duration' => $dt->getTimestamp()
-					]), $nonce, hex2bin($key)));
+			if (is_file($checksum . $jsMin . '.js')) {
 
-				$data['hash'] = $secret;
+				$replace .= "\n".'<script data-ignore="true">' . file_get_contents($checksum . $jsMin . '.js') . '</script>' . "\n";
+			}
+		}
 
-				$script = '<script>'.file_get_contents(__DIR__.'/../worker/dist/critical'.$min.'.js').'</script>'.
-					'<script>'.str_replace(
-						['"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
-						[json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
-						file_get_contents(__DIR__.'/../worker/dist/critical-extract'.$min.'.js')).'
+		if (!empty($data['dimensions'])) {
+
+			$dt = new \DateTime();
+			$dt->modify('+40s');
+
+			$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+			$secret = bin2hex($nonce . sodium_crypto_secretbox(json_encode([
+					'key' => $key,
+					'duration' => $dt->getTimestamp()
+				]), $nonce, hex2bin($key)));
+
+			$data['hash'] = $secret;
+
+			$script = '<script>' . file_get_contents(__DIR__ . '/../worker/dist/critical' . $jsMin . '.js') . '</script>' .
+				'<script>' . str_replace(
+					['"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
+					[json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
+					file_get_contents(__DIR__ . '/../worker/dist/critical-extract' . $jsMin . '.js')) . '
 </script>';
 
-				$replace .= $script."\n";
+			$replace .= $script . "\n";
+		}
+
+		if (!empty($replace)) {
+
+			$search = '</head>';
+
+			if (preg_match('#(<meta\s*charset=[^>]+>)#', $html, $match)) {
+
+				return str_replace($match[1], $match[1] . $replace, $html);
 			}
 
-			if (!empty($replace)) {
-
-				$search = '</head>';
-
-				if (preg_match('#(<meta\s*charset=[^>]+>)#', $html,$match)) {
-
-					return str_replace($match[1], $match[1].$replace, $html);
-				}
-
-				return str_replace('</head>', $replace.'</head>', $html);
-			}
+			return str_replace('</head>', $replace . '</head>', $html);
 		}
 
 		return $html;
 	}
 
 	/**
-	 * @param string $html
 	 * @param array $options
-	 *
+	 * @param string $html
 	 * @return string
 	 *
 	 * @throws Parser\SyntaxError
-	 * @throws \Exception
 	 * @since
 	 */
-	public function processHTML($html, array $options = [])
+	public function processHTML(array $options, $html)
 	{
 
 		$path = $options['css_path'];
@@ -542,6 +547,21 @@ class CSSHelper
 				return $matches[0];
 			}
 
+			if (isset($attributes['data-ignore'])) {
+
+				unset($attributes['style']);
+				unset($attributes['data-ignore']);
+
+				$result = '<style';
+
+				foreach ($attributes as $key => $value) {
+
+					$result .= " $key=\"$value\"";
+				}
+
+				return $result.'>'.$matches[2].'</style>';
+			}
+
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
 			$matches[2] = $parseUrls($matches[2]);
 			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $parseUrls($matches[2]);
@@ -612,7 +632,7 @@ class CSSHelper
 				$profiler->mark('CssStyle');
 				$headStyle->deduplicate();
 				$profiler->mark('CssRender');
-				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>'."\n";
+				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>' . "\n";
 			}
 		}
 
@@ -639,7 +659,7 @@ class CSSHelper
 						$css .= ' ' . $attr . '="' . $value . '"';
 					}
 
-					$css .= '>'."\n";
+					$css .= '>' . "\n";
 
 					if ($async) {
 
@@ -664,7 +684,7 @@ class CSSHelper
 
 				if ($style !== '') {
 
-					${$position . '_string'} .= '<style>' . $style . '</style>'."\n";
+					${$position . '_string'} .= '<style>' . $style . '</style>' . "\n";
 				}
 			}
 		}
@@ -673,11 +693,11 @@ class CSSHelper
 
 			if ($noscript != '') {
 
-				$head_string .= '<noscript>' . $noscript . '</noscript>'."\n";
+				$head_string .= '<noscript>' . $noscript . '</noscript>' . "\n";
 			}
 
 			$search[] = '</head>';
-			$replace[] = $head_string."\n" . '</head>';
+			$replace[] = $head_string . "\n" . '</head>';
 		}
 
 		if ($body_string !== '') {
@@ -699,11 +719,12 @@ class CSSHelper
 	}
 
 	/**
-	 * @since 3.0
 	 * @param array $options
 	 * @throws \SodiumException
+	 * @since 3.0
 	 */
-	public function afterInitialise($html, array $options = []) {
+	public function afterInitialise(array $options)
+	{
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
 
@@ -743,9 +764,9 @@ class CSSHelper
 			];
 
 			// compute the key used to sign data
-			$hash = hash_hmac('sha256', $options['template'].json_encode($data), $options['expiring_links']['secret']);
+			$hash = hash_hmac('sha256', $options['template'] . json_encode($data), $options['expiring_links']['secret']);
 
-			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.'.hash('sha256', $signatures[0].$raw)) {
+			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0] . '.' . hash('sha256', $signatures[0] . $raw)) {
 
 				http_response_code(400);
 				exit;
@@ -773,7 +794,7 @@ class CSSHelper
 				exit;
 			}
 
-			$path = JPATH_SITE . '/cache/z/critical/' . $_SERVER['SERVER_NAME'] . '/';
+			$path = $options['cri_path'];
 
 			if (!is_dir($path)) {
 
@@ -785,7 +806,7 @@ class CSSHelper
 			}
 
 			header('Content-Type: application/json; charset=utf-8');
-			file_put_contents($path.'/'.$hash.'_'.$post['dimension'].'.css', new Parser($post['css']));
+			file_put_contents($path . '/' . $hash . '_' . $post['dimension'] . '.css', new Parser($post['css']));
 
 			$fonts = [];
 
@@ -794,16 +815,14 @@ class CSSHelper
 				$fonts[md5(json_encode($font))] = $font;
 			}
 
-			$fontFile = $path.'/'.$hash.'_'.$post['dimension'].'.php';
+			$fontFile = $path . '/' . $hash . '_' . $post['dimension'] . '.php';
 
 			if (!empty($fonts)) {
 
-				file_put_contents($fontFile, '<?php'."\n
+				file_put_contents($fontFile, '<?php' . "\n
 defined('JPATH_PLATFORM') or die;
-\$fonts = ".var_export($fonts, true).';');
-			}
-
-			else if (is_file($fontFile)) {
+\$fonts = " . var_export($fonts, true) . ';');
+			} else if (is_file($fontFile)) {
 
 				unlink($fontFile);
 			}
@@ -850,7 +869,7 @@ defined('JPATH_PLATFORM') or die;
 
 					// honor the "ignore image" setting
 					if ((empty($options['imageignore']) ||
-						strpos($name, $options['imageignore']) === false) &&
+							strpos($name, $options['imageignore']) === false) &&
 						in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['jpg', 'png', 'webp'])) {
 
 						$images[] = $name;
@@ -883,15 +902,15 @@ defined('JPATH_PLATFORM') or die;
 
 					$keys = array_keys($set);
 					$values = array_values($set);
-					$property->setValue('url('.array_shift($values).')');
+					$property->setValue('url(' . array_shift($values) . ')');
 
 					while ($value = array_shift($values)) {
 
 						$rule = $stylesheet->addAtRule('media', Element\AtRule::ELEMENT_AT_RULE_LIST);
 
 						$prop = $property->copy();
-						$prop->setValue('url('.$value.')');
-						$rule->setValue('(min-width: '.(array_shift($keys) + 1).'px)');
+						$prop->setValue('url(' . $value . ')');
+						$rule->setValue('(min-width: ' . (array_shift($keys) + 1) . 'px)');
 						$rule->append($prop->getRoot());
 					}
 				}

@@ -32,7 +32,6 @@ class SourceLocation implements JsonSerializable {
      * @param $location
      * @return SourceLocation
      */
-
     public static function getInstance($location)
     {
 
@@ -50,7 +49,6 @@ class SourceLocation implements JsonSerializable {
     /**
      * @return Position
      */
-
     public function getEnd() {
 
         return $this->end;
@@ -67,7 +65,6 @@ class SourceLocation implements JsonSerializable {
         $this->start = $start;
         return $this;
     }
-
 
     /**
      * @param Position $end

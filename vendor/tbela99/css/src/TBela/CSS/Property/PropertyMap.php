@@ -77,13 +77,11 @@ class PropertyMap
      * @return PropertyMap
      * @throws \Exception
      */
-    public function set($name, $value, $leadingcomments = null, $trailingcomments = null)
+    public function set($name, $value, array $leadingcomments = null, array $trailingcomments = null)
     {
 
-        $property = $name instanceof Set ? trim($name->render(['remove_comments' => true])) : $name;
-
         // is valid property
-        if (($this->shorthand != $property) && !in_array($property, $this->config['properties'])) {
+        if (($this->shorthand != $name) && !in_array($name, $this->config['properties'])) {
 
             throw new InvalidArgumentException('Invalid property ' . $name, 400);
         }

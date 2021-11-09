@@ -20,10 +20,9 @@ use Peast\Formatter\Compact;
 use Peast\Peast;
 use Peast\Renderer;
 
-
 class ScriptHelper {
 
-	public function processHTML ($html, array $options = []) {
+	public function processHTML (array $options, $html) {
 
 		static $parser;
 		$path = $options['js_path'];
@@ -54,7 +53,6 @@ class ScriptHelper {
 		 * capture scripts marked as nomodule/module
 		 */
 		$modules = [];
-		$nomodules = [];
 
 		// parse scripts
 		$html = preg_replace_callback('#<script([^>]*)>(.*?)</script>#si', function ($matches) use(&$sources, &$modules, $path, $fetch_remote, $ignore, $remove) {

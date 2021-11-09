@@ -33,8 +33,9 @@ class Helper
 
         if (static::$fixParseUrl && !isset($data['query'])) {
 
-            $v = preg_split('~([#?])~', $url, 2, PREG_SPLIT_DELIM_CAPTURE);
-            if ((isset($v[1]) ? $v[1] : '') == '?') {
+            $match = preg_split('~([#?])~', $url, 2, PREG_SPLIT_DELIM_CAPTURE);
+
+            if ((isset($match[1]) ? $match[1] : '') == '?') {
 
                 $data['query'] = '';
             }

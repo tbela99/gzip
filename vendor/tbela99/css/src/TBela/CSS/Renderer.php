@@ -250,7 +250,7 @@ class Renderer
 
                             $children = new PropertyList(null, $this->options);
 
-                            foreach ((isset($ast->children) ? $ast->children : []) as $child) {
+                            foreach ((isset($ast->children) ?$ast->children : []) as $child) {
 
                                 if(isset($child->name)) {
 
@@ -262,7 +262,12 @@ class Renderer
                                     $map[] = $child;
                                 }
 
-                                $children->set(isset($child->name) ? $child->name : null, $child->value, $child->type, isset($child->leadingcomments) ? $child->leadingcomments : null, isset($child->trailingcomments) ? $child->trailingcomments : null, isset($child->src) ? $child->src : null);
+                                $children->set(isset($child->name) ? $child->name : null, $child->value, $child->type,
+                                    isset($child->leadingcomments) ? $child->leadingcomments : null,
+                                    isset($child->trailingcomments) ? $child->trailingcomments : null,
+                                    isset($child->src) ? $child->src : null,
+                                    isset($child->vendor) ? $child->vendor : null
+                                );
                             }
 
                             if ($children->isEmpty() && $this->options['remove_empty_nodes']) {
@@ -325,8 +330,8 @@ class Renderer
                             unset($res[$declaration]);
                         }
 
-                        $v = isset($child->name) ? $child->name : null;
-                        $res[$declaration] = [$declaration, isset($map[$v]) ? $map[$v] : $child];
+                        $name = isset($child->name) ? $child->name : null;
+                        $res[$declaration] = [$declaration, isset($map[$name]) ? $map[$name] : $child];
                     }
 
                     $css = '';
@@ -727,11 +732,6 @@ class Renderer
 
         if (empty($this->options['compress'])) {
 
-            if (is_string($value)) {
-
-                $value = Value::parse($value, $name);
-            }
-
             $value = implode(', ', array_map(function (Set $value) use ($options) {
 
                 return $value->render($options);
@@ -797,6 +797,11 @@ class Renderer
 
         $result = $ast->name;
 
+        if (!empty($ast->vendor)) {
+
+            $result = '-'.$ast->vendor.'-'.$result;
+        }
+
         if (!$this->options['remove_comments'] && !empty($ast->leadingcomments)) {
 
             $comments = $ast->leadingcomments;
@@ -856,7 +861,6 @@ class Renderer
      * @return string
      * @ignore
      */
-
     protected function renderCollection($ast, $level)
     {
 
@@ -868,12 +872,16 @@ class Renderer
 
             $children = new PropertyList(null, $this->options);
 
-            if (isset($ast->children)) {
+            foreach (isset($ast->children) ? $ast->children : [] as $child) {
 
-                foreach ($ast->children as $child) {
+                $children->set(isset($child->name) ? $child->name : null,
+                    $child->value, $child->type,
+                    isset($child->leadingcomments) ? $child->leadingcomments : null,
+                    isset($child->trailingcomments) ? $child->trailingcomments : null,
+                isset($child->src) ? $child->src : null,
+                isset($child->vendor) ? $child->vendor : null);
 
-                    $children->set(isset($child->name) ? $child->name : null, $child->value, $child->type, isset($child->leadingcomments) ? $child->leadingcomments : null, isset($child->trailingcomments) ? $child->trailingcomments : null);
-                }
+
             }
         } else {
 

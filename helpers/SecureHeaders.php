@@ -28,7 +28,7 @@ class SecureHeadersHelper
 	 * @return string
 	 * @since 1.0
 	 */
-	public function postProcessHTML($html, array $options = [])
+	public function postProcessHTML(array $options, $html)
 	{
 
 		$headers = [];

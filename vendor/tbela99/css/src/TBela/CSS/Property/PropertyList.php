@@ -25,7 +25,6 @@ class PropertyList implements IteratorAggregate
      * @var array
      * @ignore
      */
-
     protected $options = [
 
         'compute_shorthand' => true,
@@ -60,7 +59,8 @@ class PropertyList implements IteratorAggregate
      * @param array|null $trailingcomments
      * @return $this
      */
-    public function set($name, $value, $propertyType = null, $leadingcomments = null, $trailingcomments = null, $src = null) {
+
+    public function set($name = null, $value, $propertyType = null, array $leadingcomments = null, array $trailingcomments = null, $src = null, $vendor = null) {
 
         if ($propertyType == 'Comment') {
 
@@ -80,6 +80,11 @@ class PropertyList implements IteratorAggregate
                 if (!is_null($src)) {
 
                     $property->setSrc($src);
+                }
+
+                if (!is_null($vendor)) {
+
+                    $property->setVendor($vendor);
                 }
 
                 if (!empty($leadingcomments)) {
@@ -104,6 +109,11 @@ class PropertyList implements IteratorAggregate
             if (!is_null($src)) {
 
                 $property->setSrc($src);
+            }
+
+            if (!is_null($vendor)) {
+
+                $property->setVendor($vendor);
             }
 
             if (!empty($leadingcomments)) {
@@ -172,6 +182,11 @@ class PropertyList implements IteratorAggregate
                 }
 
                 $property = $this->properties[$name]->setValue($value);
+
+                if (!is_null($vendor)) {
+
+                    $property->setVendor($vendor);
+                }
 
                 if (!empty($leadingcomments)) {
 

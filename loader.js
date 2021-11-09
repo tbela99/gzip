@@ -66,12 +66,15 @@ LIB.ready(function () {
 
 		link = links[i];
 
-		if (link.hasAttribute('data-media')) {
-			link.media = link.dataset.media;
-			link.removeAttribute("data-media");
-		} else {
-			link.removeAttribute("media");
-		}
+		link.addEventListener('load', () => {
+
+			if (link.hasAttribute('data-media')) {
+				link.media = link.dataset.media;
+				link.removeAttribute("data-media");
+			} else {
+				link.removeAttribute("media");
+			}
+		})
 	}
 
 	 const scripts = document.querySelectorAll(
