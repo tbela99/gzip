@@ -263,17 +263,17 @@
         },
         {
             "name": "mck89/peast",
-            "version": "v1.13.8",
-            "version_normalized": "1.13.8.0",
+            "version": "v1.13.9",
+            "version_normalized": "1.13.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
-                "reference": "4f0423441ec557f3935b056d10987f2e1c7a3e76"
+                "reference": "5329e997fb50e0b82ca8f6e4164f92941f689b47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mck89/peast/zipball/4f0423441ec557f3935b056d10987f2e1c7a3e76",
-                "reference": "4f0423441ec557f3935b056d10987f2e1c7a3e76",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/5329e997fb50e0b82ca8f6e4164f92941f689b47",
+                "reference": "5329e997fb50e0b82ca8f6e4164f92941f689b47",
                 "shasum": ""
             },
             "require": {
@@ -282,11 +282,11 @@
             "require-dev": {
                 "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
             },
-            "time": "2021-09-11T10:28:18+00:00",
+            "time": "2021-11-12T13:44:49+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.13.8-dev"
+                    "dev-master": "1.13.9-dev"
                 }
             },
             "installation-source": "dist",
@@ -309,7 +309,7 @@
             "description": "Peast is PHP library that generates AST for JavaScript code",
             "support": {
                 "issues": "https://github.com/mck89/peast/issues",
-                "source": "https://github.com/mck89/peast/tree/v1.13.8"
+                "source": "https://github.com/mck89/peast/tree/v1.13.9"
             },
             "install-path": "../mck89/peast"
         },
@@ -320,12 +320,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
-                "reference": "557993fb7cd0d0c4a00bb8b914d0ac5e0ba19f9f"
+                "reference": "28e0623998e4ded3d18f8f1dd99586cddc9d0d50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tbela99/css/zipball/557993fb7cd0d0c4a00bb8b914d0ac5e0ba19f9f",
-                "reference": "557993fb7cd0d0c4a00bb8b914d0ac5e0ba19f9f",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/28e0623998e4ded3d18f8f1dd99586cddc9d0d50",
+                "reference": "28e0623998e4ded3d18f8f1dd99586cddc9d0d50",
                 "shasum": ""
             },
             "require": {
@@ -334,7 +334,7 @@
                 "ext-json": "*",
                 "php": ">=5.6"
             },
-            "time": "2021-11-09T16:35:28+00:00",
+            "time": "2021-12-24T02:50:23+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

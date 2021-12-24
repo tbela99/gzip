@@ -208,13 +208,15 @@ class CSSHelper
 
 		$async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
-		$css_options = isset($options['css_options']) ? $options['css_options'] : [
+		$css_renderer_options = isset($options['css_renderer']) ? $options['css_renderer'] : [
 			'compress' => !empty($options['minifycss'])
 		];
 
+		$css_parser_options = isset($options['css_parser']) ? $options['css_parser'] : [];
+
 		$hashFile = GZipHelper::getHashMethod($options);
-		$cssParser = new Parser();
-		$cssRenderer = new Renderer($css_options);
+		$cssParser = new Parser('', $css_parser_options);
+		$cssRenderer = new Renderer($css_renderer_options);
 		$headStyle = new Stylesheet();
 
 		$fetchFonts = function ($node) use ($options, $headStyle) {
@@ -326,7 +328,7 @@ class CSSHelper
 		$profiler = \JProfiler::getInstance('Application');
 		$profiler->mark('CssInit');
 
-		$html = preg_replace_callback('#<(' . (empty($options['parseinlinecss']) ? 'link' : '[^\s>]+') . ')([^>]*)>#', function ($matches) use ($css_options, $cssRenderer, $parseUrls, &$links, $ignore, $remove, $cssParser, $path, $fetch_remote, $options) {
+		$html = preg_replace_callback('#<(' . (empty($options['parseinlinecss']) ? 'link' : '[^\s>]+') . ')([^>]*)>#', function ($matches) use ($css_renderer_options, $cssRenderer, $parseUrls, &$links, $ignore, $remove, $cssParser, $path, $fetch_remote, $options) {
 
 			$attributes = [];
 
@@ -359,7 +361,7 @@ class CSSHelper
 
 							return 'url(' . GZipHelper::url($name) . ')';
 
-						}, $attributes['style']) . ' }', $css_options))->parse()))));
+						}, $attributes['style']) . ' }', $css_renderer_options))->parse()))));
 
 					$result = '<' . $matches[1] . ' ';
 
@@ -455,13 +457,13 @@ class CSSHelper
 						$hash .= $media;
 					}
 
-					$file = $path . GZipHelper::shorten(crc32($hash)) . '-main' . (!empty($css_options['compress']) ? '.min' : '') . '.css';
+					$file = $path . GZipHelper::shorten(crc32($hash)) . '-main' . (!empty($css_renderer_options['compress']) ? '.min' : '') . '.css';
 
 					if (!is_file($file)) {
 
 						foreach ($blob['links'] as $key => $attr) {
 
-							$cssParser->append($attr['href']);
+							$cssParser->append($attr['href'], isset($attr['media']) && $attr['media'] != 'all' && $attr['media'] !== '' ? $attr['media'] : '');
 						}
 
 						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter'), $options))));
@@ -479,7 +481,7 @@ class CSSHelper
 
 		$profiler->mark('CssMergeFile');
 
-		if (empty($options['mergecss']) && !empty($css_options['compress'])) {
+		if (empty($options['mergecss']) && !empty($css_renderer_options['compress'])) {
 
 			foreach ($links as $position => $blob) {
 
@@ -493,11 +495,11 @@ class CSSHelper
 
 						$file = $path . GZipHelper::shorten(crc32($hash)) . '-' .
 							GZipHelper::sanitizeFileName(pathinfo($attr['href'], PATHINFO_BASENAME)) .
-							(!empty($css_options['compress']) ? '.min' : '') . '.css';
+							(!empty($css_renderer_options['compress']) ? '.min' : '') . '.css';
 
 						if (!is_file($file)) {
 
-							$cssParser->load($attr['href']);
+							$cssParser->load($attr['href'], isset($attr['media']) && $attr['media'] != 'all' && $attr['media'] !== '' ? $attr['media'] : '');
 							file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse()->traverse($fetchFonts, 'enter'), $options))));
 						}
 					}
@@ -530,7 +532,7 @@ class CSSHelper
 			}
 		}
 
-		$html = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use (&$links, $css_options, $parseUrls) {
+		$html = preg_replace_callback('#(<style[^>]*>)(.*?)</style>#si', function ($matches) use (&$links, $css_renderer_options, $parseUrls) {
 
 			$attributes = [];
 
@@ -564,7 +566,7 @@ class CSSHelper
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
 			$matches[2] = $parseUrls($matches[2]);
-			$links[$position]['style'][] = !empty($css_options['compress']) ? (new Renderer($css_options))->renderAst(new Parser($matches[2])) : $parseUrls($matches[2]);
+			$links[$position]['style'][] = !empty($css_renderer_options['compress']) ? (new Renderer($css_renderer_options))->renderAst(new Parser($matches[2])) : $parseUrls($matches[2]);
 
 			return '';
 		}, $html);
@@ -625,7 +627,7 @@ class CSSHelper
 
 		if ($style !== '') {
 
-			$headStyle->append($this->parseBackgroundImages((new Parser($style, $css_options))->parse(), $options));
+			$headStyle->append($this->parseBackgroundImages((new Parser($style, $css_renderer_options))->parse(), $options));
 
 			if ($headStyle->hasChildren()) {
 

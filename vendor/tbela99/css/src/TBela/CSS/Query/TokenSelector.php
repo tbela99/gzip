@@ -8,7 +8,7 @@ class TokenSelector extends Token implements TokenSelectorInterface
     /**
      * @var TokenSelectorValueInterface[][]
      */
-    protected array $value = [];
+    protected $value = [];
 
     public function __construct($data)
     {
@@ -28,7 +28,7 @@ class TokenSelector extends Token implements TokenSelectorInterface
     /**
      * @inheritDoc
      */
-    public function filter(array $context): array
+    public function filter(array $context)
     {
 
         $result = [];

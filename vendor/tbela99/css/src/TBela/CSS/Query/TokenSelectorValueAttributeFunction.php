@@ -4,9 +4,9 @@ namespace TBela\CSS\Query;
 
 class TokenSelectorValueAttributeFunction extends TokenSelectorValue implements TokenSelectorValueInterface
 {
-    protected array $arguments = [];
-    protected string $name;
-    protected TokenSelectorValueInterface $expression;
+    protected $arguments = [];
+    protected $name;
+    protected $expression;
 
     /**
      * TokenSelectorValueAttributeExpression constructor.
@@ -56,7 +56,7 @@ class TokenSelectorValueAttributeFunction extends TokenSelectorValue implements 
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context): array
+    public function evaluate(array $context)
     {
        return $this->expression->evaluate($context);
     }

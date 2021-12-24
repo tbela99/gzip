@@ -282,9 +282,8 @@
                 </fields>
             </fieldset>
             <fieldset name="css" label="CSS">
-                <field type="spacer" label="Configure Css settings" />
-                <field type="spacer" hr="true" />
                 <fields name="gzip">
+                    <field type="spacer" label="General settings" />
                     <field name="cssenabled" label="PLG_GZIP_FIELD_CSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="1">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -309,6 +308,13 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Critical CSS path" />
+                    <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
+                        <option value="1">JYes</option>
+                        <option value="0">JNo</option>
+                    </field>
+                    <field name="criticalcssviewports" label="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_HINT" type="textarea" rows="5" cols="15" default="800x600" />
                     <fields name="css_parser">
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Parser Options" />
@@ -323,6 +329,10 @@
                         <field name="allow_duplicate_declarations" label="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_DUPLICATE_DECLARATIONS_DESCRIPTION" default="0" type="radio" class="btn-group">
                             <option value="1">JYes</option>
                             <option value="0">JNo</option>
+                        </field>
+                        <field name="capture_errors" label="PLG_GZIP_FIELD_CSS_PARSER_CAPTURE_ERRORS_LABEL" description="PLG_GZIP_FIELD_CSS_PARSER_ALLOW_CAPTURE_ERRORS_DESCRIPTION" default="1" type="list" class="btn-group">
+                            <option value="1">JOPTION_CSS_PARSER_IGNORE</option>
+                            <option value="0">JOPTION_CSS_PARSER_EXCEPTION</option>
                         </field>
                         <field type="spacer" hr="true" />
                     </fields>
@@ -361,21 +371,9 @@
                         <option value="auto">PLG_GZIP_FIELD_FONTDISPLAY_OPTION_AUTO</option>
                     </field>
                     <field type="spacer" hr="true" />
+                    <field type="spacer" label="File Matching" />
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="5" cols="45" />
                     <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="5" cols="45" />
-                </fields>
-            </fieldset>
-            <fieldset name="critical_path" label="Critical Css">
-                <field type="spacer" label="Configure Critical CSS path" />
-                <field type="spacer" hr="true" />
-                <fields name="gzip">
-                    <field name="criticalcssenabled" label="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_ENABLED_DESCRIPTION" type="radio" class="btn-group" default="0">
-                        <option value="1">JYes</option>
-                        <option value="0">JNo</option>
-                    </field>
-                    <field name="criticalcssviewports" label="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_HINT" type="textarea" rows="5" cols="15" default="800x600" />
-<!--                    <field name="criticalcssclass" label="PLG_GZIP_FIELD_CRITICALCSS_CLASS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_CLASS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_CLASS_HINT" type="textarea" rows="5" cols="15" default="" />-->
-<!--                    <field name="criticalcss" label="PLG_GZIP_FIELD_CRITICALCSS_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_HINT" type="textarea" rows="5" cols="15" default="" />-->
                 </fields>
             </fieldset>
             <fieldset name="pwa_app" label="Service Worker">

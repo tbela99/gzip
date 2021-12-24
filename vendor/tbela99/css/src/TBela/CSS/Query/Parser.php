@@ -666,9 +666,9 @@ class Parser
             if ($token == '/') {
 
                 $this->tokens[] = (object)['type' => 'select', 'node' => '>'];
-            } else if ($token !== '') {
+            } else if ($token !== '' && $token !== false) {
 
-                throw new SyntaxError(sprintf('expected "%s" at position %d', $token, $this->position));
+                throw new SyntaxError(sprintf('unexpected "%s" at position %d', $token, $this->position));
             }
         }
     }

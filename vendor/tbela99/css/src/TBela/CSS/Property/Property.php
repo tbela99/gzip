@@ -102,9 +102,9 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      * get the property name
      * @return string|null
      */
-    public function getName() {
+    public function getName($vendor = false) {
 
-        return $this->name;
+        return ($vendor && $this->vendor ? '-'.$this->vendor.'-' : '').$this->name;
     }
 
     /**
@@ -122,7 +122,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     public function getHash() {
 
-        return $this->name.':'.$this->value->getHash();
+        return $this->name.':'.($this->vendor ? $this->vendor.':' : '').$this->value->getHash();
     }
 
     /**
@@ -132,7 +132,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     public function render (array $options = []) {
 
-        $result = $this->name;
+        $result = ($this->vendor ? '-'.$this->vendor.'-' : null).$this->name;
 
         if (!empty($this->leadingcomments)) {
 

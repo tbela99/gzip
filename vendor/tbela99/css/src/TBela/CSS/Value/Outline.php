@@ -2,8 +2,6 @@
 
 namespace TBela\CSS\Value;
 
-// pattern font-style font-variant font-weight font-stretch font-size / line-height <'font-family'>
-
 /**
  * parse font
  * @package TBela\CSS\Value

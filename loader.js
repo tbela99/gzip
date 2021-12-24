@@ -66,15 +66,12 @@ LIB.ready(function () {
 
 		link = links[i];
 
-		link.addEventListener('load', () => {
-
-			if (link.hasAttribute('data-media')) {
-				link.media = link.dataset.media;
-				link.removeAttribute("data-media");
-			} else {
-				link.removeAttribute("media");
-			}
-		})
+		if (link.hasAttribute('data-media')) {
+			link.media = link.dataset.media;
+			link.removeAttribute("data-media");
+		} else {
+			link.removeAttribute("media");
+		}
 	}
 
 	 const scripts = document.querySelectorAll(
@@ -103,5 +100,4 @@ LIB.ready(function () {
 			})
 		}
 	}
-
 });

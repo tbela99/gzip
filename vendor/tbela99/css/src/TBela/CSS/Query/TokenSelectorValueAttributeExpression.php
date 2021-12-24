@@ -8,7 +8,7 @@ class TokenSelectorValueAttributeExpression implements TokenSelectorValueInterfa
 {
     use FilterTrait;
 
-    protected array $value = [];
+    protected $value = [];
 
     /**
      * TokenSelectorValueAttributeExpression constructor.
@@ -45,7 +45,7 @@ class TokenSelectorValueAttributeExpression implements TokenSelectorValueInterfa
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context): array
+    public function evaluate(array $context)
     {
         $result = [];
 
@@ -102,7 +102,7 @@ class TokenSelectorValueAttributeExpression implements TokenSelectorValueInterfa
                 $result .= '@';
             }
 
-            $q = $value->q ?? '';
+            $q = isset($value->q) ? $value->q : '';
 
             $result .= $q.$value->value.$q;
         }

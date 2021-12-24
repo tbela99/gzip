@@ -9,7 +9,7 @@ interface TokenSelectorValueInterface
      * @param QueryInterface[] $context
      * @return array
      */
-    public function evaluate(array $context): array;
+    public function evaluate(array $context);
 
     /**
      * @param array $options

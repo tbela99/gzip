@@ -25,26 +25,6 @@ trait ParserTrait
         return $string;
     }
 
-    /*
-    protected static function is_separator($char)
-    {
-
-        switch ($char) {
-
-            case ',':
-            case '/':
-            case '+':
-            case '-':
-            case '>':
-            case '~':
-            case ':':
-
-                return true;
-        }
-
-        return false;
-    }
-*/
     protected static function match_comment($string, $start, $end)
     {
 
@@ -158,7 +138,8 @@ trait ParserTrait
                 case '"':
                 case "'":
 
-                    $substr = static::_close($string, $string[$startPosition], $string[$startPosition], $startPosition, $endPosition);
+                    $buffer .= $string[$startPosition];
+                    $substr = static::_close($string, $string[$startPosition], $string[$startPosition], $startPosition + 1, $endPosition);
 
                     if ($substr === false) {
 
@@ -166,7 +147,7 @@ trait ParserTrait
                     }
 
                     $buffer .= $substr;
-                    $startPosition += strlen($substr) - 1;
+                    $startPosition += strlen($substr);
                     break;
 
                 default:
@@ -241,7 +222,13 @@ trait ParserTrait
         return false;
     }
 
-    public static function split($string, $separator)
+    /**
+     * @param string $string
+     * @param string $separator
+     * @param int $limit
+     * @return array
+     */
+    public static function split($string, $separator, $limit = PHP_INT_MAX)
     {
 
         $result = [];
@@ -249,6 +236,14 @@ trait ParserTrait
         $i = -1;
         $j = strlen($string) - 1;
         $buffer = '';
+
+        $max = $limit - 1;
+        $count = 0;
+
+        if ($max <= 0) {
+
+            return [$string];
+        }
 
         while (++$i <= $j) {
 
@@ -258,9 +253,24 @@ trait ParserTrait
 
                     if (trim($buffer) !== '') {
 
+                        $count++;
                         $result[] = $buffer;
+
+                        if ($count == $max) {
+
+                            $buffer = trim(substr($string, $i), "\t\r\n $separator");
+
+                            if ($buffer !== '') {
+
+                                $result[] = $buffer;
+                            }
+
+                            return $result;
+                        }
+
                         $buffer = '';
                     }
+
                     break;
 
                 case '\\':
@@ -316,7 +326,7 @@ trait ParserTrait
                     }
 
                     $buffer .= $substr;
-                    $i += strlen($substr) - 1;
+                    $i += strlen($substr) ;
                     break;
 
                 default:

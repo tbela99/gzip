@@ -74,8 +74,9 @@ class PropertyMap
      * set property value
      * @param string $name
      * @param Set|string $value
+     * @param array|null $leadingcomments
+     * @param array|null $trailingcomments
      * @return PropertyMap
-     * @throws \Exception
      */
     public function set($name, $value, array $leadingcomments = null, array $trailingcomments = null)
     {
@@ -205,15 +206,6 @@ class PropertyMap
 
                     $value = [$value];
                 }
-
-//                    $className = Value::getClassName($value[0]->type);
-
-//                    if (count($value) == 1 && call_user_func([$className, 'matchDefaults'],  $value[0])) {
-//
-//                        unset($data[$key]);
-////                        unset($this->properties[$key]);
-//                        continue;
-//                    }
 
                 $set = new Set;
 

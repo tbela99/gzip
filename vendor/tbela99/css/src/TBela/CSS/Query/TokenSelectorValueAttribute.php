@@ -6,8 +6,8 @@ class TokenSelectorValueAttribute extends TokenSelectorValue
 {
     use FilterTrait, TokenStringifiableTrait;
 
-    protected array $value = [];
-    protected TokenSelectorValueInterface $expression;
+    protected $value = [];
+    protected $expression;
 
     /**
      * TokenSelectorValueAttribute constructor.
@@ -60,7 +60,7 @@ class TokenSelectorValueAttribute extends TokenSelectorValue
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context): array
+    public function evaluate(array $context)
     {
 
         return $this->expression->evaluate($context);

@@ -313,6 +313,12 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 $token = $tokens[$j];
 
+                if ($token->type == 'css-string' && $token->value === '') {
+
+                    array_splice($tokens, $j, 1);
+                    continue;
+                }
+
                 if ($token->type == 'css-string' && $token->value == '!important' && count($tokens) <= 2) {
 
                     break;
@@ -320,12 +326,12 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 if ($token->type == 'whitespace' &&
                     isset($tokens[$j + 1]) &&
-                    (in_array($tokens[$j + 1]->type, ['separator', 'operator', 'whitespace', 'css-parenthesis-expression']) ||
+                    (in_array($tokens[$j + 1]->type, ['separator', 'operator', 'whitespace']) ||
                         $tokens[$j + 1]->type == 'css-string' && $tokens[$j + 1]->value == '!important')
                 ) {
 
                     array_splice($tokens, $j, 1);
-                } else if (in_array($token->type, ['separator', 'operator', 'css-parenthesis-expression']) && isset($tokens[$j + 1]) && $tokens[$j + 1]->type == 'whitespace') {
+                } else if (in_array($token->type, ['separator', 'operator']) && isset($tokens[$j + 1]) && $tokens[$j + 1]->type == 'whitespace') {
 
                     array_splice($tokens, $j + 1, 1);
                 } else if (!empty($options['remove_defaults']) && !in_array($token->type, ['whitespace', 'separator'])) {
@@ -422,7 +428,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param string $contextName
      * @return array|null
      */
-    protected static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '')
+    public static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '')
     {
 
         $string = trim($string);
@@ -442,7 +448,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                 case "\n":
                 case "\r":
 
-                    if ($buffer !== '') {
+                    if (rtrim($buffer) !== '') {
 
                         $tokens[] = static::getType($buffer);
                         $buffer = '';
@@ -501,14 +507,18 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         }
                     }
 
+
                     $token = new stdClass;
 
                     $token->type = 'css-string';
                     $token->value = substr($string, $i, $next === false ? $j + 1 : $next - $i + 1);
 
-                    $tokens[] = $token;
-                    $buffer = '';
+                    if ($token->value !== '') {
 
+                        $tokens[] = $token;
+                    }
+
+                    $buffer = '';
 
                     if ($next === false) {
 
@@ -563,7 +573,6 @@ abstract class Value implements JsonSerializable, ObjectInterface
                 case '(':
 
                     $params = static::_close($string, ')', '(', $i, $j);
-
 
                     if ($params !== false) {
 

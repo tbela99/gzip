@@ -24,7 +24,6 @@ trait ValueTrait
         $separator = Config::getPath('properties.'.$type.'.separator');
 
         $strings = is_null($separator) ? [$string] : static::split($string, $separator);
-
         $result = [];
 
         foreach ($strings as $string) {

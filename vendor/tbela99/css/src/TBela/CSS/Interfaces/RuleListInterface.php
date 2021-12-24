@@ -4,7 +4,6 @@ namespace TBela\CSS\Interfaces;
 
 use Exception;
 use IteratorAggregate;
-//use TBela\CSS\Element;
 
 /**
  * Interface implemented by rules containers

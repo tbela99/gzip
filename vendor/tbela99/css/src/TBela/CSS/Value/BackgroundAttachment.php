@@ -12,10 +12,7 @@ class BackgroundAttachment extends ShortHand
     protected static $keywords = [
         'fixed',
         'local',
-        'scroll',
-//        'unset',
-//        'inherit',
-//        'initial'
+        'scroll'
     ];
 
     protected static $defaults = ['scroll'];

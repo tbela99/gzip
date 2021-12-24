@@ -4,7 +4,7 @@ namespace TBela\CSS\Query;
 
 class TokenSelectorValueAttributeIndex implements TokenSelectorValueInterface
 {
-    protected int $value;
+    protected $value;
 
     /**
      * TokenSelectorValueAttributeExpression constructor.
@@ -18,7 +18,7 @@ class TokenSelectorValueAttributeIndex implements TokenSelectorValueInterface
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context): array
+    public function evaluate(array $context)
     {
         return isset($context[$this->value - 1]) ? [$context[$this->value - 1]] : [];
     }

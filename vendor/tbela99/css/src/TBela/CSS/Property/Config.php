@@ -204,7 +204,6 @@ final class Config {
             $config[$shorthand]['separator'] = $separator;
         }
 
-//        static::$config['properties'] = isset(static::$config['properties']) ? array_merge(static::$config['properties'], $config) : $config;
         return $config;
     }
 }

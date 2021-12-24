@@ -15,7 +15,7 @@ class TokenSelectorValueWhitespace implements TokenSelectorValueInterface
      * @param QueryInterface[] $context
      * @return array|bool
      */
-    public function evaluate(array $context): array
+    public function evaluate(array $context)
     {
         return $context;
     }
