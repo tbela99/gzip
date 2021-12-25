@@ -14,8 +14,6 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-//use Patchwork\JSqueeze as JSqueeze;
-//use Peast\Formatter\PrettyPrint;
 use Peast\Formatter\Compact;
 use Peast\Peast;
 use Peast\Renderer;

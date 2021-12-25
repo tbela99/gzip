@@ -28,7 +28,6 @@ namespace Gzip\Helpers;
 use DateTime;
 use Gzip\GZipHelper;
 
-
 class Responder
 {
 

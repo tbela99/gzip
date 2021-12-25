@@ -33,7 +33,7 @@ Images that match any pattern you specify here will be ignored. Example: ignore 
 
 ### Convert Images to Webp
 
-Convert images to Avif and Webp when this format is supported by the HTTP client.
+Convert images to Avif and Webp when the support is advertised by the HTTP client.
 Avif requires PHP >= 8.1 and GD support
 
 ### Convert Inline Background
