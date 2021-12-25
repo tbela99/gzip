@@ -32,7 +32,18 @@ class Rule extends RuleList
                 return $selectors;
             }
 
-            $selectors = implode(',', $selectors);
+            $selectors = implode(',', array_map(function ($selector) {
+
+                $result = $selector->render();
+
+                if ($selector->type == 'unit' && $selector->value == '0') {
+
+                    $result .= $selector->unit;
+                }
+
+                return $result;
+
+            }, $selectors));
         }
 
         $selectors = Value::parse($selectors);
@@ -54,7 +65,7 @@ class Rule extends RuleList
             $this->setLeadingComments($comments);
         }
 
-        $selectors = Value::parse((string)$selectors)->split(',');
+        $selectors = $selectors->split(',');
 
         $result = [];
 

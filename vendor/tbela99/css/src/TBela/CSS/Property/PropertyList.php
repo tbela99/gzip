@@ -25,7 +25,6 @@ class PropertyList implements IteratorAggregate
      * @var array
      * @ignore
      */
-
     protected $options = [
 
         'compute_shorthand' => true,
@@ -58,9 +57,13 @@ class PropertyList implements IteratorAggregate
      * @param string|null $propertyType
      * @param array|null $leadingcomments
      * @param array|null $trailingcomments
+     * @param string|null $src
+     * @param string|null $vendor
      * @return $this
      */
-    public function set($name, $value, $propertyType = null, $leadingcomments = null, $trailingcomments = null, $src = null) {
+
+    public function set($name, $value, $propertyType = null, array $leadingcomments = null, array $trailingcomments = null, $src = '', $vendor = null)
+    {
 
         if ($propertyType == 'Comment') {
 
@@ -82,6 +85,11 @@ class PropertyList implements IteratorAggregate
                     $property->setSrc($src);
                 }
 
+                if (!is_null($vendor)) {
+
+                    $property->setVendor($vendor);
+                }
+
                 if (!empty($leadingcomments)) {
 
                     $property->setLeadingComments($leadingcomments);
@@ -97,6 +105,8 @@ class PropertyList implements IteratorAggregate
             }
         }
 
+        $propertyName = ($vendor ? '-'.$vendor.'-' : '').$name;
+
         if (empty($this->options['compute_shorthand'])) {
 
             $property = (new Property($name))->setValue($value);
@@ -104,6 +114,11 @@ class PropertyList implements IteratorAggregate
             if (!is_null($src)) {
 
                 $property->setSrc($src);
+            }
+
+            if (!is_null($vendor)) {
+
+                $property->setVendor($vendor);
             }
 
             if (!empty($leadingcomments)) {
@@ -116,18 +131,18 @@ class PropertyList implements IteratorAggregate
                 $property->setTrailingComments($trailingcomments);
             }
 
-            $this->properties[$name] = $property;
+            $this->properties[$property->getName(true)] = $property;
             return $this;
         }
 
-        $shorthand = Config::getProperty($name.'.shorthand');
+        $shorthand = Config::getProperty($propertyName.'.shorthand');
 
         // is is an shorthand property?
         if (!is_null($shorthand) && !is_null(Config::getProperty($shorthand))) {
 
            $config = Config::getProperty($shorthand);
 
-            if (!isset($this->properties[$shorthand])) {
+            if (!isset($this->properties[$shorthand]) || (!($this->properties[$shorthand] instanceof PropertySet))) {
 
                 $this->properties[$shorthand] = new PropertySet($shorthand, $config);
 
@@ -137,7 +152,13 @@ class PropertyList implements IteratorAggregate
                 }
             }
 
-            $this->properties[$shorthand]->set($name, $value, $leadingcomments, $trailingcomments);
+            $this->properties[$shorthand]->set($name, $value, $leadingcomments, $trailingcomments, $vendor);
+
+//            else {
+
+//                throw new \Exception('Invalid shorthand '.$shorthand);
+//            }
+
         }
 
         else {
@@ -166,12 +187,17 @@ class PropertyList implements IteratorAggregate
             else {
 
                 // regular property
-                if (!isset($this->properties[$name])) {
+                if (!isset($this->properties[$propertyName])) {
 
-                    $this->properties[$name] = new Property($name);
+                    $this->properties[$propertyName] = new Property($name);
                 }
 
-                $property = $this->properties[$name]->setValue($value);
+                $property = $this->properties[$propertyName]->setValue($value);
+
+                if (!is_null($vendor)) {
+
+                    $property->setVendor($vendor);
+                }
 
                 if (!empty($leadingcomments)) {
 

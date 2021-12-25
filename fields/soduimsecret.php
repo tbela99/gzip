@@ -62,7 +62,7 @@ class JFormFieldSoduimSecret extends JFormField
 			$attributes .= ' disabled';
 		}
 
-		$html = '<input type="text" value="'.htmlspecialchars($this->value).'" id="'.$this->id.'" '.$attributes.'> <button type="button" class="btn btn-success" onclick="this.previousElementSibling.value=\'\'">Reset</button>';
+		$html = '<input type="text" name="'.htmlspecialchars($this->name).'" value="'.htmlspecialchars($this->value).'" id="'.$this->id.'" '.$attributes.'> <button type="button" class="btn btn-success" onclick="this.previousElementSibling.value=\'\'">Reset</button>';
 
         return '<div class="btn-group">'.$html.'</div>';
 	}

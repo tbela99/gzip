@@ -22,12 +22,8 @@ for (let name in config) {
 
       const bundle = await rollup.rollup(config);
 
-      // console.log(bundle.watchFiles); // an array of file names this bundle depends on
-
       // generate code
-      const code = await bundle.generate(config.output);
-
-      //  console.log(JSON.stringify({name, code: code.output[0].code}));
+      await bundle.generate(config.output);
 
       // or write the bundle to disk
       await bundle.write(config.output);

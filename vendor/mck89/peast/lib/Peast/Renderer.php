@@ -44,6 +44,7 @@ class Renderer
         "FunctionDeclaration",
         "IfStatement",
         "LabeledStatement",
+        "StaticBlock",
         "SwitchStatement",
         "TryStatement",
         "WhileStatement",
@@ -404,7 +405,7 @@ class Renderer
             break;
             case "JSXIdentifier":
             case "Identifier":
-                $code .= $node->getName();
+                $code .= $node->getRawName();
             break;
             case "IfStatement":
                 $code .= "if" .
@@ -722,6 +723,10 @@ class Renderer
                             $node->getExpressions(),
                             "," . $this->renderOpts->sao
                          );
+            break;
+            case "StaticBlock":
+                $code .= "static";
+                $code .= $this->renderStatementBlock($node->getBody(), true);
             break;
             case "Super":
                 $code .= "super";

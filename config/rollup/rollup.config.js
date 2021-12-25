@@ -28,6 +28,25 @@ export const libImages = {
   }
 };
 
+export const critical = {
+  input: "./worker/src/critical/critical.js",
+  output: {
+
+    name: 'critical',
+    file:"./worker/dist/critical.js",
+    format: "iife"
+  }
+};
+
+export const criticalExtract = {
+  input: "./worker/src/critical/extract.js",
+  output: {
+
+    file:"./worker/dist/critical-extract.js",
+    format: "iife"
+  }
+};
+
 export const serviceworker = {
   input: "worker/src/index.js",
   output: {

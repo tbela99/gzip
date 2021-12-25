@@ -102,9 +102,7 @@ class FontWeight extends Value
      * @inheritDoc
      * @throws \Exception
      */
-
     protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
-
     {
 
         $type = static::type();

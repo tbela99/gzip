@@ -20,12 +20,12 @@ class UrlHelper {
 
 	/**
 	 * perform url rewriting, distribute resources across cdn domains, generate HTTP push headers, replace rel="_blank" with rel="noopener noreferrer"
-	 * @param string $html
 	 * @param array $options
+	 * @param string $html
 	 * @return string
 	 * @since 1.0
 	 */
-	public function postProcessHTML ($html, array $options = []) {
+	public function postProcessHTML (array $options, $html) {
 
 		$accepted = GZipHelper::accepted();
 		$hashFile = GZipHelper::getHashMethod($options);
@@ -208,7 +208,6 @@ class UrlHelper {
 				return $a['href'] < $b['href'] ? -1 : 1;
 
 			});
-
 
 			foreach ($pushed as $push) {
 

@@ -380,6 +380,7 @@ class Parser
                                     $result[] = (object)['type' => 'operator', 'value' => $selector[$i]];
                                 }
                             } else {
+
                                 $buffer .= $selector[$i];
                             }
 
@@ -659,15 +660,15 @@ class Parser
 
             $this->position += 1;
             $this->tokens[] = (object)['type' => 'select', 'node' => '*'];
-        } else if ($substr !== false) {
+        } else {
             $token = substr($substr, 0, 1);
 
             if ($token == '/') {
 
                 $this->tokens[] = (object)['type' => 'select', 'node' => '>'];
-            } else if ($token !== '') {
+            } else if ($token !== '' && $token !== false) {
 
-                throw new SyntaxError(sprintf('expected "%s" at position %d', $token, $this->position));
+                throw new SyntaxError(sprintf('unexpected "%s" at position %d', $token, $this->position));
             }
         }
     }

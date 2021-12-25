@@ -24,6 +24,11 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     protected $name;
 
+    /**
+     * @var string | null
+     */
+    protected $vendor = null;
+
     protected $leadingcomments = null;
 
     protected $trailingcomments = null;
@@ -76,12 +81,30 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     }
 
     /**
+     * @param $vendor
+     * @return $this
+     */
+    public function setVendor($vendor) {
+
+        $this->vendor = $vendor;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getVendor() {
+
+        return $this->vendor;
+    }
+
+    /**
      * get the property name
      * @return string|null
      */
-    public function getName() {
+    public function getName($vendor = false) {
 
-        return $this->name;
+        return ($vendor && $this->vendor ? '-'.$this->vendor.'-' : '').$this->name;
     }
 
     /**
@@ -99,7 +122,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     public function getHash() {
 
-        return $this->name.':'.$this->value->getHash();
+        return $this->name.':'.($this->vendor ? $this->vendor.':' : '').$this->value->getHash();
     }
 
     /**
@@ -109,7 +132,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     public function render (array $options = []) {
 
-        $result = $this->name;
+        $result = ($this->vendor ? '-'.$this->vendor.'-' : null).$this->name;
 
         if (!empty($this->leadingcomments)) {
 
@@ -138,7 +161,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     /**
      * @inheritDoc
      */
-    public function setTrailingComments($comments)
+    public function setTrailingComments(array $comments = null)
     {
         $this->trailingcomments = $comments;
         return $this;
@@ -155,7 +178,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     /**
      * @inheritDoc
      */
-    public function setLeadingComments($comments)
+    public function setLeadingComments(array $comments = null)
     {
         $this->leadingcomments = $comments;
         return $this;

@@ -30,7 +30,7 @@ class Comment extends Property {
         $this->setValue($value);
     }
 
-    public function getName() {
+    public function getName($vendor = false) {
 
         return null;
     }
@@ -82,7 +82,7 @@ class Comment extends Property {
     /**
      * @inheritDoc
      */
-    public function setTrailingComments($comments)
+    public function setTrailingComments(array $comments = null)
     {
         return $this;
     }
@@ -98,7 +98,7 @@ class Comment extends Property {
     /**
      * @inheritDoc
      */
-    public function setLeadingComments($comments)
+    public function setLeadingComments(array $comments = null)
     {
         return $this;
     }

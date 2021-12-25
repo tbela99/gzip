@@ -34,7 +34,13 @@ class ImagesHelper
 	const EXTENSIONS = ['png', 'gif', 'jpg', 'jpeg', 'webp', 'avif'];
 	const CONVERT_TO = ['avif', 'webp'];
 
-	public function postProcessHTML($html, array $options = [])
+	/**
+	 * @param array $options
+	 * @param string $html
+	 * @return string
+	 * @since
+	 */
+	public function postProcessHTML(array $options, $html)
 	{
 
 		return preg_replace_callback('#<([^\s>]+) (.*?)/?>#si', function ($matches) use ($options) {

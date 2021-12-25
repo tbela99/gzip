@@ -109,6 +109,7 @@ LIB.ready(function (undef) {
     }
 
     function load(img, oldImage) {
+
         if (oldImage.dataset.src) {
             oldImage.src = oldImage.dataset.src;
         }

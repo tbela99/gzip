@@ -20,7 +20,14 @@ use JURI;
 class EncryptedLinksHelper
 {
 
-	public function postProcessHTML($html, array $options = [])
+	/**
+	 * @param array $options
+	 * @param string $html
+	 * @return string
+	 * @since
+	 */
+
+	public function postProcessHTML(array $options, $html)
 	{
 
 		if (!empty($options['expiring_links']['mimetypes_expiring_links'])) {

@@ -14,16 +14,15 @@
 namespace Gzip\Helpers;
 
 use Gzip\GZipHelper;
-use Patchwork\JSqueeze as JSqueeze;
-
-use Peast\Formatter\PrettyPrint;
 use Peast\Formatter\Compact;
-
+use Peast\Peast;
+use Peast\Renderer;
 
 class ScriptHelper {
 
-	public function processHTML ($html, array $options = []) {
+	public function processHTML (array $options, $html) {
 
+		static $parser;
 		$path = $options['js_path'];
 
 		$comments = [];
@@ -255,7 +254,7 @@ class ScriptHelper {
 
 				if (!empty($content)) {
 
-					file_put_contents($js_file, implode(';', $content));
+					file_put_contents($js_file, implode(";\n", $content));
 					file_put_contents($hash_file, $hash);
 				}
 
@@ -272,12 +271,26 @@ class ScriptHelper {
 
 				foreach($sources['inline'] as $position => $js) {
 
-					$data = implode(';', $js);
+					$data = implode("\n", $js);
 
 					if (!empty($data)) {
 
-						$jSqueeze = new JSqueeze();
-						$sources['inline'][$position] = [trim($jSqueeze->squeeze($data), ';')];
+						if (is_null($parser)) {
+
+							$parser = (new Renderer)->setFormatter(new Compact());
+						}
+
+						try {
+
+							$sources['inline'][$position] = [trim($parser->render(Peast::latest($data)->parse(), false, false), ';')];
+						}
+
+						catch (\Exception $e) {
+
+							error_log($e->getMessage()."\n".$e->getTraceAsString());
+
+							$sources['inline'][$position] = [trim($data, ';')];
+						}
 					}
 				}
 			}
@@ -307,18 +320,18 @@ class ScriptHelper {
 							$async = true;
 						}
 
-						$script[$position] .= "\n".'<script data-async defer src="' . array_shift($fileList) . '"'.$attr.'></script>';
+						$script[$position] .= "\n".'<script data-async defer src="' . array_shift($fileList) . '"'.$attr.'></script>'."\n";
 
 						if ($hasScript) {
 
-							$script[$position] .= "\n".'<script type="text/script">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>';
+							$script[$position] .= "\n".'<script type="text/script">' . trim(implode(';', $sources['inline'][$position]), ';') . '</script>'."\n";
 							unset($sources['inline'][$position]);
 						}
 					}
 
 					else {
 
-						$script[$position] = "\n".'<script src="' . implode('"></script>'."\n".'<script src="', $fileList) . '"></script>';
+						$script[$position] = "\n".'<script src="' . implode('"></script>'."\n".'<script src="', $fileList) . '"></script>'."\n";
 					}
 				}
 			}
@@ -330,7 +343,7 @@ class ScriptHelper {
 
 				if (!empty($content)) {
 
-					$script[$position] .= "\n".'<script>' . trim(implode(';'."\n", $content), ';') . '</script>';
+					$script[$position] .= "\n".'<script>' . trim(implode(';'."\n", $content), ';') . '</script>'."\n";
 				}
 			}
 		}

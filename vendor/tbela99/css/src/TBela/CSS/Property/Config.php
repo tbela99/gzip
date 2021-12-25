@@ -31,8 +31,9 @@ final class Config {
      */
     public static function load($file) {
 
-        $v = json_decode(file_get_contents($file), true);
-        static::$config = isset($v) ? $v : [];
+        $result = json_decode(file_get_contents($file), true);
+
+        static::$config = isset($result) ? $result : [];
     }
 
     /**
@@ -203,7 +204,6 @@ final class Config {
             $config[$shorthand]['separator'] = $separator;
         }
 
-//        static::$config['properties'] = isset(static::$config['properties']) ? array_merge(static::$config['properties'], $config) : $config;
         return $config;
     }
 }

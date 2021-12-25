@@ -16,6 +16,8 @@ fail() {
 #
 #
 # build config files
+npm run rollup-config
+npm run terser-config
 # process es6+ deps
 node rollup.config.js
 # minify

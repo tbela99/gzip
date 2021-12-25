@@ -4,12 +4,12 @@ namespace TBela\CSS\Element;
 
 use ArrayIterator;
 use InvalidArgumentException;
+use TBela\CSS\Ast\Traverser;
 use TBela\CSS\Element;
 use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Property\Property;
 use TBela\CSS\Property\PropertyList;
-use TBela\CSS\Traverser;
 use Traversable;
 use function in_array;
 
@@ -71,47 +71,6 @@ abstract class RuleList extends Element implements RuleListInterface
         return $this;
     }
 
-    /**
-     * @param int $offset
-     * @param int|null $length
-     * @param ...ElementInterface|null $replacement
-     * @return ElementInterface[]
-     * @throws \Exception
-     */
-    /*
-    public function splice(int $offset, int $length = null, $replacement = null): array {
-
-        if(!empty($this->ast->isLeaf)) {
-
-            throw new \Exception();
-        }
-
-        $args = [&$this->ast->children, $offset];
-
-        if (!is_null($length)) {
-
-            $args[] = $length;
-
-            if (!is_null($replacement)) {
-
-                $args[] = $replacement;
-            }
-        }
-
-        foreach ($this->ast->children as $child) {
-
-            $child->parent = $this;
-        }
-
-        return array_map(function ($element) {
-
-            $element->parent = null;
-
-            return $element;
-
-        }, call_user_func_array('array_splice', $args));
-    }
-*/
     /**
      * @inheritDoc
      */
@@ -221,16 +180,6 @@ abstract class RuleList extends Element implements RuleListInterface
 
                 call_user_func_array([$this, 'append'], $element->getChildren());
 
-//                foreach ($element->getChildren() as $child) {
-//
-//                    if (!$this->support($child)) {
-//
-//                        throw new InvalidArgumentException('Illegal argument', 400);
-//                    }
-//
-//                    $child->parent->remove($child);
-//                    $this->append($child);
-//                }
             } else {
 
                 if (empty($this->ast->children) || !in_array($element, $this->ast->children, true)) {

@@ -1,5 +1,11 @@
 # Change History
 
+# 3.0
+
+- #84 Automatically generate critical css path. no more parameter are required
+- #138 AVIF image support
+- changed LQIP blur value #b188238
+
 # 2.11.0
 
 - @cbahiana-sd Added info on enabling zlib.output_compression 495b84d

@@ -8,7 +8,6 @@
 - [Images](./images.md)
 - [Javascript](./javascript.md)
 - [CSS](./css.md)
-- [Critical CSS](./critical-css.md)
 - [Service Worker](./service-worker.md)
 - [Web Share Target](./web-share-target.md)
 - [Network](./network.md)

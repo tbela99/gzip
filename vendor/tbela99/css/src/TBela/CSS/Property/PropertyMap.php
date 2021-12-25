@@ -74,16 +74,15 @@ class PropertyMap
      * set property value
      * @param string $name
      * @param Set|string $value
+     * @param array|null $leadingcomments
+     * @param array|null $trailingcomments
      * @return PropertyMap
-     * @throws \Exception
      */
-    public function set($name, $value, $leadingcomments = null, $trailingcomments = null)
+    public function set($name, $value, array $leadingcomments = null, array $trailingcomments = null)
     {
 
-        $property = $name instanceof Set ? trim($name->render(['remove_comments' => true])) : $name;
-
         // is valid property
-        if (($this->shorthand != $property) && !in_array($property, $this->config['properties'])) {
+        if (($this->shorthand != $name) && !in_array($name, $this->config['properties'])) {
 
             throw new InvalidArgumentException('Invalid property ' . $name, 400);
         }
@@ -207,15 +206,6 @@ class PropertyMap
 
                     $value = [$value];
                 }
-
-//                    $className = Value::getClassName($value[0]->type);
-
-//                    if (count($value) == 1 && call_user_func([$className, 'matchDefaults'],  $value[0])) {
-//
-//                        unset($data[$key]);
-////                        unset($this->properties[$key]);
-//                        continue;
-//                    }
 
                 $set = new Set;
 
