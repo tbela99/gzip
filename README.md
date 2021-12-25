@@ -33,7 +33,7 @@ Here are some features provided by this plugin
 - remove files based on a pattern
 - async loading
 - web fonts preloading
-- critical css generation based on provided settings
+- automatic critical css generation
 
 ## Images
 
