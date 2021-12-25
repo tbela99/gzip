@@ -5,6 +5,7 @@
 - #84 Automatically generate critical css path. no more parameter are required
 - #138 AVIF image support
 - changed LQIP blur value #b188238
+- documentation update
 
 # 2.11.0
 
