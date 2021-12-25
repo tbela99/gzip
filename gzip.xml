@@ -7,7 +7,7 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>3.0-alpha1</version>
+    <version>3.0</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
         <folder>docs</folder>
@@ -288,6 +288,8 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
+                    <field type="spacer" hr="true" />
+                    <field type="spacer" label="Critical Optimization" />
                     <field name="fetchcss" label="PLG_GZIP_FIELD_FETCHCSS_LABEL" description="PLG_GZIP_FIELD_FETCHCSS_DESCRIPTION" type="radio" class="btn-group" default="1">
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
@@ -314,7 +316,14 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-                    <field name="criticalcssviewports" label="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_HINT" type="textarea" rows="5" cols="15" default="800x600" />
+                    <field name="criticalcssviewports" label="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_LABEL" description="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_DESCRIPTION" hint="PLG_GZIP_FIELD_CRITICALCSS_VIEWPORT_HINT" type="textarea" rows="5" cols="15" default="1920x1080
+1440x900
+1366x768
+1024x768
+800x600
+768x1024
+400x640
+320x480" />
                     <fields name="css_parser">
                         <field type="spacer" hr="true" />
                         <field type="spacer" label="Parser Options" />
@@ -373,7 +382,7 @@
                     <field type="spacer" hr="true" />
                     <field type="spacer" label="File Matching" />
                     <field name="cssignore" label="PLG_GZIP_FIELD_CSSIGNORE_LABEL" description="PLG_GZIP_FIELD_CSSIGNORE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSIGNORE_HINT" type="textarea" rows="5" cols="45" />
-                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" type="textarea" rows="5" cols="45" />
+                    <field name="cssremove" label="PLG_GZIP_FIELD_CSSREMOVE_LABEL" description="PLG_GZIP_FIELD_CSSREMOVE_DESCRIPTION" hint="PLG_GZIP_FIELD_CSSREMOVE_HINT" type="textarea" rows="5" cols="45" />
                 </fields>
             </fieldset>
             <fieldset name="pwa_app" label="Service Worker">

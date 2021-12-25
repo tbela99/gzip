@@ -196,7 +196,7 @@ export async function extract(options = {}) {
                 catch (e) {
 
                     console.log(`${selector} ---- ${allStylesheets[k].rule.selectorText}`);
-                    match = nodeMap.has(document.matches(allStylesheets[k].rule.selectorText));
+                    match = nodeMap.has(document.querySelector(allStylesheets[k].rule.selectorText));
                 }
             }
 

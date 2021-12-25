@@ -32,6 +32,19 @@ Enable or disable merging css files together
 
 Parse CSS defined in HTML 'style' attribute
 
+## Critical CSS path
+
+Critical CSS path are generated on the fly only the first time a page is opened and it matches a viewport in the list.
+The CSS will be generated only for that viewport
+
+### Parse Critical Css
+
+Enable or disable critical CSS path optimization
+
+### Viewports
+
+Specify viewports that will trigger critical CSS path
+
 ## CSS Parser Options
 
 ### Parse Import Rule
@@ -40,11 +53,15 @@ Enable or disable @import processing
 
 ### Allow Duplicate Rules
 
-Enable or disable duplicate rules. This does not apply to @font-face
+Enable or disable duplicate rules. @font-face rules are never merged
 
 ### Allow Duplicate Declarations
 
 Enable or disable duplicate declarations in the same rule
+
+### Parse Error
+
+Define how CSS parse errors are handled
 
 ## CSS Rendering Options
 
@@ -74,7 +91,7 @@ Enable or disable web fonts preloading
 
 Set font-display css property.
 
-## Misc
+## File Matching
 
 ### Ignored CSS files
 

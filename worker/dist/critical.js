@@ -2,6 +2,10 @@ var critical = (function (exports) {
     'use strict';
 
     /**
+     * critical css extraction
+     * from https://github.com/tbela99/critical/blob/master/dist/browser.js
+     */
+    /**
      * resolve to absolute for external urls, relative for same domain
      * @param {string} path
      * @param {string} from
@@ -195,7 +199,7 @@ var critical = (function (exports) {
                     catch (e) {
 
                         console.log(`${selector} ---- ${allStylesheets[k].rule.selectorText}`);
-                        match = nodeMap.has(document.matches(allStylesheets[k].rule.selectorText));
+                        match = nodeMap.has(document.querySelector(allStylesheets[k].rule.selectorText));
                     }
                 }
 
