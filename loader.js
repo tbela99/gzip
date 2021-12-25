@@ -100,5 +100,4 @@ LIB.ready(function () {
 			})
 		}
 	}
-
 });

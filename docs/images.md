@@ -33,12 +33,8 @@ Images that match any pattern you specify here will be ignored. Example: ignore 
 
 ### Convert Images to Webp
 
-Convert images to Webp when this format is supported by the browser. Webp produce smaller images than jpg or png. The browser must advertise webp support through the Accept http header.
-Firefox will send this header
-
-```http
-Accept: image/webp,*/*
-```
+Convert images to Avif and Webp when the support is advertised by the HTTP client.
+Avif requires PHP >= 8.1 and GD support
 
 ### Convert Inline Background
 

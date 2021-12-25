@@ -31,6 +31,25 @@
     }
   };
 
+  const critical = {
+    input: "./worker/src/critical/critical.js",
+    output: {
+
+      name: 'critical',
+      file:"./worker/dist/critical.js",
+      format: "iife"
+    }
+  };
+
+  const criticalExtract = {
+    input: "./worker/src/critical/extract.js",
+    output: {
+
+      file:"./worker/dist/critical-extract.js",
+      format: "iife"
+    }
+  };
+
   const serviceworker = {
     input: "worker/src/index.js",
     output: {
@@ -76,6 +95,8 @@
     __proto__: null,
     libReady: libReady,
     libImages: libImages,
+    critical: critical,
+    criticalExtract: criticalExtract,
     serviceworker: serviceworker,
     oneSignal: oneSignal,
     serviceworkerAdmin: serviceworkerAdmin,
@@ -95,12 +116,8 @@
 
         const bundle = await rollup.rollup(config);
 
-        // console.log(bundle.watchFiles); // an array of file names this bundle depends on
-
         // generate code
-        const code = await bundle.generate(config.output);
-
-        //  console.log(JSON.stringify({name, code: code.output[0].code}));
+        await bundle.generate(config.output);
 
         // or write the bundle to disk
         await bundle.write(config.output);

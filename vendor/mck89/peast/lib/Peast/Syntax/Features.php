@@ -150,4 +150,32 @@ class Features
      * @var bool
      */
     public $classFields = false;
+
+    /**
+     * "in" operator for private fields
+     *
+     * @var bool
+     */
+    public $classFieldsPrivateIn = false;
+
+    /**
+     * Top level await
+     *
+     * @var bool
+     */
+    public $topLevelAwait = false;
+
+    /**
+     * Class static block
+     *
+     * @var bool
+     */
+    public $classStaticBlock = false;
+
+    /**
+     * Arbitrary module namespace identifier names
+     *
+     * @var bool
+     */
+    public $arbitraryModuleNSNames = false;
 }

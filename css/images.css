@@ -1,6 +1,6 @@
 .image-placeholder-lqip {
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='4');
-  filter: blur(4px);
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0.3');
+  filter: blur(0.3rem);
 }
 .image-placeholder-loaded {
   transform: translateX(100%);
@@ -9,7 +9,7 @@
   position: relative;
   display: inline-block;
   -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0');
-  filter: blur(0px);
+  filter: blur(0rem);
   transition: filter 0.2s ease-out;
 }
 .image-placeholder-wrapper > img {
@@ -28,8 +28,8 @@
   max-height: 100%;
 }
 .image-placeholder-wrapper :not(.image-placeholder-complete) {
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='4');
-  filter: blur(4px);
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='0.3');
+  filter: blur(0.3rem);
 }
 .image-placeholder-wrapper .image-placeholder-opacity {
   transition: opacity 0.2s ease-out;

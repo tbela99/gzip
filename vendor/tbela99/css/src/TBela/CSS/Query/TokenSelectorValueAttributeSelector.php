@@ -53,7 +53,7 @@ class TokenSelectorValueAttributeSelector implements TokenSelectorValueInterface
 
         foreach ($context as $element) {
 
-            foreach ((isset($element['selector']) ? $element['selector'] : []) as $val) {
+            foreach ((isset($element['selector'] ) ? $element['selector']  : []) as $val) {
 
                 if (strpos((string) $val, $this->_value) !== false) {
 

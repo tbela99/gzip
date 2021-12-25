@@ -5,6 +5,7 @@ namespace TBela\CSS;
 use Exception;
 use InvalidArgumentException;
 use stdClass;
+use TBela\CSS\Ast\Traverser;
 use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
@@ -76,16 +77,7 @@ abstract class Element implements ElementInterface  {
     }
 
     /**
-     * @param $location
-     * @return SourceLocation
-     */
-
-    protected function createLocation ($location) {
-
-        return SourceLocation::getInstance($location);
-    }
-
-    /**    * @inheritDoc
+     * @inheritDoc
      */
     public static function getInstance($ast) {
 
@@ -142,7 +134,6 @@ abstract class Element implements ElementInterface  {
      * @inheritDoc
      * @throws Parser\SyntaxError
      */
-
     public function query($query) {
 
         return (new Evaluator())->evaluate($query, $this);
@@ -255,7 +246,7 @@ abstract class Element implements ElementInterface  {
     /**
      * @inheritDoc
      */
-    public function setTrailingComments($comments) {
+    public function setTrailingComments(array $comments = null) {
 
         return $this->setComments($comments, 'trailing');
     }
@@ -268,9 +259,51 @@ abstract class Element implements ElementInterface  {
         return isset($this->ast->trailingcomments) ? $this->ast->trailingcomments : null;
     }
 
-    public function getLocation() {
+    /**
+     * @param string[]|Value\Comment[]|null $comments
+     * @return Element
+     */
+    protected function setComments(array $comments = null, $type) {
 
-        return isset($this->ast->location) ? $this->ast->location : null;
+        if (empty($comments)) {
+
+            unset($this->ast->{$type.'comments'});
+            return $this;
+        }
+
+        $this->ast->{$type.'comments'} = array_map(function ($comment) {
+
+            if (is_string($comment)) {
+
+                return $comment;
+            }
+
+            if ((isset($comment->type) ? $comment->type : null) != 'Comment') {
+
+                throw new InvalidArgumentException('Comment expected');
+            }
+
+            return $comment->value;
+
+        }, $comments);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLeadingComments(array $comments = null) {
+
+        return $this->setComments($comments, 'leading');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getLeadingComments() {
+
+        return isset($this->ast->leadingcomments) ? $this->ast->leadingcomments : null;
     }
 
     /**
@@ -341,56 +374,6 @@ abstract class Element implements ElementInterface  {
         }
 
         return implode(':', $signature);
-    }
-
-    /**
-<<<<<<< HEAD
-     * @param string[]|Value\Comment[]|null $comments
-     * @return Element
-     */
-    protected function setComments($comments, $type) {
-
-        if (empty($comments)) {
-
-            unset($this->ast->{$type.'comments'});
-            return $this;
-        }
-
-        $this->ast->{$type.'comments'} = array_map(function ($comment) {
-
-            if (is_string($comment)) {
-
-                return $comment;
-            }
-
-            if ((isset($comment->type) ? $comment->type : null) != 'Comment') {
-
-                throw new InvalidArgumentException('Comment expected');
-            }
-
-            return $comment->value;
-
-        }, $comments);
-
-        return $this;
-    }
-
-    /**
-=======
->>>>>>> 8c86a81ac1d7c25cacb54574ff654b4493f5feb0
-     * @inheritDoc
-     */
-    public function setLeadingComments($comments) {
-
-        return $this->setComments($comments, 'leading');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLeadingComments() {
-
-        return isset($this->ast->leadingcomments) ? $this->ast->leadingcomments : null;
     }
 
     /**

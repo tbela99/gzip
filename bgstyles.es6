@@ -58,13 +58,13 @@ LIB.ready(function (undef) {
             while (i--) {
 
                 el = elements[i];
-                k = Object.keys(styles[i]);
+                k = Object.keys(styles[i]).map(key => +key).sort((a, b) => b - a);
 
                 mql = undef;
 
                 for (j = 0; j < k.length; j++) {
 
-                    mql = window.matchMedia('(max-width: ' + k[j] + 'px)');
+                    mql = window.matchMedia('(min-width: ' + k[j] + 'px)');
 
                     if (mql.matches) {
 

@@ -12,7 +12,7 @@ class TokenSelectorValueAttributeFunctionGeneric implements TokenSelectorValueIn
     /**
      * @var TokenSelectorValueAttributeExpression
      */
-    protected $expression;
+    protected TokenSelectorValueAttributeExpression $expression;
     /**
      * @var string
      */
@@ -43,7 +43,7 @@ class TokenSelectorValueAttributeFunctionGeneric implements TokenSelectorValueIn
     /**
      * @inheritDoc
      */
-    public function evaluate(array $context) {
+    public function evaluate(array $context): array {
 
        return $this->expression->evaluate($context);
     }

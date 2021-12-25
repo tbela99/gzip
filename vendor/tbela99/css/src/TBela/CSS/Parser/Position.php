@@ -16,11 +16,11 @@ class Position implements JsonSerializable  {
 
     use AccessTrait;
 
-    protected $line;
-    protected $column;
-    protected $index;
+    protected int $line;
+    protected int $column;
+    protected int $index;
 
-    public function __construct($line, $column, $index) {
+    public function __construct(int $line, int $column, int $index) {
 
         $this->line = $line;
         $this->column = $column;
@@ -33,34 +33,34 @@ class Position implements JsonSerializable  {
         return new static($start->line, $start->column, $start->index);
     }
 
-    public function getLine() {
+    public function getLine(): int {
 
         return $this->line;
     }
 
-    public function getColumn() {
+    public function getColumn(): int {
 
         return $this->column;
     }
 
-    public function getIndex() {
+    public function getIndex(): int {
 
         return $this->index;
     }
 
-    public function setLine($line) {
+    public function setLine(int $line): Position {
 
         $this->line = $line;
         return $this;
     }
 
-    public function setColumn($column) {
+    public function setColumn(int $column): Position {
 
         $this->column = $column;
         return $this;
     }
 
-    public function setIndex($index) {
+    public function setIndex(int $index): Position {
 
         $this->index = $index;
         return $this;

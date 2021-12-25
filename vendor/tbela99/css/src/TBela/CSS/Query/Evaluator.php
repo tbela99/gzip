@@ -96,10 +96,6 @@ class Evaluator
      */
     protected function search(array $selectors, array $search)
     {
-        if (empty($selectors)) {
-
-            return false;
-        }
 
         $l = count($search);
 

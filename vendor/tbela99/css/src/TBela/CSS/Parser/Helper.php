@@ -33,8 +33,9 @@ class Helper
 
         if (static::$fixParseUrl && !isset($data['query'])) {
 
-            $v = preg_split('~([#?])~', $url, 2, PREG_SPLIT_DELIM_CAPTURE);
-            if ((isset($v[1]) ? $v[1] : '') == '?') {
+            $match = preg_split('~([#?])~', $url, 2, PREG_SPLIT_DELIM_CAPTURE);
+
+            if ((isset($match[1]) ? $match[1] : '') == '?') {
 
                 $data['query'] = '';
             }
@@ -322,7 +323,7 @@ class Helper
         // google font sends a different response when this header is missing
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0'
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/93.0'
         ]);
 
         if (!empty($curlOptions)) {

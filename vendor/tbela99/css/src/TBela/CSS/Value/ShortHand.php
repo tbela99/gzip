@@ -36,7 +36,6 @@ class ShortHand extends Value
      * @inheritDoc
      * @throws Exception
      */
-
     protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
     {
 
@@ -118,8 +117,7 @@ class ShortHand extends Value
                             break;
                         }
 
-                        ++$k;
-                        $next = isset($tokens[$k]) ? $tokens[$k] : null;
+                        $next = isset($tokens[++$k]) ? $tokens[$k] : null;
                     }
 
                     if (call_user_func($className, $tokens[$i], isset($tokens[$i - 1]) ? $tokens[$i - 1] : null, $previous, isset($tokens[$i + 1]) ? $tokens[$i + 1] : null, $next, $i, $tokens)) {
@@ -147,7 +145,7 @@ class ShortHand extends Value
                                         break;
                                     }
 
-                                    $next = isset($tokens[++$w]) ? $tokens[$w] : null;
+                                    $next = isset($tokens[++$w]) ? $tokens[1 + $w] : null;
                                 }
 
                                 if (call_user_func($className, $tokens[$k], $tokens[$k - 1], $previous, isset($tokens[$k + 1]) ? $tokens[$k + 1] : null, $next, $k, $tokens)) {
@@ -166,7 +164,6 @@ class ShortHand extends Value
                                             break;
                                         }
 
-                                        
                                         $next = isset($tokens[++$w]) ? $tokens[$w] : null;
                                     }
                                 }

@@ -31,10 +31,16 @@ class ImagesHelper
 	 * @since 2.9.0
 	 * supported extensions
 	 */
-	const EXTENSIONS = ['png', 'gif', 'jpg', 'jpeg', 'webp'];
-	const CONVERT_TO = 'webp';
+	const EXTENSIONS = ['png', 'gif', 'jpg', 'jpeg', 'webp', 'avif'];
+	const CONVERT_TO = ['avif', 'webp'];
 
-	public function postProcessHTML($html, array $options = [])
+	/**
+	 * @param array $options
+	 * @param string $html
+	 * @return string
+	 * @since
+	 */
+	public function postProcessHTML(array $options, $html)
 	{
 
 		return preg_replace_callback('#<([^\s>]+) (.*?)/?>#si', function ($matches) use ($options) {
@@ -310,18 +316,20 @@ class ImagesHelper
 	{
 
 		$basename = GZipHelper::sanitizeFileName(preg_replace('/(#|\?).*$/', '', pathinfo($file, PATHINFO_FILENAME)));
-		$pathinfo = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+		$pathinfo = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
-		if ($pathinfo == static::CONVERT_TO) {
+		if (in_array($pathinfo, static::CONVERT_TO)) {
 
 			return $file;
 		}
 
-		if (!empty($options['imageconvert']) && WEBP && $pathinfo != 'webp') {
+		if (!empty($options['imageconvert']) && ((AVIF && $pathinfo != 'avif') || (WEBP && $pathinfo != 'webp'))) {
+
+			$ext = AVIF ? 'avif' : 'webp';
 
 			$img = null;
 			$path = $options['img_path'];
-			$newFile = $path . $basename.substr(md5($file), 6) . '.webp';
+			$newFile = $path . $basename.substr(md5($file), 6) . '.'.$ext;
 
 			if (!is_file($newFile)) {
 
@@ -341,11 +349,23 @@ class ImagesHelper
 
 						$img = imagecreatefromjpeg($file);
 						break;
+
+					case 'webp':
+
+						$img = imagecreatefromwebp($file);
+						break;
 				}
 
 				if ($img) {
 
-					imagewebp($img, $newFile);
+					if (AVIF) {
+
+						imageavif($img, $newFile);
+					}
+					else {
+
+						imagewebp($img, $newFile);
+					}
 				}
 			}
 
@@ -393,6 +413,12 @@ class ImagesHelper
 			}
 
 			$width = $dim[0];
+
+			// getimagesize does not yet support avif https://github.com/php/php-src/pull/5127
+			if ($width == 0 && strtolower(pathinfo($file, PATHINFO_EXTENSION)) == 'avif') {
+
+				$width = (new Image($file))->getWidth();
+			}
 
 			$sizes = array_values(array_filter($sizes, function ($size) use ($width) {
 

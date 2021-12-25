@@ -31,4 +31,32 @@ class Features extends \Peast\Syntax\ES2021\Features
      * @var bool
      */
     public $classFields = true;
+
+    /**
+     * "in" operator for private fields
+     *
+     * @var bool
+     */
+    public $classFieldsPrivateIn = true;
+
+    /**
+     * Top level await
+     *
+     * @var bool
+     */
+    public $topLevelAwait = true;
+
+    /**
+     * Class static block
+     *
+     * @var bool
+     */
+    public $classStaticBlock = true;
+
+    /**
+     * Arbitrary module namespace identifier names
+     *
+     * @var bool
+     */
+    public $arbitraryModuleNSNames = true;
 }

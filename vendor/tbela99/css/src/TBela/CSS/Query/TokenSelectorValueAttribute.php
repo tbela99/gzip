@@ -7,11 +7,7 @@ class TokenSelectorValueAttribute extends TokenSelectorValue
     use FilterTrait, TokenStringifiableTrait;
 
     protected $value = [];
-
-    /**
-     * @var TokenSelectorValueInterface
-     */
-    protected  $expression;
+    protected $expression;
 
     /**
      * TokenSelectorValueAttribute constructor.

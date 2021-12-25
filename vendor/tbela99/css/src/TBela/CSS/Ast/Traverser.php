@@ -3,6 +3,8 @@
 namespace TBela\CSS\Ast;
 
 use TBela\CSS\Event\Event;
+use TBela\CSS\Interfaces\ElementInterface;
+
 /**
  * Ast|Element traverser
  * @package TBela\CSS\Ast
@@ -62,7 +64,7 @@ class Traverser extends Event
     public function traverse($ast) {
 
         $ast = $this->doClone($ast);
-        $result = $this->doTraverse($ast);
+        $result = $this->doTraverse($ast, null);
 
         if (!is_object($result) || !isset($result->type)) {
 
@@ -110,10 +112,10 @@ class Traverser extends Event
      * @return int|\stdClass|ElementInterface
      * @ignore
      */
-    protected function doTraverse($node)
+    protected function doTraverse($node, $level)
     {
 
-        $result = $this->process($node, $this->emit('enter', $node));
+        $result = $this->process($node, $this->emit('enter', $node, $level));
 
         if ($result === static::IGNORE_NODE) {
 
@@ -145,7 +147,7 @@ class Traverser extends Event
 
             foreach ($children as $child) {
 
-                $temp_c = $this->doTraverse($child);
+                $temp_c = $this->doTraverse($child, is_null($level) ? 0 : $level + 1);
 
                 if (is_object($temp_c)) {
 
@@ -164,7 +166,7 @@ class Traverser extends Event
             $node->children = $list;
         }
 
-        $result = $this->process($node, $this->emit('exit', $node));
+        $result = $this->process($node, $this->emit('exit', $node, $level));
 
         if ($result === static::IGNORE_NODE) {
 
