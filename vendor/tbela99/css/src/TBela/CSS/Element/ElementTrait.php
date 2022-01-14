@@ -3,6 +3,7 @@
 namespace TBela\CSS\Element;
 
 use Exception;
+use TBela\CSS\Value;
 use TBela\CSS\Value\Set;
 
 /**
@@ -40,12 +41,12 @@ trait ElementTrait  {
         if (preg_match('/^(-([a-zA-Z]+)-(\S+))/', $name, $match)) {
 
             $this->ast->vendor =  $match[2];
-            $this->ast->name = $match[3];
+            $this->ast->name = Value::escape($match[3]);
         }
 
         else {
 
-            $this->ast->name = (string) $name;
+            $this->ast->name = Value::escape($name);
         }
 
         return $this;

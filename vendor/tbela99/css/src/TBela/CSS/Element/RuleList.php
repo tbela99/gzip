@@ -173,7 +173,7 @@ abstract class RuleList extends Element implements RuleListInterface
 
             if (!$this->support($element)) {
 
-                throw new InvalidArgumentException('Illegal argument', 400);
+                throw new InvalidArgumentException(sprintf('%s: invalid child of type %s', $this->type, $element->type), 400);
             }
 
             if ($element instanceof Stylesheet) {

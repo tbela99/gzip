@@ -113,7 +113,6 @@ interface ElementInterface extends QueryInterface, JsonSerializable, ArrayAccess
     /**
      * convert to string
      * @return string
-     * @throws Exception
      */
     public function __toString();
 

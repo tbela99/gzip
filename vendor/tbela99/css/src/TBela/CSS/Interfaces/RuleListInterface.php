@@ -8,7 +8,7 @@ use IteratorAggregate;
 /**
  * Interface implemented by rules containers
  * @package TBela\CSS
- * @property-read array childNodes. Return the child nodes. Accessed with array-like syntax $element['childNodes']
+ * @property-read ElementInterface[] childNodes. Return the child nodes. Accessed with array-like syntax $element['childNodes']
  * @property-read ElementInterface|null firstChild. Return the first child. Accessed with array-like syntax $element['firstChild']
  * @property-read ElementInterface|null lastChild. Return the last child. Accessed with array-like syntax $element['lastChild']
  */

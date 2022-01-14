@@ -22,48 +22,14 @@ class Traverser extends Event
     const IGNORE_CHILDREN = 2;
 
     /**
-     * @param \stdClass|ElementInterface $object
-     * @return \stdClass|ElementInterface
-     * @ignore
-     */
-    protected function doClone($object) {
-
-        if ($object instanceof ElementInterface) {
-
-            return clone $object;
-        }
-
-        $clone = clone $object;
-
-        foreach ($clone as $key => $value) {
-
-            if (is_object($value)) {
-
-                $clone->{$key} = $this->doClone($value);
-            }
-            else if (is_array($value)) {
-
-                foreach ($value as $k => $item) {
-
-                    if (is_object($item)) {
-
-                        $clone->{$key}[$k] = $this->doClone($item);
-                    }
-                }
-            }
-        }
-
-        return $clone;
-    }
-
-    /**
      * Traverse ast
      * @param \stdClass|ElementInterface $ast
      * @return \stdClass|ElementInterface|null
      */
-    public function traverse($ast) {
+    public function traverse($ast)
+    {
 
-        $ast = $this->doClone($ast);
+        $ast = clone $ast;
         $result = $this->doTraverse($ast, null);
 
         if (!is_object($result) || !isset($result->type)) {
@@ -97,10 +63,7 @@ class Traverser extends Event
 
             if (is_object($res)) {
 
-                if ($res !== $node) {
-
-                    return $res;
-                }
+                return $res;
             }
         }
 

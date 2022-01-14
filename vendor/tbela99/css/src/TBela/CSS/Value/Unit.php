@@ -2,8 +2,6 @@
 
 namespace TBela\CSS\Value;
 
-use phpDocumentor\Reflection\Types\Static_;
-
 /**
  * Css unit value
  * @package TBela\CSS\Value

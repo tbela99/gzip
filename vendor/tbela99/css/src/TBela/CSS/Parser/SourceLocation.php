@@ -10,14 +10,15 @@ use JsonSerializable;
  *
  * @property Position $start
  * @property Position $end
+ * @todo verify usage / delete
  */
 
 class SourceLocation implements JsonSerializable {
 
     use AccessTrait;
 
-    protected $start;
-    protected $end;
+    protected Position $start;
+    protected Position $end;
 
     public function __construct($start, $end) {
 

@@ -1,7 +1,5 @@
 <?php
 
-defined('_JEXEC') or die;
-
 /**
  * Serve files with cache headers.
  *
@@ -20,6 +18,7 @@ defined('_JEXEC') or die;
  */
 
 /**
+ *
  * @var $app ;
  */
 

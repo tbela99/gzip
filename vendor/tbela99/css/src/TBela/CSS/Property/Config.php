@@ -31,9 +31,8 @@ final class Config {
      */
     public static function load($file) {
 
-        $result = json_decode(file_get_contents($file), true);
-
-        static::$config = isset($result) ? $result : [];
+        $config = json_decode(file_get_contents($file), true);
+        Config::$config = isset($config) ? $config : [];
     }
 
     /**
@@ -44,7 +43,7 @@ final class Config {
     public static function exists($path) {
 
         $found = true;
-        $item = static::$config['alias'];
+        $item = Config::$config['alias'];
 
         foreach (explode('.', $path) as $p) {
 
@@ -61,7 +60,7 @@ final class Config {
         if (!$found) {
 
             $found = true;
-            $item = static::$config['properties'];
+            $item = Config::$config['properties'];
 
             foreach (explode('.', $path) as $p) {
 
@@ -87,7 +86,7 @@ final class Config {
      */
     public static function getPath($path, $default = null) {
 
-        $data = static::$config;
+        $data = Config::$config;
 
         foreach (explode('.', $path) as $item) {
 
@@ -112,17 +111,17 @@ final class Config {
 
         if (is_null($name)) {
 
-            return static::$config;
+            return Config::$config;
         }
 
-        if (isset(static::$config['properties'][$name])) {
+        if (isset(Config::$config['properties'][$name])) {
 
-            return static::$config['properties'][$name];
+            return Config::$config['properties'][$name];
         }
 
         if (strpos($name, '.') > 0) {
 
-            return static::getPath('properties.'.$name, $default);
+            return Config::getPath('properties.'.$name, $default);
         }
 
         return $default;

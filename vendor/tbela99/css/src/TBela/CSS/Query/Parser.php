@@ -4,6 +4,7 @@ namespace TBela\CSS\Query;
 
 use TBela\CSS\Parser\ParserTrait;
 use TBela\CSS\Parser\SyntaxError;
+use TBela\CSS\Value;
 
 class Parser
 {
@@ -751,8 +752,10 @@ class Parser
 
         $result = [];
 
+        $string = Value::split($string);
+
         $i = -1;
-        $j = strlen($string);
+        $j = count($string);
 
         $buffer = '';
 
@@ -820,6 +823,6 @@ class Parser
             $result[] = $buffer;
         }
 
-        return $result;
+        return array_map([Value::class, 'escape'], $result);
     }
 }

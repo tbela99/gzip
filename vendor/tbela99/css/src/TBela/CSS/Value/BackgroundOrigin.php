@@ -2,7 +2,6 @@
 
 namespace TBela\CSS\Value;
 
-use TBela\CSS\ArrayTrait;
 use TBela\CSS\Value;
 
 /**

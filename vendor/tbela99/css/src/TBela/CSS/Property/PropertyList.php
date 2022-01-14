@@ -105,7 +105,23 @@ class PropertyList implements IteratorAggregate
             }
         }
 
-        $propertyName = ($vendor ? '-'.$vendor.'-' : '').$name;
+        $propertyName = $name;
+
+        if (substr($name, 0, 1) == '-' && preg_match('/^(-([a-zA-Z]+)-(\S+))/', trim($name), $match)) {
+
+            $name = $match[3];
+
+            if (is_null($vendor)) {
+
+                $vendor = $match[2];
+            }
+        }
+
+
+        if (!is_null($vendor)) {
+
+            $propertyName = '-'.$vendor.'-'.$name;
+        }
 
         if (empty($this->options['compute_shorthand'])) {
 
@@ -178,10 +194,9 @@ class PropertyList implements IteratorAggregate
 
                         $this->properties[$shorthand]->setSrc($src);
                     }
-
                 }
 
-                $this->properties[$shorthand]->set($name, $value, $leadingcomments, $trailingcomments);
+                $this->properties[$shorthand]->set($name, (string) $value, $leadingcomments, $trailingcomments);
             }
 
             else {
