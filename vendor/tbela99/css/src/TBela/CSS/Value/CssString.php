@@ -24,13 +24,12 @@ class CssString extends Value
             $data->q = $q;
             $data->value = substr($data->value, 1, -1);
 
-            if (preg_match('#^[\w_-]+$#', $data->value) && !is_numeric(\substr($data->value, 0 , 1))) {
+            if (preg_match('#^[\w_-]+$#', $data->value) && !is_numeric(\substr($data->value, 0, 1))) {
 
                 $data->q = '';
             }
-        }
 
-        else {
+        } else {
 
             $data->q = '';
         }
@@ -38,7 +37,8 @@ class CssString extends Value
         parent::__construct($data);
     }
 
-    public function getHash() {
+    public function getHash()
+    {
 
         return $this->data->value;
     }
@@ -50,9 +50,14 @@ class CssString extends Value
     public function render(array $options = [])
     {
 
-        $q = $this->data->q;
+        $key = json_encode($options).$this->getHash().static::class;
 
-        return $q.$this->data->value.$q;
+        if (!isset(static::$cache[$key])) {
+
+            $q = $this->data->q;
+            static::$cache[$key] = static::escape($q . $this->data->value . $q);
+        }
+
+        return static::$cache[$key];
     }
-
 }

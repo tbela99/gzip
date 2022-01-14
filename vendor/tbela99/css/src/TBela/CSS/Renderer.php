@@ -102,11 +102,13 @@ class Renderer
 
         switch ($ast->type) {
 
+            case 'Stylesheet':
+                return $this->renderCollection($ast, $level, null);
+
             case 'Rule':
             case 'AtRule':
             case 'Comment':
             case 'Property':
-            case 'Stylesheet':
             case 'NestingRule':
             case 'Declaration':
             case 'NestingAtRule':
@@ -170,15 +172,11 @@ class Renderer
 
                             $child->css = $css;
                             $renderTree[] = $child;
-                        }
-
-                        else if ($css !== '' && !isset($renderTree[$css])) {
+                        } else if ($css !== '' && !isset($renderTree[$css])) {
 
                             $child->css = $css;
                             $renderTree[$css] = $child;
-                        }
-
-                        else {
+                        } else {
 
                             array_splice($node->children, $i, 1);
                         }
@@ -194,7 +192,7 @@ class Renderer
             $css = '';
             foreach ($result->renderTree as $child) {
 
-                $css .= $child->css. $this->options['glue'];
+                $css .= $child->css . $this->options['glue'];
             }
 
             $this->walk($result->renderTree, $position);
@@ -257,7 +255,7 @@ class Renderer
 
                     if (!$this->options['legacy_rendering']) {
 
-                        $this->update($pos, $node->css.';' . $this->options['glue']);
+                        $this->update($pos, $node->css . ';' . $this->options['glue']);
                     }
 
                     break;
@@ -356,11 +354,6 @@ class Renderer
     protected function renderAtRuleMedia($ast, $level)
     {
 
-        if ($ast->name == 'charset' && !$this->options['charset']) {
-
-            return '';
-        }
-
         $output = '@' . $this->renderName($ast);
         $value = isset($ast->value) && $ast->value != 'all' ? $this->renderValue($ast) : '';
 
@@ -403,6 +396,11 @@ class Renderer
 
     protected function renderAtRule($ast, $level)
     {
+
+        if ($ast->name == 'charset' && !$this->options['charset']) {
+
+            return '';
+        }
 
         settype($level, 'int');
         $media = $this->renderAtRuleMedia($ast, $level);
@@ -476,7 +474,7 @@ class Renderer
 
         foreach ($children as $el) {
 
-            if (!($el instanceof \stdClass)) {
+            if ($el instanceof RenderableInterface) {
 
                 $el = $el->getAst();
             }
@@ -635,7 +633,7 @@ class Renderer
 
                 if (is_string($set)) {
 
-                    $result .= $set.$join;
+                    $result .= $set . $join;
                     continue;
                 }
 
@@ -643,10 +641,8 @@ class Renderer
 
                     if ($sel->type == 'unit' && $sel->value == 0) {
 
-                        $result .= $sel.$sel->unit;
-                    }
-
-                    else {
+                        $result .= $sel . $sel->unit;
+                    } else {
 
                         $result .= $sel->render($this->options);
                     }
@@ -715,11 +711,7 @@ class Renderer
         $name = $this->renderName($ast);
         $value = $ast->value;
 
-        $options = [
-            'compress' => $this->options['compress'],
-            'css_level' => $this->options['css_level'],
-            'convert_color' => $this->options['convert_color'] === true ? 'hex' : $this->options['convert_color']
-        ];
+        $options = $this->options;
 
         if (is_string($value)) {
 
@@ -1134,7 +1126,7 @@ class Renderer
                             $clone = clone $node;
                             $child = clone $child;
 
-                            $clone->children = $child->children;
+                            $clone->children = isset($child->children )? $child->children : [];
                             $child->children = [$clone];
                             $frag->children[] = $this->flatten($child);
                             continue;

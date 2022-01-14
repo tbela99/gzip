@@ -8,7 +8,7 @@ use \TBela\CSS\Value;
  * CSS function value
  * @package TBela\CSS\Value
  */
-class CSSFunction extends Value {
+class CssFunction extends Value {
 
     /**
      * @inheritDoc

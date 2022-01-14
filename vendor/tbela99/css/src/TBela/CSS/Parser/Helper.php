@@ -2,6 +2,8 @@
 
 namespace TBela\CSS\Parser;
 
+use TBela\CSS\Exceptions\IOException;
+
 /**
  * Class Helper
  * @package TBela\CSS\Parser
@@ -123,6 +125,17 @@ class Helper
      */
     public static function absolutePath($file, $ref)
     {
+
+        if ($ref == '/' && php_sapi_name() != 'cli') {
+
+            if (substr($file, 0, 1) == '/' &&
+                substr($file, 1, 1) != '/') {
+
+                return substr($file, 1);
+            }
+
+            return $file;
+        }
 
         if (static::isAbsolute($file)) {
 
@@ -303,52 +316,70 @@ class Helper
      */
     public static function fetchContent($url, array $options = [], array $curlOptions = [])
     {
+        $userAgent = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/93.0';
 
-        if (strpos($url, '//') === 0) {
+        $proto = strpos($url, 'https:') === 0 ? 'https' : 'http';
 
-            $url = (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http' : 'https') . ':' . $url;
-        }
+        if (extension_loaded('curl')) {
 
-        $ch = curl_init($url);
+            if (strpos($url, '//') === 0) {
 
-        // Turn on SSL certificate verfication
-        curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                $url = $proto . ':' . $url;
+            }
 
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        // enable compression
-        curl_setopt($ch, CURLOPT_ENCODING, '');
+            $ch = curl_init($url);
 
-        // google font sends a different response when this header is missing
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            // Turn on SSL certificate verfication
+            curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/93.0'
-        ]);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            // enable compression
+            curl_setopt($ch, CURLOPT_ENCODING, '');
 
-        if (!empty($curlOptions)) {
+            // google font sends a different response when this header is missing
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
-            curl_setopt_array($ch, $curlOptions);
-        }
+                $userAgent
+            ]);
 
-        if (!empty($options)) {
+            if (!empty($curlOptions)) {
 
-            // Tell the curl instance to talk to the server using HTTP POST
-            curl_setopt($ch, CURLOPT_POST, count($options));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($options));
-        }
+                curl_setopt_array($ch, $curlOptions);
+            }
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            if (!empty($options)) {
 
-        $result = curl_exec($ch);
+                // Tell the curl instance to talk to the server using HTTP POST
+                curl_setopt($ch, CURLOPT_POST, count($options));
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($options));
+            }
 
-        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+            $result = curl_exec($ch);
+
+            if (curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+
+                curl_close($ch);
+                return false;
+            }
 
             curl_close($ch);
-            return false;
+            return $result;
         }
 
-        curl_close($ch);
-        return $result;
+        return @file_get_contents($url, false, stream_context_create([
+            $proto => [
+                'verify_peer' => true,
+                'ignore_errors' => true,
+                'follow_location' => true,
+                'user_agent' => $userAgent,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false,
+                'cafile' => __DIR__ . '/cacert.pem'
+            ]
+        ]));
     }
 }

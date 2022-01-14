@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TBela\CSS\Property;
 
 trait PropertyTrait
@@ -35,6 +34,9 @@ trait PropertyTrait
      */
     public function toObject()
     {
-        return (object) ['type' => $this->type, 'name' => $this->name, 'value' => $this->value->toObject()];
+        return (object) array_filter(get_object_vars($this), function ($value) {
+
+            return !is_null($value);
+        });
     }
 }

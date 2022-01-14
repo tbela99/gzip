@@ -98,7 +98,7 @@ class Color extends Value
 
         if (is_null($this->hash)) {
 
-            $this->hash = $this->render(['convert_color' => 'hex']);
+            $this->hash = $this->doRender(['convert_color' => 'hex']);
         }
 
         return $this->hash;
@@ -133,27 +133,29 @@ class Color extends Value
     public function render(array $options = [])
     {
 
-        $key = md5(json_encode($options).json_encode($this->data));
+        $key = json_encode($options).(isset($this->data->colorType) ? $this->data->colorType : null).(isset($this->data->name) ? $this->data->name : null).$this->getHash().static::class;
 
-        if (isset(static::$cache[$key])) {
+        if (!isset(static::$cache[$key])) {
 
-            return static::$cache[$key];
+            static::$cache[$key] = $this->doRender($options);
         }
+
+        return static::$cache[$key];
+    }
+
+    protected function doRender($options = []) {
 
         if (isset($this->data->rgba)) {
 
-            static::$cache[$key] = static::rgba2string($this->data, $options);
+            return static::rgba2string($this->data, $options);
         }
 
         else if (isset($this->data->value)) {
 
-                static::$cache[$key] = $this->data->value;
-        } else {
-
-            static::$cache[$key] = $this->data->name.'('.$this->data->arguments->render($options).')';
+            return $this->data->value;
         }
 
-        return static::$cache[$key];
+        return $this->data->name.'('.$this->data->arguments->render($options).')';
     }
 
     public static function rgba2string($data, array $options = []) {

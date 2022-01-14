@@ -2,7 +2,6 @@
 
 namespace TBela\CSS\Query;
 
-use TBela\CSS\Element\AtRule;
 use TBela\CSS\Element\Rule;
 
 class TokenSelectorValueAttributeString implements TokenSelectorValueInterface

@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitb332e7a2a50cdb9dc1b66f6e9eb841da
 {
+    public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'a' => 
         array (
@@ -17,6 +21,10 @@ class ComposerStaticInitb332e7a2a50cdb9dc1b66f6e9eb841da
         'T' => 
         array (
             'TBela\\CSS\\' => 10,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
         'P' => 
         array (
@@ -49,6 +57,10 @@ class ComposerStaticInitb332e7a2a50cdb9dc1b66f6e9eb841da
         'TBela\\CSS\\' => 
         array (
             0 => __DIR__ . '/..' . '/tbela99/css/src/TBela/CSS',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
         'Peast\\test\\' => 
         array (

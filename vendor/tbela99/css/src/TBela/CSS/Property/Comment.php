@@ -2,8 +2,6 @@
 
 namespace TBela\CSS\Property;
 
-use ArrayAccess;
-use TBela\CSS\ArrayTrait;
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Value;
 use TBela\CSS\Value\Set;

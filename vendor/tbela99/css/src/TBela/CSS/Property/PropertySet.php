@@ -103,7 +103,7 @@ class PropertySet
                 unset($this->properties[$this->shorthand]);
             } else {
 
-                $this->setProperty($propertyName, $value);
+                $this->setProperty($name, $value, $vendor);
 
                 if (!is_null($leadingcomments)) {
 
@@ -138,7 +138,7 @@ class PropertySet
                 unset($this->properties[$this->shorthand]);
             }
 
-            $this->setProperty($propertyName, $value);
+            $this->setProperty($name, $value, $vendor);
 
             if (!is_null($leadingcomments)) {
 
@@ -217,7 +217,7 @@ class PropertySet
 
         $vmap = $value_map;
 
-        foreach ($pattern as $key => $match) {
+        foreach ($pattern as $match) {
 
             foreach ($value_map as $index => $map) {
 
@@ -248,18 +248,6 @@ class PropertySet
         if (!empty($value_map)) {
 
             return false;
-        }
-
-        foreach ($value_map as $val) {
-
-            foreach ($val as $v) {
-
-                if ($v->type != 'whitespace' && $v->type != 'separator') {
-
-                    // failure to match the pattern
-                    return false;
-                }
-            }
         }
 
         foreach ($values as $types) {
@@ -317,7 +305,7 @@ class PropertySet
     {
         $result = [];
 
-        foreach ($this->property_type as $unit => $properties) {
+        foreach ($this->property_type as $properties) {
 
             foreach ($properties as $property) {
 
@@ -404,7 +392,7 @@ class PropertySet
     protected function setProperty($name, $value, $vendor = null)
     {
 
-        $propertyName = ($vendor ? '-'.$vendor.'-' : '').$name;
+        $propertyName = ($vendor && substr($name, 0, strlen($vendor) + 2) != '-'.$vendor.'-' ? '-'.$vendor.'-' : '').$name;
 
         if (!isset($this->properties[$propertyName])) {
 

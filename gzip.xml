@@ -23,7 +23,6 @@
         <folder>push</folder>
         <folder>vendor</folder>
         <filename>autoload.php</filename>
-        <filename>responder.php</filename>
         <filename>helper.php</filename>
         <filename>cacert.pem</filename>
         <filename>bgstyles.js</filename>

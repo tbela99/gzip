@@ -2,9 +2,6 @@
 
 namespace TBela\CSS\Query;
 
-use InvalidArgumentException;
-use TBela\CSS\Value;
-
 class TokenSelectorValueAttributeFunctionGeneric implements TokenSelectorValueInterface
 {
     use FilterTrait;

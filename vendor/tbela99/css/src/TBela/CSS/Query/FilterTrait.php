@@ -2,9 +2,6 @@
 
 namespace TBela\CSS\Query;
 
-use Exception;
-use InvalidArgumentException;
-
 trait FilterTrait
 {
     public function trim(array $value) {

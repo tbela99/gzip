@@ -5,10 +5,17 @@ namespace TBela\CSS\Event;
 trait EventTrait {
 
     /**
-     * @var callable[]
+     * @var callable[][]
+     * @ignore
      */
     protected $events = [];
 
+    /**
+     * register event handlers
+     * @param string $event event name
+     * @param callable $callable
+     * @return $this
+     */
     public function on($event, callable $callable) {
 
         $this->events[strtolower($event)][] = $callable;
@@ -16,9 +23,10 @@ trait EventTrait {
     }
 
     /**
-     * remove events handlers.
+     * unregister events handlers.
      * - if $event is null, all events are removed
      * - if $callable is null, all events handlers for $event are removed
+     *
      * @param string|null $event
      * @param callable|null $callable
      * @return $this
@@ -55,6 +63,12 @@ trait EventTrait {
         return $this;
     }
 
+    /**
+     * trigger event
+     * @param string $event
+     * @param mixed ...$args
+     * @return array
+     */
     public function emit($event, ...$args) {
 
         $result = [];
