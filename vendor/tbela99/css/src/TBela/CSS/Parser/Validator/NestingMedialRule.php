@@ -7,7 +7,9 @@ use TBela\CSS\Value;
 
 class NestingMedialRule implements ValidatorInterface
 {
-    public function validate(object $token, object $parentRule, object $parentStylesheet): int
+    use  ValidatorTrait;
+    
+    public function validate($token, $parentRule, $parentStylesheet)
     {
 
         return static::VALID;

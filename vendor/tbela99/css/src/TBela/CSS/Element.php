@@ -463,7 +463,16 @@ abstract class Element implements ElementInterface  {
                             if ($el->ast->type != 'Declaration') {
 
                                 $next->parent = null;
-                                array_splice($el->ast->children, 0, 0, $next->ast->children);
+
+                                if (!empty($next->ast->children)) {
+
+                                    if (!isset($el->ast->children)) {
+
+                                        $el->ast->children = [];
+                                    }
+
+                                    array_splice($el->ast->children, 0, 0, $next->ast->children);
+                                }
 
                                 if (isset($next->ast->location) && isset($el->ast->location)) {
 

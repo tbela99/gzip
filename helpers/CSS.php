@@ -174,8 +174,6 @@ class CSSHelper
 
 		if (!empty($replace)) {
 
-			$search = '</head>';
-
 			if (preg_match('#(<meta\s*charset=[^>]+>)#', $html, $match)) {
 
 				return str_replace($match[1], $match[1] . $replace, $html);

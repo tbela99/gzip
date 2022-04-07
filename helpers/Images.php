@@ -358,6 +358,8 @@ class ImagesHelper
 
 				if ($img) {
 
+					imagepalettetotruecolor($img);
+
 					if (AVIF) {
 
 						imageavif($img, $newFile);

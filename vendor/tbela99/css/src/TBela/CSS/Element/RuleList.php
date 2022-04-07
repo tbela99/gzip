@@ -8,6 +8,7 @@ use TBela\CSS\Ast\Traverser;
 use TBela\CSS\Element;
 use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
+use TBela\CSS\Parser;
 use TBela\CSS\Property\Property;
 use TBela\CSS\Property\PropertyList;
 use Traversable;
@@ -19,6 +20,29 @@ use function in_array;
  */
 abstract class RuleList extends Element implements RuleListInterface
 {
+    public function __get($name) {
+
+        if (is_callable([$this, "get$name"])) {
+
+            return $this->{"get$name"}();
+        }
+
+        if ($name == 'firstChild') {
+
+            return isset($this->ast->children[0]) ? $this->ast->children[0] : [];
+        }
+
+        if ($name == 'lastChild') {
+
+            return isset($this->ast->children) ? end($this->ast->children) : null;
+        }
+
+        if ($name == 'childNodes') {
+
+            return isset($this->ast->children) ? $this->ast->children : null;
+        }
+    }
+
     /**
      * @inheritDoc
      */
@@ -171,16 +195,16 @@ abstract class RuleList extends Element implements RuleListInterface
 
         foreach ($elements as $element) {
 
-            if (!$this->support($element)) {
-
-                throw new InvalidArgumentException(sprintf('%s: invalid child of type %s', $this->type, $element->type), 400);
-            }
-
             if ($element instanceof Stylesheet) {
 
                 call_user_func_array([$this, 'append'], $element->getChildren());
 
             } else {
+
+                if (!$this->support($element)) {
+
+                    throw new InvalidArgumentException(sprintf('%s: invalid child of type %s', $this->type, $element->type), 400);
+                }
 
                 if (empty($this->ast->children) || !in_array($element, $this->ast->children, true)) {
 
