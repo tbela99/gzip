@@ -1,6 +1,6 @@
 {
   "name": "gzip",
-  "version": "3.1",
+  "version": "3.1.1",
   "scripts": {
     "build": "./build.sh",
     "rollup-config": "./node_modules/rollup/dist/bin/rollup ./config/rollup/rollup.js -f iife --name=rollupConfig > ./rollup.config.js",
