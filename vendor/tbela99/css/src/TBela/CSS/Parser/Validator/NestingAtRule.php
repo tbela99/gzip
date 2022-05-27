@@ -22,7 +22,9 @@ class NestingAtRule implements ValidatorInterface
            return static::REJECT;
        }
 
-        foreach (Value::split($token->selector, ',') as $selector) {
+       $selectors = is_array($token->selector) ? Value::renderTokens($token->selector) : $token->selector;
+
+        foreach (Value::split($selectors, ',') as $selector) {
 
             if (strpos($selector, '&') === false) {
 

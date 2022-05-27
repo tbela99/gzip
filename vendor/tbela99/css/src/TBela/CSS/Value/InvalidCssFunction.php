@@ -16,7 +16,7 @@ class InvalidCssFunction extends Value implements InvalidTokenInterface {
      */
     protected static function validate($data) {
 
-        return isset($data->name) && isset($data->arguments) && $data->arguments instanceof Set;
+        return isset($data->name) && isset($data->arguments) && is_array($data->arguments);
     }
 
     /**
@@ -35,24 +35,11 @@ class InvalidCssFunction extends Value implements InvalidTokenInterface {
         return $this->data->arguments->{0}->value;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getHash() {
+    public static function doRecover(object $data):object {
 
-        return $this->data->name.'('. $this->data->arguments->getHash();
-    }
+        $result = clone $data;
+        $result->type = substr($result->type, 8);
 
-    public function recover($property = null)
-    {
-
-        $set = new Set();
-
-        foreach ($this->arguments as $value) {
-
-            $set->add(is_callable([$value, 'recover']) ? $value->recover() : $value);
-        }
-
-        return Value::parse($this->name.'('.$set.')', $property)->{0};
+        return $result;
     }
 }

@@ -4,6 +4,7 @@ namespace TBela\CSS\Query;
 
 use TBela\CSS\Element\AtRule;
 use TBela\CSS\Element\Rule;
+use TBela\CSS\Value;
 
 /**
  * Evaluate node name
@@ -45,31 +46,21 @@ class TokenSelectorValueString extends TokenSelectorValue
 
             if ($element instanceof Rule) {
 
+                $value = preg_quote($this->value, '#');
+
                 foreach ($element->getSelector() as $selector) {
 
-                    if (in_array($this->value, array_map(function ($value) {
-
-                        $result = (string) $value;
-
-                        if ($value->type == 'unit' && $value->value == '0') {
-
-                            $result .= $value->unit;
-                        }
-
-                        return $result;
-
-                    }, $selector->toArray()))) {
+                    if (preg_match('#(\s|^)' . $value . '(\s|$)#', $selector)) {
 
                         $result[] = $element;
                         continue 2;
                     }
                 }
-            }
-            else {
+            } else {
 
-                $name = ($element instanceof AtRule ? '@' : '').$element['name'];
+                $name = ($element instanceof AtRule ? '@' : '') . $element['name'];
 
-                if($this->value === $name) {
+                if ($this->value === $name) {
 
                     $result[] = $element;
                 }
@@ -82,8 +73,9 @@ class TokenSelectorValueString extends TokenSelectorValue
     /**
      * @inheritDoc
      */
-    public function render(array $options = []) {
+    public function render(array $options = [])
+    {
 
-        return $this->q.$this->value.$this->q;
+        return $this->q . $this->value . $this->q;
     }
 }

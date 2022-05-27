@@ -52,33 +52,6 @@ class FontSize extends Unit
     public function render(array $options = [])
     {
 
-        $value = $this->data->value;
-
-        if ($value == '0') {
-
-            return '0';
-        }
-
-        if (!empty($options['compress']) && is_numeric($value)) {
-
-            $value = Number::compress($value);
-        }
-
-        if (isset($this->data->unit)) {
-
-            return $value . $this->data->unit;
-        }
-
-        return $value;
-    }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->render(['compress' => true]);
-        }
-
-        return $this->hash;
+        return static::doRender($this->data, $options);
     }
 }

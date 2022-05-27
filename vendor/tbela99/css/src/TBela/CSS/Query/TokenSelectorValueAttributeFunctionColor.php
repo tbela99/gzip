@@ -55,12 +55,12 @@ class TokenSelectorValueAttributeFunctionColor implements TokenSelectorValueInte
 
         if ($value[0]->type == 'string') {
 
-            $value[0]->value = Value::parse($value[0]->value, 'color')->render($options);
+            $value[0]->value = Value::renderTokens(Value::parse($value[0]->value, 'color', true, '', '', true), $options);
         }
 
         if ($value[2]->type == 'string') {
 
-            $value[2]->value = Value::parse($value[2]->value, 'color')->render($options);
+            $value[2]->value = Value::renderTokens(Value::parse($value[2]->value, 'color', true, '', '', true), $options);
         }
 
         $this->value = $value;
@@ -84,16 +84,6 @@ class TokenSelectorValueAttributeFunctionColor implements TokenSelectorValueInte
             $value1 = $this->value[0]->type == 'attribute_name' ? $element[$this->value[0]->value] : $this->value[0]->value;
             $value2 = $this->value[2]->type == 'attribute_name' ? $element[$this->value[2]->value] : $this->value[2]->value;
 
-            if ($value1 instanceof Value\Set) {
-
-                $value1 = $value1->render($options);
-            }
-
-            if ($value2 instanceof Value\Set) {
-
-                $value2 = $value2->render($options);
-            }
-
             if ($value1 === $value2) {
 
                 $result[] = $element;
@@ -110,8 +100,10 @@ class TokenSelectorValueAttributeFunctionColor implements TokenSelectorValueInte
     {
 
         $result = 'color('.
-            Value::parse($this->value[0]->value, 'color')->render($options).','.
-            Value::parse($this->value[2]->value, 'color')->render($options).
+            Value::renderTokens(Value::parse($this->value[0]->value, 'color', true, '', '', true), $options)
+        .','.
+            Value::renderTokens(Value::parse($this->value[2]->value, 'color', true, '', '', true), $options)
+        .
         ')';
 
         return $result;

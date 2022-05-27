@@ -4,7 +4,6 @@ namespace TBela\CSS\Element;
 
 use Exception;
 use TBela\CSS\Value;
-use TBela\CSS\Value\Set;
 
 /**
  * Css node methods
@@ -15,7 +14,7 @@ trait ElementTrait  {
     /**
      * get css node name
      * @param bool $getVendor
-     * @return Set
+     * @return string
      * @throws Exception
      */
     public function getName($getVendor = true) {

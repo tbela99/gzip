@@ -18,41 +18,9 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // @ts-check
+    // import {ready} from "../utils/ready";
 
-    const queue = [];
-    let fired = document.readyState != 'loading';
-
-    function domReady() {
-
-    	document.removeEventListener('DOMContentLoaded', domReady);
-    	fired = true;
-
-    	while (queue.length > 0) {
-
-    		requestAnimationFrame(queue.shift());
-    	}
-    }
-
-    document.addEventListener('DOMContentLoaded', domReady);
-
-    function ready(cb) {
-
-    	if (fired) {
-
-    		while (queue.length > 0) {
-
-    			requestAnimationFrame(queue.shift());
-    		}
-
-    		cb();
-    	} else {
-
-    		queue.push(cb);
-    	}
-    }
-
-    ready(() => {
+    window.addEventListener('load', () => {
 
         let dimension;
 

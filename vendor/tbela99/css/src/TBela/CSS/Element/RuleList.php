@@ -29,17 +29,18 @@ abstract class RuleList extends Element implements RuleListInterface
 
         if ($name == 'firstChild') {
 
-            return isset($this->ast->children[0]) ? $this->ast->children[0] : [];
+            return isset($this->ast->children[0]) ? $this->ast->children[0] : null;
         }
 
         if ($name == 'lastChild') {
 
-            return isset($this->ast->children) ? end($this->ast->children) : null;
+            $array = isset($this->ast->children) ? $this->ast->children : [];
+            return end($array);
         }
 
         if ($name == 'childNodes') {
 
-            return isset($this->ast->children) ? $this->ast->children : null;
+            return isset($this->ast->children) ? $this->ast->children : [];
         }
     }
 

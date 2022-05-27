@@ -8,8 +8,6 @@ use TBela\CSS\Event\EventTrait;
 use TBela\CSS\Exceptions\IOException;
 use TBela\CSS\Interfaces\ValidatorInterface;
 use TBela\CSS\Value;
-use TBela\CSS\Value\Set;
-
 class Lexer
 {
 
@@ -101,7 +99,7 @@ class Lexer
 
                 'type' => 'AtRule',
                 'name' => 'media',
-                'value' => $media
+                'value' => Value::parse($media, null, true, '', '', true)
             ];
 
             $this->parentMediaRule = $root;
@@ -178,7 +176,7 @@ class Lexer
                             'start' => clone $position,
                             'end' => $this->update(clone $position, $comment)
                         ],
-                        'value' => $comment
+                        'value' => Value::escape($comment)
                     ];
                 } else {
 
@@ -188,7 +186,7 @@ class Lexer
                             'start' => clone $position,
                             'end' => $this->update(clone $position, $comment)
                         ],
-                        'value' => $comment
+                        'value' => Value::escape($comment)
                     ];
                 }
             } else if ($this->css[$i] == '<' && substr($this->css, $i, 4) == '<!--') {
@@ -210,7 +208,7 @@ class Lexer
                                 'start' => clone $position,
                                 'end' => $this->update(clone $position, $comment)
                             ],
-                            'value' => $comment
+                            'value' => Value::escape($comment)
                         ];
                         break;
                     }
@@ -226,7 +224,7 @@ class Lexer
                             'start' => clone $position,
                             'end' => $this->update(clone $position, $comment)
                         ],
-                        'value' => $comment
+                        'value' => Value::escape($comment)
                     ];
                 }
             }
@@ -315,7 +313,7 @@ class Lexer
                             ],
                             $this->parseVendor(trim($parts[0])),
                             [
-                                'value' => rtrim($parts[1], "\n\r\t ")
+                                'value' => Value::escape(rtrim($parts[1], "\n\r\t "))
                             ]);
 
                         if ($this->src !== '') {
@@ -343,22 +341,21 @@ class Lexer
                             }, $declaration->value);
                         }
 
-                        if (preg_match('#[("\']#', $declaration->value)) {
+                        $this->parseComments($declaration);
 
-                            $declaration->value = Value::parse($declaration->value /*, $declaration->name */);
-                            $data = $declaration->value->toArray();
+                        $data = $declaration->value;
+
+                        if (is_array($data)) {
 
                             while (($end = end($data))) {
 
                                 if (isset($end->value)) {
 
-                                    if ($end->value == ';' || $end->type == 'invalid-comment') {
+                                    if ($end->value == ';') {
 
                                         array_pop($data);
                                         continue;
                                     } else {
-
-                                        $end = $end->toObject();
 
                                         if (empty($end->q)) {
 
@@ -373,39 +370,45 @@ class Lexer
                                 break;
                             }
 
-                            $declaration->value = new Set($data);
-                        } else {
-
-                            $declaration->value = rtrim($declaration->value, ';');
-                        }
-
-                        if (preg_match('#["\'(]#', $declaration->value)) {
-
-                            $declaration->value = Value::parse($declaration->value, $declaration->name);
-
                             $isValidDeclaration = true;
-                            $declaration->value->map(function ($value) use ($declaration, &$isValidDeclaration) {
+
+                            foreach ($data as $key => $value) {
 
                                 if ($isValidDeclaration && strpos($value->type, 'invalid-') === 0) {
 
                                     if ($value->type == 'invalid-css-function') {
 
-                                        if (substr(rtrim($value->arguments->filter(function ($value) {
+                                        $c = count($value->arguments);
 
-                                                return $value->type != 'invalid-comment';
-                                            })), -1) == ';') {
+                                        while ($c--) {
 
-                                            $isValidDeclaration = false;
-                                            return $value;
+                                            if ($value->arguments[$c]->type == 'invalid-comment' || substr(isset($value->arguments[$c]->value) ? $value->arguments[$c]->value : '', -1) == ';') {
+
+                                                if ($value->arguments[$c]->type == 'invalid-comment') {
+
+                                                    array_splice($value->arguments, $c, 1);
+                                                } else {
+
+                                                    $isValidDeclaration = false;
+                                                    break;
+                                                }
+                                            } else {
+
+                                                break;
+                                            }
                                         }
                                     }
 
                                     // invalid declaration
-                                    return $value->recover($declaration->name);
-                                }
+                                    if ($isValidDeclaration) {
 
-                                return $value;
-                            });
+                                        $className = Value::getClassName($value->type);
+                                        $data[$key] = $className::doRecover($value);
+                                    }
+                                }
+                            }
+
+                            $declaration->value = $data;
 
                             if (!$isValidDeclaration) {
 
@@ -447,7 +450,7 @@ class Lexer
                             'hasDeclarations' => $char == '{',
                         ], $this->parseVendor($matches[1]),
                             [
-                                'value' => trim($matches[2])
+                                'value' => Value::parse(trim($matches[2]), null, true, '', '', true)
                             ]
                         );
 
@@ -470,19 +473,19 @@ class Lexer
 
                         if ($rule->name == 'import') {
 
-                            preg_match('#^((url\((["\']?)([^\\3]+)\\3\))|((["\']?)([^\\6]+)\\6))(.*?$)#', $rule->value, $matches);
+                                preg_match('#^((url\((["\']?)([^\\3]+)\\3\))|((["\']?)([^\\6]+)\\6))(.*?$)#', is_array($rule->value) ? Value::renderTokens($rule->value) : $rule->value, $matches);
 
-                            $media = trim($matches[8]);
+                                $media = trim($matches[8]);
 
-                            if ($media == 'all') {
+                                if ($media == 'all') {
 
-                                $media = '';
-                            }
+                                    $media = '';
+                                }
 
-                            $file = empty($matches[4]) ? $matches[7] : $matches[4];
+                                $file = empty($matches[4]) ? $matches[7] : $matches[4];
 
-                            $rule->value = trim("\"$file\" $media");
-                            unset($rule->hasDeclarations);
+                                $rule->value = trim("\"$file\" $media");
+                                unset($rule->hasDeclarations);
 
                         } else if ($char == '{') {
 
@@ -533,7 +536,7 @@ class Lexer
                                 'start' => clone $position,
                                 'end' => $this->update(clone $position, $name)
                             ],
-                            'value' => $name
+                            'value' => Value::escape($name)
                         ];
 
                         $rule->location->start->index += $this->parentOffset;
@@ -558,6 +561,7 @@ class Lexer
                         $rule->location->end = clone $position;
                         $rule->location->end->index = max(1, $rule->location->end->index - 1);
 
+                        $this->parseComments($rule);
                         $this->emit('enter', $rule, $this->context, $this->parentStylesheet);
 
                         $i += strlen($name) - 1;
@@ -575,7 +579,7 @@ class Lexer
                             'start' => clone $position,
                             'end' => clone $position
                         ],
-                        'selector' => $selector
+                        'selector' => Value::escape($selector)
                     ];
 
                     if ($this->src !== '') {
@@ -690,6 +694,7 @@ class Lexer
 
                     if (!$ignoreRule) {
 
+                        $this->parseComments($rule);
                         $this->emit('exit', $rule, $this->context, $this->parentStylesheet);
                     }
                 }
@@ -764,6 +769,112 @@ class Lexer
         }
 
         return $position;
+    }
+
+    protected function parseComments($token)
+    {
+
+        $property = property_exists($token, 'name') ? 'name' : (property_exists($token, 'selector') ? 'selector' : null);
+
+        if ($property && !is_array($token->{$property})) {
+
+            $comments = [];
+            $formatted = Value::format($token->{$property}, $comments);
+
+            if ($formatted !== false) {
+
+                $token->{$property} = $formatted;
+
+                if (!empty($comments)) {
+
+                    $token->leadingcomments = $comments;
+                }
+            }
+
+            else {
+
+                $leading = [];
+                $tokens = Value::parse($token->{$property}, null, true, '', '', true);
+
+                $k = count($tokens);
+
+                while ($k--) {
+
+                    $t = $tokens[$k];
+
+                    if ($t->type == 'Comment') {
+
+                        $leading[] = $t->value;
+                        array_splice($tokens, $k, 1);
+                    }
+                }
+
+                $tokens = Value::reduce($tokens);
+                $token->{$property} = $property == 'name' ? Value::renderTokens($tokens) : $tokens;
+
+                if (!empty($leading)) {
+
+                    $token->leadingcomments = $leading;
+                }
+            }
+        }
+
+        if (property_exists($token, 'value')) {
+
+            if (is_array($token->value)) {
+
+                return;
+            }
+
+            $comments = [];
+            $formatted = Value::format($token->value, $comments);
+
+            if ($formatted !== false) {
+
+                $token->value = rtrim($formatted, "; \r\n\t");
+
+                if (!empty($comments)) {
+
+                    $token->trailingcomments = $comments;
+                }
+            }
+
+            else {
+
+                if (is_string($token->value)) {
+
+                    $token->value = Value::parse($token->value, in_array($token->type, ['Declaration', 'Property']) ? $token->name : null, true, '', '', true);
+                }
+
+                $trailing = [];
+                $k = count($token->value);
+
+                while ($k--) {
+
+                    if ($token->value[$k]->type == 'invalid-comment') {
+
+                        array_splice($token->value, $k, 1);
+                    } else if ($token->value[$k]->type == 'Comment') {
+
+                        if (substr($token->value[$k]->value, 0, 4) == '<!--') {
+
+                            array_splice($token->value, $k, 1);
+                            continue;
+                        }
+
+                        $trailing[] = $token->value[$k]->value;
+                        array_splice($token->value, $k, 1);
+                    }
+                }
+
+                if (!empty($trailing)) {
+
+                    $token->trailingcomments = array_reverse($trailing);
+                }
+
+                $token->value = Value::reduce($token->value, ['remove_defaults' => true]);
+            }
+        }
     }
 
     /**

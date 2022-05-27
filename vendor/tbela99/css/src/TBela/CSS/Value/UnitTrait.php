@@ -33,4 +33,26 @@ trait UnitTrait
 
         return $this->data->value;
     }
+
+    public static function doRender($data, array $options = []) {
+
+        $value = $data->value;
+
+        if ($value == '0') {
+
+            return '0';
+        }
+
+        if (!empty($options['compress']) && is_numeric($value)) {
+
+            $value = Number::compress($value);
+        }
+
+        if (isset($data->unit)) {
+
+            return $value . $data->unit;
+        }
+
+        return $value;
+    }
 }

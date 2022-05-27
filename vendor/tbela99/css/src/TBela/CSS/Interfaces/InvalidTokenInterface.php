@@ -1,8 +1,6 @@
 <?php
 
 namespace TBela\CSS\Interfaces;
-use TBela\CSS\Value;
-use TBela\CSS\Value\Set;
 
 /**
  * Interface implemented by Elements
@@ -10,9 +8,7 @@ use TBela\CSS\Value\Set;
 interface InvalidTokenInterface {
 
     /**
-     * attempt to return a valid token
-     * @param string|Value|null|Set $property
-     * @return Value
+     * recover an invalid token
      */
-    public function recover($property = null);
+    public static function doRecover(object $data): object;
 }

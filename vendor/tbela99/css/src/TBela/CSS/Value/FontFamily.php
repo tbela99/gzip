@@ -39,6 +39,6 @@ class FontFamily extends ShortHand
             }
         }
 
-        return new Set(static::reduce($tokens));
+        return static::reduce($tokens);
     }
 }

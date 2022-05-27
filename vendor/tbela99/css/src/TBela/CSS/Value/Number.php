@@ -30,17 +30,12 @@ class Number extends Value
         }
     }
 
-    public function getHash() {
-
-        return $this->data->value;
-    }
-
     /**
      * @inheritDoc
      */
-    public function match ($type) {
+    public static function match ($data, $type) {
 
-        return ($this->data->value == '0' && $type == 'unit') || $this->data->type == $type;
+        return ($data->value == '0' && $type == 'unit') || $data->type == $type;
     }
 
     /**
@@ -99,12 +94,17 @@ class Number extends Value
      */
     public function render(array $options = [])
     {
+        return static::doRender($this->data, $options);
+    }
+
+    public static function doRender($data, array $options = []) {
+
 
         if (!empty($options['compress'])) {
 
-            return $this->compress($this->data->value);
+            return static::compress($data->value);
         }
 
-        return $this->data->value;
+        return $data->value;
     }
 }

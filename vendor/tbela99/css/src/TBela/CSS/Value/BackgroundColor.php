@@ -11,6 +11,9 @@ class BackgroundColor extends Color
 
     public static $defaults = ['transparent', '#0000'];
 
+    /**
+     * @inheritDoc
+     */
     public static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
     {
         $tokens = [];
@@ -25,7 +28,7 @@ class BackgroundColor extends Color
             $tokens[] = $token;
         }
 
-        return new Set(static::reduce($tokens));
+        return static::reduce($tokens);
     }
 
     public static function matchToken($token, $previousToken = null, $previousValue = null, $nextToken = null, $nextValue = null, $index = null, array $tokens = [])

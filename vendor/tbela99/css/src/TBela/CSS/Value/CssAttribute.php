@@ -12,7 +12,7 @@ class CssAttribute extends Value {
 
     protected static function validate($data) {
 
-        return isset($data->arguments) && $data->arguments instanceof Set;
+        return isset($data->arguments) && is_array($data->arguments);
     }
 
     public function render(array $options = []) {
@@ -20,8 +20,8 @@ class CssAttribute extends Value {
         return '['. $this->data->arguments->render($options).']';
     }
 
-    public function getHash() {
+    public static function doRender($data, array $options = []) {
 
-        return '['. $this->data->arguments->getHash().']';
+        return '['. Value::renderTokens($data->arguments, $options).']';
     }
 }

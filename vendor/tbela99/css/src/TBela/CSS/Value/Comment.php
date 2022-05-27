@@ -18,11 +18,6 @@ class Comment extends Value {
         return true;
     }
 
-    public function getHash() {
-
-        return '';
-    }
-
     /**
      * @inheritDoc
      */

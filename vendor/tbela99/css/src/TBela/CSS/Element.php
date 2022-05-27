@@ -10,7 +10,6 @@ use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Interfaces\RuleListInterface;
 use TBela\CSS\Query\Evaluator;
-use TBela\CSS\Value\Set;
 use function is_callable;
 use function is_null;
 use function str_ireplace;
@@ -24,14 +23,19 @@ abstract class Element implements ElementInterface  {
     use ArrayTrait;
 
     /**
-     * @var stdClass|null
+     * @var object|null
      * @ignore
      */
     protected $ast = null;
+
     /**
      * @ignore
      */
     protected $parent = null;
+    /**
+     * @var array
+     */
+    protected $rawValue = null;
 
     /**
      * Element constructor.
@@ -169,12 +173,15 @@ abstract class Element implements ElementInterface  {
      */
     public function getValue() {
 
-        if (isset($this->ast->name) && !((isset($this->ast->value) ? $this->ast->value : '') instanceof Set)) {
+        return isset($this->ast->value) ? $this->ast->value : null;
+    }
 
-            $this->ast->value = Value::parse(isset($this->ast->value) ? $this->ast->value : '', $this->ast->name);
-        }
+    /**
+     * @inheritDoc
+     */
+    public function getRawValue() {
 
-        return isset($this->ast->value) ? $this->ast->value : '';
+        return $this->rawValue;
     }
 
     /**
@@ -182,7 +189,17 @@ abstract class Element implements ElementInterface  {
      */
     public function setValue ($value) {
 
-        $this->ast->value = is_string($value) ? Value::escape($value) : $value;
+        if (!is_array($value)) {
+
+            $this->rawValue = Value::parse($value, isset($this->ast->name )? $this->ast->name : null);
+        }
+
+        else {
+
+            $this->rawValue = $value;
+        }
+
+        $this->ast->value = Value::renderTokens($this->rawValue);
         return $this;
     }
 
@@ -232,6 +249,7 @@ abstract class Element implements ElementInterface  {
         $copy = $node = clone $this;
 
         while ($parent = $parent->parent) {
+
 
             $ast = clone $parent->ast;
 
@@ -575,11 +593,6 @@ abstract class Element implements ElementInterface  {
         $ast = clone $this->ast;
 
         unset($ast->parent);
-
-        if (isset($ast->value)) {
-
-            $ast->value = trim($ast->value);
-        }
 
         if (empty($ast->location)) {
 

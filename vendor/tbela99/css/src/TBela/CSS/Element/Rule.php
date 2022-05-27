@@ -22,56 +22,41 @@ class Rule extends RuleList
     protected function parseSelector($selectors)
     {
 
-        if (is_array($selectors)) {
+        if (is_array($selectors) && is_string($selectors[0])) {
 
-            if (empty(array_filter($selectors, function ($value) {
-
-                return !($value instanceof Value);
-            }))) {
-
-                return $selectors;
-            }
-
-            $selectors = implode(',', array_map(function ($selector) {
-
-                $result = $selector->render();
-
-                if ($selector->type == 'unit' && $selector->value == '0') {
-
-                    $result .= $selector->unit;
-                }
-
-                return $result;
-
-            }, $selectors));
+            $selectors = implode(',', $selectors);
         }
 
-        $selectors = Value::parse($selectors);
+        if (is_string($selectors)) {
 
-        $comments = [];
-        $selectors->filter(function ($node) use (&$comments) {
-
-            if ($node->type == 'Comment') {
-
-                $comments[] = $node;
-                return false;
-            }
-
-            return true;
-        });
-
-        if (!empty($comments)) {
-
-            $this->setLeadingComments($comments);
+            $selectors = Value::parse($selectors, null, true, '', '', true);
         }
 
-        $selectors = $selectors->split(',');
+//        $comments = [];
+//        $k = count($selectors);
+
+//        while ($k--) {
+//
+//            if ($selectors[$k]->type == 'Comment') {
+//
+//                $comments[] = $selectors[$k]->value;
+//                array_splice($selectors, $k, 1);
+//            }
+//        }
+//
+//        if (!empty($comments)) {
+//
+//            $this->setLeadingComments(array_reverse($comments));
+//        }
+
+        $selectors = Value::split(Value::renderTokens($selectors, ['omit_unit' => false]), ',');
 
         $result = [];
 
         foreach ($selectors as $selector) {
 
-            $result[trim($selector)] = $selector;
+            $selector = trim($selector);
+            $result[$selector] = $selector;
         }
 
         return array_values($result);
@@ -109,14 +94,14 @@ class Rule extends RuleList
             $result[trim($r)] = $r;
         }
 
-        $this->ast->selector[] = array_values($result);
+        $this->ast->selector = array_values($result);
         return $this;
     }
 
     /**
      * Remove a css selector
      * @param array|string $selector
-     * @return $this
+     * @return Rule
      */
     public function removeSelector($selector)
     {

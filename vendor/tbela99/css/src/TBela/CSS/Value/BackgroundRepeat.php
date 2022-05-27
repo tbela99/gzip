@@ -2,6 +2,7 @@
 
 namespace TBela\CSS\Value;
 
+use TBela\CSS\Property\Config;
 use TBela\CSS\Value;
 
 /**
@@ -53,7 +54,7 @@ class BackgroundRepeat extends Value
     public static function matchKeyword($string, array $keywords = null)
     {
 
-        $key = preg_replace('~(\s+)~', ' ', trim($string));
+        $key = preg_replace('~(\s+)~', ' ', trim($string, ";\n\t\r "));
 
         if (isset(static::$keymap[$key])) {
 
@@ -61,5 +62,61 @@ class BackgroundRepeat extends Value
         }
 
         return parent::matchKeyword($string, $keywords);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws \Exception
+     */
+    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
+    {
+
+        $type = static::type();
+
+        $separator = Config::getProperty($type.'.separator');
+
+        if (is_null($separator)) {
+
+            $matchKeyword = static::matchKeyword($string);
+
+            if (!is_null($matchKeyword)) {
+
+                return [(object)['type' => $type, 'value' => $matchKeyword]];
+            }
+        }
+
+        else {
+
+            $strings = array_map(function ($token) {
+
+                $keyword =  static::matchKeyword($token);
+
+                return isset($keyword) ? $keyword : trim($token, ";\n\t\r ");
+            }, Value::split($string, $separator));
+
+            $string = implode(',', $strings);
+        }
+
+        $tokens = static::getTokens($string, $capture_whitespace, $context, $contextName);
+
+        foreach ($tokens as $token) {
+
+            if (static::matchToken($token)) {
+
+                if ($token->type == 'css-string') {
+
+                    $value = static::matchKeyword($token->value);
+
+                    if (!is_null($value)) {
+
+                        $token->value = $value;
+                    }
+                }
+
+                $token->type = $type;
+            }
+        }
+
+        return static::reduce($tokens);
     }
 }

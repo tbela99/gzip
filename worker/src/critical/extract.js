@@ -1,7 +1,7 @@
 import {hash} from '../crypto/hash';
-import {ready} from "../utils/ready";
+// import {ready} from "../utils/ready";
 
-ready(() => {
+window.addEventListener('load', () => {
 
     let dimension;
 

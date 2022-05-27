@@ -34,7 +34,7 @@ trait ValueTrait
 
                 if (!is_null($keyword)) {
 
-                    $result[] = new Set([(object) ['type' => $type, 'value' => $keyword]]);
+                    $result[] = [(object) ['type' => $type, 'value' => $keyword]];
                     continue;
                 }
             }
@@ -61,7 +61,7 @@ trait ValueTrait
                 }
             }
 
-            $result[] = new Set(static::reduce($tokens));
+            $result[] = static::reduce($tokens);
         }
 
         if (count($result) == 1) {
@@ -72,12 +72,12 @@ trait ValueTrait
         $i = 0;
         $j = count($result) - 1;
 
-        $set = new Set();
-        $set->merge($result[0]);
+        $set = $result[0];
 
         while (++$i <= $j) {
 
-            $set->add(Value::getInstance((object) ['type' => 'separator', 'value' => $separator]))->merge($result[$i]);
+            $set[] = (object) ['type' => 'separator', 'value' => $separator];
+            array_splice($set, count($set), 0, $result[$i]);
         }
 
         return $set;

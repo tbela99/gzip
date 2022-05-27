@@ -4,6 +4,7 @@ namespace TBela\CSS\Ast;
 
 use TBela\CSS\Event\Event;
 use TBela\CSS\Interfaces\ElementInterface;
+use TBela\CSS\Value;
 
 /**
  * Ast|Element traverser
@@ -77,6 +78,11 @@ class Traverser extends Event
      */
     protected function doTraverse($node, $level)
     {
+
+        if (isset($node->value) && is_array($node->value)) {
+
+            $node->value = Value::renderTokens($node->value);
+        }
 
         $result = $this->process($node, $this->emit('enter', $node, $level));
 

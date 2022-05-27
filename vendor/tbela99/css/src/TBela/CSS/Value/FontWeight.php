@@ -40,7 +40,13 @@ class FontWeight extends Value
     public function render(array $options = [])
     {
 
-        $value = static::matchKeyword($this->data->value);
+        return static::doRender($this->data, $options);
+    }
+
+    public static function doRender($data, array $options = [])
+    {
+
+        $value = static::matchKeyword($data->value);
 
         if (!empty($options['compress'])) {
 
@@ -60,15 +66,13 @@ class FontWeight extends Value
             return '"' . $value . '"';
         }
 
-        return $this->data->value;
+        return $data->value;
     }
 
     /**
-     * test if this object matches the specified type
-     * @param string $type
-     * @return bool
+     * @inheritDoc
      */
-    public function match($type)
+    public static function match($data, $type)
     {
 
         return $type == 'font-weight';
@@ -106,16 +110,17 @@ class FontWeight extends Value
     {
 
         $type = static::type();
-        $tokens = static::getTokens($string, $capture_whitespace, $context, $contextName);
 
         $matchKeyword = static::matchKeyword($string);
 
         if (!is_null($matchKeyword)) {
 
-            return new Set([(object)['type' => $type, 'value' => $matchKeyword]]);
+            return [(object)['type' => $type, 'value' => $matchKeyword]];
         }
 
-        foreach ($tokens as $key => $token) {
+        $tokens = static::getTokens($string, $capture_whitespace, $context, $contextName);
+
+        foreach ($tokens as $token) {
 
             if (static::matchToken($token)) {
 
@@ -133,22 +138,12 @@ class FontWeight extends Value
             }
         }
 
-        return new Set(static::reduce($tokens));
+        return static::reduce($tokens);
     }
 
     public static function keywords()
     {
 
         return array_keys(static::$keywords);
-    }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->render(['compress' => true]);
-        }
-
-        return $this->hash;
     }
 }

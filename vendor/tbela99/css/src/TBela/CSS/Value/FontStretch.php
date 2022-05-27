@@ -56,9 +56,4 @@ class FontStretch extends Value
 
         return array_keys(static::$keywords);
     }
-
-    public function getHash() {
-
-        return $this->data->value;
-    }
 }

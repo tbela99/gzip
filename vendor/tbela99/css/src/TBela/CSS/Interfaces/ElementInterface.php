@@ -43,7 +43,7 @@ interface ElementInterface extends QueryInterface, JsonSerializable, ArrayAccess
     /**
      * search nodes using query selector syntax
      * @param string $query
-     * @return array
+     * @return ElementInterface[]
      * @throws \TBela\CSS\Parser\SyntaxError
      */
     public function query($query);
@@ -51,7 +51,7 @@ interface ElementInterface extends QueryInterface, JsonSerializable, ArrayAccess
     /**
      * search nodes by class names
      * @param string $query comma separated list of class names
-     * @return array
+     * @return ElementInterface[]
      * @throws \TBela\CSS\Parser\SyntaxError
      */
     public function queryByClassNames($query);
@@ -63,14 +63,19 @@ interface ElementInterface extends QueryInterface, JsonSerializable, ArrayAccess
     public function getRoot ();
 
     /**
-     * return Value\Set|string
      * @return string
      */
     public function getValue();
 
     /**
+     * return parsed value
+     * @return array
+     */
+    public function getRawValue();
+
+    /**
      * assign the value
-     * @param Value\Set|string $value
+     * @param string $value
      * @return $this
      */
     public function setValue ($value);
