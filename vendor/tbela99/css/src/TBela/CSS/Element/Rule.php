@@ -29,7 +29,7 @@ class Rule extends RuleList
 
         if (is_string($selectors)) {
 
-            $selectors = Value::parse($selectors, null, true, '', '', true);
+            $selectors = Value::parse($selectors, null, true, '', '');
         }
 
 //        $comments = [];

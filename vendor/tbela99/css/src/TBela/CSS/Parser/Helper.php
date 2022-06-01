@@ -250,14 +250,13 @@ class Helper
             array_shift($ref);
         }
 
-		$result = implode('/', array_merge(array_fill(0, count($ref), '..'), $file));
-
-		if (php_sapi_name() != 'cli') {
-
-			$result = static::resolvePath($result, dirname($_SERVER['PHP_SELF']));
-		}
-
+        $result = implode('/', array_merge(array_fill(0, count($ref), '..'), $file));
         $result = ($result === '' ? '' : $result . '/') . $basename;
+
+        if (php_sapi_name() != 'cli') {
+
+            $result = static::resolvePath($result, dirname($_SERVER['PHP_SELF']));
+        }
 
         return $isAbsolute && strlen($original) <= strlen($result) ? $original : $result;
     }
@@ -323,7 +322,7 @@ class Helper
      */
     public static function fetchContent($url, array $options = [], array $curlOptions = [])
     {
-        $userAgent = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0';
+        $userAgent = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/93.0';
 
         $proto = strpos($url, 'https:') === 0 ? 'https' : 'http';
 

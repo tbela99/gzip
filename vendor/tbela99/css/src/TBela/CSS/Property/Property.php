@@ -60,7 +60,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
      */
     public function setValue($value) {
 
-        $this->value = is_array($value) ? $value : Value::parse($value, $this->name, true, '', '', true);
+        $this->value = is_array($value) ? $value : Value::parse($value, $this->name, true, '', '');
         return $this;
     }
 

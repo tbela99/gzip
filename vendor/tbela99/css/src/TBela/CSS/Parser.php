@@ -90,19 +90,11 @@ class Parser implements ParsableInterface
      * @param callable $callable
      * @return $this
      */
-    public function on($event, callable $callable, $index = null)
+    public function on($event, callable $callable)
     {
 
         $this->lexer->on($event, $callable);
-
-		if (is_null($index) && isset($this->event_handlers[$event][$index])) {
-
-			array_splice($this->event_handlers[$event], $index, 0, [$callable]);
-		}
-		else {
-
-			$this->event_handlers[$event][] = $callable;
-		}
+        $this->event_handlers[$event][] = $callable;
 
         return $this;
     }
@@ -724,7 +716,7 @@ class Parser implements ParsableInterface
     protected function getContext()
     {
 
-        return end($this->context) ?: $this->getAst();
+        return end($this->context) ?: ($this->ast ?? $this->getAst());
     }
 
     /**

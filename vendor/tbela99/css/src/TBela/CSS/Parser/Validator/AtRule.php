@@ -25,7 +25,7 @@ class AtRule implements ValidatorInterface
 
             if ($firstChar != '"') {
 
-                $this->error = sprintf("'%s' expected but '%' found", '"', $firstChar);
+                $this->error = sprintf("@% '%s' expected but '%s' found (%s)", $token->name, '"', $firstChar, $token->value[0]->value);
                 return static::REJECT;
             }
         }

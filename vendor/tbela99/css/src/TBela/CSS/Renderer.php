@@ -625,7 +625,7 @@ class Renderer
 
         if (is_string($selector)) {
 
-            $selector = Value::parse($selector, null, true, '', '', true);
+            $selector = Value::parse($selector, null, true, '', '');
         }
 
         $result = $indent. Value::renderTokens($selector, ['omit_unit' => false, 'compress' => $this->options['compress']], $this->options['glue'] . $indent);
@@ -778,7 +778,7 @@ class Renderer
     protected function renderValue($ast)
     {
 
-        $result = Value::renderTokens(is_string($ast->value) ? Value::parse($ast->value, in_array($ast->type, ['Property', 'Declaration']) ? $ast->name : null, true, '', '', true) : $ast->value, $this->options);
+        $result = Value::renderTokens(is_string($ast->value) ? Value::parse($ast->value, in_array($ast->type, ['Property', 'Declaration']) ? $ast->name : null, true, '', '') : $ast->value, $this->options);
 
         if (!$this->options['remove_comments'] && !empty($ast->trailingcomments)) {
 
@@ -1006,7 +1006,7 @@ class Renderer
 
                             if (isset($child->value)) {
 
-                                $value = Value::renderTokens(is_string($child->value) ? Value::parse($child->value, null, true, '', '', true) : $child->value, $this->options);
+                                $value = Value::renderTokens(is_string($child->value) ? Value::parse($child->value, null, true, '', '') : $child->value, $this->options);
 
                                 if($value !== '' && $value != 'all') {
 

@@ -36,7 +36,7 @@ class ShortHand extends Value
      * @inheritDoc
      * @throws Exception
      */
-    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
+    protected static function doParse(string $string, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
         $separator = Config::getPath('map.'.static::type().'.separator');

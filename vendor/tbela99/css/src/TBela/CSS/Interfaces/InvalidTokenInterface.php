@@ -10,5 +10,5 @@ interface InvalidTokenInterface {
     /**
      * recover an invalid token
      */
-    public static function doRecover(object $data): object;
+    public static function doRecover($data);
 }

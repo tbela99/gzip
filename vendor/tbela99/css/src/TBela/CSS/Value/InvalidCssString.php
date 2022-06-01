@@ -38,7 +38,7 @@ class InvalidCssString extends Value implements InvalidTokenInterface
         return $this->data->q.$this->data->value;
     }
 
-    public static function doRecover(object $data):object {
+    public static function doRecover($data) {
 
         $result = clone $data;
         $result->type = substr($result->type, 8);

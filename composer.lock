@@ -391,12 +391,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
-                "reference": "b06e0b5b4ee0a40a0361e23d0b21a7e6918e693c"
+                "reference": "7a4c008eeb8c8631b65b53450be419331d52bf07"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tbela99/css/zipball/b06e0b5b4ee0a40a0361e23d0b21a7e6918e693c",
-                "reference": "b06e0b5b4ee0a40a0361e23d0b21a7e6918e693c",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/7a4c008eeb8c8631b65b53450be419331d52bf07",
+                "reference": "7a4c008eeb8c8631b65b53450be419331d52bf07",
                 "shasum": ""
             },
             "require": {
@@ -438,7 +438,7 @@
                 "issues": "https://github.com/tbela99/css/issues",
                 "source": "https://github.com/tbela99/css/tree/php56-backport"
             },
-            "time": "2022-05-19T09:28:02+00:00"
+            "time": "2022-06-01T22:26:13+00:00"
         }
     ],
     "packages-dev": [],

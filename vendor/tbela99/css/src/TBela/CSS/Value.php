@@ -158,11 +158,12 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
     /**
      * @param stdClass $type
+     * @param bool $preserve_quotes
      * @return void
      */
-    private static function parseString(stdClass $type)
+    private static function parseString(stdClass $type, $preserve_quotes)
     {
-        if (strlen($type->value) > 2 &&
+        if (!$preserve_quotes && strlen($type->value) > 2 &&
             in_array($type->value[0], ['"', "'"]) &&
             $type->value[0] == substr($type->value, -1)) {
 
@@ -570,9 +571,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
+     * @param bool $preserve_quotes
      * @return array
      */
-    public static function parse($string, $property = null, $capture_whitespace = true, $context = '', $contextName = '')
+    public static function parse($string, $property = null, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
         if (is_array($string)) {
 
@@ -595,7 +597,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 try {
 
-                    return call_user_func([$className, 'doParse'], $string, $capture_whitespace, $context, $contextName);
+                    return call_user_func([$className, 'doParse'], $string, $capture_whitespace, $context, $contextName, $preserve_quotes);
                 } catch (\Exception $e) {
 
 //                    throw $e;
@@ -604,7 +606,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
             }
         }
 
-        return static::doParse($string, $capture_whitespace, $context, $contextName);
+        return static::doParse($string, $capture_whitespace, $context, $contextName, $preserve_quotes);
     }
 
     /**
@@ -722,12 +724,13 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
+     * @param bool $preserve_quotes
      * @return array
      */
-    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
+    protected static function doParse(string $string, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
-        return static::reduce(static::getTokens($string, $capture_whitespace, $context, $contextName));
+        return static::reduce(static::getTokens($string, $capture_whitespace, $context, $contextName, $preserve_quotes));
     }
 
     /**
@@ -736,9 +739,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
+     * @param booll $preserve_quotes
      * @return array|null
      */
-    public static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '')
+    public static function getTokens(string $string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
         $string = static::split(trim($string));
@@ -826,7 +830,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if (rtrim($buffer) !== '') {
 
-                        $tokens[] = static::getType($buffer);
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                         $buffer = '';
                     }
 
@@ -861,7 +865,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if ($buffer !== '') {
 
-                        $tokens[] = static::getType($buffer);
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                     }
 
                     $next = $i;
@@ -894,7 +898,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         $token->type = 'css-string';
                         $token->value = implode('', array_slice($string, $i, $next - $i + 1));
 
-                        self::parseString($token);
+                        self::parseString($token, $preserve_quotes);
                     }
 
                     if ($token->value !== '') {
@@ -933,13 +937,13 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if (trim($buffer) !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $token = new stdClass;
 
                         $token->type = 'css-attribute';
-                        $token->arguments = Value::parse(substr($params, 1, -1), null, $capture_whitespace, 'attribute', '');
+                        $token->arguments = Value::parse(substr($params, 1, -1), null, $capture_whitespace, 'attribute', '', $preserve_quotes);
 
                         $tokens[] = $token;
 
@@ -948,7 +952,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     } else {
 
-                        $tokens[] = static::getType($buffer . substr($string, $i));
+                        $tokens[] = static::getType($buffer . substr($string, $i), $preserve_quotes);
                         $buffer = '';
                         $i = $j;
                     }
@@ -996,7 +1000,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                             $t->type = 'css-string';
                             $t->value = $str;
 
-                            self::parseString($t);
+                            self::parseString($t, $preserve_quotes);
 
                             $token->arguments = [$t];
                         } else {
@@ -1005,10 +1009,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                                 $token->name = '';
                                 $token->type = 'css-parenthesis-expression';
-                                $tokens[] = static::getType($buffer);
+                                $tokens[] = static::getType($buffer, $preserve_quotes);
                             }
 
-                            $token->arguments = Value::parse($str, null, $capture_whitespace, $token->type, $token->name);
+                            $token->arguments = Value::parse($str, null, $capture_whitespace, $token->type, $token->name, $preserve_quotes);
                         }
 
                         if (!empty($token->name)) {
@@ -1032,7 +1036,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer === '') {
 
-                            $tokens[] = static::getType($buffer . substr($string, $i));
+                            $tokens[] = static::getType($buffer . substr($string, $i), $preserve_quotes);
                         } else {
 
                             $token = (object)[
@@ -1045,7 +1049,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                             if (trim($args) !== '') {
 
-                                $token->arguments = Value::parse($args, '', '', $token->type, $token->name);
+                                $token->arguments = Value::parse($args, '', '', $token->type, $token->name, $preserve_quotes);
                             }
 
                             $tokens[] = $token;
@@ -1063,7 +1067,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                             $buffer = '';
                         }
 
@@ -1089,7 +1093,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $tokens[] = (object)['type' => 'separator', 'value' => $string[$i]];
@@ -1109,11 +1113,11 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 case '/':
 
-                    if ($i < $j && $string[$i + 1] == '*' && $string[$i] == '/') {
+                    if ($i < $j && $string[$i + 1] == '*') {
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                             $buffer = '';
                         }
 
@@ -1146,7 +1150,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         }
                     }
 
-                    $token = static::getType($buffer);
+                    $token = static::getType($buffer, $preserve_quotes);
 
                     if (trim($buffer) === '') {
 
@@ -1176,7 +1180,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if (trim($buffer) !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $token = end($tokens);
@@ -1216,7 +1220,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if ($buffer !== '') {
 
-                        $tokens[] = static::getType($buffer);
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                     }
 
                     $token = new stdClass;
@@ -1233,7 +1237,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType(rtrim($buffer));
+                            $tokens[] = static::getType(rtrim($buffer), $preserve_quotes);
                             $buffer = '';
                         }
                     }
@@ -1244,7 +1248,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
         if ($buffer !== '') {
 
-            $tokens[] = static::getType($buffer);
+            $tokens[] = static::getType($buffer, $preserve_quotes);
         }
 
         return $tokens;
@@ -1306,9 +1310,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
     /**
      * @param string $token
+     * @param bool $preserve_quotes
      * @return stdClass
      */
-    protected static function getType($token)
+    protected static function getType(string $token, $preserve_quotes = false)
     {
 
         $type = new stdClass;
@@ -1331,7 +1336,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
             $type->type = 'css-string';
 
-            self::parseString($type);
+            self::parseString($type, $preserve_quotes);
         }
 
         return $type;

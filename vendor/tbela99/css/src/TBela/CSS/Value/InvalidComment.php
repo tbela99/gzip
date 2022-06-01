@@ -22,7 +22,7 @@ class InvalidComment extends Value implements InvalidTokenInterface
         return '';
     }
 
-    public static function doRecover(object $data): object
+    public static function doRecover($data)
     {
         return (object) ['type' => 'css-string', 'value' => '', 'q' => ''];
     }

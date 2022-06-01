@@ -91,7 +91,7 @@ class PropertySet
 
             if (is_string($value)) {
 
-                $value = Value::parse($value, $name, true, '', '', true);
+                $value = Value::parse($value, $name, true, '', '');
             }
 
             $result = $this->expand($value);
