@@ -156,10 +156,10 @@
                         <option value="1">JYes</option>
                         <option value="0">JNo</option>
                     </field>
-<!--                    <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION" type="radio" class="btn-group" default="time">-->
-<!--                        <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>-->
-<!--                        <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>-->
-<!--                    </field>-->
+                    <field name="hashfiles" label="PLG_GZIP_FIELD_HASHFILES_LABEL" description="PLG_GZIP_FIELD_HASHFILES_DESCRIPTION" type="radio" class="btn-group" default="time">
+                        <option value="time">PLG_GZIP_FIELD_HASHFILES_OPTION_TIME</option>
+                        <option value="content">PLG_GZIP_FIELD_HASHFILES_OPTION_CONTENT</option>
+                    </field>
                     <field name="cache_key" label="PLG_GZIP_FIELD_CACHE_KEY_LABEL" description="PLG_GZIP_FIELD_CACHE_KEY_DESCRIPTION" type="text" default="" size="5" pattern="[a-zA-Z0-9@_]+" maxlength="5" class="form-control" />
                     <field name="maxage" label="PLG_GZIP_FIELD_MAXAGE_LABEL" description="PLG_GZIP_FIELD_MAXAGE_DESCRIPTION" first="1" last="24" step="1" type="maxage" default="2months" />
                     <field type="spacer" hr="true" />
