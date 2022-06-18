@@ -624,23 +624,7 @@ class GZipHelper
 			$salt .= static::$route;
 			$salt .= json_encode(static::$options);
 
-			$hash = !(isset($options['hashfiles']) && $options['hashfiles'] == 'content') ? function ($file) use ($scheme, $salt, $cache) {
-
-				if (isset($cache[$file])) {
-
-					return $cache[$file];
-				}
-
-				if (!static::isFile($file)) {
-
-					$cache[$file] = static::shorten(crc32($scheme . $salt . $file));
-				} else {
-					$cache[$file] = static::shorten(crc32($scheme . $salt . filemtime(static::getName($file))));
-				}
-
-				return $cache[$file];
-
-			} : function ($file) use ($scheme, $salt, $cache) {
+			$hash = function ($file) use ($scheme, $salt, $cache) {
 
 				if (!static::isFile($file)) {
 

@@ -574,7 +574,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $preserve_quotes
      * @return array
      */
-    public static function parse($string, $property = null, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
+    public static function parse($string, $property = null, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
         if (is_array($string)) {
 
@@ -727,7 +727,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $preserve_quotes
      * @return array
      */
-    protected static function doParse(string $string, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
+    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
         return static::reduce(static::getTokens($string, $capture_whitespace, $context, $contextName, $preserve_quotes));
@@ -742,7 +742,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param booll $preserve_quotes
      * @return array|null
      */
-    public static function getTokens(string $string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
+    public static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
         $string = static::split(trim($string));
@@ -1313,7 +1313,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $preserve_quotes
      * @return stdClass
      */
-    protected static function getType(string $token, $preserve_quotes = false)
+    protected static function getType($token, $preserve_quotes = false)
     {
 
         $type = new stdClass;

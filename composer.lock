@@ -304,23 +304,20 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.25.0",
+            "version": "v1.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "0abb51d2f102e00a4eefcf46ba7fec406d245825"
+                "reference": "b5f7b932ee6fa802fc792eabd77c4c88084517ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/0abb51d2f102e00a4eefcf46ba7fec406d245825",
-                "reference": "0abb51d2f102e00a4eefcf46ba7fec406d245825",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/b5f7b932ee6fa802fc792eabd77c4c88084517ce",
+                "reference": "b5f7b932ee6fa802fc792eabd77c4c88084517ce",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1"
-            },
-            "provide": {
-                "ext-mbstring": "*"
+                "php": ">=5.3.3"
             },
             "suggest": {
                 "ext-mbstring": "For best performance"
@@ -328,7 +325,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.23-dev"
+                    "dev-main": "1.19-dev"
                 },
                 "thanks": {
                     "name": "symfony/polyfill",
@@ -367,7 +364,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.25.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.19.0"
             },
             "funding": [
                 {
@@ -383,7 +380,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-11-30T18:21:41+00:00"
+            "time": "2020-10-23T09:01:57+00:00"
         },
         {
             "name": "tbela99/css",
@@ -391,12 +388,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
-                "reference": "7a4c008eeb8c8631b65b53450be419331d52bf07"
+                "reference": "42d6add593a3457a73a54e0a4e2432370c588d6d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tbela99/css/zipball/7a4c008eeb8c8631b65b53450be419331d52bf07",
-                "reference": "7a4c008eeb8c8631b65b53450be419331d52bf07",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/42d6add593a3457a73a54e0a4e2432370c588d6d",
+                "reference": "42d6add593a3457a73a54e0a4e2432370c588d6d",
                 "shasum": ""
             },
             "require": {
@@ -405,7 +402,7 @@
                 "ext-json": "*",
                 "ext-mbstring": "*",
                 "php": ">=5.6.40",
-                "symfony/polyfill-mbstring": "^1.19"
+                "symfony/polyfill-mbstring": "v1.19.0"
             },
             "type": "library",
             "autoload": {
@@ -438,7 +435,7 @@
                 "issues": "https://github.com/tbela99/css/issues",
                 "source": "https://github.com/tbela99/css/tree/php56-backport"
             },
-            "time": "2022-06-01T22:26:13+00:00"
+            "time": "2022-06-18T20:21:22+00:00"
         }
     ],
     "packages-dev": [],

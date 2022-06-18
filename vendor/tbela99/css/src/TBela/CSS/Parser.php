@@ -716,7 +716,7 @@ class Parser implements ParsableInterface
     protected function getContext()
     {
 
-        return end($this->context) ?: ($this->ast ?? $this->getAst());
+        return end($this->context) ?: ($this->ast ?: $this->getAst());
     }
 
     /**

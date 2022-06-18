@@ -14,7 +14,7 @@ class BackgroundColor extends Color
     /**
      * @inheritDoc
      */
-    public static function doParse(string $string, bool $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
+    public static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
         $tokens = [];
 

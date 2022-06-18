@@ -227,13 +227,13 @@ class PropertyMap
             // match
             $patterns = $this->config['pattern'];
 
-            foreach ($patterns as $name => $pattern) {
+            foreach ($patterns as $p => $pattern) {
 
                 foreach (preg_split('#(\s+)#', $pattern, -1, PREG_SPLIT_NO_EMPTY) as $token) {
 
                     if (empty($this->property_type[$token]['optional']) && (!isset($data[$token]) || (is_array($data[$token]) && !isset($data[$token][$index])))) {
 
-                        unset($patterns[$name]);
+                        unset($patterns[$p]);
                     }
                 }
             }
@@ -335,6 +335,12 @@ class PropertyMap
         }
 
         $data = Value::reduce($set, ['remove_defaults' => true]);
+
+        if (empty($data)) {
+
+            $this->properties[$name] = (new Property($name))->setValue($value);
+            return $this;
+        }
 
         $this->properties = [$this->shorthand => (new Property($this->shorthand))->setValue($data)->
         setLeadingComments($leadingcomments)->

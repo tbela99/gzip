@@ -27,6 +27,22 @@ use function preg_replace_callback;
 
 class CSSHelper
 {
+	protected $algo = 'sha1';
+
+	// 64 hex ->
+	protected function pad($key, $len = 64) {
+
+
+		$kl = strlen($key) - 1;
+
+		if ($kl < $len - 1) {
+
+			$pad = md5($key);
+			$key .= str_repeat($pad, ceil(($len - $kl - 1) / strlen($pad)));
+		}
+
+		return substr($key, 0, $len);
+	}
 
 	/**
 	 * @throws \SodiumException
@@ -56,7 +72,8 @@ class CSSHelper
 			return $b - $a;
 		});
 
-		$key = hash_hmac('sha256', $options['template'] . json_encode($data), $options['expiring_links']['secret']);
+		$key = $this->pad(hash_hmac($this->algo, $options['template'] . json_encode($data), $options['expiring_links']['secret']));
+
 		$path = $options['cri_path'];
 
 		$path .= $key . '_';
@@ -163,10 +180,14 @@ class CSSHelper
 
 			$data['hash'] = $secret;
 
+
+			$profiler = \JProfiler::getInstance('Application');
+			$profiler->mark('criticalCssSetup');
+
 			$script = '<script>' . file_get_contents(__DIR__ . '/../worker/dist/critical' . $jsMin . '.js') . '</script>' .
 				'<script>' . str_replace(
-					['"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
-					[json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
+					['"{ALGO}"', '"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
+					[strtoupper(str_replace($this->algo, 'sha', 'sha-')), json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
 					file_get_contents(__DIR__ . '/../worker/dist/critical-extract' . $jsMin . '.js')) . '
 </script>';
 
@@ -283,55 +304,45 @@ class CSSHelper
 			}
 		};
 
-		$parseUrls = function (ElementInterface $css) use ($path) {
+		$parseUrls = function ($css) use ($path) {
 
-			foreach ($css->query('[@name=src][@value*="url("]') as $fontSrc) {
+			return preg_replace_callback('~url\(([^)]+)\)~', function ($matches) use ($path) {
 
-				$values = $fontSrc->getRawValue();
-				$replace = false;
+				$url = preg_replace('~^(["\'])?([^\1]+)\1~', '$2', trim($matches[1]));
 
-				foreach ($values as $value) {
+				if (strpos($matches[0], 'data:') !== false) {
 
-					if ($value->type == 'css-url') {
+					return $matches[0];
+				}
 
-						$url = $value->arguments[0]->value;
+				if (preg_match_all('~^(https?:)?//~', $url)) {
 
-						if (strpos($url, 'data:') !== false) {
+					$parts = explode('/', parse_url($url)['path']);
+					$localName = $path . GZipHelper::shorten(crc32($url)) . '-' . GZipHelper::sanitizeFileName(end($parts));
 
-							continue;
+					if (!is_file($localName)) {
+
+						$data = Parser\Helper::fetchContent($url);
+
+						if ($data !== false) {
+
+							file_put_contents($localName, $data);
 						}
+					}
 
-						$replace = true;
+					if (is_file($localName)) {
 
-						if (preg_match_all('~^(https?:)?//~', $url)) {
-
-							$parts = explode('/', parse_url($url)['path']);
-							$localName = $path . GZipHelper::shorten(crc32($url)) . '-' . GZipHelper::sanitizeFileName(end($parts));
-
-							$value->arguments[0]->value = $localName;
-
-							if (!is_file($localName)) {
-
-								$data = Parser\Helper::fetchContent($url);
-
-								if ($data !== false) {
-
-									file_put_contents($localName, $data);
-								}
-							}
-						}
-
-						$value->arguments[0]->value = GZipHelper::url($value->arguments[0]->value);
+						return 'url(' . GZipHelper::url($localName) . ')';
 					}
 				}
 
-				if ($replace) {
+				if (substr($url, 0, 1) != '/') {
 
-					$fontSrc->setValue($values);
+					return 'url(' . GZipHelper::url($url) . ')';
 				}
-			}
 
-			return $css;
+				return $matches[0];
+			}, $css);
 		};
 
 		$profiler = \JProfiler::getInstance('Application');
@@ -429,7 +440,7 @@ class CSSHelper
 								$clone = clone $cssParser;
 								$clone->load(str_replace('&amp;', '&', $remote));
 
-								file_put_contents($local, $cssRenderer->renderAst($parseUrls($clone->parse())));
+								file_put_contents($local, $parseUrls($cssRenderer->renderAst($clone->parse())));
 							} catch (\Exception $e) {
 
 								error_log($e);
@@ -483,7 +494,7 @@ class CSSHelper
 							$cssParser->append($attr['href'], isset($attr['media']) && $attr['media'] != 'all' && $attr['media'] !== '' ? $attr['media'] : '');
 						}
 
-						file_put_contents($file, $cssRenderer->render($this->parseBackgroundImages($parseUrls($cssParser->parse(), $options))));
+						file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse(), $options))));
 					}
 
 					$links[$position]['links'] = [
@@ -517,7 +528,7 @@ class CSSHelper
 						if (!is_file($file)) {
 
 							$cssParser->load($attr['href'], isset($attr['media']) && $attr['media'] != 'all' && $attr['media'] !== '' ? $attr['media'] : '');
-							file_put_contents($file, $cssRenderer->render($this->parseBackgroundImages($parseUrls($cssParser->parse(), $options))));
+							file_put_contents($file, $parseUrls($cssRenderer->render($this->parseBackgroundImages($cssParser->parse(), $options))));
 						}
 					}
 
@@ -583,7 +594,7 @@ class CSSHelper
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
 //			$matches[2] = $parseUrls($matches[2]);
-			$links[$position]['style'][] = (new Renderer($css_renderer_options))->renderAst($parseUrls((new Parser($matches[2]))->parse()));
+			$links[$position]['style'][] = $parseUrls((new Renderer($css_renderer_options))->renderAst((new Parser($matches[2]))->parse()));
 
 			return '';
 		}, $html);
@@ -776,20 +787,21 @@ class CSSHelper
 				exit;
 			}
 
+			$sign = hash($this->algo, $signatures[0] . $raw);
+			// compute the key used to sign data
+			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.' . $sign) {
+
+				http_response_code(400);
+				exit;
+			}
+
 			$data = [
 
 				'url' => $post['url'],
 				'dimensions' => $dimensions
 			];
 
-			// compute the key used to sign data
-			$hash = hash_hmac('sha256', $options['template'] . json_encode($data), $options['expiring_links']['secret']);
-
-			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0] . '.' . hash('sha256', $signatures[0] . $raw)) {
-
-				http_response_code(400);
-				exit;
-			}
+			$hash = $this->pad(hash_hmac($this->algo, $options['template'] . json_encode($data), $options['expiring_links']['secret']));
 
 			$raw_message = hex2bin($signatures[0]);
 			$nonce = substr($raw_message, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);

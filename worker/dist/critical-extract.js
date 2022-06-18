@@ -7,7 +7,7 @@
      * @param {string} hash
      * @returns {Promise<string>}
      */
-    async function hash(message, hash = 'SHA-256') {
+    async function hash(message, hash) {
         // encode as UTF-8
         const msgBuffer = new TextEncoder().encode(message);
         // hash the message
@@ -23,6 +23,7 @@
     window.addEventListener('load', () => {
 
         let dimension;
+        const algo = 'SHA-1';
 
         if (!"{CRITICAL_MATCHED_VIEWPORTS}".some(dimension => window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches)) {
 
@@ -64,7 +65,7 @@
                                 method: "POST",
                                 headers: {
                                     'Content-Type': 'application/json; charset=utf-8',
-                                    'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), 'SHA-256')}`
+                                    'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), algo)}`
                                 },
                                 body: JSON.stringify(extracted)
                             });

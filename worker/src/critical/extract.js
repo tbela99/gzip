@@ -4,6 +4,7 @@ import {hash} from '../crypto/hash';
 window.addEventListener('load', () => {
 
     let dimension;
+    // const algo = 'SHA-1';
 
     if (!"{CRITICAL_MATCHED_VIEWPORTS}".some(dimension => window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches)) {
 
@@ -45,7 +46,7 @@ window.addEventListener('load', () => {
                             method: "POST",
                             headers: {
                                 'Content-Type': 'application/json; charset=utf-8',
-                                'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), 'SHA-256')}`
+                                'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), "{ALGO}")}`
                             },
                             body: JSON.stringify(extracted)
                         })

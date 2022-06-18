@@ -646,7 +646,9 @@ class PlgSystemGzip extends JPlugin
 
 			// "start_url": "./?utm_source=web_app_manifest",
 			// manifeste url
-		} else if ($app->isClient('admin')) {
+		}
+
+		else if ($app->isClient('admin')) {
 
 			$secret = $this->params->get('gzip.admin_secret');
 
@@ -709,9 +711,6 @@ class PlgSystemGzip extends JPlugin
 		}
 
 		$options = $this->options;
-
-		$profiler = JProfiler::getInstance('Application');
-		$profiler->mark('afterRenderStart');
 
 		$body = $app->getBody();
 

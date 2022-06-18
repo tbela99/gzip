@@ -39,8 +39,8 @@
     "ext-json": "*",
     "ext-curl": "*",
     "ext-mbstring": "*",
-    "axy/sourcemap": "^0.1.5",
-    "symfony/polyfill-mbstring": "^1.19"
+    "symfony/polyfill-mbstring": "v1.19.0",
+    "axy/sourcemap": "^0.1.5"
   },
   "scripts": {
     "test": "./bin/runtest.sh"

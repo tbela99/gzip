@@ -68,6 +68,7 @@ class PropertySet
      * @param array|string $value
      * @param array|null $leadingcomments
      * @param array|null $trailingcomments
+     * @param null $vendor
      * @return PropertySet
      */
     public function set($name, $value, array $leadingcomments = null, array $trailingcomments = null, $vendor = null)
@@ -91,10 +92,16 @@ class PropertySet
 
             if (is_string($value)) {
 
-                $value = Value::parse($value, $name, true, '', '');
+                $value = Value::parse($value, $name);
             }
 
             $result = $this->expand($value);
+
+            if ($result === false) {
+
+                $this->setProperty($name, $value, $vendor);
+                return $this;
+            }
 
             if (is_array($result)) {
 
@@ -153,6 +160,13 @@ class PropertySet
         return $this;
     }
 
+    /**
+     * @param array $result
+     * @param array|null $leadingcomments
+     * @param array|null $trailingcomments
+     * @param string|null $vendor
+     * @return $this
+     */
     protected function expandProperties(array $result, array $leadingcomments = null, array $trailingcomments = null, $vendor = null)
     {
 
@@ -197,6 +211,11 @@ class PropertySet
         $index = 0;
 
         foreach ($value as $v) {
+
+            if ($v->type == 'css-string' && $v->value == '!important') {
+
+                return false;
+            }
 
             if (isset($v->value) && $v->value == $separator) {
 
@@ -345,11 +364,23 @@ class PropertySet
     /**
      * return Property array
      * @return Property[]
+     * @throws \Exception
      */
     public function getProperties()
     {
 
         $properties = $this->properties;
+
+        foreach ($properties as $property) {
+
+            foreach ($property->getValue() as $value) {
+
+                if ($value->type == 'css-string' && $value->value == '!important') {
+
+                    return array_values($properties);
+                }
+            }
+        }
 
         if (isset($this->config['value_map']) && count($this->config['properties']) == count($properties)) {
 
@@ -463,6 +494,7 @@ class PropertySet
      * convert this object to string
      * @param string $join
      * @return string
+     * @throws \Exception
      */
     public function render($join = "\n")
     {
@@ -480,6 +512,7 @@ class PropertySet
     /**
      * convert this object to string
      * @return string
+     * @throws \Exception
      */
     public function __toString()
     {
