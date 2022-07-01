@@ -1,14 +1,15 @@
 import {hash} from '../crypto/hash';
-// import {ready} from "../utils/ready";
+import {ready} from "../utils/ready";
 
-window.addEventListener('load', () => {
+ready(() => {
 
     let dimension;
-    // const algo = 'SHA-1';
 
     if (!"{CRITICAL_MATCHED_VIEWPORTS}".some(dimension => window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches)) {
 
         for (dimension of "{CRITICAL_DIMENSIONS}") {
+
+            console.info({dimension});
 
             if (window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches) {
 
@@ -37,8 +38,30 @@ window.addEventListener('load', () => {
                         const extracted = {
                             url: "{CRITICAL_URL}",
                             dimension,
-                            fonts: result.fonts,
-                            css: result.styles.join('\n')
+                            // fonts: result.fonts,
+                            css: result.styles.concat(result.fonts.map(font => {
+
+                                let css = '@font-face {';
+
+                                for (const entry of Object.entries(font)) {
+
+                                    if (entry[0] == 'properties') {
+
+                                        for (const property of Object.entries(entry[1])) {
+
+                                            css += `${property[0]}: ${property[1]};`
+                                        }
+                                    }
+
+                                    else {
+
+                                        css += `${entry[0]}: ${entry[1]};`
+                                    }
+                                }
+
+                                return css + '}';
+
+                            })).join('\n')
                         }
 
                         const key = "{CRITICAL_HASH}";
@@ -46,7 +69,7 @@ window.addEventListener('load', () => {
                             method: "POST",
                             headers: {
                                 'Content-Type': 'application/json; charset=utf-8',
-                                'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), "{ALGO}")}`
+                                'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), '"{ALGO}"')}`
                             },
                             body: JSON.stringify(extracted)
                         })

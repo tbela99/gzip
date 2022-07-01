@@ -605,7 +605,12 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
 			GZipHelper::register(new Gzip\Helpers\Responder());
 
+//			$profiler = \JProfiler::getInstance('Application');
+//			$profiler->mark('preAfterInitialise');
+
 			GZipHelper::trigger('afterInitialise', $options);
+
+//			$profiler->mark('postAfterInitialise');
 
 			$document = JFactory::getDocument();
 

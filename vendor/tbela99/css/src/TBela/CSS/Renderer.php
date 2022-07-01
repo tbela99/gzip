@@ -211,7 +211,7 @@ class Renderer
 
         } else {
 
-            $css = $this->{'render' . $ast->type}($ast);
+            $css = $this->{'render' . $ast->type}($ast, null);
         }
 
         if (file_put_contents($file, $css) === false) {

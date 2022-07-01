@@ -30,7 +30,8 @@ class CSSHelper
 	protected $algo = 'sha1';
 
 	// 64 hex ->
-	protected function pad($key, $len = 64) {
+	protected function pad($key, $len = 64)
+	{
 
 
 		$kl = strlen($key) - 1;
@@ -43,6 +44,7 @@ class CSSHelper
 
 		return substr($key, 0, $len);
 	}
+
 
 	/**
 	 * @throws \SodiumException
@@ -57,7 +59,12 @@ class CSSHelper
 			return $html;
 		}
 
-		$min = empty($options['minifyjs']) ? '' : '.min';
+
+		$profiler = \JProfiler::getInstance('Application');
+
+		$replace = '';
+		$css_min = !empty($options['minifycss']) ? '.min' : '';
+		$jsMin = !empty($options['minifyjs']) ? '.min' : '';
 
 		$data = [
 			'url' => $options['request_uri'],
@@ -72,102 +79,70 @@ class CSSHelper
 			return $b - $a;
 		});
 
-		$key = $this->pad(hash_hmac($this->algo, $options['template'] . json_encode($data), $options['expiring_links']['secret']));
-
 		$path = $options['cri_path'];
 
-		$path .= $key . '_';
+		$profiler->mark('preProcessPad');
+		$key = $this->pad(hash_hmac($this->algo, $options['template'] . json_encode($data), $options['expiring_links']['secret']));
+		$root = $path . $key . '_';
 
-		$paths = [];
 		$matched = [];
-		$data['dimensions'] = array_values(array_filter($data['dimensions'], function ($dimension) use ($path, &$paths, &$matched) {
 
-			$dimension = preg_replace('#[^x0-9]+#', '', $dimension);
+		$data['dimensions'] = array_values(array_filter($data['dimensions'], function ($dimension) use (&$matched, $root) {
 
-			if (!is_file($path . $dimension . '.css')) {
+			if (is_file($root . $dimension . '.css')) {
 
-				return true;
+				$matched[] = $dimension;
+				return false;
 			}
 
-			$matched[] = $dimension;
-			$paths[] = $path . $dimension;
-			return false;
+			return true;
 		}));
 
-		// filter matched resolutions
-		// lower matched resolutions must be removed
+
+
+		if (empty($data['dimensions'])) {
+
+			// all breakpoints processed
+			if (is_file($root . 'all' . $css_min . '.css')) {
+
+				$html = preg_replace('#<head>#i', '<style data-ignore="true">' . file_get_contents($path . $key . '_all' . $css_min . '.css') . '</style>' . "\n", $html, 1);
+
+//				$replace = '<style data-ignore="true">' . file_get_contents($path . $key . '_all' . $css_min . '.css') . '</style>' . "\n";
+			}
+		} else {
+
+			$hash = $root.md5(json_encode($matched));
+
+			if (!empty($matched)) {
+
+				$cssParser = new Parser('', ['capture_errors' => false]);
+
+				if (!is_file($hash.$css_min.'.css')) {
+
+					foreach (array_reverse($matched) as $dimension) {
+
+						$file = $root.$dimension.$css_min.'.css';
+
+						if (is_file($file)) {
+
+							$cssParser->append($file);
+						}
+					}
+
+					file_put_contents($hash.'.css', $cssParser);
+					file_put_contents($hash.'.min.css', (new Renderer(['compress' => true]))->renderAst($cssParser));
+				}
+
+				if (is_file($hash.$css_min.'.css')) {
+
+					$html = preg_replace('#<head>#i', '<style data-ignore="true">'.file_get_contents($hash.$css_min.'.css').'</style>'."\n", $html, 1);
+
+//				$replace .= '<style data-ignore="true">'.file_get_contents($hash.$css_min.'.css').'</style>'."\n";
+				}
+			}
+		}
+
 		if (!empty($matched)) {
-
-			$matched = array_filter($matched, function ($value) use ($data) {
-
-				$value = intval($value);
-				foreach ($data['dimensions'] as $dimension) {
-
-					if (intval($dimension) >= $value) {
-
-						return false;
-					}
-				}
-
-				return true;
-			});
-		}
-
-		$replace = '';
-		$css_min = !empty($options['minifycss']) ? '.min' : '';
-		$jsMin = !empty($options['minifyjs']) ? '.min' : '';
-
-		if (!empty($paths)) {
-
-			$paths = array_reverse($paths);
-			$checksum = $options['cri_path'] . 'chk_' . hash('md5', json_encode($paths)) . '_' . implode('_', $data['dimensions']);
-
-			if (!is_file($checksum . '.css')) {
-
-				$css = '';
-				$fontList = [];
-
-				foreach ($paths as $p) {
-
-					$css .= "\n" . file_get_contents($p . '.css');
-
-					if (is_file($p . '.php')) {
-
-						$fonts = [];
-
-						require $p . '.php';
-
-						$fontList = array_merge($fontList, $fonts);
-					}
-				}
-
-				if (trim($css) !== '') {
-
-					$parser = new Parser($css);
-
-					file_put_contents($checksum . '.css', $parser);
-					file_put_contents($checksum . '.min.css', (new Renderer(['compress' => true]))->renderAst($parser));
-				}
-
-				if (!empty($fontList)) {
-
-					file_put_contents($checksum . '.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList), JSON_PRETTY_PRINT), file_get_contents(__DIR__ . '/../worker/dist/fontloader.js')), JSON_PRETTY_PRINT);
-					file_put_contents($checksum . '.min.js', str_replace('"{WEB_FONTS}"', json_encode(array_values($fontList)), file_get_contents(__DIR__ . '/../worker/dist/fontloader.min.js')));
-				}
-			}
-
-			if (is_file($checksum . $css_min . '.css')) {
-
-				$replace .= "\n" . '<style data-ignore="true">' . file_get_contents($checksum . $css_min . '.css') . '</style>' . "\n";
-			}
-
-			if (is_file($checksum . $jsMin . '.js')) {
-
-				$replace .= "\n" . '<script data-ignore="true">' . file_get_contents($checksum . $jsMin . '.js') . '</script>' . "\n";
-			}
-		}
-
-		if (!empty($data['dimensions'])) {
 
 			$dt = new \DateTime();
 			$dt->modify('+40s');
@@ -180,14 +155,28 @@ class CSSHelper
 
 			$data['hash'] = $secret;
 
-
 			$profiler = \JProfiler::getInstance('Application');
 			$profiler->mark('criticalCssSetup');
+
+			$matched = array_values(array_filter($matched, function ($dimension) use($data) {
+
+				$dimension = intval($dimension);
+
+				foreach ($data['dimensions'] as $dim) {
+
+					if (intval($dim) > $dimension) {
+
+						return false;
+					}
+
+					return true;
+				}
+			}));
 
 			$script = '<script>' . file_get_contents(__DIR__ . '/../worker/dist/critical' . $jsMin . '.js') . '</script>' .
 				'<script>' . str_replace(
 					['"{ALGO}"', '"{CRITICAL_URL}"', '"{CRITICAL_POST_URL}"', '"{CRITICAL_DIMENSIONS}"', '"{CRITICAL_MATCHED_VIEWPORTS}"', '"{CRITICAL_HASH}"'],
-					[strtoupper(str_replace($this->algo, 'sha', 'sha-')), json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
+					[strtoupper(str_replace('sha', 'sha-', $this->algo)), json_encode($data['url']), json_encode(GZipHelper::CRITICAL_PATH_URL), json_encode($data['dimensions']), json_encode($matched), json_encode($data['hash'])],
 					file_get_contents(__DIR__ . '/../worker/dist/critical-extract' . $jsMin . '.js')) . '
 </script>';
 
@@ -213,6 +202,7 @@ class CSSHelper
 	 * @return string
 	 *
 	 * @throws Parser\SyntaxError
+	 * @throws \Exception
 	 * @since
 	 */
 	public function processHTML(array $options, $html)
@@ -228,81 +218,14 @@ class CSSHelper
 
 		$async = !empty($options['asynccss']) || !empty($options['criticalcssenabled']);
 
-		$css_renderer_options = isset($options['css_renderer']) ? $options['css_renderer'] : [
-			'compress' => !empty($options['minifycss'])
-		];
-
+		$css_renderer_options['compress'] = !empty($options['minifycss']);
+		$css_renderer_options = isset($options['css_renderer']) ? $options['css_renderer'] : [];
 		$css_parser_options = isset($options['css_parser']) ? $options['css_parser'] : [];
 
 		$hashFile = GZipHelper::getHashMethod($options);
 		$cssParser = new Parser('', $css_parser_options);
 		$cssRenderer = new Renderer($css_renderer_options);
 		$headStyle = new Stylesheet();
-
-		$fetchFonts = function ($node) use ($options, $headStyle) {
-
-			/**
-			 * @var Element\AtRule $node
-			 */
-
-			if ((string)$node['name'] == 'font-face') {
-
-				$query = $node->query('./[@name=src]');
-
-				/**
-				 * @var ElementInterface $query
-				 */
-
-				$query = end($query);
-
-				if ($query) {
-
-					foreach ($query as $q) {
-
-						$q->getValue()->map(function ($value) {
-
-							/**
-							 * @var Value $value
-							 */
-
-							if ($value->type == 'css-url') {
-
-								$name = GZipHelper::getName(preg_replace('#(^["\'])([^\1]+)\1#', '$2', trim($value->arguments->{0})));
-
-								if (GZipHelper::isFile($name)) {
-
-									return Value::getInstance((object)[
-										'name' => 'url',
-										'type' => 'css-url',
-										'arguments' => new Value\Set([
-											Value::getInstance((object)[
-												'type' => 'css-string',
-												'value' => GZipHelper::url($name)
-											])
-										])
-									]);
-								}
-							}
-
-							return $value;
-						});
-					}
-
-					$copy = $query->copy();
-
-					$declaration = new Element\Declaration();
-					$declaration->setName('font-display');
-					$declaration->setValue($options['fontdisplay']);
-
-					/**
-					 * @var RuleListInterface
-					 */
-					$copy->getParent()->insert($declaration, 0);
-
-					$headStyle->append($copy->getRoot());
-				}
-			}
-		};
 
 		$parseUrls = function ($css) use ($path) {
 
@@ -363,7 +286,7 @@ class CSSHelper
 			if ($matches[1] != 'link' && $matches[1] != 'style') {
 
 				// parsing css can be expansive
-				// let do it only when needed
+				// lets do it only when needed
 				if (!empty($options['parseinlinecss']) &&
 					!empty($attributes['style']) &&
 					strpos($attributes['style'], 'background') !== false &&
@@ -489,7 +412,7 @@ class CSSHelper
 
 					if (!is_file($file)) {
 
-						foreach ($blob['links'] as $key => $attr) {
+						foreach ($blob['links'] as $attr) {
 
 							$cssParser->append($attr['href'], isset($attr['media']) && $attr['media'] != 'all' && $attr['media'] !== '' ? $attr['media'] : '');
 						}
@@ -593,7 +516,6 @@ class CSSHelper
 			}
 
 			$position = isset($attributes['data-position']) && $attributes['data-position'] == 'head' ? 'head' : 'body';
-//			$matches[2] = $parseUrls($matches[2]);
 			$links[$position]['style'][] = $parseUrls((new Renderer($css_renderer_options))->renderAst((new Parser($matches[2]))->parse()));
 
 			return '';
@@ -616,8 +538,6 @@ class CSSHelper
 				}
 
 				$profiler->mark('CssParseObject');
-				$headStyle->deduplicate();
-
 				file_put_contents($css_hash, $cssRenderer->render($this->parseBackgroundImages($headStyle, $options)));
 
 				$profiler->mark('CssDedup');
@@ -654,13 +574,12 @@ class CSSHelper
 		$noscript = '';
 
 		if ($style !== '') {
+			$profiler->mark('CssBgStyles');
 
 			$headStyle->append($this->parseBackgroundImages((new Parser($style, $css_renderer_options))->parse(), $options));
 
 			if ($headStyle->hasChildren()) {
 
-				$profiler->mark('CssStyle');
-				$headStyle->deduplicate();
 				$profiler->mark('CssRender');
 				$head_string .= '<style>' . $cssRenderer->render($headStyle) . '</style>' . "\n";
 			}
@@ -751,9 +670,10 @@ class CSSHelper
 	/**
 	 * @param array $options
 	 * @throws \SodiumException
+	 * @throws \Exception
 	 * @since 3.0
 	 */
-	public function afterInitialise(array $options)
+	public	function afterInitialise(array $options)
 	{
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
@@ -777,8 +697,8 @@ class CSSHelper
 				!is_array($post) ||
 				!isset($post['url']) ||
 				!isset($post['css']) ||
-				!isset($post['fonts']) ||
-				!is_array($post['fonts']) ||
+//				!isset($post['fonts']) ||
+//				!is_array($post['fonts']) ||
 				!isset($_SERVER['HTTP_X_SIGNATURE']) ||
 				!isset($post['dimension']) ||
 				!in_array($post['dimension'], $dimensions)) {
@@ -789,7 +709,7 @@ class CSSHelper
 
 			$sign = hash($this->algo, $signatures[0] . $raw);
 			// compute the key used to sign data
-			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0].'.' . $sign) {
+			if ($_SERVER['HTTP_X_SIGNATURE'] != $signatures[0] . '.' . $sign) {
 
 				http_response_code(400);
 				exit;
@@ -837,25 +757,33 @@ class CSSHelper
 			}
 
 			header('Content-Type: application/json; charset=utf-8');
-			file_put_contents($path . '/' . $hash . '_' . $post['dimension'] . '.css', new Parser($post['css']));
 
-			$fonts = [];
+			$parser = new Parser($post['css']);
+			file_put_contents($path . $hash . '_' . $post['dimension'] . '.css', $parser);
+			file_put_contents($path . $hash . '_' . $post['dimension'] . '.min.css', (new Renderer(['compress' => true]))->renderAst($parser));
 
-			foreach ($post['fonts'] as $font) {
+			$processed = true;
 
-				$fonts[md5(json_encode($font))] = $font;
+			foreach ($dimensions as $dimension) {
+
+				if (!is_file($path . $hash . '_' . $dimension . '.css')) {
+
+					$processed = false;
+					break;
+				}
 			}
 
-			$fontFile = $path . '/' . $hash . '_' . $post['dimension'] . '.php';
+			if ($processed) {
 
-			if (!empty($fonts)) {
+				$parser = new Parser('', ['capture_errors' => false]);
 
-				file_put_contents($fontFile, '<?php' . "\n
-defined('JPATH_PLATFORM') or die;
-\$fonts = " . var_export($fonts, true) . ';');
-			} else if (is_file($fontFile)) {
+				foreach (array_reverse($dimensions) as $dimension) {
 
-				unlink($fontFile);
+					$parser->append($path . $hash . '_' . $dimension . '.css');
+				}
+
+				file_put_contents($path . $hash . '_all.css', $parser);
+				file_put_contents($path . $hash . '_all.min.css', (new Renderer(['compress' => true]))->renderAst($parser));
 			}
 
 			echo 1;
@@ -872,7 +800,7 @@ defined('JPATH_PLATFORM') or die;
 	 * @throws Parser\SyntaxError
 	 * @since version
 	 */
-	public function parseBackgroundImages(Element $headStyle, array $options = [])
+	public	function parseBackgroundImages(Element $headStyle, array $options = [])
 	{
 
 		if (empty($options['imagecssresize']) || empty($options['css_sizes'])) {

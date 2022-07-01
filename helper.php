@@ -321,8 +321,8 @@ class GZipHelper
 
 			if (is_callable([$callback[0], $event])) {
 
-				$html = call_user_func_array([$callback[0], $event], [$options, $html]);
 				$profiler->mark($callback[1] . ucwords($event));
+				$html = call_user_func_array([$callback[0], $event], [$options, $html]);
 			}
 		}
 

@@ -295,6 +295,11 @@ class Helper
             $url .= '//' . $data['host'];
         }
 
+        if (isset($data['port'])) {
+
+            $url .= ':' . $data['port'];
+        }
+
         if (isset($data['path'])) {
 
             $url .= $data['path'];

@@ -74,7 +74,7 @@ class Number extends Value
 
             if ($value[0] == 0) {
 
-                $value[0] = '';
+                $value[0] = rtrim($value[0], '0');
             }
 
         } else {

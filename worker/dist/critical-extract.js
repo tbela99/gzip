@@ -18,16 +18,49 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // import {ready} from "../utils/ready";
+    // @ts-check
 
-    window.addEventListener('load', () => {
+    const queue = [];
+    let fired = document.readyState != 'loading';
+
+    function domReady() {
+
+    	document.removeEventListener('DOMContentLoaded', domReady);
+    	fired = true;
+
+    	while (queue.length > 0) {
+
+    		requestAnimationFrame(queue.shift());
+    	}
+    }
+
+    document.addEventListener('DOMContentLoaded', domReady);
+
+    function ready(cb) {
+
+    	if (fired) {
+
+    		while (queue.length > 0) {
+
+    			requestAnimationFrame(queue.shift());
+    		}
+
+    		cb();
+    	} else {
+
+    		queue.push(cb);
+    	}
+    }
+
+    ready(() => {
 
         let dimension;
-        const algo = 'SHA-1';
 
         if (!"{CRITICAL_MATCHED_VIEWPORTS}".some(dimension => window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches)) {
 
             for (dimension of "{CRITICAL_DIMENSIONS}") {
+
+                console.info({dimension});
 
                 if (window.matchMedia('(min-width: ' + dimension.split('x', 1)[0] + 'px)').matches) {
 
@@ -56,8 +89,30 @@
                             const extracted = {
                                 url: "{CRITICAL_URL}",
                                 dimension,
-                                fonts: result.fonts,
-                                css: result.styles.join('\n')
+                                // fonts: result.fonts,
+                                css: result.styles.concat(result.fonts.map(font => {
+
+                                    let css = '@font-face {';
+
+                                    for (const entry of Object.entries(font)) {
+
+                                        if (entry[0] == 'properties') {
+
+                                            for (const property of Object.entries(entry[1])) {
+
+                                                css += `${property[0]}: ${property[1]};`;
+                                            }
+                                        }
+
+                                        else {
+
+                                            css += `${entry[0]}: ${entry[1]};`;
+                                        }
+                                    }
+
+                                    return css + '}';
+
+                                })).join('\n')
                             };
 
                             const key = "{CRITICAL_HASH}";
@@ -65,7 +120,7 @@
                                 method: "POST",
                                 headers: {
                                     'Content-Type': 'application/json; charset=utf-8',
-                                    'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), algo)}`
+                                    'X-Signature': `${key}.${await hash(key + JSON.stringify(extracted), '"{ALGO}"')}`
                                 },
                                 body: JSON.stringify(extracted)
                             });

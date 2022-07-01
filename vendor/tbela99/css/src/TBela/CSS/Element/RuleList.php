@@ -118,17 +118,11 @@ abstract class RuleList extends Element implements RuleListInterface
 
         if (isset($this->ast->children)) {
 
-            $children = $this->ast->children;
+            $k = count($this->ast->children);
 
-            foreach ($children as $element) {
+            while ($k--) {
 
-                $index = array_search($element, $this->ast->children, true);
-
-                if ($index !== false) {
-
-                    array_splice($this->ast->children, $index, 1);
-                    $element->ast->parent = null;
-                }
+                $this->ast->children[$k]->ast->parent = null;
             }
 
             $this->ast->children = [];

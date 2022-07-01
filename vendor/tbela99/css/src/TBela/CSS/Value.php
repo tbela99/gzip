@@ -76,8 +76,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
             if (!is_object($token)) {
 
-                echo new \Exception(sprintf('invalid token %s', var_export($token, true)));
-                die;
+                throw new \Exception(sprintf('invalid token %s', var_export($token, true)));
             }
 
             switch ($token->type) {
