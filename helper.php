@@ -321,8 +321,8 @@ class GZipHelper
 
 			if (is_callable([$callback[0], $event])) {
 
-				$html = call_user_func_array([$callback[0], $event], [$options, $html]);
 				$profiler->mark($callback[1] . ucwords($event));
+				$html = call_user_func_array([$callback[0], $event], [$options, $html]);
 			}
 		}
 
@@ -519,7 +519,7 @@ class GZipHelper
 			return static::$options['webroot'] . $file;
 		}
 
-		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY);
+		$hash = preg_split('~([#?])~', $file, 2, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 		$hash = isset($hash[2]) ? $hash[1] . $hash[2] : '';
 
 		$name = static::getName($file);

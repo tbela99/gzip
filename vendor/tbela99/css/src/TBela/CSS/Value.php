@@ -8,14 +8,13 @@ use stdClass;
 use TBela\CSS\Interfaces\ObjectInterface;
 use TBela\CSS\Property\Config;
 use TBela\CSS\Value\Number;
-use TBela\CSS\Value\Set;
 use TBela\CSS\Parser\ParserTrait;
 
 /**
  * CSS value base class
  * @package CSS
  * @property-read string|null $value
- * @property-read Set|null $arguments
+ * @property-read array|null $arguments
  * @method string getName()
  * @method \stdClass|null getData()
  * @method \stdClass|null getValue()
@@ -54,14 +53,127 @@ abstract class Value implements JsonSerializable, ObjectInterface
      */
     protected static $cache = [];
 
+//    abstract public static function doRender(object $data, array $options = []);
+
     /**
      * Value constructor.
-     * @param stdClass $data
+     * @param object $data
      */
-    protected function __construct($data)
+    protected function __construct(object $data)
     {
 
         $this->data = $data;
+    }
+
+    public static function renderTokens(array $tokens, array $options = [], $join = null)
+    {
+
+//        echo new \Exception('no reason');
+
+        $result = '';
+
+        foreach ($tokens as $token) {
+
+            if (!is_object($token)) {
+
+                throw new \Exception(sprintf('invalid token %s', var_export($token, true)));
+            }
+
+            switch ($token->type) {
+
+                case 'font':
+                case 'operator':
+                case 'separator':
+                case 'background':
+                case 'font-style':
+                case 'font-family':
+                case 'font-variant':
+                case 'outline-style':
+                case 'background-clip':
+                case 'background-size':
+                case 'background-repeat':
+                case 'background-attachment':
+
+                    $result .= $token->value;
+
+                    if (isset($token->unit) && $token->value !== '0') {
+
+                        $result .= $token->unit;
+                    }
+
+                    if ($token->value == ',' && empty($options['compress'])) {
+
+                        $result .= isset($join) ? $join : ' ';
+                    }
+
+                    break;
+                case 'whitespace':
+
+                    $result .= ' ';
+                    break;
+
+                case 'css-src-format':
+
+                    $result .= $token->name . '("' . Value::renderTokens($token->arguments) . '")';
+                    break;
+
+                case 'css-function':
+                case 'invalid-css-function':
+                case 'css-parenthesis-expression':
+
+                    $result .= $token->name . '(' . Value::renderTokens($token->arguments, $options) . ')';;
+                    break;
+
+                case 'unit':
+                case 'color':
+                case 'number':
+                case 'css-url':
+                case 'font-size':
+                case 'css-string':
+                case 'line-height':
+                case 'font-weight':
+                case 'outline-color':
+                case 'css-attribute':
+                case 'css-src-format':
+                case 'outline-width':
+                case 'background-color':
+                case 'background-image':
+                case 'background-origin':
+                case 'background-position':
+
+                    $className = static::getClassName($token->type);
+                    $result .= $className::doRender($token, $options);
+                    break;
+                case 'Comment':
+                    $result .= $token->value;
+                    break;
+                default:
+                    throw new \Exception(sprintf("Not implemented: %s:\n%s", $token->type, var_export($token, true)), 501);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param stdClass $type
+     * @param bool $preserve_quotes
+     * @return void
+     */
+    private static function parseString(stdClass $type, $preserve_quotes)
+    {
+        if (!$preserve_quotes && strlen($type->value) > 2 &&
+            in_array($type->value[0], ['"', "'"]) &&
+            $type->value[0] == substr($type->value, -1)) {
+
+            $value = substr($type->value, 1, -1);
+
+            if (!preg_match('#^\d#', $value) &&
+                preg_match('#^[\w_-]+$#', $value)) {
+
+                $type->value = $value;
+            }
+        }
     }
 
     /**
@@ -97,24 +209,14 @@ abstract class Value implements JsonSerializable, ObjectInterface
     }
 
     /**
-     * compute the hash value
-     * @return string|null
-     */
-    public function getHash()
-    {
-
-        return $this->data->value;
-    }
-
-    /**
      * test if this object matches the specified type
      * @param string $type
      * @return bool
      */
-    public function match($type)
+    public static function match($data, $type)
     {
 
-        return strtolower($this->data->type) == $type;
+        return strtolower($data->type) == $type;
     }
 
     /**
@@ -245,17 +347,235 @@ abstract class Value implements JsonSerializable, ObjectInterface
     }
 
     /**
+     * compare parsed values
+     * @param array $value
+     * @param array $otherValue
+     * @return bool
+     * @throws \Exception
+     */
+    public static function equals(array $value, array $otherValue)
+    {
+
+        return static::renderTokens($value, ['convert_color' => 'hex']) == static::renderTokens($otherValue, ['convert_color' => 'hex']);
+    }
+
+    /**
+     * avoid parsing string
+     * @param $string
+     * @return string | bool
+     *
+     */
+    public static function format($string, array &$comments = null)
+    {
+
+        $result = '';
+
+        $string = trim($string);
+        $j = strlen($string) - 1;
+        $i = -1;
+
+        while ($i++ < $j) {
+
+            switch ($string[$i]) {
+
+                case ' ':
+                case "\t":
+                case "\r":
+                case "\n":
+
+                    while ($i + 1 < $j && static::is_whitespace($string[$i + 1])) {
+
+                        $i++;
+                    }
+
+                    if ((isset($string[$i + 1]) ? $string[$i + 1] : ',') != ',') {
+
+                        $result .= ' ';
+                    }
+
+                    break;
+
+                case '"':
+                case "'":
+
+                    $k = $i;
+
+                    while (++$k < $j) {
+
+                        if ($string[$k] == $string[$i] && $string[$k - 1] != '\\') {
+
+                            break;
+                        }
+                    }
+
+                    if ($k > $j || $string[$k] != $string[$i]) {
+
+                        // unterminated string
+//                        $result .= substr($string, $i);
+//                        throw new SyntaxError(sprintf('unclosed string. missing "%s"', $string[$i]), 400);
+
+                        return false;
+                    } else {
+
+                        $result .= substr($string, $i, $k - $i + 1);
+                    }
+
+                    $i = $k;
+
+                    break;
+
+                case ',':
+
+                    $result .= ',';
+
+                    while ($i < $j && static::is_whitespace($string[$i + 1])) {
+
+                        $i++;
+                    }
+
+                    break;
+
+                case '[':
+                case '(':
+
+                    $start = $string[$i] == '[' ? '[' : '(';
+                    $end = $string[$i] == '[' ? ']' : ')';
+
+                    $params = static::_close($string, $end, $start, $i, $j);
+
+                    if ($params === false) {
+
+//                        throw new SyntaxError(sprintf('missing "%s"', $end), 400);
+                        return false;
+
+                    } else {
+
+                        $res = static::format(substr($params, 1, -1), $comments);
+
+                        if ($res === false) {
+
+                            return false;
+                        }
+
+                        $result .= $start . $res . $end;
+                        $i += strlen($params) - 1;
+                    }
+
+                    break;
+
+                case '/':
+
+                    $comment = '/';
+
+                    if ($i < $j && $string[$i + 1] == '*') {
+
+                        $comment .= '*';
+                        $i++;
+
+                        while ($i++ < $j) {
+
+                            if ($string[$i] == '\\') {
+
+                                $comment .= '\\';
+
+                                if ($i < $j) {
+
+                                    $comment .= $string[++$i];
+                                    continue;
+                                }
+                            }
+
+                            $comment .= $string[$i];
+
+                            if ($i < $j && $string[$i] == '*' && $string[$i + 1] == '/') {
+
+                                $comment .= $string[++$i];
+
+                                if (!is_null($comments)) {
+
+                                    $comments[] = $comment;
+                                    while ($i < $j && static::is_whitespace($string[$i + 1])) {
+
+                                        $i++;
+                                    }
+                                } else {
+
+                                    $result .= $comment;
+                                }
+
+                                break 2;
+                            }
+                        }
+
+//                        throw new SyntaxError("unterminated comment", 400);
+                        return false;
+                    } else {
+
+                        $result .= '/';
+                    }
+
+                    break;
+
+                case '<':
+
+                    if (substr($string, $i, 4) == '<!--') {
+
+                        $comment = '<!--';
+                        $i += 3;
+
+                        while ($i++ < $j) {
+
+                            if ($string[$i] == '-' && $i < $j - 3 && substr($string, $i, 4) == '--!>') {
+
+                                $comment .= '--!>';
+                                $i += 3;
+
+                                if (!is_null($comments)) {
+
+                                    $comments[] = $comment;
+                                } else {
+
+                                    $result .= $comment;
+                                }
+
+                                break 2;
+                            }
+
+                            $comment .= $string[$i];
+                        }
+
+                        // invalid comment
+                        return false;
+                    } else {
+
+                        $result .= $string[$i];
+                    }
+
+                    break;
+
+                default:
+
+                    $result .= $string[$i];
+                    break;
+            }
+        }
+
+        return rtrim($result);
+    }
+
+    /**
      * parse a css value
      * @param string $string
-     * @param string|Set|null $property
+     * @param string|null $property
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
-     * @return Set
+     * @param bool $preserve_quotes
+     * @return array
      */
-    public static function parse($string, $property = null, $capture_whitespace = true, $context = '', $contextName = '')
+    public static function parse($string, $property = null, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
-        if ($string instanceof Set) {
+        if (is_array($string)) {
 
             return $string;
         }
@@ -276,7 +596,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 try {
 
-                    return call_user_func([$className, 'doParse'], $string, $capture_whitespace, $context, $contextName);
+                    return call_user_func([$className, 'doParse'], $string, $capture_whitespace, $context, $contextName, $preserve_quotes);
                 } catch (\Exception $e) {
 
 //                    throw $e;
@@ -285,7 +605,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
             }
         }
 
-        return static::doParse($string, $capture_whitespace, $context, $contextName);
+        return static::doParse($string, $capture_whitespace, $context, $contextName, $preserve_quotes);
     }
 
     /**
@@ -335,7 +655,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if (is_callable($className . '::matchDefaults') && call_user_func($className . '::matchDefaults', $token)) {
 
-                        if ($token->type == 'background-size') {
+                        if (in_array($token->type, ['background-size', 'background-repeat'])) {
 
                             if ((isset($tokens[$j - 2]) && $token->type == $tokens[$j - 2]->type) ||
                                 (isset($tokens[$j + 2]) && $token->type == $tokens[$j + 2]->type)) {
@@ -403,23 +723,25 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
-     * @return Set
+     * @param bool $preserve_quotes
+     * @return array
      */
-    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '')
+    protected static function doParse($string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
-        return new Set(static::reduce(static::getTokens($string, $capture_whitespace, $context, $contextName)));
+        return static::reduce(static::getTokens($string, $capture_whitespace, $context, $contextName, $preserve_quotes));
     }
 
     /**
      * parse a css value
-     * @param Set|string $string
+     * @param string $string
      * @param bool $capture_whitespace
      * @param string $context
      * @param string $contextName
+     * @param booll $preserve_quotes
      * @return array|null
      */
-    public static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '')
+    public static function getTokens($string, $capture_whitespace = true, $context = '', $contextName = '', $preserve_quotes = false)
     {
 
         $string = static::split(trim($string));
@@ -448,8 +770,6 @@ abstract class Value implements JsonSerializable, ObjectInterface
                             $tokens[] = static::getType($buffer);
                         }
 
-                        $buffer = '';
-
                         $k = $i + 3;
 
                         $buffer = '<!--';
@@ -461,7 +781,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                                 $buffer .= '->';
 
-                                $tokens[] = (object) [
+                                $tokens[] = (object)[
                                     'type' => 'Comment',
                                     'value' => $buffer
                                 ];
@@ -473,7 +793,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         }
 
                         // unclosed comment
-                        $tokens[] = (object) [
+                        $tokens[] = (object)[
                             'type' => 'invalid-comment',
                             'value' => $buffer
                         ];
@@ -486,6 +806,22 @@ abstract class Value implements JsonSerializable, ObjectInterface
                     $buffer .= '<';
                     break;
 
+                case ';':
+
+                    if ($context == 'invalid-css-function') {
+
+                        $tokens[] = static::getType($buffer . ';');
+                        $buffer = '';
+
+                    } else if ($buffer !== '') {
+
+                        $tokens[] = static::getType($buffer);
+                        $buffer = '';
+                    }
+
+                    break;
+
+
                 case ' ':
                 case "\t":
                 case "\n":
@@ -493,7 +829,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if (rtrim($buffer) !== '') {
 
-                        $tokens[] = static::getType($buffer);
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                         $buffer = '';
                     }
 
@@ -528,8 +864,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if ($buffer !== '') {
 
-                        $tokens[] = static::getType($buffer);
-                        $buffer = '';
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                     }
 
                     $next = $i;
@@ -557,11 +892,12 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         $token->type = 'invalid-css-string';
                         $token->value = implode('', array_slice($string, $i + 1));
                         $token->q = $string[$i];
-                    }
-                    else {
+                    } else {
 
                         $token->type = 'css-string';
                         $token->value = implode('', array_slice($string, $i, $next - $i + 1));
+
+                        self::parseString($token, $preserve_quotes);
                     }
 
                     if ($token->value !== '') {
@@ -600,13 +936,13 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if (trim($buffer) !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $token = new stdClass;
 
                         $token->type = 'css-attribute';
-                        $token->arguments = Value::parse(substr($params, 1, -1), null, $capture_whitespace, 'attribute');
+                        $token->arguments = Value::parse(substr($params, 1, -1), null, $capture_whitespace, 'attribute', '', $preserve_quotes);
 
                         $tokens[] = $token;
 
@@ -615,7 +951,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     } else {
 
-                        $tokens[] = static::getType($buffer . substr($string, $i));
+                        $tokens[] = static::getType($buffer . substr($string, $i), $preserve_quotes);
                         $buffer = '';
                         $i = $j;
                     }
@@ -662,22 +998,33 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                             $t->type = 'css-string';
                             $t->value = $str;
-                            $token->arguments = new Set([$t]);
+
+                            self::parseString($t, $preserve_quotes);
+
+                            $token->arguments = [$t];
                         } else {
 
                             if (in_array($buffer, ['or', 'and'])) {
 
                                 $token->name = '';
                                 $token->type = 'css-parenthesis-expression';
-                                $tokens[] = static::getType($buffer);
+                                $tokens[] = static::getType($buffer, $preserve_quotes);
                             }
 
-                            $token->arguments = Value::parse($str, null, $capture_whitespace, $token->type, $token->name);
+                            $token->arguments = Value::parse($str, null, $capture_whitespace, $token->type, $token->name, $preserve_quotes);
                         }
 
-                        if (!empty($token->name) && (isset($token->arguments->{0}->name) ? $token->arguments->{0}->name : null) == 'var') {
+                        if (!empty($token->name)) {
 
-                            $token->type = 'css-function';
+                            foreach ($token->arguments as $arg) {
+
+                                if ((isset($arg->name) ? $arg->name : '') == 'var') {
+
+
+                                    $token->type = 'css-function';
+                                    break;
+                                }
+                            }
                         }
 
                         $tokens[] = $token;
@@ -688,21 +1035,20 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer === '') {
 
-                            $tokens[] = static::getType($buffer . substr($string, $i));
-                        }
-                        else {
+                            $tokens[] = static::getType($buffer . substr($string, $i), $preserve_quotes);
+                        } else {
 
-                            $token = (object) [
+                            $token = (object)[
                                 'type' => 'invalid-css-function',
                                 'name' => $buffer,
-                                'arguments' => new Set
+                                'arguments' => []
                             ];
 
                             $args = implode('', array_slice($string, $i + 1));
 
                             if (trim($args) !== '') {
 
-                                $token->arguments->merge(Value::parse($args));
+                                $token->arguments = Value::parse($args, '', '', $token->type, $token->name, $preserve_quotes);
                             }
 
                             $tokens[] = $token;
@@ -720,7 +1066,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                             $buffer = '';
                         }
 
@@ -746,7 +1092,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $tokens[] = (object)['type' => 'separator', 'value' => $string[$i]];
@@ -766,11 +1112,11 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                 case '/':
 
-                    if ($i < $j && $string[$i + 1] == '*' && $string[$i] == '/') {
+                    if ($i < $j && $string[$i + 1] == '*') {
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                             $buffer = '';
                         }
 
@@ -788,9 +1134,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                             $i += strlen($params) - 1;
                             $buffer = '';
                             break;
-                        }
-
-                        else {
+                        } else {
 
                             $token = new stdClass;
 
@@ -805,7 +1149,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
                         }
                     }
 
-                    $token = static::getType($buffer);
+                    $token = static::getType($buffer, $preserve_quotes);
 
                     if (trim($buffer) === '') {
 
@@ -835,7 +1179,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if (trim($buffer) !== '') {
 
-                            $tokens[] = static::getType($buffer);
+                            $tokens[] = static::getType($buffer, $preserve_quotes);
                         }
 
                         $token = end($tokens);
@@ -875,7 +1219,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                     if ($buffer !== '') {
 
-                        $tokens[] = static::getType($buffer);
+                        $tokens[] = static::getType($buffer, $preserve_quotes);
                     }
 
                     $token = new stdClass;
@@ -892,7 +1236,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
                         if ($buffer !== '') {
 
-                            $tokens[] = static::getType(rtrim($buffer));
+                            $tokens[] = static::getType(rtrim($buffer), $preserve_quotes);
                             $buffer = '';
                         }
                     }
@@ -903,7 +1247,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
         if ($buffer !== '') {
 
-            $tokens[] = static::getType($buffer);
+            $tokens[] = static::getType($buffer, $preserve_quotes);
         }
 
         return $tokens;
@@ -914,7 +1258,8 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param string $value
      * @return string
      */
-    public static function escape($value) {
+    public static function escape($value)
+    {
 
         $result = '';
 
@@ -946,7 +1291,8 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param int $offset
      * @return false|int
      */
-    protected static function indexOf(array $array, $search, $offset = 0) {
+    protected static function indexOf(array $array, $search, $offset = 0)
+    {
 
         $length = count($array);
 
@@ -963,9 +1309,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
     /**
      * @param string $token
+     * @param bool $preserve_quotes
      * @return stdClass
      */
-    protected static function getType($token)
+    protected static function getType($token, $preserve_quotes = false)
     {
 
         $type = new stdClass;
@@ -987,6 +1334,8 @@ abstract class Value implements JsonSerializable, ObjectInterface
         } else {
 
             $type->type = 'css-string';
+
+            self::parseString($type, $preserve_quotes);
         }
 
         return $type;
@@ -1003,17 +1352,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
         foreach ($this->data as $key => $value) {
 
-            $val = null;
-            if ($value instanceof Set) {
-
-                $val = array_map(function ($value) {
-
-                    return $value->toObject();
-                }, $value->toArray());
-            } else {
-
-                $val = $value;
-            }
+            $val = $value;
 
             if (!is_null($key) && $key !== false && $key !== "") {
 
@@ -1048,7 +1387,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
 
             $keywords = static::keywords();
         }
-
+        $string = trim($string, ";\n\t\r ");
         $string = static::stripQuotes($string, true);
 
         foreach ($keywords as $keyword) {
@@ -1067,7 +1406,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param array $options
      * @return string
      */
-    public static function getNumericValue(Value $value = null, array $options = [])
+    public static function getNumericValue($value, array $options = [])
     {
 
         if (is_null($value) || $value->value === '') {
@@ -1075,17 +1414,17 @@ abstract class Value implements JsonSerializable, ObjectInterface
             return null;
         }
 
-        return Number::compress($value->unit == '%' ? $value->value / 100 : $value->render($options));
+        return Number::compress((isset($value->unit) ? $value->unit : '') == '%' ? $value->value / 100 : Value::renderTokens([$value], $options));
     }
 
     /**
      * @param Value $value
      * @return string
      */
-    public static function getRGBValue(Value $value)
+    public static function getRGBValue($value)
     {
 
-        return Number::compress($value->unit == '%' ? 255 * $value->value / 100 : $value->value);
+        return Number::compress((isset($value->unit) ? $value->unit : '') == '%' ? 255 * $value->value / 100 : $value->value);
     }
 
     /**
@@ -1093,7 +1432,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
      * @param array $options
      * @return string
      */
-    public static function getAngleValue(Value $value = null, array $options = [])
+    public static function getAngleValue($value, array $options = [])
     {
 
         if (is_null($value) || $value->value === '') {
@@ -1101,7 +1440,7 @@ abstract class Value implements JsonSerializable, ObjectInterface
             return null;
         }
 
-        switch ($value->unit) {
+        switch (isset($value->unit) ? $value->unit : '') {
 
             case 'rad':
 

@@ -7,7 +7,6 @@ use TBela\CSS\ArrayTrait;
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Interfaces\RenderablePropertyInterface;
 use TBela\CSS\Value;
-use TBela\CSS\Value\Set;
 
 
 /**
@@ -40,50 +39,36 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     protected $type = 'Property';
 
     /**
-     * @var Set|string
+     * @var array
      * @ignore
      */
     protected $value;
 
     /**
      * Property constructor.
-     * @param Value\Set|string $name
+     * @param string $name
      */
     public function __construct($name)
     {
-        if (substr($name, 0, 1) == '-' && preg_match('/^(-([a-zA-Z]+)-(\S+))/', trim($name), $match)) {
-
-            $this->name = $match[3];
-            $this->vendor = $match[2];
-        }
-
-        else {
-
-            $this->name = (string) $name;
-        }
+        $this->setName($name);
     }
 
     /**
      * set the property value
-     * @param Set|string $value
+     * @param array|string $value
      * @return Property
      */
     public function setValue($value) {
 
-        $this->value = !($value instanceof Set) ? Value::parse($value, $this->name) : $value;
+        $this->value = is_array($value) ? $value : Value::parse($value, $this->name, true, '', '');
         return $this;
     }
 
     /**
      * get the property value
-     * @return Set|null
+     * @return array|null
      */
     public function getValue() {
-
-        if (!($this->value instanceof Set)) {
-
-            $this->value = Value::parse($this->value, $this->name);
-        }
 
         return $this->value;
     }
@@ -107,6 +92,26 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     }
 
     /**
+     * @param string $name
+     * @return Property
+     */
+    public function setName($name) {
+
+        if (substr($name, 0, 1) == '-' && preg_match('/^(-([a-zA-Z]+)-(\S+))/', trim($name), $match)) {
+
+            $this->name = $match[3];
+            $this->vendor = $match[2];
+        }
+
+        else {
+
+            $this->name = (string) $name;
+        }
+
+        return $this;
+    }
+
+    /**
      * get the property name
      * @return string|null
      */
@@ -125,15 +130,6 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
     }
 
     /**
-     * get property hash.
-     * @return string
-     */
-    public function getHash() {
-
-        return $this->name.':'.($this->vendor ? $this->vendor.':' : '').$this->value->getHash();
-    }
-
-    /**
      * convert property to string
      * @param array $options
      * @return string
@@ -147,7 +143,7 @@ class Property implements ArrayAccess, RenderableInterface, RenderablePropertyIn
             $result .= ' '.implode(' ', $this->leadingcomments);
         }
 
-        $result .= ': '.$this->value->render($options);
+        $result .= ': '.Value::renderTokens($this->value, $options);
 
         if (!empty($this->trailingcomments)) {
 

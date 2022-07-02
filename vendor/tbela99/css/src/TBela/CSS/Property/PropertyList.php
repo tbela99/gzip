@@ -196,7 +196,7 @@ class PropertyList implements IteratorAggregate
                     }
                 }
 
-                $this->properties[$shorthand]->set($name, (string) $value, $leadingcomments, $trailingcomments);
+                $this->properties[$shorthand]->set($name, $value, $leadingcomments, $trailingcomments);
             }
 
             else {
@@ -286,37 +286,6 @@ class PropertyList implements IteratorAggregate
             else {
 
                 $result[] = $property;
-            }
-        }
-
-        $hashes = [];
-
-        $i = count($result);
-
-        // remove duplicate values
-        // color: #f00;
-        // color: red;
-        // ...
-        // color: rbg(255, 0, 0);
-        // compute all to the last value -> color: red
-
-        while($i--) {
-
-            if ($result[$i]['type'] == 'Comment') {
-
-                continue;
-            }
-
-            $hash = $result[$i]->getHash();
-
-            if (isset($hashes[$hash])) {
-
-                array_splice($result, $i, 1);
-            }
-
-            else {
-
-                $hashes[$hash] = 1;
             }
         }
 

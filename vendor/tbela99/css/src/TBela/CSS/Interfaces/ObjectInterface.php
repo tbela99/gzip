@@ -7,7 +7,8 @@ namespace TBela\CSS\Interfaces;
  * @package TBela\CSS
  * @method getName(): string;
  * @method getType(): string;
- * @method getValue(): \TBela\CSS\Value\Set;
+ * @method getValue(): stringt;
+ * @method getRawValue(): ?array;
  */
 interface ObjectInterface {
 

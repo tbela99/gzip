@@ -24,14 +24,4 @@ class OutlineWidth extends Unit
 
         return $token->type == 'unit' || ($token->type == 'number' && $token->value == 0);
     }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->render(['compress' => true]);
-        }
-
-        return $this->hash;
-    }
 }

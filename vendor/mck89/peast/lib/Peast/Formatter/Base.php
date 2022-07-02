@@ -64,6 +64,37 @@ abstract class Base
     protected $spacesInsideRoundBrackets = false;
     
     /**
+     * Boolean that indicates if comments must be rendered
+     * 
+     * @var bool
+     */
+    protected $renderComments = true;
+    
+    /**
+     * Boolean that indicates if multiline documentation comments
+     * (for example JSDoc syntax) must be manipulated to match the
+     * right indentation
+     * 
+     * @var bool
+     */
+    protected $recalcCommentsIndent = true;
+
+    /**
+     * Class constructor
+     *
+     * @param bool  $renderComments     True to render the comments if
+     *                                  the parser has collected them
+     *                                  and the formatter allows their
+     *                                  rendering
+     */
+    public function __construct($renderComments = false)
+    {
+        if ($this->renderComments) {
+            $this->renderComments = $renderComments;
+        }
+    }
+    
+    /**
      * Returns the new line character
      * 
      * @return string
@@ -125,5 +156,27 @@ abstract class Base
     public function getSpacesInsideRoundBrackets()
     {
         return $this->spacesInsideRoundBrackets;
+    }
+    
+    /**
+     * Returns a boolean that indicates if comments must be rendered
+     * 
+     * @return bool
+     */
+    public function getRenderComments()
+    {
+        return $this->renderComments;
+    }
+    
+    /**
+     * Returns a boolean that indicates if multiline documentation comments
+     * (for example JSDoc syntax) must be manipulated to match the
+     * right indentation
+     * 
+     * @return bool
+     */
+    public function getRecalcCommentsIndent()
+    {
+        return $this->recalcCommentsIndent;
     }
 }

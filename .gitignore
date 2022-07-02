@@ -2,8 +2,8 @@
 .idea/
 jasmine/
 node_modules/
-package-lock.json
+#package-lock.json
 test/
 excluded.lst
 /composer.phar
-/composer.lock
+#/composer.lock

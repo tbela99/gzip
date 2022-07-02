@@ -23,14 +23,12 @@ class FontStyle extends Value
 
 
     /**
-     * test if this object matches the specified type
-     * @param string $type
-     * @return bool
+     * @inheritDoc
      */
-    public function match($type)
+    public static function match($data, $type)
     {
 
-        return strtolower($this->data->type) == $type;
+        return strtolower($data->type) == $type;
     }
 
     /**
@@ -44,10 +42,5 @@ class FontStyle extends Value
         }
 
         return $token->type == static::type();
-    }
-
-    public function getHash() {
-
-        return $this->data->value;
     }
 }

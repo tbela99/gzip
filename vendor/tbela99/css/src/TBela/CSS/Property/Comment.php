@@ -4,7 +4,6 @@ namespace TBela\CSS\Property;
 
 use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Value;
-use TBela\CSS\Value\Set;
 
 /**
  * Comment property class
@@ -20,7 +19,7 @@ class Comment extends Property {
 
     /**
      * PropertyComment constructor.
-     * @param Set | Value | string $value
+     * @param array | string $value
      */
     public function __construct($value)
     {
@@ -35,7 +34,7 @@ class Comment extends Property {
 
     /**
      * Set the value
-     * @param Set | Value | string $value
+     * @param array | string $value
      * @return $this
      */
     public function setValue($value) {
@@ -66,15 +65,6 @@ class Comment extends Property {
         }
 
         return $this->value;
-    }
-
-    /**
-     * get property hash.
-     * @return string
-     */
-    public function getHash() {
-
-        return ':'.$this->value;
     }
 
     /**

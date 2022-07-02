@@ -201,21 +201,26 @@ class BackgroundPosition extends Value
     public function render(array $options = [])
     {
 
-        if (isset($this->data->unit)) {
+        return static::doRender($this->data, $options);
+    }
 
-            if ($this->data->value == '0') {
+    public static function doRender($data, array $options = []) {
+
+        if (isset($data->unit)) {
+
+            if ($data->value == '0') {
 
                 return '0';
             }
 
             if (!empty($options['compress'])) {
 
-                return Number::compress($this->data->value) . $this->data->unit;
+                return Number::compress($data->value) . $data->unit;
             }
 
-            return $this->data->value . $this->data->unit;
+            return $data->value . $data->unit;
         }
 
-        return $this->data->value;
+        return $data->value;
     }
 }

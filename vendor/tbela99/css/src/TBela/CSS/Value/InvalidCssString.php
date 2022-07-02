@@ -28,11 +28,6 @@ class InvalidCssString extends Value implements InvalidTokenInterface
         return $this->data->q.$this->data->value;
     }
 
-    public function getHash() {
-
-        return $this->data->q.$this->data->value;
-    }
-
     /**
      * @inheritDoc
      * @ignore
@@ -43,15 +38,16 @@ class InvalidCssString extends Value implements InvalidTokenInterface
         return $this->data->q.$this->data->value;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function recover($property = null)
-    {
+    public static function doRecover($data) {
 
-        return Value::getInstance((object) [
-            'type' => 'css-string',
-            'value' => $this->data->q.$this->value.$this->data->q
-        ]);
+        $result = clone $data;
+        $result->type = substr($result->type, 8);
+
+        if (!empty($result->q) && preg_match('#^[\w_-]+$#', $result->value) && !is_numeric(\substr($result->value, 0, 1))) {
+
+            unset($result->q);
+        }
+
+        return $result;
     }
 }

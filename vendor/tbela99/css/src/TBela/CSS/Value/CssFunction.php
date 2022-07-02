@@ -15,7 +15,7 @@ class CssFunction extends Value {
      */
     protected static function validate($data) {
 
-        return isset($data->name) && isset($data->arguments) && $data->arguments instanceof Set;
+        return isset($data->name) && isset($data->arguments) && is_array($data->arguments);
     }
 
     /**
@@ -29,16 +29,16 @@ class CssFunction extends Value {
     /**
      * @inheritDoc
      */
-    public function getValue() {
-
-        return $this->data->arguments->{0}->value;
+    public static function doRender($data, array $options = [])
+    {
+        return $data->name.'('. Value::renderTokens($data->arguments, $options).')';
     }
 
     /**
      * @inheritDoc
      */
-    public function getHash() {
+    public function getValue() {
 
-        return $this->data->name.'('. $this->data->arguments->getHash().')';
+        return $this->data->arguments->{0}->value;
     }
 }

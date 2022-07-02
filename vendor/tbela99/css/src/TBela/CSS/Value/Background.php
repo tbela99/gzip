@@ -88,7 +88,7 @@ class Background extends ShortHand
 
             $slice = array_slice($tokens, $i, $k - $i + 1);
             $className = static::getClassName($slice[0]->type);
-            $keyword = $className::matchKeyword(implode('', array_map(Value::class . '::getInstance', $slice)));
+            $keyword = $className::matchKeyword(Value::renderTokens($slice));
 
             if (!is_null($keyword)) {
 

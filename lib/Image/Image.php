@@ -85,7 +85,15 @@ class Image {
         }		
 		
         $image_info = getimagesize($file);
-        $this->_abspath = $file;
+
+
+		if($image_info === false) {
+
+			throw new Exception(sprintf('unsupported image format: %s', $file), 400);
+		}
+
+
+		$this->_abspath = $file;
         $this->_image_type = $image_info[2];
 		
         if($this->_image_type == IMAGETYPE_JPEG) {

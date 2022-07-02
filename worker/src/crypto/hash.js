@@ -4,7 +4,7 @@
  * @param {string} hash
  * @returns {Promise<string>}
  */
-export async function hash(message, hash = 'SHA-256') {
+export async function hash(message, hash) {
     // encode as UTF-8
     const msgBuffer = new TextEncoder().encode(message);
     // hash the message

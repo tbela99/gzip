@@ -1,9 +1,14 @@
 {
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "99bbf2b03f169cf050b912bfcf2b099e",
     "packages": [
         {
             "name": "axy/backtrace",
             "version": "1.0.7",
-            "version_normalized": "1.0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axypro/backtrace.git",
@@ -18,9 +23,7 @@
             "require": {
                 "php": ">=5.4.0"
             },
-            "time": "2019-02-02T15:52:44+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "axy\\backtrace\\": ""
@@ -48,12 +51,11 @@
                 "issues": "https://github.com/axypro/backtrace/issues",
                 "source": "https://github.com/axypro/backtrace/tree/1.0.7"
             },
-            "install-path": "../axy/backtrace"
+            "time": "2019-02-02T15:52:44+00:00"
         },
         {
             "name": "axy/codecs-base64vlq",
             "version": "1.0.1",
-            "version_normalized": "1.0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axypro/codecs-base64vlq.git",
@@ -69,9 +71,7 @@
                 "axy/errors": "~1.0.1",
                 "php": ">=5.4.0"
             },
-            "time": "2015-11-23T07:08:52+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "axy\\codecs\\base64vlq\\": ""
@@ -100,12 +100,11 @@
                 "issues": "https://github.com/axypro/codecs-base64vlq/issues",
                 "source": "https://github.com/axypro/codecs-base64vlq/tree/master"
             },
-            "install-path": "../axy/codecs-base64vlq"
+            "time": "2015-11-23T07:08:52+00:00"
         },
         {
             "name": "axy/errors",
             "version": "1.0.5",
-            "version_normalized": "1.0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axypro/errors.git",
@@ -121,9 +120,7 @@
                 "axy/backtrace": "~1.0.2",
                 "php": ">=5.4.0"
             },
-            "time": "2019-02-02T18:26:18+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "axy\\errors\\": ""
@@ -149,12 +146,11 @@
                 "issues": "https://github.com/axypro/errors/issues",
                 "source": "https://github.com/axypro/errors/tree/1.0.5"
             },
-            "install-path": "../axy/errors"
+            "time": "2019-02-02T18:26:18+00:00"
         },
         {
             "name": "axy/sourcemap",
             "version": "0.1.5",
-            "version_normalized": "0.1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/axypro/sourcemap.git",
@@ -172,9 +168,7 @@
                 "ext-json": "*",
                 "php": ">=5.4.0"
             },
-            "time": "2020-08-20T09:49:44+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "axy\\sourcemap\\": ""
@@ -202,12 +196,11 @@
                 "issues": "https://github.com/axypro/sourcemap/issues",
                 "source": "https://github.com/axypro/sourcemap/tree/0.1.5"
             },
-            "install-path": "../axy/sourcemap"
+            "time": "2020-08-20T09:49:44+00:00"
         },
         {
             "name": "lordelph/icofileloader",
             "version": "2.0.1",
-            "version_normalized": "2.0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lordelph/icofileloader.git",
@@ -227,9 +220,7 @@
                 "phpunit/phpunit": "~5",
                 "squizlabs/php_codesniffer": "^2.3"
             },
-            "time": "2017-06-01T10:50:53+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "Elphin\\IcoFileLoader\\": "src"
@@ -259,12 +250,11 @@
                 "issues": "https://github.com/lordelph/icofileloader/issues",
                 "source": "https://github.com/lordelph/icofileloader/tree/master"
             },
-            "install-path": "../lordelph/icofileloader"
+            "time": "2017-06-01T10:50:53+00:00"
         },
         {
             "name": "mck89/peast",
             "version": "v1.14.0",
-            "version_normalized": "1.14.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
@@ -283,14 +273,12 @@
             "require-dev": {
                 "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
             },
-            "time": "2022-05-01T15:09:54+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.14.0-dev"
                 }
             },
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "Peast\\": "lib/Peast/",
@@ -312,12 +300,11 @@
                 "issues": "https://github.com/mck89/peast/issues",
                 "source": "https://github.com/mck89/peast/tree/v1.14.0"
             },
-            "install-path": "../mck89/peast"
+            "time": "2022-05-01T15:09:54+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
             "version": "v1.19.0",
-            "version_normalized": "1.19.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
@@ -335,7 +322,6 @@
             "suggest": {
                 "ext-mbstring": "For best performance"
             },
-            "time": "2020-10-23T09:01:57+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -346,7 +332,6 @@
                     "url": "https://github.com/symfony/polyfill"
                 }
             },
-            "installation-source": "dist",
             "autoload": {
                 "files": [
                     "bootstrap.php"
@@ -395,12 +380,11 @@
                     "type": "tidelift"
                 }
             ],
-            "install-path": "../symfony/polyfill-mbstring"
+            "time": "2020-10-23T09:01:57+00:00"
         },
         {
             "name": "tbela99/css",
             "version": "dev-php56-backport",
-            "version_normalized": "dev-php56-backport",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
@@ -420,9 +404,7 @@
                 "php": ">=5.6.40",
                 "symfony/polyfill-mbstring": "v1.19.0"
             },
-            "time": "2022-07-01T19:53:21+00:00",
             "type": "library",
-            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "TBela\\CSS\\": "src/TBela/CSS"
@@ -453,9 +435,24 @@
                 "issues": "https://github.com/tbela99/css/issues",
                 "source": "https://github.com/tbela99/css/tree/php56-backport"
             },
-            "install-path": "../tbela99/css"
+            "time": "2022-07-01T19:53:21+00:00"
         }
     ],
-    "dev": true,
-    "dev-package-names": []
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "tbela99/css": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "ext-gd": "*",
+        "ext-json": "*",
+        "ext-sodium": "*",
+        "ext-dom": "*",
+        "ext-simplexml": "*"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

@@ -2,6 +2,7 @@
 
 namespace TBela\CSS\Query;
 use TBela\CSS\Parser\SyntaxError;
+use TBela\CSS\Value;
 use function usort;
 
 class Evaluator
@@ -61,7 +62,7 @@ class Evaluator
                  * @var \TBela\CSS\Element\Rule $node
                  */
 
-                if ($this->search($selectors, array_map('trim', $node->getSelector()))) {
+                if ($this->search($selectors, $node->getSelector())) {
 
                         $result[] = $node;
                 }
@@ -73,7 +74,8 @@ class Evaluator
 
             else if ($node->getType() == 'AtRule') {
 
-                if ($this->search($selectors, [trim('@'.$node->getName().' '.$node->getValue()->render(['remove_comments' => true]))])) {
+                $value = $node->getValue();
+                if ($this->search($selectors, [trim('@'.$node->getName().' '.(is_string($value) ? $value : Value::renderTokens($node->getValue(), ['remove_comments' => true])))])) {
 
                     $result[] = $node;
                 }

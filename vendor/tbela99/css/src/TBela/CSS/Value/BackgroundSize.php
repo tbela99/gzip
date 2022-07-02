@@ -36,9 +36,10 @@ class BackgroundSize extends Value
 
     public static function matchKeyword($string, array $keywords = null)
     {
+        $string = trim($string, ";\n\t\r ");
         $string = preg_replace('#\s+#', ' ', $string);
 
-        if (trim($string) == 'auto auto') {
+        if ($string == 'auto auto') {
 
             $string = 'auto';
         }

@@ -58,9 +58,14 @@ class LineHeight extends Value
      */
     public function render(array $options = [])
     {
-        $prefix = func_num_args() > 1 && func_get_arg(1) == 'font' ? '/ ' : '';
+        return static::doRender($this->data, $options);
+    }
 
-        $value = $this->data->value;
+    public static function doRender($data, array $options = [])
+    {
+//        $prefix = func_num_args() > 1 && func_get_arg(1) == 'font' ? '/ ' : '';
+
+        $value = $data->value;
 
         if ($value == '0') {
 
@@ -69,10 +74,10 @@ class LineHeight extends Value
 
         if (!empty($options['compress'])) {
 
-            if ($prefix !== '') {
-
-                $prefix = '/';
-            }
+//            if ($prefix !== '') {
+//
+//                $prefix = '/';
+//            }
 
             if(is_numeric($value)) {
 
@@ -80,21 +85,11 @@ class LineHeight extends Value
             }
         }
 
-        if (isset($this->data->unit)) {
+        if (isset($data->unit)) {
 
-            return $prefix.$value . $this->data->unit;
+            return $value . $data->unit;
         }
 
-        return $prefix.$value;
-    }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->render(['compress' => true]);
-        }
-
-        return $this->hash;
+        return $value;
     }
 }

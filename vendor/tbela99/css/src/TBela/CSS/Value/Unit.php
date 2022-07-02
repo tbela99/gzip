@@ -20,10 +20,10 @@ class Unit extends Number {
     /**
      * @inheritDoc
      */
-    public function match ($type) {
+    public static function match($data, $type) {
 
-        $dataType = strtolower($this->data->type);
-        return $dataType == static::type() || ($type == 'number' && $this->data->value == 0);
+        $dataType = strtolower($data->type);
+        return $dataType == static::type() || ($type == 'number' && $data->value == 0);
     }
 
     /**
@@ -32,41 +32,31 @@ class Unit extends Number {
     public function render(array $options = [])
     {
 
-        if (in_array(strtolower($this->value), static::$keywords)) {
+        return static::doRender($this->data, $options);
+    }
 
-            return $this->value;
+    public static function doRender($data, array $options = []) {
+
+        if ($data->value == 0) {
+
+            return '0'.(isset($options['omit_unit']) && isset($data->unit) && $options['omit_unit'] == false ? $data->unit : '');
         }
 
-        if ($this->data->value == 0) {
-
-            return '0';
-        }
-
-        $unit = !empty($options['omit_unit']) && $options['omit_unit'] == $this->data->unit ? '' : $this->data->unit;
+        $unit = !empty($options['omit_unit']) && $options['omit_unit'] == $data->unit ? '' : $data->unit;
 
         if (!empty($options['compress'])) {
 
-            $value = $this->data->value;
+            $value = $data->value;
 
-            if ($this->data->unit == 'ms' && $value >= 100) {
+            if ($data->unit == 'ms' && $value >= 100) {
 
                 $unit = 's';
                 $value /= 1000;
             }
 
-            return $this->compress($value).$unit;
+            return static::compress($value).$unit;
         }
 
-        return $this->data->value.$unit;
-    }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->render(['compress' => true]);
-        }
-
-        return $this->hash;
+        return $data->value.$unit;
     }
 }

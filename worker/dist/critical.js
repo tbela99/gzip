@@ -391,7 +391,7 @@ var critical = (function (exports) {
                 })) {
 
                     fontObject = {
-                        'fontFamily': font.style.getPropertyValue('font-family').replace(/(['"])([^\1\s]+)\1/, '$2'),
+                        'font-family': font.style.getPropertyValue('font-family').replace(/(['"])([^\1\s]+)\1/, '$2'),
                         src: font.style.getPropertyValue('src').replace(/(^|[,\s*])local\([^)]+\)\s*,?\s*?/g, '').replace(/url\(([^)%\s]+)\)([^,]*)(,?)\s*/g, (all, one, two, three) => {
 
                             one = one.replace(/(['"])([^\1\s]+)\1/, '$2');
@@ -441,7 +441,6 @@ var critical = (function (exports) {
                 duration: (entry.duration / 1000).toFixed(3) + 's'
             }
         });
-
 
         return {styles: [...styles].map(escapeCSS), fonts: [...usedFonts.values()], nodeCount, stats: {nodeCount, stats}};
     }

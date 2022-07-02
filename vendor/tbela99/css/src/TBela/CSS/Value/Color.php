@@ -21,87 +21,6 @@ class Color extends Value
 
         parent::__construct($data);
 
-        if (isset($data->colorType) && $data->colorType == 'hex') {
-
-            $values = ColorUtil::hex2rgba_values($data->value);
-
-            if (count($values) >= 3) {
-
-                $data->rgba = $values;
-            }
-        }
-
-        else if (isset($data->name)) {
-
-            $a = static::getNumericValue($data->arguments->{6});
-
-            if ($a == 1) {
-
-                $a = null;
-            }
-
-            switch ($data->name) {
-
-                case 'rgb':
-                case 'rgba':
-
-                    $data->rgba[] = static::getRGBValue($data->arguments->{0});
-                    $data->rgba[] = static::getRGBValue($data->arguments->{2});
-                    $data->rgba[]= static::getRGBValue($data->arguments->{4});
-
-                    if (!is_null($a)) {
-
-                        $data->rgba[] =  $a;
-                    }
-
-                    break;
-
-                case 'hsl':
-                case 'hsla':
-
-                    $data->rgba = ColorUtil::hsl2rgb_values(static::getAngleValue($data->arguments->{0}), static::getNumericValue($data->arguments->{2}), static::getNumericValue($data->arguments->{4}), $a);
-                    break;
-
-                case 'hwb':
-
-                    $data->rgba = ColorUtil::hwb2rgba_values(static::getAngleValue($data->arguments->{0}), static::getNumericValue($data->arguments->{2}), static::getNumericValue($data->arguments->{4}), $a);
-                    break;
-
-                case 'device-cmyk':
-
-                    $a = static::getNumericValue($data->arguments->{8});
-
-                    if ($a == 1) {
-
-                        $a = null;
-                    }
-
-                    $data->rgba = ColorUtil::cmyk2rgba_values(static::getNumericValue($data->arguments->{0}), static::getNumericValue($data->arguments->{2}), static::getNumericValue($data->arguments->{4}), static::getNumericValue($data->arguments->{6}), $a);
-                    break;
-
-//                case 'lab':
-//
-//                    $a = static::getNumericValue($data->arguments->{4});
-//
-//                    if ($a == 1) {
-//
-//                        $a = null;
-//                    }
-//
-//                    $data->rgba = ColorUtil::lab2rgba(static::getNumericValue($data->arguments->{0}), static::getNumericValue($data->arguments->{1}), static::getNumericValue($data->arguments->{2}), static::getNumericValue($data->arguments->{6}), $a);
-//                    break;
-            }
-        }
-    }
-
-    public function getHash() {
-
-        if (is_null($this->hash)) {
-
-            $this->hash = $this->doRender(['convert_color' => 'hex']);
-        }
-
-        return $this->hash;
     }
 
     /**
@@ -121,7 +40,7 @@ class Color extends Value
     /**
      * @inheritDoc
      */
-    public function match($type)
+    public static function match($data, $type)
     {
 
         return $type == 'color';
@@ -133,29 +52,27 @@ class Color extends Value
     public function render(array $options = [])
     {
 
-        $key = json_encode($options).(isset($this->data->colorType) ? $this->data->colorType : null).(isset($this->data->name) ? $this->data->name : null).$this->getHash().static::class;
-
-        if (!isset(static::$cache[$key])) {
-
-            static::$cache[$key] = $this->doRender($options);
-        }
-
-        return static::$cache[$key];
+        return static::doRender($this->data, $options);
     }
 
-    protected function doRender($options = []) {
+    public static function doRender($data, array $options = []) {
 
-        if (isset($this->data->rgba)) {
+        if (!isset($data->rgba)) {
 
-            return static::rgba2string($this->data, $options);
+            static::computeRGBA($data);
         }
 
-        else if (isset($this->data->value)) {
+        if (isset($data->rgba)) {
 
-            return $this->data->value;
+            return static::rgba2string($data, $options);
         }
 
-        return $this->data->name.'('.$this->data->arguments->render($options).')';
+        else if (isset($data->value)) {
+
+            return $data->value;
+        }
+
+        return $data->name.'('.Value::renderTokens($data->arguments, $options).')';
     }
 
     public static function rgba2string($data, array $options = []) {
@@ -291,5 +208,82 @@ class Color extends Value
         array_unshift($rgba_values, 'device-cmyk('.$format.')');
 
         return call_user_func_array('sprintf', $rgba_values);
+    }
+
+    /**
+     * @param object $data
+     * @return void
+     */
+    private static function computeRGBA($data)
+    {
+        if (isset($data->colorType) && $data->colorType == 'hex') {
+
+            $values = ColorUtil::hex2rgba_values($data->value);
+
+            if (count($values) >= 3) {
+
+                $data->rgba = $values;
+            }
+        } else if (isset($data->name)) {
+
+            $a = !isset($data->arguments[6]) ? null : static::getNumericValue($data->arguments[6]);
+
+            if ($a == 1) {
+
+                $a = null;
+            }
+
+            switch ($data->name) {
+
+                case 'rgb':
+                case 'rgba':
+
+                    $data->rgba[] = static::getRGBValue($data->arguments[0]);
+                    $data->rgba[] = static::getRGBValue($data->arguments[2]);
+                    $data->rgba[] = static::getRGBValue($data->arguments[4]);
+
+                    if (!is_null($a)) {
+
+                        $data->rgba[] = $a;
+                    }
+
+                    break;
+
+                case 'hsl':
+                case 'hsla':
+
+                    $data->rgba = ColorUtil::hsl2rgb_values(static::getAngleValue($data->arguments[0]), static::getNumericValue($data->arguments[2]), static::getNumericValue($data->arguments[4]), $a);
+                    break;
+
+                case 'hwb':
+
+                    $data->rgba = ColorUtil::hwb2rgba_values(static::getAngleValue($data->arguments[0]), static::getNumericValue($data->arguments[2]), static::getNumericValue($data->arguments[4]), $a);
+                    break;
+
+                case 'device-cmyk':
+
+                    $a = static::getNumericValue($data->arguments->{8});
+
+                    if ($a == 1) {
+
+                        $a = null;
+                    }
+
+                    $data->rgba = ColorUtil::cmyk2rgba_values(static::getNumericValue($data->arguments[0]), static::getNumericValue($data->arguments[2]), static::getNumericValue($data->arguments[4]), !isset($data->arguments[6]) ? null : static::getNumericValue($data->arguments[6]), $a);
+                    break;
+
+//                case 'lab':
+//
+//                    $a = static::getNumericValue($data->arguments[4]);
+//
+//                    if ($a == 1) {
+//
+//                        $a = null;
+//                    }
+//
+//                    $data->rgba = ColorUtil::lab2rgba(static::getNumericValue($data->arguments[0]), static::getNumericValue($data->arguments->{1}), static::getNumericValue($data->arguments[2]), static::getNumericValue($data->arguments[6]), $a);
+//                    break;
+            }
+        }
     }
 }

@@ -41,7 +41,7 @@ trait ArrayTrait
 
     /**
      * @param string $offset
-     * @param Value\Set|string $value
+     * @param string $value
      * @ignore
      */
     public function offsetSet($offset, $value)

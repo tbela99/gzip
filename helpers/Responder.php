@@ -37,6 +37,7 @@ class Responder
 	public function afterInitialise(array $options)
 	{
 
+		// url rewrite
 		if (strpos($options['request_uri'], $options['webroot'] . $options['route']) === 0) {
 
 			$this->respond($options);

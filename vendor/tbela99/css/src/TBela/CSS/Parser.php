@@ -26,12 +26,6 @@ class Parser implements ParsableInterface
     use ParserTrait;
 
     /**
-     * import rules
-     * @var object[]
-     */
-    protected $imports = [];
-
-    /**
      * @var ValidatorInterface[]
      */
     protected static $validators = [];
@@ -40,6 +34,8 @@ class Parser implements ParsableInterface
     protected $lexer;
 
     protected $errors = [];
+    protected $imports = [];
+    protected $error;
 
     protected $ast = null;
 
@@ -51,13 +47,18 @@ class Parser implements ParsableInterface
         'capture_errors' => true,
         'flatten_import' => false,
         'allow_duplicate_rules' => ['font-face'], // set to true for speed
-        'allow_duplicate_declarations' => false
+        'allow_duplicate_declarations' => true
     ];
 
     /**
      * @var array<string, callable>
      */
     protected $event_handlers = [];
+
+    /**
+     * @var object[]
+     */
+    protected $import = [];
 
     /**
      * Parser constructor.
@@ -123,6 +124,22 @@ class Parser implements ParsableInterface
         return $this;
     }
 
+
+    /**
+     * @param Exception $error
+     * @return void
+     */
+    protected function emit(Exception $error)
+    {
+        if (!empty($this->event_handlers['error'])) {
+
+            foreach ($this->event_handlers['error'] as $handler) {
+
+                call_user_func($handler, $error);
+            }
+        }
+    }
+
     /**
      * parse css file and append to the existing AST
      * @param string $file
@@ -140,7 +157,7 @@ class Parser implements ParsableInterface
     /**
      * @param Parser $parser
      * @return Parser
-     * @throws SyntaxError
+     * @throws SyntaxError|IOException
      */
     public function merge($parser)
     {
@@ -162,10 +179,14 @@ class Parser implements ParsableInterface
             $this->ast->children = [];
         }
 
-        array_splice($this->ast->children, count($this->ast->children), 0, $parser->ast->children);
+        if (isset($parser->ast->children)) {
+
+            array_splice($this->ast->children, count($this->ast->children), 0, $parser->ast->children);
+        }
+
         array_splice($this->errors, count($this->errors), 0, $parser->errors);
 
-        $this->deduplicate($this->ast);
+//        $this->deduplicate($this->ast);
         return $this;
     }
 
@@ -242,25 +263,28 @@ class Parser implements ParsableInterface
 
                 if ($key == 'allow_duplicate_declarations') {
 
-                    if (is_string($this->options[$key])) {
+                    if (is_string($options[$key])) {
 
-                        $this->options[$key] = [$this->options[$key]];
+                        $this->options[$key] = [$options[$key]];
+                    } else if (is_array($options[$key])) {
+
+                        $this->options[$key] = array_flip($options[$key]);
+                    } else {
+
+                        $this->options[$key] = $options[$key];
                     }
 
-                    if (is_array($this->options[$key])) {
+                } else if ($key == 'allow_duplicate_rules' && is_string($options[$key])) {
 
-                        $this->options[$key] = array_flip($this->options[$key]);
-                    }
-                } else if ($key == 'allow_duplicate_rules' && is_string($v)) {
-
-                    $this->options[$key] = [$v];
+                    $this->options[$key] = [$options[$key]];
                 } else {
 
                     $this->options[$key] = $options[$key];
                 }
 
-                if ($key == 'allow_duplicate_rules' && is_array($this->options[$key]) && !in_array('font-face', $this->options[$key])) {
+                if ($key == 'allow_duplicate_rules' && is_array($options[$key]) && !in_array('font-face', $options[$key])) {
 
+                    $this->options[$key] = $options[$key];
                     $this->options[$key][] = 'font-face';
                 }
             }
@@ -296,17 +320,25 @@ class Parser implements ParsableInterface
 
         if (is_null($this->ast)) {
 
-            $this->imports = [];
             $this->ast = $this->lexer->createContext();
             $this->lexer->setContext($this->ast)->tokenize();
 
-            if ($this->options['flatten_import'] && !empty($this->imports)) {
+            if ($this->options['flatten_import'] && !empty($this->ast->children)) {
 
-                foreach ($this->imports as $token) {
+                $i = count($this->ast->children);
+
+                while ($i--) {
 
                     try {
 
-                        preg_match('#^((["\']?)([^\\2]+)\\2)(.*?$)#', $token->value, $matches);
+                        if ($this->ast->children[$i]->type != 'AtRule' || $this->ast->children[$i]->name != 'import') {
+
+                            continue;
+                        }
+
+                        $token = $this->ast->children[$i];
+
+                        preg_match('#^((["\']?)([^\\2]+)\\2)(.*?$)#', is_array($token->value) ? Value::renderTokens($token->value) : $token->value, $matches);
 
                         $media = isset($matches[4]) ? trim($matches[4]) : '';
 
@@ -315,22 +347,7 @@ class Parser implements ParsableInterface
                             $media = '';
                         }
 
-                        $src = isset($token->src) ? $token->src : '';
-                        $file = $matches[3];
-
-                        $file = Helper::absolutePath($file, dirname($src));
-
-                        if ($src !== '' && !preg_match('#^((https?:)?//)#i', $file)) {
-
-                            $curDir = Helper::getCurrentDirectory();
-
-                            if ($curDir != '/') {
-
-                                $curDir .= '/';
-                            }
-
-                            $file = preg_replace('#^' . preg_quote($curDir, '#') . '#', '', $file);
-                        }
+                        $file = Helper::absolutePath($matches[3], dirname(isset($token->src) ? $token->src : ''));
 
                         $parser = (new static)->load($file);
                         $parser->event_handlers = $this->event_handlers;
@@ -373,10 +390,12 @@ class Parser implements ParsableInterface
                             throw $e;
                         }
 
+                        $this->emit($e);
                         $this->errors[] = $e;
                     }
+                }
 
-                    $this->imports = [];
+                if (isset($this->ast->children)) {
 
                     $i = count($this->ast->children);
 
@@ -445,13 +464,12 @@ class Parser implements ParsableInterface
             $signature .= ':name:' . $name;
         }
 
-        $value = isset($ast->value) ? $ast->value : null;
+//        $value = $ast->value ?? null;
 
-        if (isset($value)) {
-
-            $value = is_string($value) ? Value::parse($value, $name) : $value;
-            $signature .= ':value:' . $value->getHash();
-        }
+//        if (isset($value)) {
+//
+//            $signature .= ':value:' .Value::renderTokens($value);
+//        }
 
         $selector = isset($ast->selector) ? $ast->selector : null;
 
@@ -471,8 +489,8 @@ class Parser implements ParsableInterface
     }
 
     /**
-     * @param stdClass $ast
-     * @return stdClass
+     * @param object $ast
+     * @return object
      */
     protected function deduplicateRules($ast)
     {
@@ -503,7 +521,7 @@ class Parser implements ParsableInterface
 
                         $next = $ast->children[$total - 1];
 
-                        while ($total > 1 && (string)$next->type == 'Comment') {
+                        while ($total > 1 && $next->type == 'Comment') {
 
                             $next = $ast->children[--$total - 1];
                         }
@@ -534,7 +552,12 @@ class Parser implements ParsableInterface
 
                                 $next->parent = null;
 
-                                if (isset($el->children)) {
+                                if (isset($next->children)) {
+
+                                    if (!isset($el->children)) {
+
+                                        $el->children = [];
+                                    }
 
                                     array_splice($el->children, 0, 0, $next->children);
                                 }
@@ -575,8 +598,8 @@ class Parser implements ParsableInterface
     }
 
     /**
-     * @param stdClass $ast
-     * @return stdClass
+     * @param object $ast
+     * @return object
      */
     protected function deduplicateDeclarations($ast)
     {
@@ -649,6 +672,8 @@ class Parser implements ParsableInterface
             throw $error;
         }
 
+        $this->emit($error);
+
         $this->errors[] = $error;
 
         return $error;
@@ -675,9 +700,13 @@ class Parser implements ParsableInterface
             }
         }
 
+        $this->error = null;
+
         if (isset(static::$validators[$token->type])) {
 
-            return static::$validators[$token->type]->validate($token, $parentRule, $parentStylesheet);
+            $result = static::$validators[$token->type]->validate($token, $parentRule, $parentStylesheet);
+            $this->error = static::$validators[$token->type]->getError();
+            return $result;
         }
 
         return ValidatorInterface::VALID;
@@ -691,7 +720,7 @@ class Parser implements ParsableInterface
     protected function getContext()
     {
 
-        return end($this->context) ?: $this->ast;
+        return end($this->context) ?: ($this->ast ?: $this->getAst());
     }
 
     /**
@@ -731,72 +760,39 @@ class Parser implements ParsableInterface
 
         if ($token->type != 'Comment' && strpos($token->type, 'Invalid') !== 0) {
 
-            $property = property_exists($token, 'name') ? 'name' : (property_exists($token, 'selector') ? 'selector' : null);
+            $hasCdoCdc = false;
 
-            if ($property) {
+            if (!empty($token->leadingcomments)) {
 
-                if (strpos($token->{$property}, '/*') !== false ||
-                    strpos($token->{$property}, '<!--') !== false) {
+                $i = count($token->leadingcomments);
 
-                    $leading = [];
-                    $token->{$property} = trim(Value::parse($token->{$property})->
-                    filter(function ($value) use (&$leading, $token) {
+                while ($i--) {
 
-                        if ($value->type == 'Comment') {
+                    if (substr($token->leadingcomments[$i], 0, 4) == '<!--') {
 
-                            if (substr($value, 0, 4) == '<!--') {
-
-                                $this->handleError(sprintf('CDO token not allowed here %s %s:%s:%s', $token->type, isset($token->src) ? $token->src : '', $token->location->start->line, $token->location->start->column));
-                            } else {
-
-                                $leading[] = $value;
-                            }
-
-                            return false;
-                        }
-
-                        return true;
-                    }));
-
-                    if (!empty($leading)) {
-
-                        $token->leadingcomments = $leading;
+                        $hasCdoCdc = true;
+                        array_splice($token->leadingcomments, $i, 1);
                     }
                 }
             }
 
-            if (property_exists($token, 'value')) {
-                if (strpos($token->value, '/*') !== false ||
-                    strpos($token->value, '<!--') !== false) {
+            if (!empty($token->trailingcomments)) {
 
-                    $trailing = [];
-                    $token->value = Value::parse($token->value)->
-                    filter(function ($value) use (&$trailing, $token) {
+                $i = count($token->trailingcomments);
 
-                        if ($value->type == 'Comment') {
+                while ($i--) {
 
-                            if (substr($value, 0, 4) == '<!--') {
+                    if (substr($token->trailingcomments[$i], 0, 4) == '<!--') {
 
-                                $this->handleError(sprintf('CDO token not allowed here %s %s:%s:%s', $token->type, isset($token->src) ? $token->src : '', $token->location->start->line, $token->location->start->column));
-                            } else {
-
-                                $trailing[] = $value;
-                            }
-
-                            return false;
-                        } else if ($value->type == 'invalid-comment') {
-
-                            return false;
-                        }
-
-                        return true;
-                    });
-
-                    if (!empty($trailing)) {
-
-                        $token->trailingcomments = $trailing;
+                        $hasCdoCdc = true;
+                        array_splice($token->trailingcomments, $i, 1);
                     }
                 }
+            }
+
+            if ($hasCdoCdc) {
+
+                $this->handleError(sprintf('CDO token not allowed here %s %s:%s:%s', $token->type, isset($token->src) ? $token->src : '', $token->location->start->line, $token->location->start->column));
             }
         }
 
@@ -834,6 +830,25 @@ class Parser implements ParsableInterface
 
             $this->popContext();
         }
+
+        if (
+            in_array($token->type, ['AtRule', 'NestingMediaRule']) &&
+            $token->name == 'media' &&
+            (
+                empty($token->value) ||
+                (
+                    count($token->value) == 1 &&
+                    (isset($token->value[0]->value) ? $token->value[0]->value : '') == 'all'
+                )
+            )
+        ) {
+
+            $context = $this->getContext();
+
+            array_pop($context->children);
+            array_splice($context->children, count($context->children), 0, $token->children);
+
+        }
     }
 
     /**
@@ -851,7 +866,7 @@ class Parser implements ParsableInterface
 
         if ($status == ValidatorInterface::REJECT) {
 
-            $this->handleError(sprintf('invalid token %s at %s:%s:%s', $token->type, isset($token->src) ? $token->src : '', $token->location->start->line, $token->location->start->column));
+            $this->handleError(sprintf("%s: %s at %s:%s:%s\n", $token->type, $this->error, isset($token->src) ? $token->src : '', $token->location->start->line, $token->location->start->column));
         }
 
         return $status;

@@ -126,7 +126,8 @@ class Helper
     public static function absolutePath($file, $ref)
     {
 
-        if ($ref == '/' && php_sapi_name() != 'cli') {
+        // web server environment
+        if (substr($ref, 0, 1) == '/' && php_sapi_name() != 'cli') {
 
             if (substr($file, 0, 1) == '/' &&
                 substr($file, 1, 1) != '/') {
@@ -252,6 +253,11 @@ class Helper
         $result = implode('/', array_merge(array_fill(0, count($ref), '..'), $file));
         $result = ($result === '' ? '' : $result . '/') . $basename;
 
+        if (php_sapi_name() != 'cli') {
+
+            $result = static::resolvePath($result, dirname($_SERVER['PHP_SELF']));
+        }
+
         return $isAbsolute && strlen($original) <= strlen($result) ? $original : $result;
     }
 
@@ -287,6 +293,11 @@ class Helper
         if (isset($data['host'])) {
 
             $url .= '//' . $data['host'];
+        }
+
+        if (isset($data['port'])) {
+
+            $url .= ':' . $data['port'];
         }
 
         if (isset($data['path'])) {

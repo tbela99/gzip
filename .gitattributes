@@ -1,8 +1,8 @@
 test/ export-ignore
 config/ export-ignore
+docs/ export-ignore
 worker/src/ export-ignore
 js/lib/ export-ignore
-composer.lock export-ignore
 composer.phar export-ignore
 .gitignore export-ignore
 build.sh export-ignore

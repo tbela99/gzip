@@ -301,7 +301,7 @@ class PlgSystemGzip extends JPlugin
 
 		$file = JPATH_SITE . '/cache/z/app/' . $_SERVER['SERVER_NAME'] . '/worker_version';
 
-		$this->options = (array)$this->params->get('gzip');
+		$this->options = (array) $this->params->get('gzip');
 
 		$dirname = JURI::base(true) . '/';
 
@@ -372,11 +372,6 @@ class PlgSystemGzip extends JPlugin
 				$options['cdn'] = [];
 
 			$options['scheme'] = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
-
-//			if (is_object($options['cdn'])) {
-//
-//				$options['cdn'] = array_filter(array_values($options['cdn']));
-//			}
 
 			if (empty($options['cdn'])) {
 
@@ -610,7 +605,12 @@ class PlgSystemGzip extends JPlugin
 			GZipHelper::register(new Gzip\Helpers\SecureHeadersHelper());
 			GZipHelper::register(new Gzip\Helpers\Responder());
 
+//			$profiler = \JProfiler::getInstance('Application');
+//			$profiler->mark('preAfterInitialise');
+
 			GZipHelper::trigger('afterInitialise', $options);
+
+//			$profiler->mark('postAfterInitialise');
 
 			$document = JFactory::getDocument();
 
@@ -651,7 +651,9 @@ class PlgSystemGzip extends JPlugin
 
 			// "start_url": "./?utm_source=web_app_manifest",
 			// manifeste url
-		} else if ($app->isClient('admin')) {
+		}
+
+		else if ($app->isClient('admin')) {
 
 			$secret = $this->params->get('gzip.admin_secret');
 
@@ -694,10 +696,7 @@ class PlgSystemGzip extends JPlugin
 	public function onAfterDispatch()
 	{
 
-		$app = JFactory::$application;
-
 		$document = JFactory::getDocument();
-
 		$generator = $this->params->get('gzip.metagenerator');
 
 		if (!is_null($generator)) {
@@ -709,7 +708,7 @@ class PlgSystemGzip extends JPlugin
 	public function onAfterRender()
 	{
 
-		$app = JFactory::$application;
+		$app = JFactory::getApplication();
 
 		if (!$app->isClient('site') || JFactory::getDocument()->getType() != 'html') {
 
@@ -717,9 +716,6 @@ class PlgSystemGzip extends JPlugin
 		}
 
 		$options = $this->options;
-
-		$profiler = JProfiler::getInstance('Application');
-		$profiler->mark('afterRenderStart');
 
 		$body = $app->getBody();
 

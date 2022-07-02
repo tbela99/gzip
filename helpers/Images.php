@@ -174,6 +174,7 @@ class ImagesHelper
 
 				$file = $this->convert($file, $options);
 
+
 				$attributes['src'] = $file;
 
 				$method = empty($options['imagesresizestrategy']) ? 'CROP_FACE' : $options['imagesresizestrategy'];
@@ -323,7 +324,7 @@ class ImagesHelper
 			return $file;
 		}
 
-		if (!empty($options['imageconvert']) && ((AVIF && $pathinfo != 'avif') || (WEBP && $pathinfo != 'webp'))) {
+		if (!empty($options['imageconvert']) && !((AVIF && $pathinfo == 'avif') || (WEBP && $pathinfo == 'webp'))) {
 
 			$ext = AVIF ? 'avif' : 'webp';
 
@@ -357,6 +358,8 @@ class ImagesHelper
 				}
 
 				if ($img) {
+
+					imagepalettetotruecolor($img);
 
 					if (AVIF) {
 

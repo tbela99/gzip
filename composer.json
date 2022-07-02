@@ -5,6 +5,8 @@
     "mck89/peast": "^1.13",
     "ext-gd": "*",
     "ext-json": "*",
-    "ext-sodium": "*"
+    "ext-sodium": "*",
+    "ext-dom": "*",
+    "ext-simplexml": "*"
   }
 }

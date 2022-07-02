@@ -11,7 +11,6 @@ use TBela\CSS\Interfaces\RenderableInterface;
 use TBela\CSS\Interfaces\ElementInterface;
 use TBela\CSS\Parser\Helper;
 use TBela\CSS\Property\PropertyList;
-use TBela\CSS\Value\Set;
 use function is_string;
 
 /**
@@ -212,7 +211,7 @@ class Renderer
 
         } else {
 
-            $css = $this->{'render' . $ast->type}($ast);
+            $css = $this->{'render' . $ast->type}($ast, null);
         }
 
         if (file_put_contents($file, $css) === false) {
@@ -607,7 +606,7 @@ class Renderer
 
         if (!isset($selector)) {
 
-            throw new Exception('The selector cannot be empty');
+            throw new Exception('The selector cannot be empty', 400);
         }
 
         settype($level, 'int');
@@ -619,43 +618,17 @@ class Renderer
 
         $indent = $this->indents[$level];
 
-        $result = $indent;
-        $join = ',' . $this->options['glue'] . $indent;
+        if (is_array($selector) && is_string($selector[0])) {
+
+            $selector = implode(','.$this->options['indent'], $selector);
+        }
 
         if (is_string($selector)) {
 
-            $selector = Value::parse($selector)->split(',');
+            $selector = Value::parse($selector, null, true, '', '');
         }
 
-        if (is_array($selector)) {
-
-            foreach ($selector as $set) {
-
-                if (is_string($set)) {
-
-                    $result .= $set . $join;
-                    continue;
-                }
-
-                foreach ($set as $sel) {
-
-                    if ($sel->type == 'unit' && $sel->value == 0) {
-
-                        $result .= $sel . $sel->unit;
-                    } else {
-
-                        $result .= $sel->render($this->options);
-                    }
-                }
-
-                $result .= $join;
-            }
-        } else {
-
-            $result .= $selector;
-        }
-
-        $result = rtrim($result, $join);
+        $result = $indent. Value::renderTokens($selector, ['omit_unit' => false, 'compress' => $this->options['compress']], $this->options['glue'] . $indent);
 
         if ($ast->type == 'NestingAtRule' && !$this->options['legacy_rendering']) {
 
@@ -709,25 +682,16 @@ class Renderer
         }
 
         $name = $this->renderName($ast);
-        $value = $ast->value;
 
-        $options = $this->options;
+        if (class_exists(Value::getClassName($ast->name)) || !is_string($ast->value)) {
 
-        if (is_string($value)) {
-
-            $value = Value::parse($value, $name);
+            $property = is_string($ast->value) ? Value::parse($ast->value, $ast->name) : $ast->value;
+            $value = Value::renderTokens($property, $this->options);
         }
 
-        if (empty($this->options['compress'])) {
+        else {
 
-            $value = implode(', ', array_map(function (Set $value) use ($options) {
-
-                return $value->render($options);
-
-            }, $value->split(',')));
-        } else {
-
-            $value = $value->render($options);
+            $value = $ast->value;
         }
 
         if ($value == 'none') {
@@ -813,15 +777,8 @@ class Renderer
      */
     protected function renderValue($ast)
     {
-        $result = $ast->value;
 
-        if (!($result instanceof Set)) {
-
-            $result = Value::parse($result, $ast->name);
-            $ast->value = $result;
-        }
-
-        $result = $result->render($this->options);
+        $result = Value::renderTokens(is_string($ast->value) ? Value::parse($ast->value, in_array($ast->type, ['Property', 'Declaration']) ? $ast->name : null, true, '', '') : $ast->value, $this->options);
 
         if (!$this->options['remove_comments'] && !empty($ast->trailingcomments)) {
 
@@ -1037,14 +994,24 @@ class Renderer
 
                             $values = [];
 
-                            if (isset($node->value) && $node->value !== '' && $node->value != 'all') {
+                            if (!empty($node->value)) {
 
-                                $values[(string)$node->value] = $node->value;
+                                $value = Value::renderTokens($node->value, $this->options);
+
+                                if($value !== '' && $value != 'all') {
+
+                                    $values[$value] = $value;
+                                }
                             }
 
-                            if (isset($child->value) && $child->value !== '' && $child->value != 'all') {
+                            if (isset($child->value)) {
 
-                                $values[(string)$child->value] = $child->value;
+                                $value = Value::renderTokens(is_string($child->value) ? Value::parse($child->value, null, true, '', '') : $child->value, $this->options);
+
+                                if($value !== '' && $value != 'all') {
+
+                                    $values[$value] = $value;
+                                }
                             }
 
                             if (!empty($values)) {
@@ -1078,6 +1045,11 @@ class Renderer
 
                         'type' => 'Fragment'
                     ];
+
+                    if (is_object(isset($node->selector[0]) ? $node->selector[0] : null)) {
+
+                        $node->selector = Value::renderTokens($node->selector);
+                    }
 
                     $selector = is_array($node->selector) ? $node->selector : Value::split($node->selector, ',');
                     $selector = count($selector) > 1 ? ':is(' . implode(', ', array_map('trim', $selector)) . ')' : $selector[0];

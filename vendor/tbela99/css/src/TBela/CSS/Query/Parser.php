@@ -138,6 +138,52 @@ class Parser
             }
         }
 
+        $i = count($this->tokens);
+
+        while ($i--) {
+
+            if ($this->tokens[$i]->type == 'selector') {
+
+                $j = count($this->tokens[$i]->value);
+
+                while ($j--) {
+
+                    $token = $this->tokens[$i]->value[$j];
+
+                    if ($token->type == 'string') {
+
+                        $k = $j;
+
+                        while ($k--) {
+
+                            $item = $this->tokens[$i]->value[$k];
+
+                            if ($item->type == 'string') {
+
+                                $token->value = $item->value.$token->value;
+                                array_splice($this->tokens[$i]->value, $k, 1);
+                                continue;
+                            }
+
+                            if ($item->type == 'whitespace') {
+
+                                if ($k > 0 && $this->tokens[$i]->value[$k - 1]->type == 'string') {
+
+                                    $token->value = $this->tokens[$i]->value[$k - 1]->value.' '.$token->value;
+                                    array_splice($this->tokens[$i]->value, --$k, 2);
+                                    continue;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        $j = max($k, 0);
+                    }
+                }
+            }
+        }
+
         // set default context
         if (empty($this->tokens) || (isset($this->tokens[0]) && $this->tokens[0]->type != 'select')) {
 
@@ -285,7 +331,7 @@ class Parser
 
                         $buffer = ParserTrait::stripQuotes($match, true);
 
-                        $result[] = (object)['type' => 'string', 'value' => $buffer, 'q' => preg_match('#^[a-zA-Z_@-][a-zA-Z0-9_@-]+$#', $buffer) ? '' : $selector[$i]];
+                        $result[] = (object)['type' => 'string', 'value' => $buffer, 'q' => preg_match('#^((\\\\[0-1a-fA-F]+)|[a-zA-Z_@-])[a-zA-Z0-9_@-]*$#', $buffer) ? '' : $selector[$i]];
 
                         $i += strlen($match) - 1;
                         $buffer = '';
@@ -390,7 +436,7 @@ class Parser
 
                             if ($buffer !== '') {
 
-                                $result[] = static::getType($buffer);
+                                $result[] = static::getTokenType($buffer);
                                 $buffer = '';
                             }
 

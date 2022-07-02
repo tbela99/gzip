@@ -5,8 +5,8 @@ namespace TBela\CSS\Interfaces;
 /**
  * Interface renderable property
  * @package TBela\CSS\Property
- * @method Set getValue()
- * @method Set|string getName()
+ * @method array|string getValue()
+ * @method string getName()
  */
 interface RenderablePropertyInterface {
 
