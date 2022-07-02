@@ -98,8 +98,6 @@ class CSSHelper
 			return true;
 		}));
 
-
-
 		if (empty($data['dimensions'])) {
 
 			// all breakpoints processed
@@ -111,17 +109,17 @@ class CSSHelper
 			}
 		} else {
 
-			$hash = $root.md5(json_encode($matched));
+			$hash = $root . md5(json_encode($matched));
 
 			if (!empty($matched)) {
 
 				$cssParser = new Parser('', ['capture_errors' => false]);
 
-				if (!is_file($hash.$css_min.'.css')) {
+				if (!is_file($hash . $css_min . '.css')) {
 
 					foreach (array_reverse($matched) as $dimension) {
 
-						$file = $root.$dimension.$css_min.'.css';
+						$file = $root . $dimension . $css_min . '.css';
 
 						if (is_file($file)) {
 
@@ -129,20 +127,17 @@ class CSSHelper
 						}
 					}
 
-					file_put_contents($hash.'.css', $cssParser);
-					file_put_contents($hash.'.min.css', (new Renderer(['compress' => true]))->renderAst($cssParser));
+					file_put_contents($hash . '.css', $cssParser);
+					file_put_contents($hash . '.min.css', (new Renderer(['compress' => true]))->renderAst($cssParser));
 				}
 
-				if (is_file($hash.$css_min.'.css')) {
+				if (is_file($hash . $css_min . '.css')) {
 
-					$html = preg_replace('#<head>#i', '<style data-ignore="true">'.file_get_contents($hash.$css_min.'.css').'</style>'."\n", $html, 1);
+					$html = preg_replace('#<head>#i', '<style data-ignore="true">' . file_get_contents($hash . $css_min . '.css') . '</style>' . "\n", $html, 1);
 
 //				$replace .= '<style data-ignore="true">'.file_get_contents($hash.$css_min.'.css').'</style>'."\n";
 				}
 			}
-		}
-
-		if (!empty($matched)) {
 
 			$dt = new \DateTime();
 			$dt->modify('+40s');
@@ -158,7 +153,7 @@ class CSSHelper
 			$profiler = \JProfiler::getInstance('Application');
 			$profiler->mark('criticalCssSetup');
 
-			$matched = array_values(array_filter($matched, function ($dimension) use($data) {
+			$matched = array_values(array_filter($matched, function ($dimension) use ($data) {
 
 				$dimension = intval($dimension);
 
@@ -182,6 +177,7 @@ class CSSHelper
 
 			$replace .= $script . "\n";
 		}
+
 
 		if (!empty($replace)) {
 
@@ -673,7 +669,7 @@ class CSSHelper
 	 * @throws \Exception
 	 * @since 3.0
 	 */
-	public	function afterInitialise(array $options)
+	public function afterInitialise(array $options)
 	{
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SERVER['REQUEST_URI'] == GZipHelper::CRITICAL_PATH_URL && isset($_SERVER['HTTP_X_SIGNATURE'])) {
@@ -800,7 +796,7 @@ class CSSHelper
 	 * @throws Parser\SyntaxError
 	 * @since version
 	 */
-	public	function parseBackgroundImages(Element $headStyle, array $options = [])
+	public function parseBackgroundImages(Element $headStyle, array $options = [])
 	{
 
 		if (empty($options['imagecssresize']) || empty($options['css_sizes'])) {
