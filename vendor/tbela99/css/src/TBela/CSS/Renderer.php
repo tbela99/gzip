@@ -618,9 +618,18 @@ class Renderer
 
         $indent = $this->indents[$level];
 
-        if (is_array($selector) && is_string($selector[0])) {
+        if (is_array($selector)) {
 
-            $selector = implode(','.$this->options['indent'], $selector);
+            if (empty($selector)) {
+;
+                // the selector is empty!
+                throw new \Exception(sprintf('the selector is empty: %s:%s:%s', isset($ast->src) ? $ast->src : '', isset($ast->position->line) ? $ast->position->line :'', isset($ast->position->column) ? $ast->position->column : ''), 400);
+            }
+
+            if (is_string($selector[0])) {
+
+                $selector = implode(','.$this->options['indent'], $selector);
+            }
         }
 
         if (is_string($selector)) {

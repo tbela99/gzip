@@ -102,6 +102,7 @@ class Rule extends RuleList
      * Remove a css selector
      * @param array|string $selector
      * @return Rule
+     * @throws Exception
      */
     public function removeSelector($selector)
     {
@@ -111,7 +112,15 @@ class Rule extends RuleList
             $selector = array_map('trim', explode(',', $selector));
         }
 
-        $this->ast->selector = array_diff($this->ast->selector, $selector);
+        $selector = array_values(array_diff($this->ast->selector, $selector));
+
+        if (empty($selector)) {
+
+            throw new \Exception(sprintf('the selector is empty: %s:%s:%s', isset($this->ast->src) ? $this->ast->src : '', isset($this->ast->position->line) ? $this->ast->position->line : '', isset($this->ast->position->column) ? $this->ast->position->column : ''), 400);
+        }
+
+        $this->ast->selector = $selector;
+
         return $this;
     }
 
