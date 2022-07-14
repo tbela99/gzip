@@ -7,7 +7,7 @@ namespace TBela\CSS;
  *
  * - Getter syntax: $value = $element['value']; // $value = $element->getValue()
  * - Setter syntax: $element['value'] = $value; // $element->setValue($value);
- * - Properties: $element['childNodes'], $element['firstChild'], $element['lastChild']
+ * - Properties: $element['childNodes'], $element['firstChild'], $element['lastChild'], $element['parentNode']
  * @package TBela\CSS
  */
 trait ArrayTrait
@@ -62,7 +62,7 @@ trait ArrayTrait
     {
         return is_callable([$this, 'get' . $offset]) ||
             is_callable([$this, 'set' . $offset]) ||
-            (isset($this->ast->children) && in_array($offset, ['childNodes', 'firstChild', 'lastChild']));
+            (isset($this->ast->children) && in_array($offset, ['childNodes', 'firstChild', 'lastChild', 'parentNode']));
     }
 
     /**
@@ -91,6 +91,11 @@ trait ArrayTrait
             return call_user_func([$this, 'get' . $offset]);
         }
 
+        if ($offset == 'parentNode') {
+
+            return $this->parent;
+        }
+
         if (isset($this->ast->children)) {
 
             switch ($offset) {
@@ -105,8 +110,7 @@ trait ArrayTrait
 
                 case 'lastChild':
 
-                    $count = count($this->ast->children);
-                    return $count > 0 ? $this->ast->children[$count - 1] : null;
+                    return end($this->ast->children);
             }
         }
 

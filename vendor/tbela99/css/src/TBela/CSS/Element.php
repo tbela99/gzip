@@ -631,7 +631,7 @@ abstract class Element implements ElementInterface  {
 
         catch (Exception $ex) {
 
-            error_log($ex->getTraceAsString());
+            error_log($ex);
         }
 
         return '';

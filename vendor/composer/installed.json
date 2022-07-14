@@ -404,12 +404,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tbela99/css.git",
-                "reference": "66357d1655adee242c91093fdca40a8d2696df4a"
+                "reference": "8156a0f72deb264573b0262b9ffa39f7945e05f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tbela99/css/zipball/66357d1655adee242c91093fdca40a8d2696df4a",
-                "reference": "66357d1655adee242c91093fdca40a8d2696df4a",
+                "url": "https://api.github.com/repos/tbela99/css/zipball/8156a0f72deb264573b0262b9ffa39f7945e05f6",
+                "reference": "8156a0f72deb264573b0262b9ffa39f7945e05f6",
                 "shasum": ""
             },
             "require": {
@@ -420,7 +420,7 @@
                 "php": ">=5.6.40",
                 "symfony/polyfill-mbstring": "v1.19.0"
             },
-            "time": "2022-07-01T19:53:21+00:00",
+            "time": "2022-07-14T01:12:39+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

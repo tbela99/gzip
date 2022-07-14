@@ -7,10 +7,9 @@
     <license>Released under dual license LGPL v3 | MIT</license>
     <authorEmail>contact@tbela.net</authorEmail>
     <authorUrl>https://tbela.net</authorUrl>
-    <version>3.1.1</version>
+    <version>3.1.2</version>
     <description>PLG_SYSTEM_GZIP_XML_DESCRIPTION</description>
     <files>
-        <folder>docs</folder>
         <folder>css</folder>
         <folder>fields</folder>
         <folder>helpers</folder>
@@ -19,7 +18,6 @@
         <folder>language</folder>
         <folder>worker/dist</folder>
         <folder>worker/css</folder>
-        <folder>docs/</folder>
         <folder>push</folder>
         <folder>vendor</folder>
         <filename>autoload.php</filename>

@@ -1196,10 +1196,10 @@ abstract class Value implements JsonSerializable, ObjectInterface
                             $tokens[] = (object)['type' => $context === 'attribute' ? 'operator' : 'css-string', 'value' => '='];
                         } else if ($context === 'attribute') {
 
-                            $tokens[] = (object)['type' => 'operator', 'value' => $string[$i++] . '='];
+                            $tokens[] = (object)['type' => 'operator', 'value' => $string[$i++] .$string[$i]];
                         } else {
 
-                            $tokens[] = (object)['type' => 'css-string', 'value' => $string[$i++]];
+                            $tokens[] = (object)['type' => 'css-string', 'value' => $string[$i]];
                         }
 
                         break;
