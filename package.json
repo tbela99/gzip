@@ -7,7 +7,7 @@
     "terser-config": "./node_modules/rollup/dist/bin/rollup ./config/terser/terser.js -f iife --name=terserConfig > ./terser.config.js"
   },
   "devDependencies": {
-    "rollup": "^1.25.1",
+    "rollup": "^3.29.5",
     "terser": "^4.4.0"
   },
   "license": "MIT OR LGPL-3.0",
